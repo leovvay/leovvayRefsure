@@ -1,6 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { keySet, loadConfig } from '../../../src/config';
-import type { RefsureConfig } from '../../../src/config';
 import { approve, isEgressRefusal } from '../../../src/egress';
 import { makeProviders } from '../../../src/providers';
 import type { DecisionProvider } from '../../../src/providers';
@@ -15,10 +14,9 @@ import type { JevAsker } from './jev-asker-shape';
 
 const RETRYABLE = /^(timeout|transport|http_429|http_5\d\d)$/;
 
-/** `piiMasks` overrides the config (parity sends the stored bodies unmasked, as they were sent). */
-export function jevAsker(opts: { deadlineMs: number; attempts: number; piiMasks?: boolean }): JevAsker {
-  const loaded = loadConfig(process.env);
-  const config: RefsureConfig = opts.piiMasks === undefined ? loaded : { ...loaded, piiMasks: opts.piiMasks };
+/** Each call is tried once, then again after a retryable failure, up to `attempts` tries in all. */
+export function jevAsker(opts: { deadlineMs: number; attempts: number }): JevAsker {
+  const config = loadConfig(process.env);
   const provider: DecisionProvider | undefined = makeProviders(config, keySet(config, process.env)).jev;
   if (!provider) throw new Error('no Jev provider: set REFSURE_OPENROUTER_KEY (or a gateway naming Jev) first');
   return {
@@ -33,18 +31,16 @@ export function jevAsker(opts: { deadlineMs: number; attempts: number; piiMasks?
       return isEgressRefusal(approved) ? { cause: approved.cause, detail: approved.detail } : approved;
     },
     async ask(request) {
-      let last: JevAnswer | null = null;
-      for (let attempt = 1; attempt <= opts.attempts; attempt += 1) {
+      for (let attempt = 1; ; attempt += 1) {
         const signal = AbortSignal.timeout(opts.deadlineMs + 1000);
         const answer = await provider.ask(request, { deadlineMs: opts.deadlineMs, signal });
-        last = {
+        const result: JevAnswer = {
           status: answer.status, answers: answer.answers, model: answer.model, usd: answer.usd, ms: answer.ms,
           attempts: attempt, digest: request.digest, ...(answer.detail === undefined ? {} : { detail: answer.detail }),
         };
-        if (answer.status === 'ok' || !RETRYABLE.test(answer.status)) return last;
+        if (answer.status === 'ok' || !RETRYABLE.test(answer.status) || attempt >= opts.attempts) return result;
         await sleep(1000 * attempt * attempt);
       }
-      return last!;
     },
   };
 }

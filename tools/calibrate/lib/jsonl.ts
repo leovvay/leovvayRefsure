@@ -1,9 +1,16 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-/** One JSON value per non-empty line. A line that does not parse (a killed run's last write) is skipped. */
-export function readJsonl<T>(path: string): T[] {
-  if (!existsSync(path)) return [];
+/**
+ * One JSON value per non-empty line. A line that does not parse (a killed run's last write) is skipped. A missing
+ * file is an error, so a mistyped input path never reads as an empty set; `optional` reads it as no rows (a run's
+ * own --out, before its first call).
+ */
+export function readJsonl<T>(path: string, opts: { optional?: boolean } = {}): T[] {
+  if (!existsSync(path)) {
+    if (opts.optional === true) return [];
+    throw new Error(`${path}: no such file`);
+  }
   const out: T[] = [];
   for (const line of readFileSync(path, 'utf8').split('\n')) {
     if (line.trim() === '') continue;

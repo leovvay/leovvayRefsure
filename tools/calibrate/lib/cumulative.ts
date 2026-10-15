@@ -1,3 +1,4 @@
+import { roundedAtOrAbove, roundedAtOrBelow } from './isotonic';
 import type { Point } from './point';
 import type { ThresholdFit } from './threshold-fit';
 
@@ -7,14 +8,6 @@ import type { ThresholdFit } from './threshold-fit';
   cumulative`); it ships looser rows, because a band of weaker answers can hide under many strong ones.
 */
 
-function rounded(value: number, below: number, up: boolean): number {
-  for (const step of [100, 1_000, 10_000]) {
-    const candidate = up ? Math.ceil(value * step - 1e-9) / step : Math.floor(value * step + 1e-9) / step;
-    if (up ? candidate < below : candidate > below) return Math.min(1, Math.max(0, candidate));
-  }
-  return value;
-}
-
 /** The lowest observed score whose answers at or above it are right at `target`, with `minItems` of them. */
 export function fitUpperCumulative(points: readonly Point[], target: number, minItems: number): ThresholdFit {
   const scores = [...new Set(points.map((point) => point.score))].sort((a, b) => a - b);
@@ -22,7 +15,7 @@ export function fitUpperCumulative(points: readonly Point[], target: number, min
     const above = points.filter((point) => point.score >= score);
     const positives = above.filter((point) => point.positive).length;
     if (above.length >= minItems && positives / above.length >= target) {
-      const value = rounded(score, scores[index - 1] ?? Number.NEGATIVE_INFINITY, false);
+      const value = roundedAtOrBelow(score, scores[index - 1] ?? Number.NEGATIVE_INFINITY);
       return { value, beyond: above.length, precision: positives / above.length, why: 'fitted' };
     }
   }
@@ -36,7 +29,7 @@ export function fitLowerCumulative(points: readonly Point[], target: number, min
     const below = points.filter((point) => point.score <= score);
     const negatives = below.filter((point) => !point.positive).length;
     if (below.length >= minItems && negatives / below.length >= target) {
-      const value = rounded(score, scores[index - 1] ?? Number.POSITIVE_INFINITY, true);
+      const value = roundedAtOrAbove(score, scores[index - 1] ?? Number.POSITIVE_INFINITY);
       return { value, beyond: below.length, precision: negatives / below.length, why: 'fitted' };
     }
   }

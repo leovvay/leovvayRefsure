@@ -1,6 +1,6 @@
 import { RISK_ORDER } from '../../../src/risk';
 import type { RiskClass } from '../../../src/risk';
-import { dismissSite, findSite, locateSite, outcomeSite, pageStateSite, presenceSite } from '../../../src/questions';
+import { SITES } from '../../../src/questions';
 import type { NoulBand, SiteId } from '../../../src/questions';
 import type { FitOptions } from './fit-options';
 import { fitLowerCumulative, fitUpperCumulative } from './cumulative';
@@ -44,11 +44,6 @@ const HELD: Readonly<Record<'converted' | 'native', Partial<Record<SiteId, (row:
   },
 };
 
-const SITES = {
-  locate: locateSite, find: findSite, dismiss: dismissSite, 'page-state': pageStateSite, outcome: outcomeSite,
-  presence: presenceSite,
-} as const;
-type FittedSite = keyof typeof SITES;
 type ChoiceSite = 'locate' | 'find' | 'dismiss' | 'page-state';
 type PerRisk = Readonly<Record<RiskClass, number>>;
 
@@ -174,8 +169,8 @@ function masksOf(rows: readonly RunRow[]): { masks?: { on: number; off: number }
 
 /** Fits one site on its runs, pooled over every replay given. Rows of another site are ignored. */
 export function fitSite(site: SiteId, rows: readonly RunRow[], opts: FitOptions): SiteFit {
-  if (!(site in SITES)) throw new Error(`no calibration fit for site ${site}`);
-  const known = SITES[site as FittedSite];
+  if (site === 'option-map' || !(site in SITES)) throw new Error(`no calibration fit for site ${site}`);
+  const known = SITES[site];
   const usable = rows.filter((row) => row.site === site && row.status === 'ok' && row.wording === known.wording.hash
     && row.choice !== null && row.confidence !== null);
   const base = { site, items: new Set(usable.map(pageKey)).size, ...masksOf(usable), runs: usable.length, skipped: rows.length - usable.length };

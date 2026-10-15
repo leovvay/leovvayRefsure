@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { NativeProvenance } from './native-provenance';
+import { fittedOf, ordersOf } from './record-parts';
 import type { RunRow } from './run-row';
 import type { SetMeta } from './set-meta';
 import type { SiteFit } from './site-fit';
@@ -28,8 +29,6 @@ export function nativeSummary(
   fit: SiteFit, rows: readonly RunRow[], metas: readonly SetMeta[],
   ctx: { replays: number; model: string; route: string; date: string; textOnly?: NativeProvenance['textOnly'] },
 ): NativeProvenance {
-  const fitted: Record<string, number | null> = {};
-  for (const [name, edge] of Object.entries(fit.fits)) fitted[name] = edge.value;
   return {
     sets: metas.map((meta) => ({
       set: meta.set, sha256: meta.sha256, asked: meta.native?.asked ?? meta.kept, code: meta.native?.code ?? 0,
@@ -37,8 +36,8 @@ export function nativeSummary(
       goldNotOffered: meta.native?.goldNotOffered ?? 0,
     })),
     runs: fit.runs, items: fit.items, ...(fit.masks === undefined ? {} : { masks: fit.masks }),
-    orders: new Set(rows.map((row) => row.salt)).size, replays: ctx.replays, model: ctx.model, route: ctx.route,
-    rows: fit.rows, fitted, acted: fit.acted, correct: fit.correct, coverage: fit.coverage, precision: fit.precision,
+    orders: ordersOf(rows), replays: ctx.replays, model: ctx.model, route: ctx.route,
+    rows: fit.rows, fitted: fittedOf(fit), acted: fit.acted, correct: fit.correct, coverage: fit.coverage, precision: fit.precision,
     wilsonLow: fit.wilsonLow, why: fit.why, ...(ctx.textOnly === undefined ? {} : { textOnly: ctx.textOnly }),
     date: ctx.date,
   };

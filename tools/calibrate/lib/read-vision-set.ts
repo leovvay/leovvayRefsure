@@ -1,5 +1,6 @@
 import { fold } from '../../../src/page-model';
-import { nameOf, parseDescriptor, toLineV1 } from './descriptor';
+import { str } from './coerce';
+import { type Descriptor, nameOf, parseDescriptor, pathOf } from './descriptor';
 import type { GoldRef } from './gold-ref';
 import type { NativeItem } from './native-item';
 
@@ -18,21 +19,19 @@ const SITES: Readonly<Record<string, NativeItem['site']>> = {
 const EXPECTED = /^It is the intended page — (.*) — though layout or wording may differ from what was recorded\.$/su;
 const PAGE_IN_NOTE = /vision-pages\/[A-Za-z0-9._-]+\.html/;
 
-const str = (value: unknown): string => (typeof value === 'string' ? value : '');
-
-/** The descriptor at `index` as role, name and its ordinal among same-role, same-name descriptors in list order. */
-export function descriptorRef(lines: readonly string[], index: number): GoldRef | null {
-  const line = lines[index];
-  const d = line === undefined ? null : parseDescriptor(line);
+/**
+ * The descriptor at `index` of an item's parsed list as role, name and its ordinal among same-role, same-name
+ * descriptors in list order; `hint` is its v1 path.
+ */
+export function descriptorRef(parsed: readonly (Descriptor | null)[], index: number): GoldRef | null {
+  const d = parsed[index] ?? null;
   if (d === null) return null;
   const name = nameOf(d);
-  const same = lines.map((text, at) => ({ at, d: parseDescriptor(text) }))
+  const same = parsed.map((x, at) => ({ at, d: x }))
     .filter((x) => x.d !== null && x.d.role === d.role && fold(nameOf(x.d)) === fold(name));
-  const hint = toLineV1(line ?? '') ?? '';
-  const path = /\sin=("(?:[^"\\]|\\.)*")$/.exec(hint)?.[1];
   return {
     kind: 'element', role: d.role, name, ordinal: same.findIndex((x) => x.at === index) + 1, of: same.length,
-    hint: path === undefined ? '' : (JSON.parse(path) as string),
+    hint: pathOf(d),
   };
 }
 
@@ -58,11 +57,11 @@ export function readVisionRow(row: Row, set: string): NativeItem | { skip: strin
   const { page, recording } = pagesOf(row);
   if (page === null) return { skip: 'no stored page' };
   const r = row.request;
-  const candidates = Array.isArray(r.candidates) ? (r.candidates as string[]) : [];
+  const parsed = (Array.isArray(r.candidates) ? (r.candidates as unknown[]) : []).map((line) => parseDescriptor(str(line)));
   const keyed = (value: unknown): GoldRef | null => {
     if (String(value) === 'none') return { kind: 'none' };
     if (site === 'page-state' || site === 'presence') return { kind: 'key', value: String(value) };
-    return descriptorRef(candidates, Number(value));
+    return descriptorRef(parsed, Number(value));
   };
   const gold = keyed(row.gold);
   if (gold === null) return { skip: 'gold names no parsable descriptor' };
@@ -86,7 +85,7 @@ export function readVisionRow(row: Row, set: string): NativeItem | { skip: strin
     case 'locate': {
       const recorded = parseDescriptor(str(r.recorded));
       if (recording === null || recorded === null) return { skip: 'no recorded page or recorded descriptor' };
-      const recordedRef: GoldRef = { kind: 'element', role: recorded.role, name: nameOf(recorded), ordinal: 1 };
+      const recordedRef: GoldRef = { kind: 'element', role: recorded.role, name: nameOf(recorded), ordinal: 1, hint: pathOf(recorded) };
       return { ...base, site, intent: str(r.intent), recordedPage: recording, recordedRef };
     }
     default:

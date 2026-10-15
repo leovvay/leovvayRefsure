@@ -1,14 +1,16 @@
 import { dismissSite, findSite, locateSite, NONE_KEY, outcomeSite, pageStateSite, presenceSite } from '../../../src/questions';
-import type { DecisionAnswer, PresentedCandidates } from '../../../src/questions';
+import type { DecisionAnswer, DecisionSite, PresentedCandidates } from '../../../src/questions';
 import type { BuiltItem } from './built-item';
 import type { CalibItem } from './calib-item';
 
-/** Sites whose candidates are shuffled: the salt picks the order. Elsewhere the salt only names a repeat. */
-export const SHUFFLED: ReadonlySet<string> = new Set(['locate', 'find', 'dismiss']);
+/** A Noul probability read as a key: `true` at 0.5 and above. Parity and the replay score Nouls by it. */
+export function noulKey(probability: number): 'true' | 'false' {
+  return probability >= 0.5 ? 'true' : 'false';
+}
 
 function readNoul(answer: DecisionAnswer | undefined) {
   return answer?.type === 'noul'
-    ? { choice: answer.noul >= 0.5 ? 'true' : 'false', confidence: answer.noul, noul: answer.noul }
+    ? { choice: noulKey(answer.noul), confidence: answer.noul, noul: answer.noul }
     : { choice: null, confidence: null };
 }
 
@@ -21,21 +23,24 @@ function readCandidate(context: PresentedCandidates) {
   };
 }
 
-/** The request refsure's site builds for this item in the salted order, and its reader. */
+/** A candidate site (locate, find, dismiss) in the order the salt shuffles; the read maps keys back to indices. */
+function shuffled<In>(site: DecisionSite<In, PresentedCandidates, number>, input: Omit<In, 'order'>, salt: string): BuiltItem {
+  const { request, context } = site.build({ ...input, order: { kind: 'shuffled', salt } } as In);
+  return { site: site.id, question: site.question, wording: site.wording.hash, request, read: readCandidate(context) };
+}
+
+/**
+ * The request refsure's site builds for this item, and its reader. Candidate sites are shuffled by the salt; for
+ * the others the salt only names a repeat.
+ */
 export function buildItem(item: CalibItem, salt: string): BuiltItem {
   switch (item.site) {
-    case 'locate': {
-      const { request, context } = locateSite.build({ ...item.input, order: { kind: 'shuffled', salt } });
-      return { site: 'locate', question: locateSite.question, wording: locateSite.wording.hash, request, read: readCandidate(context) };
-    }
-    case 'find': {
-      const { request, context } = findSite.build({ ...item.input, order: { kind: 'shuffled', salt } });
-      return { site: 'find', question: findSite.question, wording: findSite.wording.hash, request, read: readCandidate(context) };
-    }
-    case 'dismiss': {
-      const { request, context } = dismissSite.build({ ...item.input, order: { kind: 'shuffled', salt } });
-      return { site: 'dismiss', question: dismissSite.question, wording: dismissSite.wording.hash, request, read: readCandidate(context) };
-    }
+    case 'locate':
+      return shuffled(locateSite, item.input, salt);
+    case 'find':
+      return shuffled(findSite, item.input, salt);
+    case 'dismiss':
+      return shuffled(dismissSite, item.input, salt);
     case 'page-state': {
       const { request } = pageStateSite.build(item.input);
       const wording = (pageStateSite.wordingFor?.(item.input) ?? pageStateSite.wording).hash;

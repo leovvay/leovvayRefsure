@@ -4,10 +4,10 @@ import { detectOverlay, vetoOf } from '../../../src/features/dismiss';
 import { stateInput } from '../../../src/features/state';
 import {
   type Candidate, candidatesOf, exactNameMatch, pageView, rankCandidates, rowContains, rowTextOf, subtree, subtreeText,
-  twinKey,
 } from '../../../src/page-model';
 import { BOUNDS, RESEARCH_STATES } from '../../../src/questions';
 import type { FindInput, LocateInput, PageStateInput, PresenceInput } from '../../../src/questions';
+import { keyOf } from './gold-map';
 
 /*
   Each site's input built from one live snapshot exactly as its command builds it (locate, dismiss, wait-for,
@@ -17,8 +17,6 @@ import type { FindInput, LocateInput, PageStateInput, PresenceInput } from '../.
 
 const CONTROL_ROLES: ReadonlySet<string> = new Set(['button', 'link']);
 const BLOCKING_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
-
-const keyOf = (c: Candidate): string => twinKey(c.fp.role, c.fp.name, c.fp.path);
 
 /** One candidate per twin group, the first in page order (locate and dismiss). */
 export function distinct(cands: readonly Candidate[]): Candidate[] {
@@ -37,20 +35,24 @@ function oneGroup(matches: readonly Candidate[]): Candidate | null {
   return matches.every((m) => keyOf(m) === keyOf(first)) ? first : null;
 }
 
-export type CandidateScene = { cands: Candidate[]; code: Candidate | null; offered: Candidate[] };
+export type CandidateScene = { cands: readonly Candidate[]; code: Candidate | null; offered: Candidate[] };
 
-/** `locate --intent [--within]`: the within filter, the exact-name code pick, then the ranked top 20. */
-export function findScene(tree: AxTree, intent: string, within: string | null): CandidateScene & { input: FindInput } {
-  const all = candidatesOf(tree);
+/**
+ * `locate --intent [--within]` over the page's candidates (`all`, from `tree`): the within filter, the exact-name
+ * code pick, then the ranked top 20.
+ */
+export function findScene(tree: AxTree, all: readonly Candidate[], intent: string, within: string | null): CandidateScene & { input: FindInput } {
   const cands = within === null ? all : all.filter((c) => rowContains(rowTextOf(tree, c.node), within));
   const code = oneGroup(exactNameMatch(cands, intent));
   const offered = rankCandidates(distinct(cands), intent);
   return { cands, code, offered, input: { intent, lines: offered.map((c) => c.line) } };
 }
 
-/** `locate --recorded <line> --intent <step intent>`: the verbatim-line code pick, then the ranked top 20. */
-export function locateScene(tree: AxTree, recorded: string, intent: string): CandidateScene & { input: Omit<LocateInput, 'order'> } {
-  const cands = candidatesOf(tree);
+/**
+ * `locate --recorded <line> --intent <step intent>` over the page's candidates: the verbatim-line code pick, then
+ * the ranked top 20.
+ */
+export function locateScene(cands: readonly Candidate[], recorded: string, intent: string): CandidateScene & { input: Omit<LocateInput, 'order'> } {
   const code = oneGroup(cands.filter((c) => c.line === recorded));
   const offered = rankCandidates(distinct(cands), intent === '' ? recorded : intent);
   return { cands, code, offered, input: { recorded, intent, lines: offered.map((c) => c.line) } };

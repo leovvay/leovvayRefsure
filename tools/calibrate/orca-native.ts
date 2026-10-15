@@ -1,12 +1,11 @@
-import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { createOrcaBrowser } from '../../src/browser';
 import { loadConfig } from '../../src/config';
 import { newTrace } from '../../src/output';
 import { worktreeSelectorOf } from './lib/worktree';
-import { flags, list, need, opt } from './lib/args';
+import { flags, list, need, num, opt } from './lib/args';
 import type { Captured } from './lib/captured';
 import { appendJsonl } from './lib/jsonl';
 import { captureItem } from './lib/native-capture';
@@ -16,7 +15,8 @@ import { openTab } from './lib/orca-tab';
 import { startPageServer } from './lib/page-server';
 import { readRefsureRow } from './lib/read-refsure-set';
 import { readVisionRow } from './lib/read-vision-set';
-import type { SetMeta } from './lib/set-meta';
+import { readSet, today, writeSetMeta } from './lib/set-file';
+import { inOverlayPlace } from './lib/v1-line';
 
 /*
   Calibration step 2, the Orca-native replay (spec §9). Each stored page of a set is served on 127.0.0.1 and
@@ -39,29 +39,37 @@ const outPath = need(values, 'out', USAGE);
 const profile = need(values, 'profile', USAGE);
 const ids = new Set(list(values, 'ids', []));
 const sources = new Set(list(values, 'sources', ['synthetic', 'vision']));
-const limit = values.limit === undefined ? Infinity : Number(values.limit);
-const settleMs = Number(values['settle-ms'] ?? 600);
+const limit = num(values, 'limit', Infinity, USAGE, { min: 1, integer: true });
+const settleMs = num(values, 'settle-ms', 600, USAGE, { min: 0 });
 
-const bytes = readFileSync(setPath);
-const rows = bytes.toString('utf8').split('\n').filter((line) => line.trim() !== '').map((line) => JSON.parse(line) as Record<string, unknown>);
-const frozen = rows.some((row) => typeof row.task === 'string');
-const setName = basename(setPath);
-const root = opt(values, 'root') ?? (frozen ? dirname(setPath) : join(dirname(setPath), setName.replace(/\.jsonl$/, '')));
+const set = readSet(setPath);
+const frozen = set.rows.some((row) => typeof row.task === 'string');
+const root = opt(values, 'root') ?? (frozen ? dirname(setPath) : join(dirname(setPath), set.name.replace(/\.jsonl$/, '')));
 
 const skipped: Record<string, number> = {};
 const bump = (map: Record<string, number>, key: string) => { map[key] = (map[key] ?? 0) + 1; };
 const items: NativeItem[] = [];
-for (const row of rows) {
+let droppedById = 0;
+let droppedBySource = 0;
+for (const row of set.rows) {
   const id = String(row.id);
-  if (ids.size > 0 && !ids.has(id)) continue;
+  if (ids.size > 0 && !ids.has(id)) {
+    droppedById += 1;
+    continue;
+  }
   const read = frozen
-    ? readVisionRow(row as Parameters<typeof readVisionRow>[0], setName)
-    : readRefsureRow(row as Parameters<typeof readRefsureRow>[0], setName);
+    ? readVisionRow(row as Parameters<typeof readVisionRow>[0], set.name)
+    : readRefsureRow(row as Parameters<typeof readRefsureRow>[0], set.name);
   if ('skip' in read) bump(skipped, read.skip);
-  else if (!sources.has(read.source)) bump(skipped, `source ${read.source} not kept`);
-  else items.push(read);
+  else if (!sources.has(read.source)) {
+    droppedBySource += 1;
+    bump(skipped, `source ${read.source} not kept`);
+  } else items.push(read);
 }
 const todo = items.slice(0, limit);
+// Every capture keeps its item's site, so a mixed set is refused before any stored page is opened.
+const sites = new Set(todo.map((item) => item.site));
+if (sites.size > 1) throw new Error(`${set.name} holds items of several sites (${[...sites].join(', ')}); a set holds one site`);
 
 const env = process.env;
 const worktree = worktreeSelectorOf(env);
@@ -70,7 +78,7 @@ const server = await startPageServer();
 const blank = join(mkdtempSync(join(tmpdir(), 'refsure-native-')), 'blank.html');
 writeFileSync(blank, '<!doctype html><title>blank</title>');
 const tab = await openTab(env, { url: server.mount('/__blank', blank), profile, worktree });
-process.stderr.write(`${todo.length} items from ${setName} on ${server.origin}, tab ${tab.pageId}, profile ${tab.profile ?? 'unconfirmed'}\n`);
+process.stderr.write(`${todo.length} items from ${set.name} on ${server.origin}, tab ${tab.pageId}, profile ${tab.profile ?? 'unconfirmed'}\n`);
 if (tab.profile === null) {
   await tab.close();
   await server.close();
@@ -86,7 +94,6 @@ const counts: NativeCounts = {
 };
 let lines = 0;
 let overlayLines = 0;
-const site = new Set<string>();
 try {
   for (const item of todo) {
     const results: Captured[] = await captureItem(item, deps);
@@ -94,14 +101,12 @@ try {
       if (result.kind === 'ask') {
         appendJsonl(outPath, result.item);
         counts.asked += 1;
-        site.add(result.item.site);
         if (result.goldNotOffered) counts.goldNotOffered += 1;
         const offered = 'lines' in result.item.input ? result.item.input.lines : [];
         lines += offered.length;
-        overlayLines += offered.filter((line) => /\sin="(?:[^"]* > )?(?:dialog|alertdialog|region)\b/.test(line)).length;
+        overlayLines += offered.filter(inOverlayPlace).length;
       } else {
         appendJsonl(`${outPath}.rows.jsonl`, result.row);
-        site.add(result.row.site);
         if (result.row.kind === 'code') {
           counts.code += 1;
           if (result.row.correct === true) counts.codeCorrect += 1;
@@ -116,11 +121,7 @@ try {
   await server.close();
 }
 
-if (site.size > 1) throw new Error(`${setName} produced items of several sites (${[...site].join(', ')}); a set holds one site`);
-const meta: SetMeta = {
-  set: setName, sha256: createHash('sha256').update(bytes).digest('hex'), site: [...site][0] ?? 'none',
-  items: rows.length, kept: counts.asked, droppedBySource: skipped[`source not kept`] ?? 0, droppedById: 0,
-  lines, unparsedLines: 0, overlayLines, date: new Date().toISOString().slice(0, 10), native: counts,
-};
-writeFileSync(`${outPath}.meta.json`, `${JSON.stringify(meta, null, 2)}\n`);
-process.stdout.write(`${JSON.stringify(meta)}\n`);
+writeSetMeta(outPath, {
+  set: set.name, sha256: set.sha256, site: [...sites][0] ?? 'none', items: set.rows.length, kept: counts.asked,
+  droppedBySource, droppedById, lines, unparsedLines: 0, overlayLines, date: today(), native: counts,
+});

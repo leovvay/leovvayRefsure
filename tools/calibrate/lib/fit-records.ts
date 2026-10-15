@@ -4,6 +4,7 @@ import type { FitOptions } from './fit-options';
 import type { HeldRecord } from './held-record';
 import type { NativeProvenance } from './native-provenance';
 import { pooledSha256 } from './native-summary';
+import { type EntrySummary, fittedOf, ordersOf } from './record-parts';
 import type { RunRow } from './run-row';
 import type { SetMeta } from './set-meta';
 import type { ShippedEntry } from './shipped-entry';
@@ -58,8 +59,6 @@ export function setsOf(record: ShippedEntry | HeldRecord): string[] {
 
 /** A `measured` entry: the pooled fit's rows, with its provenance. */
 export function entryFor(fit: SiteFit, rows: readonly RunRow[], sets: readonly SetMeta[], ctx: RecordContext): ShippedEntry {
-  const fitted: Record<string, number | null> = {};
-  for (const [name, edge] of Object.entries(fit.fits)) fitted[name] = edge.value;
   return {
     site: fit.site, wordingHash: SITES[fit.site].wording.hash, lineFormat: 1, modelFamily: KNOWN_FAMILIES.jev,
     provider: 'jev', threshold: fit.threshold!, setSha256: pooledSha256(sets), n: fit.runs,
@@ -67,9 +66,9 @@ export function entryFor(fit: SiteFit, rows: readonly RunRow[], sets: readonly S
     provenance: {
       source: ctx.source ?? sourceOf(sets), set: sets.map((meta) => meta.set).join(', '), items: fit.items,
       ...(fit.masks === undefined ? {} : { masks: fit.masks }), runs: fit.runs,
-      orders: new Set(rows.map((row) => row.salt)).size, replays: ctx.replays, model: ctx.model, route: ctx.route,
+      orders: ordersOf(rows), replays: ctx.replays, model: ctx.model, route: ctx.route,
       method: `${METHODS[ctx.opts.method]}; ${ROWS}`, target: ctx.opts.target, minPoints: ctx.opts.minPoints,
-      minItems: ctx.opts.minItems, fitted, acted: fit.acted, correct: fit.correct, wilsonLow: fit.wilsonLow,
+      minItems: ctx.opts.minItems, fitted: fittedOf(fit), acted: fit.acted, correct: fit.correct, wilsonLow: fit.wilsonLow,
     },
   };
 }
@@ -77,15 +76,13 @@ export function entryFor(fit: SiteFit, rows: readonly RunRow[], sets: readonly S
 /** A held site: what refsure keeps using, why, and the readings that did not ship. */
 export function heldFor(
   fit: SiteFit, pooled: NativeProvenance, ctx: RecordContext,
-  extra: { native?: NativeProvenance; replaced?: ShippedEntry | NonNullable<HeldRecord['replaced']> },
+  extra: { native?: NativeProvenance; replaced?: EntrySummary },
 ): HeldRecord {
   const policy = SITES[fit.site].policy;
-  const replaced = extra.replaced === undefined || !('provenance' in extra.replaced) ? extra.replaced
-    : { threshold: extra.replaced.threshold, set: extra.replaced.provenance.set, n: extra.replaced.n, date: extra.replaced.date };
   return {
     site: fit.site, wordingHash: SITES[fit.site].wording.hash, lineFormat: 1, modelFamily: KNOWN_FAMILIES.jev,
     provider: 'jev', ships: { maturity: policy.maturity, rows: policy.threshold.jev as CalibrationEntry['threshold'] },
     why: fit.why, date: ctx.date, pooled, ...(extra.native === undefined ? {} : { native: extra.native }),
-    ...(replaced === undefined ? {} : { replaced }),
+    ...(extra.replaced === undefined ? {} : { replaced: extra.replaced }),
   };
 }

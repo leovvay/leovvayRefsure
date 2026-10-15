@@ -1,3 +1,4 @@
+import { str } from './coerce';
 import type { GoldRef } from './gold-ref';
 import type { NativeItem } from './native-item';
 import { parseV1Line } from './v1-line';
@@ -9,8 +10,6 @@ import { parseV1Line } from './v1-line';
 */
 
 type Row = Record<string, unknown> & { id: string; page: string; site: string; gold: string };
-
-const str = (value: unknown, fallback = ''): string => (typeof value === 'string' ? value : fallback);
 
 function elementOf(ref: unknown): GoldRef {
   const r = (ref ?? {}) as Record<string, unknown>;

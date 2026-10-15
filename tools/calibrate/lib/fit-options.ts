@@ -14,6 +14,9 @@ export interface FitOptions {
   method: 'isotonic' | 'cumulative';
   /** Rows already shipped for the site: each starting row is raised to its row here (never loosen). */
   floor?: number | Readonly<Record<string, number>> | { yesAtLeast: number; noAtMost: number };
-  /** The runs include Orca-native ones: a site held for want of native lines is fitted to ship. */
+  /**
+   * The runs include Orca-native ones. It only picks which held reason applies to a site the replays hold (step
+   * 1's or step 2's); a held site stays held either way: dismiss is held on both.
+   */
   native?: boolean;
 }

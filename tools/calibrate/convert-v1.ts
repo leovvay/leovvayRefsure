@@ -1,10 +1,11 @@
-import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { flags, list, need } from './lib/args';
 import type { CalibItem, CalibSite } from './lib/calib-item';
+import { str } from './lib/coerce';
 import { toLineV1 } from './lib/descriptor';
+import { readSet, today, writeSetMeta } from './lib/set-file';
 import type { SetItem } from './lib/set-item';
-import type { SetMeta } from './lib/set-meta';
+import { inOverlayPlace } from './lib/v1-line';
 
 /*
   Calibration step 1, conversion. Reads one frozen benchmark set (JSONL, one labelled item per line) and writes
@@ -14,7 +15,8 @@ import type { SetMeta } from './lib/set-meta';
     convert-v1 --set <set.jsonl> --out <converted.jsonl> [--sources a,b] [--drop id,id]
 
   Only items whose `source` is in --sources are kept (the default lists the public and synthetic sources the
-  sets use); --drop removes named items. `<out>.meta.json` records the set's sha256 and the counts.
+  sets use); --drop removes named items. Every item carries its set's file name, so its runs name the set the fit
+  pools them under. `<out>.meta.json` records the set's sha256 and the counts.
 */
 
 const USAGE = 'usage: convert-v1 --set <set.jsonl> --out <converted.jsonl> [--sources a,b] [--drop id,id]';
@@ -24,29 +26,23 @@ const SITES: Readonly<Record<string, CalibSite>> = {
 };
 
 const counts = { lines: 0, unparsed: 0, overlay: 0 };
-/** A v1 line placed in an overlay container: where every live dismiss candidate sits. */
-const OVERLAY_PLACE = /\sin="(?:[^"]* > )?(?:dialog|alertdialog|region)(?: > |")/;
 
 function v1(line: unknown): string {
   counts.lines += 1;
   const text = typeof line === 'string' ? line : '';
   const converted = toLineV1(text);
-  if (converted !== null && OVERLAY_PLACE.test(converted)) counts.overlay += 1;
+  if (converted !== null && inOverlayPlace(converted)) counts.overlay += 1;
   if (converted !== null) return converted;
   counts.unparsed += 1;
   return `generic ${JSON.stringify('')} in=""`;
 }
 
-function str(value: unknown): string {
-  return typeof value === 'string' ? value : '';
-}
-
-function convert(item: SetItem, site: CalibSite): CalibItem {
+function convert(item: SetItem, site: CalibSite, set: string): CalibItem {
   const r = item.request;
   const base = {
     id: item.id, base: item.base ?? item.id, lang: item.lang ?? 'en', source: item.source ?? '',
     condition: item.condition ?? '', gold: String(item.gold), alt: (item.alt ?? []).map(String),
-    risk: typeof r.risk === 'string' ? r.risk : null,
+    risk: typeof r.risk === 'string' ? r.risk : null, set,
   };
   const candidates = Array.isArray(r.candidates) ? r.candidates : [];
   switch (site) {
@@ -69,8 +65,8 @@ const outPath = need(values, 'out', USAGE);
 const sources = new Set(list(values, 'sources', PUBLIC_SOURCES));
 const drop = new Set(list(values, 'drop', []));
 
-const bytes = readFileSync(setPath);
-const items = bytes.toString('utf8').split('\n').filter((line) => line.trim() !== '').map((line) => JSON.parse(line) as SetItem);
+const set = readSet(setPath);
+const items = set.rows as unknown as SetItem[];
 let droppedBySource = 0;
 let droppedById = 0;
 const out: string[] = [];
@@ -88,12 +84,12 @@ for (const item of items) {
     droppedById += 1;
     continue;
   }
-  out.push(JSON.stringify(convert(item, itemSite)));
+  out.push(JSON.stringify(convert(item, itemSite, set.name)));
 }
 writeFileSync(outPath, out.length > 0 ? `${out.join('\n')}\n` : '');
-const meta: SetMeta = {
-  set: setPath.split('/').pop() ?? setPath,
-  sha256: createHash('sha256').update(bytes).digest('hex'),
+writeSetMeta(outPath, {
+  set: set.name,
+  sha256: set.sha256,
   site: site ?? 'none',
   items: items.length,
   kept: out.length,
@@ -102,7 +98,5 @@ const meta: SetMeta = {
   lines: counts.lines,
   unparsedLines: counts.unparsed,
   overlayLines: counts.overlay,
-  date: new Date().toISOString().slice(0, 10),
-};
-writeFileSync(`${outPath}.meta.json`, `${JSON.stringify(meta, null, 2)}\n`);
-process.stdout.write(`${JSON.stringify(meta)}\n`);
+  date: today(),
+});

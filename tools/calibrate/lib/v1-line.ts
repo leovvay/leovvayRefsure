@@ -8,3 +8,12 @@ export function parseV1Line(line: string): { role: string; name: string; path: s
     return null;
   }
 }
+
+/**
+ * Whether a v1 line sits in an overlay place (a dialog, alertdialog or region anywhere on its path, named or
+ * not): where every live dismiss candidate sits.
+ */
+export function inOverlayPlace(line: string): boolean {
+  const parsed = parseV1Line(line);
+  return parsed !== null && parsed.path.split(' > ').some((part) => /^(dialog|alertdialog|region)\b/.test(part));
+}

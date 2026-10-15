@@ -1,6 +1,7 @@
 import { canonicalJson, sha256Hex } from '../../src/egress';
 import type { DecisionAnswer, SiteId } from '../../src/questions';
-import { flags, need } from './lib/args';
+import { flags, need, num } from './lib/args';
+import { noulKey } from './lib/build-item';
 import { jevAsker } from './lib/jev-asker';
 import { appendJsonl, readJsonl } from './lib/jsonl';
 import type { ParityItem } from './lib/parity-item';
@@ -9,8 +10,8 @@ import { pool } from './lib/pool';
 /*
   Calibration step 0, parity. Sends frozen requests, byte for byte as they were sent before, through refsure's
   Jev provider (PII masks off, so the body is unchanged; the redaction pass still runs and any change is counted),
-  and compares each answer with the one stored for the same request. Pass: at least 90 % of Choice answers pick
-  the same key.
+  and compares each answer with the one stored for the same request. Pass needs all three: every request answered,
+  every body sent unchanged (byte for byte), and at least 90 % of Choice answers picking the same key.
 
     parity --in <parity-items.jsonl> --out <parity-runs.jsonl> [--concurrency 4] [--deadline-ms 15000]
 */
@@ -21,8 +22,12 @@ const inPath = need(values, 'in', USAGE);
 const outPath = need(values, 'out', USAGE);
 const SITE_IDS: Readonly<Record<string, SiteId>> = { page_state: 'page-state' };
 
+const concurrency = num(values, 'concurrency', 4, USAGE, { min: 1, integer: true });
+const deadlineMs = num(values, 'deadline-ms', 15_000, USAGE, { min: 1 });
+
 const items = readJsonl<ParityItem>(inPath);
-const asker = jevAsker({ deadlineMs: Number(values['deadline-ms'] ?? 15_000), attempts: 3, piiMasks: false });
+if (items.length === 0) throw new Error(`${inPath} holds no parity items`);
+const asker = jevAsker({ deadlineMs, attempts: 3 });
 process.stderr.write(`${items.length} parity requests to ${asker.host} (${asker.model})\n`);
 
 function scoreOf(answer: DecisionAnswer | null | undefined): number | null {
@@ -32,13 +37,14 @@ function scoreOf(answer: DecisionAnswer | null | undefined): number | null {
 
 function keyOf(answer: DecisionAnswer | null | undefined): string | null {
   if (!answer) return null;
-  return answer.type === 'choice' ? answer.choice : answer.noul >= 0.5 ? 'true' : 'false';
+  return answer.type === 'choice' ? answer.choice : noulKey(answer.noul);
 }
 
-const rows = await pool(items, Number(values.concurrency ?? 4), async (item) => {
+const rows = await pool(items, concurrency, async (item) => {
   const site = SITE_IDS[item.site] ?? (item.site as SiteId);
   const sentDigest = sha256Hex(canonicalJson({ state: item.state, questions: item.questions }));
-  const approved = asker.approve(site, { state: item.state, questions: item.questions });
+  // PII masks off: the stored body is sent as it was sent before.
+  const approved = asker.approve(site, { state: item.state, questions: item.questions }, false);
   if ('cause' in approved) {
     const row = { id: item.id, site: item.site, status: `refused:${approved.cause}`, detail: approved.detail };
     appendJsonl(outPath, row);
@@ -73,8 +79,13 @@ const summary = (kind: string) => {
   };
 };
 const choice = summary('choice');
+const unchangedBodies = answered.filter((row) => row.unchanged).length;
+const checks = {
+  allAnswered: answered.length === items.length, bodiesUnchanged: unchangedBodies === answered.length,
+  choiceAgrees: choice.rate !== null && choice.rate >= 0.9,
+};
 process.stdout.write(`${JSON.stringify({
-  requests: items.length, answered: answered.length, unchangedBodies: answered.filter((row) => row.unchanged).length,
-  choice, noul: summary('noul'), pass: choice.rate !== null && choice.rate >= 0.9,
+  requests: items.length, answered: answered.length, unchangedBodies, choice, noul: summary('noul'), checks,
+  pass: checks.allAnswered && checks.bodiesUnchanged && checks.choiceAgrees,
   usd: Number(rows.reduce((s, row) => s + (('usd' in row ? row.usd : 0) ?? 0), 0).toFixed(6)),
 })}\n`);

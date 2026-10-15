@@ -38,7 +38,8 @@ export function isotonic(points: readonly Point[]): Block[] {
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
-function roundedAtOrBelow(included: number, excluded: number): number {
+/** The roundest value at or below `included` that still lies above `excluded` (the next lower score). */
+export function roundedAtOrBelow(included: number, excluded: number): number {
   for (const step of [100, 1_000, 10_000]) {
     const candidate = Math.floor(included * step + 1e-9) / step;
     if (candidate > excluded) return clamp01(candidate);
@@ -46,7 +47,8 @@ function roundedAtOrBelow(included: number, excluded: number): number {
   return clamp01(included);
 }
 
-function roundedAtOrAbove(included: number, excluded: number): number {
+/** The roundest value at or above `included` that still lies below `excluded` (the next higher score). */
+export function roundedAtOrAbove(included: number, excluded: number): number {
   for (const step of [100, 1_000, 10_000]) {
     const candidate = Math.ceil(included * step - 1e-9) / step;
     if (candidate < excluded) return clamp01(candidate);

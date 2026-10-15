@@ -3,7 +3,8 @@ import type { GoldRef } from './gold-ref';
 
 type Element = Extract<GoldRef, { kind: 'element' }>;
 
-const keyOf = (c: Candidate): string => twinKey(c.fp.role, c.fp.name, c.fp.path);
+/** A candidate's twin group: the key gold mapping, the twin stop and `distinct` all group by. */
+export const keyOf = (c: Candidate): string => twinKey(c.fp.role, c.fp.name, c.fp.path);
 
 /**
  * The live candidate a gold element names: the `ordinal`-th, in page order, of the candidates with its role and
@@ -18,7 +19,7 @@ export function findGold(cands: readonly Candidate[], ref: Element): Candidate |
 }
 
 /** The kinds of place a v1 path passes through, outer to inner, names and headings left out. */
-function placesOf(path: string): string {
+export function placesOf(path: string): string {
   return path.split(' > ').map((part) => /^(dialog|alertdialog|navigation|main|form|region)\b/.exec(part)?.[1])
     .filter((kind) => kind !== undefined).join('>');
 }
