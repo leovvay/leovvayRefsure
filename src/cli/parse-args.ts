@@ -37,6 +37,22 @@ function plainValues(values: Record<string, unknown>): ParsedArgs['values'] {
   return out;
 }
 
+/**
+ * A string option given twice, when it takes one value: `parseArgs` keeps the last, so `--ref @e5 --ref @e6`
+ * would quietly act on @e6. `null` when every one-value option was given at most once.
+ */
+function repeatedOption(options: ParseOptions, tokens: readonly { kind: string; name?: string; index: number }[], cut: number): string | null {
+  const seen = new Set<string>();
+  for (const token of tokens) {
+    if (token.kind !== 'option' || token.index >= cut || token.name === undefined) continue;
+    const option = options[token.name];
+    if (option === undefined || option.type !== 'string' || option.multiple) continue;
+    if (seen.has(token.name)) return token.name;
+    seen.add(token.name);
+  }
+  return null;
+}
+
 export function isUsageError(value: unknown): value is UsageError {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     && typeof (value as { usage?: unknown }).usage === 'string' && Object.keys(value).length === 1;
@@ -58,6 +74,12 @@ export function parseCommandArgs(
     const parsed = parseArgs({ args: [...argv], options, strict: true, allowPositionals: true, tokens: true });
     const terminator = parsed.tokens.find((token) => token.kind === 'option-terminator');
     const cut = terminator?.index ?? argv.length;
+    const repeated = repeatedOption(options, parsed.tokens, cut);
+    if (repeated !== null) return { usage: `--${repeated} takes one value; it was given more than once` };
+    // A blank `--page` (an unset "$PAGE") must not fall through to REFSURE_PAGE or the current tab.
+    if (typeof parsed.values.page === 'string' && parsed.values.page.trim() === '') {
+      return { usage: '--page is empty: pass a page id, or leave --page out' };
+    }
     const positionals = parsed.tokens
       .flatMap((token) => (token.kind === 'positional' && token.index < cut ? [token.value] : []));
     return { values: plainValues(parsed.values), positionals, rest: argv.slice(cut + 1) };

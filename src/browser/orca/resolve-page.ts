@@ -12,7 +12,13 @@ export async function resolveOrcaPage(
   currentTab: (worktree: string) => Promise<unknown>,
 ): Promise<PageRef> {
   const worktree = worktreeSelector(env);
-  const named = hint.page?.trim() || env.REFSURE_PAGE?.trim();
+  // A given `--page` is final: a blank one never falls through to another tab (the registry refuses it first).
+  if (hint.page !== undefined) {
+    const id = hint.page.trim();
+    if (!id) throw new BrowserError('no_tab', '--page is empty');
+    return { backend: 'orca', id };
+  }
+  const named = env.REFSURE_PAGE?.trim();
   if (named) return { backend: 'orca', id: named };
   const result = await currentTab(worktree);
   const tab = isRecord(result) && isRecord(result.tab) ? result.tab : null;

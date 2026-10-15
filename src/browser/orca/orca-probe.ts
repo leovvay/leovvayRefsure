@@ -13,7 +13,8 @@ export async function probeOrca(bin: string | null, env: NodeJS.ProcessEnv, run:
     binary: bin,
     version: env.ORCA_APP_VERSION?.trim() || null,
     running: false,
-    features: [...ORCA_FEATURES],
+    // Known only once Orca answers as running.
+    features: [],
     problem: null,
   };
   if (!bin) return { ...health, problem: 'no orca binary in $ORCA_CLI_BIN_DIR, on PATH, or in /Applications/Orca.app' };
@@ -38,5 +39,5 @@ export async function probeOrca(bin: string | null, env: NodeJS.ProcessEnv, run:
       : env.ORCA_WORKTREE_ID?.trim()
         ? null
         : 'ORCA_WORKTREE_ID is not set: run refsure from an Orca terminal';
-  return { ...health, ok: problem === null, running, version, problem };
+  return { ...health, ok: problem === null, running, version, problem, features: running ? [...ORCA_FEATURES] : [] };
 }

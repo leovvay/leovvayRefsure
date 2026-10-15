@@ -35,9 +35,12 @@ function backendChecks(backend: string, health: BackendHealth, inTerminal: boole
       detail: runningOk ? `${backend}${version} is running and ready` : (health.problem ?? `${backend} is not ready`),
     },
     {
+      // A backend that is not running could not be asked, so its features are unknown, not the static list.
       name: 'browser_features',
-      ok: true,
-      detail: health.features.length > 0 ? health.features.join(', ') : 'none',
+      ok: health.running && health.features.length > 0,
+      detail: !health.running
+        ? `unknown: ${backend} is not running`
+        : health.features.length > 0 ? health.features.join(', ') : 'none',
     },
   ];
 }

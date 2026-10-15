@@ -36,7 +36,8 @@ export function buildEnvelope(
     untrusted: [],
     next: outcome.next ?? null,
   };
-  return applyUntrusted(envelope, trace.untrusted);
+  // The page's URL is page text too: its path, query and fragment are whatever the page put there.
+  return applyUntrusted(envelope, page === null ? trace.untrusted : [...trace.untrusted, 'page.url']);
 }
 
 /** The exit comes only from the status (spec §6.1); a command never sets one. */

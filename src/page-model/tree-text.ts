@@ -1,4 +1,4 @@
-import type { AxTree } from '../browser';
+import type { AxNode, AxTree } from '../browser';
 import { norm } from './normalize';
 
 /**
@@ -7,13 +7,21 @@ import { norm } from './normalize';
  */
 export const VALUE_FIELD_ROLES: ReadonlySet<string> = new Set(['textbox', 'searchbox', 'combobox', 'spinbutton']);
 
+/**
+ * A value field: one of `VALUE_FIELD_ROLES`, or an editable region of any role. agent-browser prints the latter as
+ * `generic "Notes" [ref=e3] editable [contenteditable]: <typed text>`, its StaticText repeating the typing.
+ */
+export function isValueField(node: AxNode): boolean {
+  return VALUE_FIELD_ROLES.has(node.role) || node.attrs.contenteditable === true;
+}
+
 /** Whether a strict ancestor of node `i` is a value field. */
 export function insideValueField(tree: AxTree, i: number): boolean {
   let at = tree.nodes[i]?.parent ?? null;
   while (at !== null) {
     const node = tree.nodes[at];
     if (node === undefined) return false;
-    if (VALUE_FIELD_ROLES.has(node.role)) return true;
+    if (isValueField(node)) return true;
     at = node.parent;
   }
   return false;
@@ -58,7 +66,7 @@ export function subtreeText(tree: AxTree, root: number, opts: { staticOnly?: boo
 export function typedValues(tree: AxTree): string[] {
   const out = new Set<string>();
   for (const node of tree.nodes) {
-    if (node.value === null || !VALUE_FIELD_ROLES.has(node.role) || node.role === 'combobox') continue;
+    if (node.value === null || !isValueField(node) || node.role === 'combobox') continue;
     for (const piece of [node.value, ...node.value.split(/\r?\n/)]) {
       const value = norm(piece);
       if (Array.from(value).length >= 3) out.add(value);

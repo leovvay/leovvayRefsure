@@ -1,6 +1,7 @@
 import { isRef, parseSnapshot } from '../agent-browser-format';
 import type { Ref } from '../ax-tree';
-import { BrowserError } from '../browser-error';
+import { BrowserError, isBrowserError } from '../browser-error';
+import type { BrowserErrorCode } from '../browser-error-code';
 import type { BrowserPort } from '../browser-port';
 import type { PageRef } from '../page-ref';
 import { actOnOrca, dismissOrcaDialog } from './orca-act';
@@ -16,6 +17,7 @@ import { resolveOrcaPage } from './resolve-page';
 import { pageArgs } from './worktree-guard';
 
 const LOG_LIMIT = 200;
+const UNREACHED: ReadonlySet<BrowserErrorCode> = new Set<BrowserErrorCode>(['no_tab', 'orca_not_running', 'not_in_orca_terminal']);
 // `exec` hands its command to agent-browser's own tokenizer, so only plain attribute names may pass.
 const ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/;
 
@@ -48,10 +50,16 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     async snapshot(page) {
       const args = onPage(page, ['snapshot']);
-      // Once the call starts, Orca may renumber refs, whether or not a tree comes back.
-      const result = await call(args, () => {
-        trace.snapshotTaken = true;
-      });
+      let result: unknown;
+      try {
+        result = await call(args);
+      } catch (error) {
+        // Once the page has the call, Orca may renumber refs whether or not a tree comes back. A missing tab or
+        // app never got it, so no ref can have moved.
+        if (!isBrowserError(error) || !UNREACHED.has(error.code)) trace.snapshotTaken = true;
+        throw error;
+      }
+      trace.snapshotTaken = true;
       return parseSnapshot(result, page.id);
     },
 

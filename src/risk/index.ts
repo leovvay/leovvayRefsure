@@ -11,5 +11,5 @@ export { classify } from './classify';
 export { fieldRaisers, pageRaisers } from './raisers';
 export { liveRefCheck } from './live-ref-check';
 export { actionPolicy } from './action-policy';
-export { findTerm } from './term-match';
+export { findTerm, findTermLoose } from './term-match';
 export { dialogOf, isConfirmDialog } from './confirm-dialog';

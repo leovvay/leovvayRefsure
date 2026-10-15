@@ -1,6 +1,6 @@
 import type { AxTree } from '../browser';
 import { fold, insideValueField, INTERACTIVE_ROLES } from '../page-model';
-import { findTerm } from './term-match';
+import { findTermLoose } from './term-match';
 
 const DIALOG_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 
@@ -47,7 +47,8 @@ function wordingOf(tree: AxTree, dialog: number): string[] {
 
 /**
  * A confirm dialog (spec §8.5): its name, a heading in it or its StaticText carries a confirm cue ("are you
- * sure", "confirm", ...) or an irreversible term ("Delete this invoice?").
+ * sure", "confirm", ...) or an irreversible term ("Delete this invoice?"). Dialog wording mostly has no ref to
+ * take spacing from, so the cues are matched spacing-insensitively (`findTermLoose`).
  */
 export function isConfirmDialog(tree: AxTree, dialog: number): boolean {
   let known = memo.get(tree);
@@ -59,7 +60,7 @@ export function isConfirmDialog(tree: AxTree, dialog: number): boolean {
   if (cached !== undefined) return cached;
   const found = wordingOf(tree, dialog).some((text) => {
     const folded = fold(text);
-    return findTerm('confirmCue', folded) !== null || findTerm('irreversible', folded) !== null;
+    return findTermLoose('confirmCue', folded) !== null || findTermLoose('irreversible', folded) !== null;
   });
   known.set(dialog, found);
   return found;

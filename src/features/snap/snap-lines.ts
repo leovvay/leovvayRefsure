@@ -49,15 +49,25 @@ export function snapLines(tree: AxTree, opts: { scope: SnapScope | null; interac
   return out;
 }
 
-/** Keeps whole lines while the joined text fits `maxChars`; the rest are counted, never split. */
-export function cutLines(lines: readonly string[], maxChars: number): { kept: string[]; dropped: number } {
+/**
+ * Keeps whole lines while the joined text fits `maxChars`; the rest are counted, never split. When lines are cut,
+ * the footer `N lines dropped` ends the list and counts against the budget too; a budget too small for even the
+ * footer gets no lines at all, and `dropped` still says how many there were.
+ */
+export function cutLines(lines: readonly string[], maxChars: number): { lines: string[]; dropped: number } {
+  const total = lines.reduce((sum, line, k) => sum + line.length + (k > 0 ? 1 : 0), 0);
+  if (total <= maxChars) return { lines: [...lines], dropped: 0 };
+  const footer = (kept: number): string => `${lines.length - kept} lines dropped`;
   const kept: string[] = [];
   let used = 0;
   for (const line of lines) {
     const add = (kept.length > 0 ? 1 : 0) + line.length;
-    if (used + add > maxChars) break;
+    if (used + add + 1 + footer(kept.length + 1).length > maxChars) break;
     used += add;
     kept.push(line);
   }
-  return { kept, dropped: lines.length - kept.length };
+  const dropped = lines.length - kept.length;
+  const tail = footer(kept.length);
+  if (used + (kept.length > 0 ? 1 : 0) + tail.length > maxChars) return { lines: kept, dropped };
+  return { lines: [...kept, tail], dropped };
 }

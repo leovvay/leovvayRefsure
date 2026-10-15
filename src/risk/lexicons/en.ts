@@ -32,7 +32,7 @@ export const EN: LanguageLexicon = {
   ],
   cancelContext: ['subscription', 'order', 'account', 'booking', 'membership', 'reservation', 'plan', 'payment'],
   cancelVerbs,
-  cancelWords: [...cancelVerbs, 'no', 'go back', 'keep'],
+  cancelWords: [...cancelVerbs, 'no', 'go back', 'back', 'keep', 'never mind', 'nevermind'],
   confirmCue: [
     'are you sure', 'confirm', 'cannot be undone', "can't be undone", 'permanently', 'irreversible',
     'this action', 'do you want to',

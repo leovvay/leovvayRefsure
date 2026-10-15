@@ -1,5 +1,5 @@
 import type { ActAction, AxNode, AxTree } from '../browser';
-import { fold, pathOf } from '../page-model';
+import { fold } from '../page-model';
 import { dialogOf, isConfirmDialog } from './confirm-dialog';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
@@ -15,6 +15,8 @@ export interface ClassifyOpts {
 }
 
 const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
+// What a confirm dialog's confirming control can be: whatever confirms on a click.
+const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
 const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;
@@ -59,9 +61,11 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
     risk = maxRisk(risk, cls);
     reasons.push(`lexicon:${hit.lang}:${cls}:${hit.term}`);
   }
+  // "Cancel subscription" names what it ends. A bare "Cancel" never takes the word from its dialog title or a
+  // heading: in "Delete account?" it backs out (spec §8.5: never a confirm dialog's Cancel/No).
   const cancel = findTerm('cancelVerbs', name);
   if (cancel !== null) {
-    const context = findTerm('cancelContext', name) ?? findTerm('cancelContext', fold(pathOf(tree, i)));
+    const context = findTerm('cancelContext', name);
     if (context !== null) {
       matched = true;
       risk = maxRisk(risk, 'irreversible');
@@ -70,7 +74,8 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   }
   if (!matched) reasons.push('lexicon:none');
 
-  const dialog = node.role === 'button' ? dialogOf(tree, i) : null;
+  const clicks = opts.action === undefined || !FIELD_ACTIONS.has(opts.action);
+  const dialog = clicks && CONFIRMING_ROLES.has(node.role) ? dialogOf(tree, i) : null;
   if (dialog !== null && isConfirmDialog(tree, dialog)
     && findTerm('dismissClose', name) === null && findTerm('cancelWords', name) === null) {
     risk = maxRisk(risk, 'irreversible');

@@ -40,8 +40,7 @@ export const snapCommand: CommandSpec<SnapArgs, SnapResult> = {
   async run(args, ctx) {
     if (ctx.page === null) throw new Error('snap needs a page, and none was resolved');
     const tree = await ctx.browser.snapshot(ctx.page);
-    const { kept, dropped } = cutLines(snapLines(tree, args), args.maxChars);
-    const lines = dropped > 0 ? [...kept, `${dropped} lines dropped`] : kept;
+    const { lines, dropped } = cutLines(snapLines(tree, args), args.maxChars);
     const result: SnapResult = { lines, dropped };
     if (tree.dropped > 0) result.unparsed = tree.dropped;
     ctx.trace.untrusted.add('result.lines');

@@ -31,7 +31,7 @@ function bodyLines(tree: AxTree, bodyText: string): string {
 
 /**
  * The `state` input: URL, title, headings, dialogs, alerts and body text. It reads names, never `node.value`, and
- * skips everything inside a textbox, searchbox or combobox, whose StaticText repeats what was typed.
+ * skips everything inside a value field (see `isValueField`), whose StaticText repeats what was typed.
  */
 export function pageView(tree: AxTree, tab: TabInfo, bodyText: string): PageView {
   const headings = new Set<string>();
