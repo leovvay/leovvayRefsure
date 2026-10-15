@@ -1,15 +1,14 @@
 import type { ActAction, ActResult } from '../act-result';
 import { isRef } from '../agent-browser-format';
-import { boundDetail } from '../bound-detail';
 import type { Ref } from '../ax-tree';
-import { BrowserError, isBrowserError } from '../browser-error';
+import { BrowserError } from '../browser-error';
+import { ACT_TIMEOUT_MS, READ_TIMEOUT_MS } from '../run-json';
+import { actDetail, hideValue, lostDetail, NO_DIALOG, type Sent, sendOnce } from '../send-once';
 import type { AbActDeps } from './ab-act-deps';
 import { abError, refusedBeforeDispatch } from './ab-error-map';
 import type { AbReply } from './ab-reply';
-import { ACT_TIMEOUT_MS, READ_TIMEOUT_MS } from './ab-runner';
+import type { SessionReply } from './ab-session-reply';
 import { sessionGone } from './resolve-session';
-
-const NO_DIALOG = /no dialog is showing/i;
 
 /**
  * `<verb> @eN [value]` on the session's active tab. From the moment the process exists the act counts as
@@ -28,16 +27,17 @@ export async function actOnSession(
     if (value === undefined) throw new BrowserError('backend_error', `${action} needs a value`);
     verb.push(value);
   }
-  const sent = await sendOnce(deps, verb, ACT_TIMEOUT_MS);
-  if (sent.kind === 'lost') return { kind: 'unknown', detail: hideValue(lostDetail(sent.error), value) };
-  const reply = sent.reply;
-  if (sent.launched) return launchedAct(deps, sent, value);
+  const sent = await send(deps, verb, ACT_TIMEOUT_MS);
+  if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'agent-browser', value) };
+  const { replies, launched } = sent.reply;
+  const reply = replies[0]!;
+  if (launched) return launchedAct(deps, reply, sent.before, value);
   if (reply.ok) return { kind: 'done' };
   if (refusedBeforeDispatch(reply.message)) {
     deps.trace.dispatched = sent.before;
     return { kind: 'stale_ref' };
   }
-  return { kind: 'unknown', detail: hideValue(boundDetail(`agent-browser: ${reply.message}`), value) };
+  return { kind: 'unknown', detail: actDetail(`agent-browser: ${reply.message}`, value) };
 }
 
 /**
@@ -45,10 +45,11 @@ export async function actOnSession(
  * agent-browser dismisses alert and beforeunload dialogs by itself; a confirm or prompt stays for this call.
  */
 export async function dismissSessionDialog(deps: AbActDeps): Promise<boolean> {
-  const sent = await sendOnce(deps, ['dialog', 'dismiss'], READ_TIMEOUT_MS);
+  const sent = await send(deps, ['dialog', 'dismiss'], READ_TIMEOUT_MS);
   if (sent.kind === 'lost') throw sent.error;
-  const reply = sent.reply;
-  if (sent.launched) {
+  const { replies, launched } = sent.reply;
+  const reply = replies[0]!;
+  if (launched) {
     // A browser started during the call holds no dialog of the user's page; nothing of theirs was dismissed.
     if (!reply.ok && NO_DIALOG.test(reply.message)) deps.trace.dispatched = sent.before;
     throw sessionGone(deps.session, 'launched');
@@ -61,17 +62,13 @@ export async function dismissSessionDialog(deps: AbActDeps): Promise<boolean> {
   throw abError(reply.message);
 }
 
-type Sent =
-  | { kind: 'reply'; reply: AbReply; launched: boolean; before: boolean }
-  | { kind: 'lost'; error: unknown };
-
 /**
  * The act reached a browser agent-browser started during the call, not the page the ref came from. A ref it could
  * not resolve touched nothing (`no_tab`); anything else may have landed on a page a persistent profile restored.
  */
-function launchedAct(deps: AbActDeps, sent: Extract<Sent, { kind: 'reply' }>, value: string | undefined): ActResult {
-  if (!sent.reply.ok && refusedBeforeDispatch(sent.reply.message)) {
-    deps.trace.dispatched = sent.before;
+function launchedAct(deps: AbActDeps, reply: AbReply, before: boolean, value: string | undefined): ActResult {
+  if (!reply.ok && refusedBeforeDispatch(reply.message)) {
+    deps.trace.dispatched = before;
     throw sessionGone(deps.session, 'launched');
   }
   const detail = `the browser of agent-browser session "${deps.session}" went away during the act, and `
@@ -80,26 +77,6 @@ function launchedAct(deps: AbActDeps, sent: Extract<Sent, { kind: 'reply' }>, va
 }
 
 // A failure before the spawn (no binary, a session that is not running) rethrows: nothing was sent.
-async function sendOnce(deps: AbActDeps, verb: readonly string[], timeoutMs: number): Promise<Sent> {
-  const before = deps.trace.dispatched;
-  let spawned = false;
-  try {
-    const answer = await deps.call([verb], timeoutMs, () => {
-      spawned = true;
-      deps.trace.dispatched = true;
-    });
-    return { kind: 'reply', reply: answer.replies[0]!, launched: answer.launched, before };
-  } catch (error) {
-    if (!spawned) throw error;
-    return { kind: 'lost', error };
-  }
-}
-
-function lostDetail(error: unknown): string {
-  return isBrowserError(error) ? `${error.code}: ${error.detail}` : 'the agent-browser call failed after it started';
-}
-
-// agent-browser may echo a fill value in its error text; the value can be a password.
-function hideValue(text: string, value: string | undefined): string {
-  return value && value.length > 0 ? text.split(value).join('[value]') : text;
+function send(deps: AbActDeps, verb: readonly string[], timeoutMs: number): Promise<Sent<SessionReply>> {
+  return sendOnce(deps.trace, (onSpawn) => deps.call([verb], timeoutMs, onSpawn));
 }

@@ -1,10 +1,10 @@
 import { BrowserError } from '../browser-error';
 import { isRecord } from '../is-record';
+import { READ_TIMEOUT_MS } from '../run-json';
 import type { AbBatchRun } from './ab-batch-run';
 import { abError } from './ab-error-map';
 import type { SessionGuard } from './ab-guard';
 import type { AbRun } from './ab-run';
-import { READ_TIMEOUT_MS } from './ab-runner';
 import type { SessionReply } from './ab-session-reply';
 import type { SessionState } from './ab-session-state';
 import { readSessions } from './ab-sessions';

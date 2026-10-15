@@ -1,10 +1,11 @@
 import { BrowserError } from '../browser-error';
+import { namedPage } from '../named-page';
 import type { PageHint } from '../page-hint';
 import type { PageRef } from '../page-ref';
 import type { SessionState } from './ab-session-state';
 
 /** agent-browser's own default session name, used when neither `--page` nor `REFSURE_PAGE` names one. */
-export const DEFAULT_SESSION = 'default';
+const DEFAULT_SESSION = 'default';
 // A session name goes to agent-browser as one argv word after `--session`: never one that reads as a flag.
 const SESSION_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 
@@ -26,14 +27,7 @@ export async function resolveSession(
   /** The session as agent-browser reports it, asked without launching anything; injected so only the adapter spawns. */
   state: (session: string) => Promise<SessionState>,
 ): Promise<PageRef> {
-  let name: string;
-  if (hint.page !== undefined) {
-    name = hint.page.trim();
-    if (!name) throw new BrowserError('no_tab', '--page is empty');
-  } else {
-    name = env.REFSURE_PAGE?.trim() || DEFAULT_SESSION;
-  }
-  const session = checkedSession(name);
+  const session = checkedSession(namedPage(hint, env) ?? DEFAULT_SESSION);
   const now = await state(session);
   if (now !== 'running') throw sessionGone(session, now);
   return { backend: 'agent-browser', id: session };

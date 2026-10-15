@@ -7,8 +7,6 @@ import { readLine } from './snapshot-line';
 import { withRefSpacing } from './spacing';
 import { valueSpan } from './value-span';
 
-export { isRef } from './snapshot-line';
-
 /**
  * Where each multi-line value ends: the lines its run-on text covers are marked, and the whole value is kept.
  * A line inside an earlier value is never a value's start.

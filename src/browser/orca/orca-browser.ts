@@ -1,25 +1,23 @@
-import { isRef, parseSnapshot } from '../agent-browser-format';
-import type { Ref } from '../ax-tree';
+import { parseSnapshot, readAttr, readConsole, readCount, readNetwork, readText } from '../agent-browser-format';
 import { BrowserError, isBrowserError } from '../browser-error';
 import type { BrowserErrorCode } from '../browser-error-code';
 import type { BrowserPort } from '../browser-port';
+import { checkedAttr, checkedRef, LOG_LIMIT } from '../checked-args';
 import type { PageRef } from '../page-ref';
+import { READ_TIMEOUT_MS, stripRefsureEnv } from '../run-json';
 import { actOnOrca, dismissOrcaDialog } from './orca-act';
 import { findOrcaBinary } from './orca-binary';
 import type { OrcaBrowserOptions } from './orca-browser-options';
 import { orcaError } from './orca-error-map';
 import { ORCA_FEATURES } from './orca-features';
 import { probeOrca } from './orca-probe';
-import { readAttr, readConsole, readCount, readNetwork, readTab, readText } from './orca-replies';
+import { readTab } from './orca-replies';
 import type { OrcaRun } from './orca-run';
-import { READ_TIMEOUT_MS, runOrca, stripRefsureEnv } from './orca-runner';
+import { runOrca } from './orca-runner';
 import { resolveOrcaPage } from './resolve-page';
 import { pageArgs } from './worktree-guard';
 
-const LOG_LIMIT = 200;
 const UNREACHED: ReadonlySet<BrowserErrorCode> = new Set<BrowserErrorCode>(['no_tab', 'orca_not_running', 'not_in_orca_terminal']);
-// `exec` hands its command to agent-browser's own tokenizer, so only plain attribute names may pass.
-const ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/;
 // A selector for `exec`, sent as one double-quoted token: no double quote, backslash or control character in it.
 const EXEC_SELECTOR = /^[^"\\\u0000-\u001f\u007f]{1,2000}$/;
 
@@ -30,8 +28,8 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
   const childEnv = stripRefsureEnv(env);
   const run: OrcaRun = (args, timeoutMs, onSpawn) => runOrca(bin, args, { env: childEnv, timeoutMs, onSpawn });
 
-  async function call(args: readonly string[], onSpawn?: () => void): Promise<unknown> {
-    const reply = await run(args, READ_TIMEOUT_MS, onSpawn);
+  async function call(args: readonly string[]): Promise<unknown> {
+    const reply = await run(args, READ_TIMEOUT_MS);
     if (!reply.ok) throw orcaError(reply.code, reply.message);
     return reply.result;
   }
@@ -67,29 +65,30 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     async text(page, target) {
       const element = target === 'body' ? 'body' : checkedRef(target);
-      return readText(await call(onPage(page, ['get'], '--what=text', `--element=${element}`)), 'get text');
+      return readText(await call(onPage(page, ['get'], '--what=text', `--element=${element}`)), 'orca get text');
     },
 
     async attr(page, ref, name) {
-      if (!ATTR_NAME.test(name)) throw new BrowserError('backend_error', `not a plain attribute name: ${name}`);
-      const command = `get attr @${checkedRef(ref)} ${name}`;
-      return readAttr(await call(onPage(page, ['exec'], `--command=${command}`)));
+      const attrName = checkedAttr(name);
+      const command = `get attr @${checkedRef(ref)} ${attrName}`;
+      return readAttr(await call(onPage(page, ['exec'], `--command=${command}`)), 'orca exec get attr');
     },
 
     async count(page, css) {
       if (css.trim() === '') throw new BrowserError('backend_error', 'count needs a CSS selector');
-      return readCount(await call(onPage(page, ['get'], '--what=count', `--element=${css}`)), css);
+      return readCount(await call(onPage(page, ['get'], '--what=count', `--element=${css}`)), 'orca get count', css);
     },
 
     async selectorText(page, css) {
       if (css.trim() === '') throw new BrowserError('backend_error', 'selectorText needs a CSS selector');
-      return readText(await call(onPage(page, ['get'], '--what=text', `--element=${css}`)), 'get text');
+      return readText(await call(onPage(page, ['get'], '--what=text', `--element=${css}`)), 'orca get text');
     },
 
     async selectorAttr(page, css, name) {
-      if (!ATTR_NAME.test(name)) throw new BrowserError('backend_error', `not a plain attribute name: ${name}`);
+      const attrName = checkedAttr(name);
       if (!EXEC_SELECTOR.test(css)) throw new BrowserError('backend_error', 'selectorAttr takes no double quote or backslash');
-      return readAttr(await call(onPage(page, ['exec'], `--command=get attr "${css}" ${name}`)));
+      const result = await call(onPage(page, ['exec'], `--command=get attr "${css}" ${attrName}`));
+      return readAttr(result, 'orca exec get attr');
     },
 
     act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),
@@ -100,18 +99,13 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     // A mark is resolved by the caller; Orca keeps no cursor, so `since` is not sent.
     async console(page) {
-      return readConsole(await call(onPage(page, ['console'], `--limit=${LOG_LIMIT}`)));
+      return readConsole(await call(onPage(page, ['console'], `--limit=${LOG_LIMIT}`)), 'orca console');
     },
 
     async network(page) {
-      return readNetwork(await call(onPage(page, ['network'], `--limit=${LOG_LIMIT}`)));
+      return readNetwork(await call(onPage(page, ['network'], `--limit=${LOG_LIMIT}`)), 'orca network');
     },
 
     dialogDismiss: (page) => dismissOrcaDialog({ env, trace, run }, page),
   };
-}
-
-function checkedRef(ref: Ref): Ref {
-  if (!isRef(ref)) throw new BrowserError('stale_ref', `not a snapshot ref: ${String(ref).slice(0, 40)}`);
-  return ref;
 }

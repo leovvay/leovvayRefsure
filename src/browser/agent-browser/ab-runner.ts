@@ -1,15 +1,14 @@
-import { execFile, execFileSync, type ExecFileException } from 'node:child_process';
-import { boundDetail } from '../bound-detail';
+import { execFile, execFileSync } from 'node:child_process';
 import { BrowserError } from '../browser-error';
 import { isRecord } from '../is-record';
+import {
+  childFailure, type JsonChild, MAX_BUFFER, parseJsonFrom, READ_TIMEOUT_MS, spawnJson, stripRefsureEnv,
+} from '../run-json';
 import type { AbReply } from './ab-reply';
 import type { AbRunOptions } from './ab-run-options';
 
-export const READ_TIMEOUT_MS = 15_000;
-export const ACT_TIMEOUT_MS = 30_000;
 const HELP_TIMEOUT_MS = 5_000;
-const MAX_BUFFER = 64 * 1024 * 1024;
-const SPAWN_FAILURES = new Set(['ENOENT', 'EACCES', 'EPERM', 'ENOEXEC']);
+const AGENT_BROWSER: JsonChild = { label: 'agent-browser', spawnCode: 'backend_error' };
 export const NO_BINARY = 'no agent-browser binary on PATH or in /Applications/Orca.app';
 /** The one agent-browser setting a child keeps: where the user's session sockets live. */
 const KEPT: ReadonlySet<string> = new Set(['AGENT_BROWSER_SOCKET_DIR']);
@@ -29,11 +28,9 @@ const STRAY_DAEMON_IDLE_MS = '500';
  * variable or a profile relaunched a live session). Config files are kept out by `--config` (see ab-empty-config).
  */
 export function stripChildEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  const out: NodeJS.ProcessEnv = {};
-  for (const [key, value] of Object.entries(env)) {
-    if (value === undefined || key.startsWith('REFSURE_') || PROXY.test(key)) continue;
-    if (key.startsWith('AGENT_BROWSER_') && !KEPT.has(key)) continue;
-    out[key] = value;
+  const out = stripRefsureEnv(env);
+  for (const key of Object.keys(out)) {
+    if (PROXY.test(key) || (key.startsWith('AGENT_BROWSER_') && !KEPT.has(key))) delete out[key];
   }
   out.AGENT_BROWSER_IDLE_TIMEOUT_MS = STRAY_DAEMON_IDLE_MS;
   return out;
@@ -44,7 +41,7 @@ export function stripChildEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
  * agent-browser prints its error there and exits 1. Throws a `BrowserError` only when no reply could be read.
  */
 export function runAgentBrowser(bin: string | null, args: readonly string[], opts: AbRunOptions): Promise<AbReply> {
-  return runJson(bin, args, opts, readReply);
+  return runJson(bin, args, opts, readReply, carriesValue(args));
 }
 
 /**
@@ -54,29 +51,19 @@ export function runAgentBrowser(bin: string | null, args: readonly string[], opt
 export function runAgentBrowserBatch(
   bin: string | null, args: readonly string[], commands: readonly (readonly string[])[], opts: AbRunOptions,
 ): Promise<AbReply[]> {
-  return runJson(bin, [...args, 'batch'], { ...opts, input: JSON.stringify(commands) }, readBatch);
+  const input = JSON.stringify(commands);
+  return runJson(bin, [...args, 'batch'], { ...opts, input }, readBatch, commands.some(carriesValue));
 }
 
 function runJson<T>(
   bin: string | null, args: readonly string[], opts: AbRunOptions, read: (stdout: string) => T | null,
+  withholdOutput: boolean,
 ): Promise<T> {
   if (!bin) return Promise.reject(new BrowserError('backend_error', NO_BINARY));
-  return new Promise((resolve, reject) => {
-    const child = execFile(
-      bin,
-      ['--json', '--config', opts.config, ...args],
-      { env: opts.env, timeout: opts.timeoutMs, maxBuffer: MAX_BUFFER, encoding: 'utf8', windowsHide: true },
-      (error, stdout, stderr) => {
-        const reply = read(stdout);
-        if (reply !== null) resolve(reply);
-        else reject(failure(verbOf(args), opts.timeoutMs, error, stderr || stdout));
-      },
-    );
-    child.once('spawn', () => opts.onSpawn?.());
-    // A closed pipe is the child's to report; the reply above says what happened.
-    child.stdin?.on('error', () => undefined);
-    child.stdin?.end(opts.input ?? '');
-  });
+  return spawnJson(AGENT_BROWSER, bin, ['--json', '--config', opts.config, ...args], {
+    env: opts.env, timeoutMs: opts.timeoutMs, verb: verbOf(args), onSpawn: opts.onSpawn, input: opts.input ?? '',
+    withholdOutput,
+  }, read);
 }
 
 /** Plain text output (`--version`), for the probe. */
@@ -84,7 +71,7 @@ export function runAgentBrowserText(bin: string, args: readonly string[], env: N
   return new Promise((resolve, reject) => {
     const options = { env, timeout: READ_TIMEOUT_MS, maxBuffer: MAX_BUFFER, encoding: 'utf8' as const };
     execFile(bin, [...args], options, (error, stdout, stderr) => {
-      if (error) reject(failure(verbOf(args), READ_TIMEOUT_MS, error, stderr || stdout));
+      if (error) reject(childFailure(AGENT_BROWSER, verbOf(args), READ_TIMEOUT_MS, error, stderr || stdout));
       else resolve(stdout);
     });
   });
@@ -101,18 +88,6 @@ export function helpTextSync(bin: string, env: NodeJS.ProcessEnv): string | null
   }
 }
 
-// Tolerate a stray warning line printed before the JSON.
-function parseJson(stdout: string, open: '{' | '['): unknown {
-  const text = stdout.trim();
-  const start = text.startsWith(open) ? 0 : text.indexOf(`\n${open}`) + 1;
-  if (start === 0 && !text.startsWith(open)) return undefined;
-  try {
-    return JSON.parse(text.slice(start));
-  } catch {
-    return undefined;
-  }
-}
-
 // A command answers `{success, data, error}`; a batch item answers `{success, result, error}`.
 function asReply(value: unknown, field: 'data' | 'result'): AbReply | null {
   if (!isRecord(value) || typeof value.success !== 'boolean') return null;
@@ -123,30 +98,18 @@ function asReply(value: unknown, field: 'data' | 'result'): AbReply | null {
 }
 
 function readReply(stdout: string): AbReply | null {
-  return asReply(parseJson(stdout, '{'), 'data');
+  return asReply(parseJsonFrom(stdout, '{'), 'data');
 }
 
 // A client that fails before the batch runs (a bad flag, no daemon) answers with one plain reply.
 function readBatch(stdout: string): AbReply[] | null {
-  const items = parseJson(stdout, '[');
+  const items = parseJsonFrom(stdout, '[');
   if (!Array.isArray(items)) {
     const single = readReply(stdout);
     return single && !single.ok ? [single] : null;
   }
   const replies = items.map((item) => asReply(item, 'result'));
   return replies.every((reply): reply is AbReply => reply !== null) ? replies : null;
-}
-
-function failure(verb: string, timeoutMs: number, error: ExecFileException | null, output: string): BrowserError {
-  if (error && typeof error.code === 'string' && SPAWN_FAILURES.has(error.code)) {
-    return new BrowserError('backend_error', `could not start agent-browser: ${error.code}`);
-  }
-  if (error?.killed && error.code !== 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
-    return new BrowserError('timeout', `agent-browser ${verb} gave no answer within ${Math.round(timeoutMs / 1000)} s`);
-  }
-  // Never error.message: it repeats the argv, and a fill value may be a secret.
-  const why = typeof error?.code === 'number' ? `exit ${error.code}` : String(error?.signal ?? error?.code ?? 'exit 0');
-  return new BrowserError('backend_error', boundDetail(`agent-browser ${verb} gave no JSON reply (${why}): ${output}`));
 }
 
 /** The verb words, for messages: never a value, which follows a ref, nor the session name. */
@@ -159,4 +122,10 @@ function verbOf(args: readonly string[]): string {
     else words.push(arg);
   }
   return words.slice(0, 2).join(' ') || '?';
+}
+
+/** A command that sends a value, which follows a ref (`fill @e7 <value>`); its output may echo the value. */
+function carriesValue(command: readonly string[]): boolean {
+  const at = command.findIndex((word) => word.startsWith('@'));
+  return at >= 0 && at < command.length - 1;
 }

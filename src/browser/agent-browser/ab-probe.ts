@@ -1,8 +1,9 @@
 import type { BackendHealth } from '../backend-health';
 import { boundDetail } from '../bound-detail';
 import { isBrowserError } from '../browser-error';
+import { READ_TIMEOUT_MS } from '../run-json';
 import type { AbProbeDeps } from './ab-probe-deps';
-import { NO_BINARY, READ_TIMEOUT_MS } from './ab-runner';
+import { NO_BINARY } from './ab-runner';
 import { readSessions } from './ab-sessions';
 
 const VERSION = /agent-browser\s+v?(?<version>\d+\.\d+\.\d+\S*)/i;
@@ -32,8 +33,8 @@ export async function probeAgentBrowser(deps: AbProbeDeps): Promise<BackendHealt
       ((await deps.state(session)) === 'running' ? live : idle).push(session);
     }
   } catch (error) {
-    const detail = isBrowserError(error) ? `${error.code}: ${error.detail}` : 'agent-browser session list failed';
-    return { ...health, version, problem: detail };
+    const problem = isBrowserError(error) ? error.message : 'agent-browser session list failed';
+    return { ...health, version, problem };
   }
   const features = [...deps.features()];
   const seen = [

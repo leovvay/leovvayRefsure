@@ -1,11 +1,12 @@
 import {
-  asResult, isRef, parseSnapshot, readAttr, readConsole, readCount, readNetwork, readText, str,
+  asResult, parseSnapshot, readAttr, readConsole, readCount, readNetwork, readText, str,
 } from '../agent-browser-format';
-import type { Ref } from '../ax-tree';
 import { BrowserError } from '../browser-error';
 import type { BrowserPort } from '../browser-port';
 import type { BrowserCapability } from '../capability';
+import { checkedAttr, checkedRef, LOG_LIMIT } from '../checked-args';
 import type { PageRef } from '../page-ref';
+import { READ_TIMEOUT_MS } from '../run-json';
 import { actOnSession, dismissSessionDialog } from './ab-act';
 import type { AbActDeps } from './ab-act-deps';
 import type { AbBatchRun } from './ab-batch-run';
@@ -17,15 +18,13 @@ import { featuresFromHelp } from './ab-features';
 import { probeAgentBrowser } from './ab-probe';
 import type { AbRun } from './ab-run';
 import {
-  helpTextSync, READ_TIMEOUT_MS, runAgentBrowser, runAgentBrowserBatch, runAgentBrowserText, stripChildEnv,
+  helpTextSync, runAgentBrowser, runAgentBrowserBatch, runAgentBrowserText, stripChildEnv,
 } from './ab-runner';
 import { createSessionGuard } from './ab-session-guard';
 import { activeTabId } from './ab-tabs';
 import { checkedSession, resolveSession, sessionGone } from './resolve-session';
 
-const LOG_LIMIT = 200;
-// Values travel in a batch's JSON argv, taken literally; these only keep the words well formed.
-const ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/;
+// Values travel in a batch's JSON argv, taken literally; this only keeps the word well formed.
 const SELECTOR = /^\S[\s\S]{0,1999}$/;
 
 /**
@@ -151,16 +150,6 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
 
     dialogDismiss: async (page) => dismissSessionDialog(actDeps(page)),
   };
-}
-
-function checkedRef(ref: Ref): Ref {
-  if (!isRef(ref)) throw new BrowserError('stale_ref', `not a snapshot ref: ${String(ref).slice(0, 40)}`);
-  return ref;
-}
-
-function checkedAttr(name: string): string {
-  if (!ATTR_NAME.test(name)) throw new BrowserError('backend_error', `not a plain attribute name: ${name}`);
-  return name;
 }
 
 function checkedSelector(css: string): string {
