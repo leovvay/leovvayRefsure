@@ -1,0 +1,20 @@
+/** Roles a candidate may have: what a person clicks, types into or picks (spec §8.3, plan task 4). */
+export const INTERACTIVE_ROLES: ReadonlySet<string> = new Set([
+  'button',
+  'link',
+  'textbox',
+  'searchbox',
+  'checkbox',
+  'radio',
+  'switch',
+  'combobox',
+  'listbox',
+  'option',
+  'menuitem',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'tab',
+  'treeitem',
+  'slider',
+  'spinbutton',
+]);

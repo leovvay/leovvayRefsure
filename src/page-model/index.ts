@@ -1,2 +1,14 @@
 export type * from './fingerprint';
 export type * from './candidate';
+export type * from './page-view-shape';
+export type * from './rank-opts';
+export { cutName, fold, NAME_MAX, norm, urlNorm } from './normalize';
+export { contentWords } from './content-words';
+export { INTERACTIVE_ROLES } from './interactive-roles';
+export { lineOf, pathOf } from './candidate-line';
+export { groupOf, twinKey, twinsOf } from './twins';
+export { candidatesOf, findByFingerprint, fingerprintOf } from './fingerprint-of';
+export { rowOf, rowTextOf } from './row-text';
+export { insideValueField, VALUE_FIELD_ROLES } from './tree-text';
+export { pageView } from './page-view';
+export { exactNameMatch, RANK_MAX, rankCandidates } from './rank-candidates';
