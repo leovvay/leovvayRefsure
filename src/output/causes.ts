@@ -13,19 +13,20 @@ export const CAUSES: readonly CauseRow[] = [
   row('twins', 'abstained', 'The pick has identical twins; narrow it with --within or --first.'),
   row('proposed_only', 'abstained', 'The ticket only proposes at this risk; it may not act.'),
   row('disagree', 'abstained', 'The two providers did not pick the same option.'),
+  row('not_seen', 'abstained', 'wait-for did not see it within its timeout; never a claim that it is absent.'),
 
   row('veto', 'refused', 'The control is on the never-click list (accept, subscribe, settings, ...).'),
   row('high_risk_class', 'refused', 'Money, irreversible, auth or consent: refused on this path.'),
   row('oversize', 'refused', 'The request was over the egress byte bounds.'),
   row('provider_not_allowed', 'refused', 'That provider or combination is not allowed at this site.'),
   row('origin_denied', 'refused', 'The page origin or profile is outside the configured origin policy.'),
-  row('expect_name_mismatch', 'refused', 'The live name differs from --expect-name; nothing was done.'),
   row('ambiguous_option', 'refused', 'Two options read the same once folded; refsure will not pick.'),
 
   row('page_changed', 'stale', 'The page moved on since the ticket: a different URL or element.'),
-  row('ticket_expired', 'stale', 'The ticket or mark is past its time to live.'),
+  row('ticket_expired', 'stale', 'The ticket or mark is past its time to live, or no such mark is kept.'),
   row('ticket_used', 'stale', 'The ticket was already claimed; tickets are single use.'),
   row('ref_gone', 'stale', 'The element is no longer on the page; take a fresh snapshot.'),
+  row('expect_name_mismatch', 'stale', 'The live ref shows another name than --expect-name; nothing was done.'),
 
   row('provider_timeout', 'unavailable', 'The provider did not answer within its time budget.'),
   row('provider_error', 'unavailable', 'The provider failed or answered invalidly.'),
