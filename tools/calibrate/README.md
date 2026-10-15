@@ -7,8 +7,8 @@ input path is an argument, and every output belongs outside the repo.
 
 | Tool | Step | Does |
 |---|---|---|
-| `parity.ts` | 0 | Sends frozen requests, byte for byte, through refsure's Jev provider and compares the answers with the ones stored for the same requests. Pass: ≥90 % of Choice answers pick the same key. |
-| `convert-v1.ts` | 1 | Turns a labelled set into refsure site inputs, every element line in line format v1. |
+| `parity.ts` | 0 | Sends frozen requests, byte for byte, through refsure's Jev provider and compares the answers with the ones stored for the same requests. Pass needs all three `checks`: `allAnswered` (every request got an answer), `bodiesUnchanged` (every body went out byte for byte as stored) and `choiceAgrees` (≥90 % of Choice answers pick the same key). |
+| `convert-v1.ts` | 1 | Turns a labelled set into refsure site inputs, every element line in line format v1, each item stamped with its set's file name. |
 | `run.ts` | 1 | Builds each item through refsure's own site, approves it through the egress pipeline and asks Jev, once per salt. |
 | `orca-native.ts` | 2 | Serves a set's stored pages on 127.0.0.1, opens them in an isolated Orca profile, snapshots each through refsure's Orca adapter and builds the input its command would send; gold is mapped by role, name and ordinal. |
 | `fit.ts` | 1, 2 | Fits each site on every replay given for it, pooled, and with `--write` updates its Jev entry in `calibration.json`. |
@@ -31,8 +31,30 @@ REFSURE_OPENROUTER_KEY=… node dist/refsure.mjs setup     # type: send page tex
 ```
 
 Harness calls are not written to `egress.log` and do not count toward its caps; `run --max-usd` (default 1) stops a
-run instead. A rerun of `run` skips the (item, salt) pairs already answered, so a killed run resumes. A second
-replay of the same salts goes to its own `--out` file; the fit pools every file it is given for a site.
+run instead. It counts the cost already in `--out`, so a rerun spends against the same total, and a route that reports no cost
+makes `run` warn once that those calls are not counted. A second replay of the same salts goes to its own `--out`
+file; the fit pools every file it is given for a site.
+
+What a rerun of `run` does, exactly:
+
+- It skips an (item, salt) pair only when `--out` already holds an `ok` row for it, or a `refused:oversize` row (the
+  item's own body is over the byte bounds, and stays so). A pair with no such row, only failed calls (a timeout, a
+  transport error, an HTTP error), is asked again, so a killed run resumes where it stopped.
+- Any other refusal is about this machine's setup (no consent grant yet, an origin or spend rule), not about the
+  item. The run stops on the first one with exit 64, prints it on stderr, and writes **no row** for it, so a rerun
+  once `refsure setup` is done asks every pair that was never answered. Before, any `refused:*` row was skipped.
+- `--out` may be missing (a run's first start). `--in` may not: a missing input file is an error, so a mistyped path
+  never reads as an empty set, and an input with no items is an error too. The same holds for `parity --in`, and for
+  every file of `fit --runs`.
+- A line of a JSONL file that does not parse (a killed run's last write) is skipped with a note on stderr, for the
+  files read this way (`run --in` and `--out`, `parity --in`, `fit --runs`). A labelled set read by `convert-v1` and
+  `orca-native` is stricter: an unparsable line is an error naming `file:line`, never a skipped item.
+
+Every numeric flag is checked (`--concurrency`, `--deadline-ms`, `--attempts`, `--max-usd`, `--limit`, `--settle-ms`,
+and `fit`'s `--target`, `--min-points`, `--min-items`): a value that is not a number in range, or not a whole number
+where one is needed, exits 64 with the usage line, because a NaN cap would switch its guard off without a word.
+`--attempts` is the total tries per call, a retry made only after a retryable failure (a timeout, a transport error,
+an HTTP 429 or 5xx), with no wait after the last one.
 
 ```sh
 node $OUT/bin/parity.mjs --in parity-items.jsonl --out parity-runs.jsonl
@@ -76,6 +98,10 @@ candidate sits.
   is scored by its probability against `gold`. Each call is one point, and every call given for a site is pooled,
   over sets and replays: a row fitted on one replay sits just above that replay's highest wrong answer, so another
   replay moves it. The report line carries each replay's rows beside the pooled ones.
+- **The metas and the runs name the same sets.** For each site, the sets of its `--metas` files and the sets of its
+  answered `--runs` rows must be the same: a meta with no answered run, or runs from a set with no meta, is refused,
+  so a record never claims evidence it did not fit. Runs from before `convert-v1` stamped the set name carry no set;
+  they count as the site's one converted set.
 - **All labelled evidence for a key.** refsure reads one entry per site, wording, line format, model family and
   provider, so a site is `measured` only when the fit on every labelled call for that key ships a row. Converted
   (step 1) and Orca-native (step 2) runs of a site pool, and so do the calls on visual-only items: refsure cannot
@@ -163,7 +189,9 @@ node $OUT/bin/fit.mjs --runs <step 1 runs>,a/…,b/… --metas <step 1 metas>,ca
   opens unless `orca tab profile list` reports that profile with scope `isolated`, and refuses again unless `tab
   profile show` reports exactly that profile for the new tab; refsure's own adapter takes `tab show`, the snapshot and the body text. The input is built as
   the command builds it: `locate --intent [--within]` (`find`), `locate --recorded` (`locate`, the recorded line is
-  refsure's own line for the element on the recording page), one `dismiss` level, one `wait-for` poll, `state` in
+  refsure's own line for the element on the recording page; when that role and name show in several places, the
+  recorded descriptor's place kinds (dialog, navigation, main, form, region) pick the line if they leave exactly one,
+  else the item is dropped), one `dismiss` level, one `wait-for` poll, `state` in
   each PII mask mode the set asks for. In the live proof 32 of 32 inputs built this way (8 from each set in
   `sets/`) equalled the body `refsure <verb> --dry-run` printed for the same page.
 - **Gold.** A set names its gold as role, name and ordinal (and path when it has one); a frozen item's descriptor
@@ -171,6 +199,10 @@ node $OUT/bin/fit.mjs --runs <step 1 runs>,a/…,b/… --metas <step 1 metas>,ca
   twin group. A gold on the page but on no offered line scores only `none` as right; a gold not on the page drops
   the item. What code settles (an exact name, the recorded line, no overlay, the veto, a dialog) is written to
   `<out>.rows.jsonl`, scored, and never fitted; a code pick that still has twins stops at the twin rule.
+- **Dropped.** A stored page that navigated off the page server while it was read (a script or a refresh) is dropped as
+  `navigated_away` in `<out>.rows.jsonl`: the replay runs with no origin to check, so nothing another origin shows
+  may become an input. A set that holds items of more than one site is refused before any page is opened. The meta
+  file counts the items `--ids` and `--sources` left out (`droppedById`, `droppedBySource`).
 - **Fit.** Every set of a site pools, step 1's converted runs included (see Fit above). `--floor` raises each
   starting row to the step 1 entry, so step 2 never ships looser than step 1. The native reading goes into
   `provenance.native` (or the held record), with `textOnly`: the fit without the calls on items their set marks

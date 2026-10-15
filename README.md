@@ -69,8 +69,9 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
 | A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or outside an Orca terminal when an `agent-browser` binary is found | a session name; else `REFSURE_PAGE`, else the session `default` |
 
 - **Orca:** refsure looks for the binary in `$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then
-  `/Applications/Orca.app/Contents/Resources/bin/orca`. Page commands outside an Orca terminal answer
-  `not_in_orca_terminal` (exit 24); the worktree guard has no fallback.
+  `/Applications/Orca.app/Contents/Resources/bin/orca` (an executable file; a directory of that name does not
+  count). Page commands outside an Orca terminal answer `not_in_orca_terminal` (exit 24); the worktree guard has no
+  fallback.
 - **agent-browser:** refsure uses `agent-browser` on `PATH` first, then the copy Orca bundles
   (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). It drives only a session you opened
   yourself, and acts on that session's active tab:
@@ -166,10 +167,11 @@ Rules:
 - **No literal keys.** A string where a key source belongs, or any field other than `env` or `command`, is refused.
 - **No `--key` flag.** Command-line arguments leak into shell history and `ps`.
 - Keys live in memory for one request. Provider error bodies are classified, never printed. `REFSURE_*` variables
-  are stripped from the environment of the `orca` child process.
+  are stripped from the environment of the `orca` and `agent-browser` child processes.
 
 Other fields: `allowOrigins` and `denyOrigins` (both empty by default; `denyOrigins` wins; entries are exact origins
-or `https://*.example.com`), `piiMasks` (on by default), `requireIsolatedProfile` (off by default; when on, pages in
+or `https://*.example.com`; a trailing dot on a host is dropped on both sides, so `bank.example.` stays denied if
+`bank.example` is), `piiMasks` (on by default), `requireIsolatedProfile` (off by default; when on, pages in
 Orca's default profile are refused with `origin_denied`), and `limits`.
 
 ### Custom gateway
@@ -193,7 +195,7 @@ or headers** for a gateway, so spell them out:
 
 - A provider goes through the gateway only when both its path and its model are named (`jevPath` + `jevModel`,
   `openaiPath` + `openaiModel`). It then uses the gateway key.
-- HTTPS is required, except on `localhost`, `127.0.0.1` and `::1`.
+- HTTPS is required, except on a loopback host: `localhost` and `*.localhost`, `127.0.0.0/8` and `::1`.
 - A gateway does whatever its operator does with your data.
 
 ### Consent
@@ -206,8 +208,8 @@ refsure setup
 
 `setup` prints the disclosure from [What leaves your machine](#what-leaves-your-machine). Then, for each configured
 provider host, it asks you to type the exact phrase `send page text to <host>`, for example
-`send page text to openrouter.ai`. It reads from `/dev/tty`, never asks for a key, and writes the grants to
-`$XDG_CONFIG_HOME/refsure/consent.json` (mode `0600`). A consent file that group or others can write is ignored, as
+`send page text to openrouter.ai`. Any other answer revokes that host's grant. It reads from `/dev/tty`, never asks
+for a key, and writes the grants to `$XDG_CONFIG_HOME/refsure/consent.json` (mode `0600`). A consent file that group or others can write is ignored, as
 if you had granted nothing, because anyone who can write it could grant on your behalf.
 
 - A Decision runs only with a grant that matches its provider, its host and the current disclosure text. If the
@@ -218,8 +220,10 @@ if you had granted nothing, because anyone who can write it could grant on your 
 - `refsure privacy` prints the disclosure, its hash, your grants and which key source each provider uses (by name,
   never by value).
 - `refsure doctor` checks Node, the chosen browser backend (the `orca` or `agent-browser` binary, and its open
-  sessions), keys (by name), consent, the config file mode, model drift and the installed skill.
-  `refsure doctor --ping` sends one synthetic Decision per configured provider.
+  sessions), keys (by name), consent, the config file mode, model drift and the installed skill. On Orca, its
+  `orca_terminal` check reports the worktree (`ORCA_WORKTREE_ID`) on its own: a terminal outside Orca fails that
+  check, and `orca_running` still reports Orca itself. `refsure doctor --ping` sends one synthetic Decision per
+  configured provider.
 
 Consent is a disclosure, not a security control: an agent with a terminal could fake the typed step. The point is
 that you, the human, have read what is sent before anything is.
@@ -231,7 +235,8 @@ Per Decision, refsure sends only the following, after redaction:
 | Command | Sent |
 |---|---|
 | `state` | URL (≤300 chars), title, headings, dialogs, alerts, page text (≤1,500 chars) |
-| `locate`, `verify-target`, `pick-option` | ≤20 candidate lines of ≤600 chars, plus your intent (≤300 chars) |
+| `locate`, `verify-target` | ≤20 candidate lines of ≤600 chars, plus your intent (≤300 chars) |
+| `pick-option` | the field's line (≤600 chars), what you want (≤300 chars), and every option's label (≤90 chars each) |
 | `dismiss` | the overlay's text (≤1,000 chars), plus ≤12 control lines |
 | `outcome` | your intent, the acted element (≤300 chars), page text before and after (≤4,000 chars each) |
 | `wait-for` | your expectation (≤500 chars), plus page text (≤6,000 chars) |
@@ -239,7 +244,10 @@ Per Decision, refsure sends only the following, after redaction:
 A candidate line is `<role> "<name>" in="<section path>"`: no attributes, no values, no element ids.
 
 **Size caps.** State ≤24,000 bytes and questions ≤12,000 bytes. Anything larger is refused as `oversize` before any
-call is made.
+call is made. The one exception is a list of options that code built (`locate`, `dismiss`, `verify-target`,
+`pick-option`): lines past the questions bound are cut from the end of the list, where a ranked list keeps its
+weakest, so those verbs never refuse `oversize` for their own options. `pick-option` ranks its options first, so
+the likeliest stay, and `--open` is never followed by an `oversize` refusal once it has clicked the list open.
 
 **Never sent:** cookies, local or session storage, screenshots, API keys, values you typed or filled, textbox
 values, console and network bodies.
@@ -249,9 +257,15 @@ values, console and network bodies.
 - secret shapes (cloud, VCS, payment, messaging and AI provider keys, JWTs, private keys, `Bearer` tokens,
   credentials in URLs, `password=…`-style pairs) are replaced by `[redacted:<family>]`;
 - PII masks replace e-mail addresses, phone numbers, card numbers (Luhn-valid) and IBANs (checksum-valid) with
-  `[email]`, `[phone]`, `[card]` and `[iban]`. They are on by default (`piiMasks`);
+  `[email]`, `[phone]`, `[card]` and `[iban]`. They are on by default (`piiMasks`). Text that a cut shortens
+  (a name over 90 characters, a heading, a dialog, an alert, a bounded line, an overlay) is redacted and masked
+  *before* the cut, with the masks on even when `piiMasks` is off: the stub a cut leaves of an e-mail or a card no
+  longer matches its shape. `--within` row text is the exception: it stays as the page shows it, because only you
+  read it and type it back;
 - the page origin is checked against `allowOrigins` and `denyOrigins` (both empty by default);
-- the spend caps are checked: 30 Decisions per minute and $0.50 per day by default (`spend_limit`, exit 22).
+- the spend caps are checked: 30 Decisions per minute and $0.50 per day by default (`spend_limit`, exit 22). A call
+  whose provider reports no cost (OpenAI publishes none, and a gateway may report none) counts toward the daily cap at
+  $0.0001, unless it failed in transport or was refused with an HTTP error status.
 
 **The disclosure** (also shown by `refsure privacy` and `refsure setup`):
 
@@ -265,11 +279,15 @@ values, console and network bodies.
 - A custom gateway does whatever its operator does.
 
 **See it before it happens.** Add `--dry-run` to any command: it prints the exact redacted request body for each
-provider and sends nothing, and it never clicks.
+provider and sends nothing, and it never clicks. It saves nothing locally either: `mark` returns `mark: null`, and
+`forget` removes nothing and reports `would_remove`.
 
 **See it after it happened.** Every envelope lists `egress: [{host, bytes}]` (or `null` when nothing was sent). A
 local log at `$XDG_STATE_HOME/refsure/egress.log` (default `~/.local/state/refsure/egress.log`, mode `0600`) records
-the time, command, provider, host, byte count, digest, status and cost of every call. It never records content.
+the time, command, provider, host, byte count, digest, status and cost of every call. It never records content. A call
+is written down before it is sent and settled after, so two refsure processes share the same caps, and a call that
+was killed mid-flight still counts. A call that never left the machine (no key, interrupted first) counts nowhere and
+shows no `egress`.
 
 ## Commands
 
@@ -413,7 +431,7 @@ refsure wait-for --expect "<what should appear>" [--text <literal>] [--url <glob
 - `--url <value>`: A URL glob (* = any run) that settles it by code once the tab matches it
 - `--timeout <value>`: How long to wait, as 10s, 90s or 2m; from 1s to 10m (default: 30s)
 - `--interval <value>`: Time between polls, as 1s or 1500ms; from 1s to 5m (default: 2s)
-- `--max-decisions <value>`: Provider calls the wait may make; 0 waits by code only (default: 10)
+- `--max-decisions <value>`: Provider calls the wait may make; 0 waits by code only (with --text or --url) (default: 10)
 - `--agree`: Both providers must say present (needs both set up)
 
 **`mark`** (runs on a page; no Decision)
@@ -458,12 +476,13 @@ refsure verify-target --ref @eN --intent "<what the element is for>" [--risk r]
 **`pick-option`** (runs on a page; Decision sites: option-map)
 
 ```text
-refsure pick-option --field @eN --want "<the option you mean>" [--open]
+refsure pick-option --field @eN --want "<the option you mean>" [--open --expect-name "<the name you saw on the field>"]
 ```
 
 - `--field <value>`: The dropdown, @eN from your latest snapshot (required)
 - `--want <value>`: The option you mean, in any wording or language (required)
 - `--open`: Click the field first, for a dropdown that lists its options only once open
+- `--expect-name <value>`: With --open (required): the name you saw on the field; the live ref must still show it
 
 **`act-high-risk`** (no Decision; capabilities: highlight)
 
@@ -580,6 +599,10 @@ The one rule an agent needs: **0 = ok; 10-29 and 64-78 = nothing happened; anyth
 repeating.** When `acted` is `true` the exit is only 0 or 30, and any non-answer after a dispatch is `effect_unknown`
 with `effect: "dispatched"`. Every check that can refuse runs before the first dispatch.
 
+**Interrupts.** The first SIGINT or SIGTERM stops provider calls and the `setup` prompt, and the command still prints
+its envelope. An act or a dialog dismissal not yet dispatched is refused (`internal`, exit 20: nothing was
+dispatched); one already dispatched reads as `effect_unknown`. A second signal exits at once with 130 or 143.
+
 ### Causes
 
 Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause means: act on its exit class.
@@ -638,7 +661,7 @@ These rules live in code, not in the agent skill:
 1. A Decision only picks among code's options plus `none`, and answers are validated all-or-nothing.
 2. Deciding never acts. Acting rechecks the page first.
 3. Every non-answer before a dispatch is `acted: false` with a named cause. A refusal quotes the option the model
-   leaned to and the threshold it missed.
+   leaned to, by its text and never by its shuffled key, and the threshold it missed.
 4. Risk only rises: it is the highest of `--risk`, the lexicon match and the page raisers.
 5. Money, irreversible, auth and consent controls never go through `act`, `outcome`, `dismiss` or `pick-option`.
 6. No Decision says "failed" or "absent", and no Decision confirms money or an irreversible action.
@@ -660,7 +683,10 @@ These rules live in code, not in the agent skill:
 | consent | accept, agree, allow cookies, opt in | `act-high-risk` only |
 
 Names are matched against the union of all lexicons (English, Ukrainian, Russian, German, Spanish, French and
-Polish), whatever the page language.
+Polish), whatever the page language. Typographic apostrophes fold to a straight one (`J’accepte` reads as
+`j'accepte`), and an `<input>` button with no text is named by its `value` (an image button by its `alt`), as the
+snapshot names it. A name only ever lowers a control's class when it is, as a whole, a close, cancel or reject word
+(`Close`, `Close dialog`, `No, cancel`): `Close project` and `Yes, cancel` keep their class.
 
 **Tickets.** `locate`, `dismiss` (when it proposes rather than clicks) and `pick-option` issue a single-use ticket
 that lives 120 s and stores the element's fingerprint (role, name, section path, ordinal among twins), never its ref
@@ -668,14 +694,21 @@ number. `act` claims it, checks the URL, takes a fresh snapshot, finds the same 
 acts at once. If anything moved, nothing is clicked (`stale`). Two agents racing one ticket: exactly one wins, the
 other gets `ticket_used`.
 
-**Your own refs.** `outcome`, `act-high-risk --ref` and `pick-option --open` take no snapshot, so your refs survive.
-Instead, `--expect-name` must match the element's live text (or its `aria-label`, `placeholder` or `title`), and page
-raisers (a password field, card fields) lift the risk class.
+**Your own refs.** `outcome` and `act-high-risk --ref` take no snapshot, so your refs survive. `pick-option --open`
+clicks your ref with no snapshot first, then takes one to read the options it lists (`earlier_refs_void: true`). All
+three take `--expect-name`, and for `pick-option` it is required with `--open`: it must match the element's live text
+(or its `aria-label`, `placeholder`, `title`, or an `<input>` button's `value`), and page raisers (a password field,
+card fields) lift the risk class. Money, irreversible, auth and consent still refuse before the click, `--open`
+included.
 
-**Dismiss.** The overlay is found by code (a `dialog` or `alertdialog`, or a cookie region with at least two buttons;
-never a page `banner`). A veto list (accept, agree, allow, subscribe, buy, trial, enable, upgrade, manage, settings,
-preferences, customize, in every lexicon) is never overridable. After a click, the overlay must be gone, else the
-result is `effect_unknown`.
+**Dismiss.** The overlay is found by code (the last `dialog` or `alertdialog` on the page, or else a cookie region
+with at least two buttons; never a page `banner`). A veto list (accept, agree, allow, subscribe, buy, trial, enable,
+upgrade, manage, settings, preferences, customize, in every lexicon) is never overridable. A negation right before an
+accept term (`without`, `sans`, `ohne`, `sin`, `bez`, `без`) turns it into a reject, so `Continuer sans accepter`
+(continue without accepting) can be clicked; it never turns a money, irreversible or auth term. Before the click,
+`dismiss` finds its pick again on a fresh snapshot by fingerprint, on the same URL and tab, and reads the veto and the
+risk again on the fresh element: if anything changed, nothing is clicked. After a click, the overlay must be gone,
+else the result is `effect_unknown`.
 
 **Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in shuffled option lines,
 and the envelope lists it under `untrusted`.
@@ -751,7 +784,8 @@ the honest sample size.
 
 OpenAI (`gpt-6-luna`), which may answer `state` and `wait-for`, was not measured in this pass: its answers run at
 the declared maturity on the starting rows. A new model family gets no authority at all: its answers are reported as
-`proposed` until a release re-measures it. A new dated snapshot within the same family keeps its maturity, adds
+`proposed` until a release re-measures it. A complete answer that names no model counts as a new family too, reported
+as `unnamed`. A new dated snapshot within the same family keeps its maturity, adds
 `model_changed` to the envelope and raises a `doctor` warning.
 
 **What blocks 1.0.** refsure becomes 1.0 when every site passes an Orca-native replay. Per site:
@@ -813,8 +847,9 @@ under `~/.claude/skills/refsure/`, `~/.codex/skills/refsure/` and `~/.agents/ski
 - a copy with the same major passes;
 - a copy with another major, none in its frontmatter, or a value that is not a whole number fails the check
   (`result.failed` lists `skill_stale`). The detail names each stale copy and why, and ends with one command that
-  refreshes them all (`refsure skill print > <path>`, or `refsure skill print | tee <path> <path> > /dev/null`). A
-  FIFO or folder at a skill path is reported, never read; remove it before the refresh;
+  refreshes every stale copy a write can reach (`refsure skill print > <path>`, or
+  `refsure skill print | tee <path> <path> > /dev/null`). A FIFO or folder at a skill path is reported, never read, and
+  left out of that command (a redirect into a FIFO blocks, into a folder fails); remove it, then refresh;
 - no copy at all passes: the skill is optional.
 
 Minor details come from `refsure commands --json` at run time, so a skill installed from the repository and a pinned

@@ -28,7 +28,10 @@ button inside a cookie banner, or build twin controls to confuse a click.
 - Risk only rises: the union of all lexicons, URL paths and page raisers (password and card fields) can raise a
   class, never lower it.
 - Money, irreversible, auth and consent controls never go through the ordinary verbs.
-- A veto list stops `dismiss` from clicking accept, subscribe, enable, manage or settings controls.
+- A veto list stops `dismiss` from clicking accept, subscribe, enable, manage or settings controls. A negation right
+  before an accept term ("continue without accepting") reads as a reject, never for a money, irreversible or auth
+  term, and `dismiss` re-reads the veto and the risk on a fresh snapshot right before its click.
+- A close, cancel or reject word calms a control only when it is the whole name ("Close", never "Close project").
 
 A hostile page can still defeat a lexicon. That is a known limit, not a vulnerability by itself.
 
@@ -54,7 +57,9 @@ A way to make refsure act on an option code did not offer, or to act past a refu
   group or others may write (anyone who could write it could grant on the owner's behalf), and refuses a local-state
   entry with any group or other bit, or one another user owns. A FIFO or other non-file at any of these paths is
   refused, never waited on.
-- Secret shapes and PII in page text are redacted before anything is sent.
+- Secret shapes and PII in page text are redacted before anything is sent, and before any cut that could leave a
+  piece of one behind (names, headings, dialogs, alerts, bounded lines, the page text in an envelope). A name over 90
+  characters is PII-masked even with `piiMasks` off.
 
 Any path by which a key value reaches stdout, stderr, the envelope, `egress.log`, local state or a provider request
 body is a vulnerability.

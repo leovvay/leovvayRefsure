@@ -42,7 +42,7 @@ refsure commands on it.
 | You hold your own ref and the action writes anything | `refsure outcome --intent "<what should happen>" --expect-name "<name you saw>" -- click --element @eN` |
 | You will act in several steps yourself | `refsure mark` first, then `refsure outcome --intent "…" --mark <M>` at the end |
 | Content that loads later | `refsure wait-for --expect "<what should appear>" [--text "<literal>"]` |
-| A dropdown value by meaning ("Ukraine" vs "Україна") | `refsure pick-option --field @eN --want "<meaning>"`, then `act --ticket` |
+| A dropdown value by meaning ("Ukraine" vs "Україна") | `refsure pick-option --field @eN --want "<meaning>"`, then `act --ticket`. A custom dropdown that lists its options only once open: add `--open --expect-name "<name you saw on the field>"` (required with `--open`) |
 | Something broke and you need the console or failed requests | `refsure mark` before, `refsure triage --since <M>` after |
 | Money, irreversible, auth or consent | only `refsure act-high-risk`, and only when the human asked for exactly that action in this session |
 
@@ -51,9 +51,10 @@ More rules:
   `type`, `keypress` and `inserttext`.
 - `locate` never acts. `act` uses a single-use ticket and rechecks the page first.
 - `dismiss` does click: only a reject or close control, never one the veto names (accept, subscribe, enable…). When
-  it is less sure it proposes a ticket for `act` instead, and `--propose` never clicks. After its click the overlay
-  must be gone, else exit 30.
+  it is less sure it proposes a ticket for `act` instead, and `--propose` never clicks. A negated accept ("continue
+  without accepting") counts as a reject. After its click the overlay must be gone, else exit 30.
 - `wait-for` answering `not_seen` does not mean absent. It means not seen within the timeout.
+- `--dry-run` also leaves local state alone: `mark` returns `mark: null` and `forget` only reports `would_remove`.
 - `snap` prints compact candidate lines when you must look yourself. `guard --ref @eN` tells you an element's risk
   class before you touch it.
 - Pass `--risk` honestly: `read` for links, tabs and close buttons; `write` for fields, toggles and plain submits.
@@ -110,7 +111,7 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 | `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs; a retry will not help. Tell the human |
 | `spend_limit` (22) | Stop asking Decisions. Code-only verbs (`snap`, `guard`, `mark`, `triage`) still work |
 | `low_confidence`, `none_chosen` (abstained, 10) | Make `--intent` concrete (role, visible text, section), or narrow with `--within` |
-| `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine |
+| `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine. If the detail says the options read the same as sent, the model could not tell them apart: with `locate` narrow with `--within`; with `pick-option` ask the human |
 | `proposed_only` (abstained, 10) | Not trusted enough to act on alone. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
 | `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
@@ -129,6 +130,8 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 
 - refsure finds the tab through `ORCA_WORKTREE_ID`, which Orca sets in its terminals. The page is `--page`, then
   `REFSURE_PAGE`, then the worktree's current tab.
+- `refsure doctor` reports the worktree in its own `orca_terminal` check; a failed one means this terminal is outside
+  Orca, whatever `orca_running` says.
 - Pass `page.id` as `--page` to your own `orca` calls too: `orca snapshot --page <id>`,
   `orca click --page <id> --element @eN`.
 - After `earlier_refs_void: true`, run `orca snapshot --page <id>` again before you use your own refs.

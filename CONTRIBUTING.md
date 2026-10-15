@@ -14,9 +14,11 @@ This guide has three recipes (add a Decision site, add a verb, add a language) a
   for a Decision site.
 - **One contract per file.** Every interface or type contract sits in its own file. Files target ≤300 lines.
 - **Ownership.** These are enforced by review:
-  - only `src/browser/orca/` and `src/browser/agent-browser/` spawn browser processes;
+  - only `src/browser/` spawns browser processes: `run-json.ts`, the child-process side both backends share, and
+    `agent-browser/ab-runner.ts` for the `--version` and `--help` reads. The one other spawn is a key `command`, in
+    `src/config/keys/command-key.ts`;
   - only `src/providers/transport.ts` calls `fetch`;
-  - only `src/config/keys/` reads keys;
+  - keys come only from the sources in `src/config/keys/`, and only `src/providers/read-key.ts` reads one;
   - only `src/main.ts` calls `process.exit`;
   - only `src/egress/pipeline.ts` constructs an `ApprovedRequest`, the only thing a provider accepts.
 - **Never send textbox values.** The snapshot carries them after `: ` on a textbox line. They never enter a line,
@@ -33,12 +35,15 @@ wording and its thresholds are one unit and several verbs reuse the same site.
 2. **Add the id.** Extend `SiteId` in `src/questions/site-id.ts`.
 3. **Implement `DecisionSite<In, Ctx, Out>`** in `src/questions/sites/<site>.ts`:
    - `id`, `kind` (`'choice'` or `'noul'`) and `question`, the key the answer is read back by;
-   - `wording: { version: 1, hash }`, computed at module load with
-     `wordingHash(kind, instructions, labels)` from `src/questions/wording-hash.ts`. The hash covers the kind, the
-     instructions and the fixed labels in key order. Candidate lines and page text are never hashed;
+   - `wording: { version: 1, hash }`, from `siteWording(kind, instructions, labels)` in
+     `src/questions/wording-hash.ts`, which hashes with `wordingHash` on first read (an import cycle through `egress`
+     must not reach the digest early). The hash covers the kind, the instructions and the fixed labels in key order.
+     Candidate lines and page text are never hashed;
    - `build(input)`, pure: returns `{ request, context }`. Bound every string with the caps in
      `src/questions/bounds.ts`. A request over 24,000 bytes of state or 12,000 bytes of questions is refused as
-     `oversize`;
+     `oversize`. A choice over caller lines plus `none` (`locate`, `find`, `dismiss`, `option-map`) is built by
+     `candidateSite` in `src/questions/sites/candidate-site.ts` instead: you give it the lines and it cuts them from the
+     end until the questions fit, so such a site never refuses `oversize` for its own options;
    - `read(answer, context, threshold)`, pure: returns a `Verdict`. A choice of `none` is `none_chosen`; below the
      threshold is `low_confidence`, with `leaned`, `confidence` and `threshold` filled in. A Noul site answers only
      on a clear yes. "No" and "unsure" are both abstains, because no verdict may say "failed" or "absent".
@@ -88,8 +93,8 @@ A verb is a `CommandSpec` in its own feature folder.
 3. **Declare `needs` honestly.** The registry acts on it:
    - `page: 'required'` makes the registry resolve the page (`--page`, then `REFSURE_PAGE`, then the worktree's
      current tab); `'none'` skips it;
-   - `capabilities`: browser features the verb needs (`highlight`, `dialog`, `console`, `network`, `count`, `attr`).
-     A backend without them answers `unsupported_by_backend` (21) before `run` is called;
+   - `capabilities`: browser features the verb needs (`highlight`, `dialog`, `console`, `network`, `count`, `attr`,
+     `selector-text`). A backend without them answers `unsupported_by_backend` (21) before `run` is called;
    - `sites`: every Decision site the verb may ask;
    - `acts`: `'never'`, `'own-ref'` (the agent's ref, after a name check), `'ticket'` (a claimed ticket and a
      fingerprint recheck) or `'high-risk'`. The registry asserts that an `acts: 'never'` verb never returns
@@ -107,9 +112,15 @@ Rules for `run`:
   dispatch. Once `acted` is `true`, the only statuses are `ok` and `effect_unknown`; anything that goes wrong after a
   dispatch is `effect_unknown` with `effect: 'dispatched'`.
 - Never forward `type`, `keypress` or `inserttext`: keystrokes go to whatever has focus, which can be a terminal.
-- Money, irreversible, auth and consent go only through `act-high-risk`. Use `refusesHighRisk` from `src/risk/`.
+- Money, irreversible, auth and consent go only through `act-high-risk`. Ask `refusesHighRisk(risk.class)` from
+  `src/risk/` before the first dispatch, as `act`, `outcome`, `dismiss` and `pick-option --open` do.
+- Cut page text only after it is cleaned: `cutName` (names, headings, dialogs, alerts) and `boundedText` redact and
+  mask a text they cut, with the masks on whatever the config says, because a cut secret or e-mail no longer matches
+  its shape. Use `cleanEgressText` before `boundText` for any other cut. `cutShown` skips the cleaning and is only for
+  text the agent itself reads and types back (`--within` rows), which never leaves the machine.
 - Put page text in `result` only under paths you add to `ctx.trace.untrusted`.
-- Honour `ctx.dryRun`: nothing is sent and nothing is clicked.
+- Honour `ctx.dryRun`: nothing is sent, nothing is clicked and nothing is saved (`mark` saves no mark and returns
+  `mark: null`; `forget` clears nothing and returns `would_remove`).
 - `result` is a plain JSON object. Keep the envelope about 1 KB in the common case.
 - Every verb prints exactly one envelope. The one exception is a verb whose product is a file (`skill print`): it
   returns the file as `text` on an `ok` outcome, and `main.ts` prints that verbatim instead of the envelope.
@@ -128,7 +139,7 @@ skill's troubleshooting table.
 Risk classes and the dismiss veto come from lexicons. Every element name is matched against the union of all
 lexicons, whatever the page language.
 
-1. **Create `src/risk/lexicons/<lang>.ts`** exporting a `LanguageLexicon` (a `Lexicon` plus `cancelVerbs`):
+1. **Create `src/risk/lexicons/<lang>.ts`** exporting a `Lexicon`:
 
    | Field | Holds |
    |---|---|
@@ -144,9 +155,14 @@ lexicons, whatever the page language.
    | `confirmCue` | dialog wording that marks a confirm dialog: "are you sure", "confirm", "this cannot be undone" |
    | `cancelVerbs` | the part of `cancelWords` that means "cancel" (never a plain "no"): only these turn irreversible next to a `cancelContext` word |
 
-2. Aim for at least eight terms per risk class. Write terms in lower case: they are matched against the folded name
-   (NFKC, lower-cased) on Unicode word boundaries, and multi-word phrases are fine. Include common inflections, since
-   matching is by whole word.
+2. Aim for at least eight terms per risk class. Write terms in lower case, with a straight apostrophe (`j'accepte`):
+   they are matched against the folded name (NFKC, typographic apostrophes straightened, lower-cased) on Unicode word
+   boundaries, and multi-word phrases are fine. Include common inflections, since matching is by whole word.
+   `dismissClose` and `cancelWords` are read differently: a control reads calm only when its whole name
+   is one of these terms (with filler like "this" or "dialog" beside it), so list the bare words ("close", "no
+   thanks"), never a phrase that names an object ("close project" must keep its class). If the language negates an
+   accept with a word before the term (`without`, `sans`, `ohne`, `sin`, `bez`, `без`), add it to `NEGATION` in
+   `src/features/dismiss/dismiss-reading.ts`.
 3. **Register it** in the `LEXICONS` array in `src/risk/lexicons/index.ts`, and name the language in the README's risk
    section.
 4. **Check collisions.** A term that is an everyday word in another language raises the risk class on every page.
