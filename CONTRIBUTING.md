@@ -48,9 +48,14 @@ wording and its thresholds are one unit and several verbs reuse the same site.
      `RiskClass` for risk-scaled sites. Start no looser than the existing rows: choice 0.8, Noul 0.85 / 0.15;
    - `combos`: `'agree'` and/or `'fallback'`, only where two providers make the site safer. `fallback` adds wrong acts
      where an answer leads to a click (`locate`, `dismiss`, `outcome`), so it is never allowed there;
+   - `solo` (optional): the providers that may answer alone. Without it, every provider with a row may; `dismiss`
+     lists only `jev`, so OpenAI answers there only through `agree`;
    - `maturity: 'experimental'`. A new wording always starts experimental. `inherited` is reserved for wordings
      measured earlier, and `measured` is never declared: it only comes from a matching `calibration.json` entry.
-5. **Register it** in `src/questions/sites/index.ts`, and list it in the `needs.sites` of every command that asks it.
+   - If the caller's input changes the wording (as `state --state` does), also implement `wordingFor(input)` and
+     `maturityFor(input)`, so the custom wording gets its own hash and reads as `experimental`.
+5. **Register it** in the `SITES` map in `src/questions/sites/registry.ts` and export it from
+   `src/questions/sites/index.ts`. List it in the `needs.sites` of every command that asks it.
 6. **Disclose it.** Add a row to the "What leaves your machine" table in `README.md`, and add any new cause to
    `src/output/causes.ts`.
 7. **Calibrate it.** Build a labelled set written for refsure (synthetic pages, or pages you may publish). Run it
@@ -67,14 +72,17 @@ to its declared maturity until it is measured again. Do not tidy a measured word
 A verb is a `CommandSpec` in its own feature folder.
 
 1. **Create the folder** `src/features/<verb>/` with:
-   - `<verb>.contract.ts`: the `Args` and `Result` types, one contract per file;
+   - `<verb>.args.ts`: the parsed `Args` type;
+   - `<verb>.contract.ts`: the `Result` type (one contract per file);
    - `<verb>.command.ts`: the `CommandSpec<Args, Result>`;
    - `index.ts`: exports the spec, and any helper another feature may use;
    - any rule only this verb needs (as `dismiss/` holds `overlay-detect.ts` and `dismiss-veto.ts`).
 2. **Fill in the `CommandSpec`:**
    - `name`, `summary`, `since` (the release that adds it) and `stability: 'experimental'` for a new verb;
    - `options`: one `OptionSpec` per flag. They feed `util.parseArgs`, `--help` and `commands --json`. `--page`,
-     `--dry-run` and `--help` are global; do not redeclare them;
+     `--dry-run`, `--help` and `--json` are global; do not redeclare them;
+   - `forms`: the invocation shapes, without `refsure <verb>`, e.g. `'--ticket T [--action a] [--value v]'`. They
+     show in `--help` and `commands --json`, so an agent sees which flags go together;
    - `parse(raw)`: returns `Args`, or a `UsageError` (exit 64) for a missing or malformed flag;
    - `run(args, ctx)`: returns a `CommandOutcome`.
 3. **Declare `needs` honestly.** The registry acts on it:
@@ -87,7 +95,7 @@ A verb is a `CommandSpec` in its own feature folder.
      fingerprint recheck) or `'high-risk'`. The registry asserts that an `acts: 'never'` verb never returns
      `acted: true`.
 4. **Register it** in the static `FEATURES` array in `src/features/index.ts`. There is no directory scan; the array
-   order is the `--help` order.
+   order is the `--help` and `commands --json` order.
 
 Rules for `run`:
 
@@ -102,19 +110,23 @@ Rules for `run`:
 - Money, irreversible, auth and consent go only through `act-high-risk`. Use `actionPolicy` from `src/risk/`.
 - Put page text in `result` only under paths you add to `ctx.trace.untrusted`.
 - Honour `ctx.dryRun`: nothing is sent and nothing is clicked.
-- `result` is a plain JSON object. Keep the envelope under 1 KB in the common case.
+- `result` is a plain JSON object. Keep the envelope about 1 KB in the common case.
+- Every verb prints exactly one envelope. The one exception is a verb whose product is a file (`skill print`): it
+  returns the file as `text` on an `ok` outcome, and `main.ts` prints that verbatim instead of the envelope.
 - A new `why.cause` gets a row in `src/output/causes.ts`. A new cause or `next.do` value ships only in a minor
   release, and never moves between exit classes.
 
-Then add the verb to the Commands table in `README.md`, and to `skills/refsure/SKILL.md` if agents should reach for
-it unprompted.
+Then update the "Commands" section of `README.md` (the tables and "Options by command") and its causes table from the
+built binary's `refsure commands --json`, `refsure causes --json` and `refsure <verb> --help`, never from memory. Add
+the verb to `skills/refsure/SKILL.md` if agents should reach for it unprompted, and give a new cause a row in the
+skill's troubleshooting table.
 
 ## Recipe 3: add a language
 
 Risk classes and the dismiss veto come from lexicons. Every element name is matched against the union of all
 lexicons, whatever the page language.
 
-1. **Create `src/risk/lexicons/<lang>.ts`** exporting a `Lexicon`:
+1. **Create `src/risk/lexicons/<lang>.ts`** exporting a `LanguageLexicon` (a `Lexicon` plus `cancelVerbs`):
 
    | Field | Holds |
    |---|---|
@@ -128,11 +140,13 @@ lexicons, whatever the page language.
    | `cancelContext` | words that make "cancel" irreversible: subscription, order, account, booking |
    | `cancelWords` | the plain cancel / no words of a confirm dialog, which never become irreversible |
    | `confirmCue` | dialog wording that marks a confirm dialog: "are you sure", "confirm", "this cannot be undone" |
+   | `cancelVerbs` | the part of `cancelWords` that means "cancel" (never a plain "no"): only these turn irreversible next to a `cancelContext` word |
 
 2. Aim for at least eight terms per risk class. Write terms in lower case: they are matched against the folded name
    (NFKC, lower-cased) on Unicode word boundaries, and multi-word phrases are fine. Include common inflections, since
    matching is by whole word.
-3. **Register it** in `src/risk/lexicons/index.ts`.
+3. **Register it** in the `LEXICONS` array in `src/risk/lexicons/index.ts`, and name the language in the README's risk
+   section.
 4. **Check collisions.** A term that is an everyday word in another language raises the risk class on every page.
    Risk only rises, so a too-broad risk term costs refusals, not wrong clicks. A missing veto term can cost a wrong
    click, so err towards a longer `dismissVeto`.

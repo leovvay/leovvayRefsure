@@ -8,14 +8,16 @@ refsure-skill: 1
 
 `refsure` is a CLI that answers browser judgment questions for you. Code builds the options from the page, a
 Decision API picks one, and code rechecks the page before anything is clicked. Each call prints one JSON envelope
-under 1 KB on stdout. Prefer it over reading a whole snapshot whenever the question is "which", "is it", or "did it".
+of about 1 KB on stdout. Prefer it over reading a whole snapshot whenever the question is "which", "is it", or
+"did it".
 
 Version-specific detail (every verb, option and cause) comes from `refsure commands --json` and
 `refsure causes --json`. `refsure skill print` prints the copy of this skill that matches the installed binary.
 
 ## 1. Setup
 
-- Run `refsure doctor` once at the start of a browser task and read `result.checks`.
+- Run `refsure doctor` once at the start of a browser task and read `result.checks`. If `result.failed` lists
+  `skill_stale`, tell the human this skill is out of date for their refsure (`refsure skill print` gives the match).
 - On `not_set_up` (exit 23), ask the human to run `refsure setup` in their own terminal. Never run `setup` yourself,
   never type its consent phrase, and never ask for, read, print or paste an API key.
 - refsure must be installed globally (`npm i -g @leovvay/refsure`). Do not call it through `npx`.
@@ -86,33 +88,38 @@ both act on the same tab.
 
 ## 8. Cost
 
-- One envelope is under 1 KB, against a 50-540 KB accessibility tree.
+- One envelope is about 1 KB (up to ~1.3 KB when two providers answer), against a 50-540 KB accessibility tree.
 - A Decision costs about $0.00002-0.0001 and takes 0.7-1.2 s. Code-settled answers cost nothing.
 - The human's caps (30 Decisions per minute, $0.50 per day by default) answer `spend_limit` (exit 22).
 
 ## 9. Troubleshooting
 
-The main causes are below. The full, version-matched table comes from `refsure causes --json`.
+Every cause from `refsure causes --json`, with its status and exit. Run it for the installed version.
 
 | `why.cause` (status, exit) | What to do |
 |---|---|
-| `not_set_up` (23) | Ask the human to run `refsure setup` or configure a key. Never do it yourself |
-| `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid` (not_set_up, 23) | The human's config file needs fixing. Tell them the cause |
+| `not_set_up`, `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid` (not_set_up, 23) | Tell the human the cause: they run `refsure setup` or fix their config file. Never do it yourself |
 | `not_in_orca_terminal` (24) | You are outside an Orca terminal. Tell the human; do not work around it |
 | `orca_not_running`, `no_tab` (unavailable, 20) | Ask the human to start Orca or open a tab, or pass `--page <id>` |
+| `browser_timeout`, `browser_error`, `internal` (unavailable, 20) | Nothing was dispatched. Re-observe (`state`), then retry once |
 | `provider_timeout`, `provider_error` (unavailable, 20) | Retry once a little later. If it persists, tell the human |
+| `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs. Tell the human |
 | `spend_limit` (22) | Stop asking Decisions. Code-only verbs (`snap`, `guard`, `mark`, `triage`) still work |
 | `low_confidence`, `none_chosen` (abstained, 10) | Make `--intent` concrete (role, visible text, section), or narrow with `--within` |
 | `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine |
-| `proposed_only` (abstained, 10) | The pick was not trusted enough to act on by itself. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
+| `proposed_only` (abstained, 10) | Not trusted enough to act on alone. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
+| `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human |
 | `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it |
-| `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not configured. Tell the human |
+| `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |
 | `origin_denied`, `oversize` (refused, 11) | The human's config blocks this site, or the input is too large. Do not work around it |
-| `expect_name_mismatch` (refused, 11) | The ref is not the element you named; nothing was done. Snapshot again |
-| `page_changed`, `ref_gone`, `ticket_expired`, `ticket_used` (stale, 12) | `locate` again for a fresh ticket. Never reuse a ticket |
-| (effect_unknown, 30) | The action was sent but not confirmed. Re-observe before repeating anything |
+| `ambiguous_option` (refused, 11) | Two options read the same; refsure will not pick. Ask the human which one |
+| `expect_name_mismatch` (stale, 12) | The ref shows another name than you gave; nothing was done. Snapshot again |
+| `page_changed`, `ref_gone`, `ticket_expired`, `ticket_used` (stale, 12) | `locate` again for a fresh ticket, or snapshot again. Never reuse a ticket |
+| `effect_unknown` (30) | The action was sent but not confirmed. Re-observe before repeating anything |
+| `dry_run` (ok, 0) | Nothing was sent or done: that was `--dry-run` |
+| `usage` (64) | The command line was wrong; nothing was done. Read `refsure <command> --help` |
 
 ## In Orca
 

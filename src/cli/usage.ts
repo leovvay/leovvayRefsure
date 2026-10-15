@@ -46,7 +46,7 @@ export function usageText(features: readonly Described[]): string {
     'Global options:',
     ...optionLines(GLOBAL_OPTIONS),
     '',
-    'Every command prints one JSON envelope on stdout.',
+    'Every command prints one JSON envelope on stdout; `skill print` prints the skill file itself.',
     EXIT_LINE,
     'Run `refsure <command> --help` for its options.',
   ].join('\n');

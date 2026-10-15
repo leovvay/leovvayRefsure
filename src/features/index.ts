@@ -13,6 +13,7 @@ import { outcomeCommand } from './outcome';
 import { pickOptionCommand } from './pick-option';
 import { privacyCommand } from './privacy';
 import { setupCommand } from './setup';
+import { skillCommand } from './skill';
 import { snapCommand } from './snap';
 import { stateCommand } from './state';
 import { triageCommand } from './triage';
@@ -40,4 +41,5 @@ export const FEATURES: readonly AnyCommandSpec[] = [
   forgetCommand,
   commandsCommand(() => FEATURES),
   causesCommand,
+  skillCommand,
 ];

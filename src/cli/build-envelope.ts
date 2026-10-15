@@ -56,5 +56,7 @@ export function finish(
   trace: RunTrace,
 ): CommandResult {
   const envelope = buildEnvelope(command, outcome, page, trace);
-  return { envelope, exit: exitFor(envelope.status) };
+  const result: CommandResult = { envelope, exit: exitFor(envelope.status) };
+  if (envelope.status === 'ok' && outcome.text !== undefined) result.text = outcome.text;
+  return result;
 }

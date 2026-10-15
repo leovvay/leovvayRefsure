@@ -43,6 +43,7 @@ export const triageCommand: CommandSpec<TriageArgs, TriageResult> = {
   options: {
     since: { type: 'string', summary: 'Only lines after this mark (from `refsure mark`); console lines carry no time' },
   },
+  forms: ['[--since M]'],
   needs: { page: 'required', capabilities: ['console', 'network'], sites: [], acts: 'never' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `triage takes no positional arguments, got ${raw.positionals.length}` };

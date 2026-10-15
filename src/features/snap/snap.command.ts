@@ -23,6 +23,7 @@ export const snapCommand: CommandSpec<SnapArgs, SnapResult> = {
     interactive: { type: 'boolean', summary: 'Only interactive elements with a ref', default: true },
     all: { type: 'boolean', summary: 'Every named node, not only interactive ones (overrides --interactive)' },
   },
+  forms: ['[--max-chars 4000] [--scope dialog|main|form] [--all]'],
   needs: { page: 'required', capabilities: [], sites: [], acts: 'never' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `snap takes no positional arguments, got ${raw.positionals.length}` };

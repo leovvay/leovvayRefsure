@@ -25,6 +25,10 @@ export const waitForCommand: CommandSpec<WaitForArgs, WaitForResult> = {
     },
     agree: { type: 'boolean', summary: 'Both providers must say present (needs both set up)' },
   },
+  forms: [
+    '--expect "<what should appear>" [--text <literal>] [--url <glob>] [--timeout 30s] [--interval 2s] '
+      + '[--max-decisions 10] [--agree]',
+  ],
   needs: { page: 'required', capabilities: [], sites: ['presence'], acts: 'never' },
   parse: parseWaitFor,
   async run(args, ctx) {

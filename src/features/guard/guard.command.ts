@@ -47,7 +47,7 @@ export const guardCommand: CommandSpec<GuardArgs, GuardResult> = {
   forms: ['--ref @eN', '--ticket T'],
   options: {
     ref: { type: 'string', summary: 'The element, as @eN from the latest snapshot' },
-    ticket: { type: 'string', summary: 'A ticket from locate or dismiss: rechecked on its page, not spent' },
+    ticket: { type: 'string', summary: 'A ticket from locate, dismiss or pick-option: rechecked on its page, not spent' },
   },
   needs: { page: 'none', capabilities: [], sites: [], acts: 'never' },
   parse(raw) {

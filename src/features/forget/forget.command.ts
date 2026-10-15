@@ -15,6 +15,7 @@ export const forgetCommand: CommandSpec<ForgetArgs, ForgetResult> = {
   options: {
     all: { type: 'boolean', summary: 'Clear every page\'s marks and tickets' },
   },
+  forms: ['[--all]'],
   needs: { page: 'none', capabilities: [], sites: [], acts: 'never' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `forget takes no positional arguments, got ${raw.positionals.length}` };

@@ -39,7 +39,8 @@ function abortOnSignals(controller: AbortController): void {
 }
 
 function emit(result: CommandResult): number {
-  process.stdout.write(`${renderEnvelope(result.envelope)}\n`);
+  // A verb whose product is a file (`skill print`) prints it byte for byte: no envelope, no added newline.
+  process.stdout.write(result.text ?? `${renderEnvelope(result.envelope)}\n`);
   return result.exit;
 }
 

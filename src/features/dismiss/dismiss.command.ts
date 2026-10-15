@@ -43,6 +43,7 @@ export const dismissCommand: CommandSpec<DismissArgs, DismissResult> = {
     agree: { type: 'boolean', summary: 'Both providers must pick the same control (needs both set up)' },
     depth: { type: 'string', summary: `Nested overlays to dismiss in turn, 1 to ${DEPTH_MAX}`, default: '1' },
   },
+  forms: ['[--propose] [--agree] [--depth 1..3]'],
   needs: { page: 'required', capabilities: [], sites: ['dismiss'], acts: 'ticket' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `dismiss takes no positional arguments, got ${raw.positionals.length}` };

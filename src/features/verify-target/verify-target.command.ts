@@ -80,6 +80,7 @@ export const verifyTargetCommand: CommandSpec<VerifyTargetArgs, VerifyTargetResu
     intent: { type: 'string', summary: 'What the element is for, in a few words (required)' },
     risk: { type: 'string', summary: 'The threshold row: read, write, consent, auth, money or irreversible; only raised' },
   },
+  forms: ['--ref @eN --intent "<what the element is for>" [--risk r]'],
   needs: { page: 'required', capabilities: [], sites: ['find'], acts: 'never' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `verify-target takes no positional arguments, got ${raw.positionals.length}` };

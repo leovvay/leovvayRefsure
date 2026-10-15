@@ -12,15 +12,18 @@ import { runAct } from './run-act';
  */
 export const actCommand: CommandSpec<ActArgs, ActCommandResult> = {
   name: 'act',
-  summary: 'Act on a ticket from locate or dismiss: claim, recheck, guard, then one typed act',
+  summary: 'Act on a ticket from locate, dismiss --propose or pick-option: claim, recheck, guard, then one typed act',
   since: '0.1.0',
   stability: 'stable',
   options: {
-    ticket: { type: 'string', summary: 'The ticket id (t_…) from locate or dismiss (required)' },
+    ticket: { type: 'string', summary: 'The ticket id (t_…) from locate, dismiss or pick-option (required)' },
     action: { type: 'string', summary: `${ACT_ACTIONS.join(', ')}; default: the ticket's own, else click` },
     value: { type: 'string', summary: 'The text to fill or the option to select (fill and select only); never logged' },
     verify: { type: 'string', summary: 'What should happen; after the act the outcome Decision must say landed, else exit 30' },
   },
+  forms: [
+    '--ticket T [--action click|dblclick|fill|select|check|uncheck] [--value v] [--verify "<what should happen>"]',
+  ],
   needs: { page: 'none', capabilities: [], sites: ['outcome'], acts: 'ticket' },
   parse: parseAct,
   run: runAct,

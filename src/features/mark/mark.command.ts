@@ -21,6 +21,7 @@ export const markCommand: CommandSpec<MarkArgs, MarkResult> = {
   options: {
     label: { type: 'string', summary: `A label to show with the mark, up to ${LABEL_MAX} characters (display only)` },
   },
+  forms: ['[--label L]'],
   needs: { page: 'required', capabilities: [], sites: [], acts: 'never' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `mark takes no positional arguments, got ${raw.positionals.length}` };

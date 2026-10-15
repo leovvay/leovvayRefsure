@@ -97,6 +97,7 @@ export const pickOptionCommand: CommandSpec<PickOptionArgs, PickOptionResult> = 
     want: { type: 'string', summary: 'The option you mean, in any wording or language (required)' },
     open: { type: 'boolean', summary: 'Click the field first, for a dropdown that lists its options only once open' },
   },
+  forms: ['--field @eN --want "<the option you mean>" [--open]'],
   needs: { page: 'required', capabilities: [], sites: ['option-map'], acts: 'own-ref' },
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `pick-option takes no positional arguments, got ${raw.positionals.length}` };

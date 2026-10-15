@@ -12,7 +12,7 @@ export const GLOBAL_OPTIONS: Readonly<Record<string, OptionSpec>> = {
   page: { type: 'string', summary: 'Browser page id; else REFSURE_PAGE, else this worktree\'s current tab' },
   'dry-run': { type: 'boolean', summary: 'Print the exact redacted request; send nothing, do nothing' },
   help: { type: 'boolean', short: 'h', summary: 'Show this command\'s options' },
-  json: { type: 'boolean', summary: 'Accepted and ignored: output is always one JSON envelope' },
+  json: { type: 'boolean', summary: 'Accepted and ignored: output is one JSON envelope (skill print: the file itself)' },
 };
 
 function toParseOption(spec: OptionSpec): ParseOption {

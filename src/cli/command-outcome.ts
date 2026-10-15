@@ -12,4 +12,9 @@ export interface CommandOutcome<Result> {
    * way to it, e.g. a wait whose literal appeared after an abstained poll. `egress` still lists every call.
    */
   settledByCode?: true;
+  /**
+   * The verb's product is a file, not an answer (`skill print`): on `ok`, `main.ts` prints this text verbatim in
+   * place of the envelope, so it can be redirected into place. Any other status prints the envelope as usual.
+   */
+  text?: string;
 }

@@ -5,7 +5,7 @@
 Report it privately through GitHub security advisories:
 <https://github.com/kma-leovvay/leovvayRefsure/security/advisories/new>.
 
-Please do not open a public issue for a vulnerability. Include the refsure version (`refsure --help` or the
+Please do not open a public issue for a vulnerability. Include the refsure version (`refsure --version` or the
 envelope's `version`), the Orca version, the command you ran, and a minimal page or fixture that reproduces it. Do not
 include real API keys or real logged-in page content; a synthetic fixture is enough.
 
