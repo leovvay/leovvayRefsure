@@ -10,3 +10,5 @@ export type * from './network-line';
 export type * from './browser-error-code';
 export type * from './browser-port';
 export { BrowserError, isBrowserError } from './browser-error';
+export { parseSnapshot, isRef } from './agent-browser-format';
+export { createOrcaBrowser } from './orca';
