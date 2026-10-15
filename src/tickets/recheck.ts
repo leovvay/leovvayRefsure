@@ -9,9 +9,9 @@ import type { Ticket } from './ticket';
 const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 
 /**
- * Steps 2-6 of the ticket path (spec §8.3): the same URL, a fresh snapshot, the fingerprint's twin group unchanged,
- * the ref at the stored ordinal (still in the `--within` row when one was bound), and the risk re-read on the
- * fresh tree. A stored ref number is never reused.
+ * Steps 2-6 of the ticket path (spec §8.3): the same URL and tab, a fresh snapshot, the fingerprint's twin group
+ * unchanged, the ref at the stored ordinal (still in the `--within` row when one was bound), and the risk re-read
+ * on the fresh tree. A stored ref number is never reused.
  * Browser failures propagate for the registry to map. `action` defaults to the ticket's, then `click`.
  */
 export async function recheck(
@@ -20,6 +20,8 @@ export async function recheck(
   const page: PageRef = { backend: ctx.browser.backend, id: ticket.pageId };
   const tab = await ctx.browser.tabInfo(page);
   if (urlNorm(tab.url) !== ticket.urlNorm) return { stale: 'page_changed' };
+  // A session's other tab can show the same URL and the same element; it is still another page.
+  if ((tab.tabKey ?? undefined) !== ticket.tabKey) return { stale: 'page_changed' };
   const tree = await ctx.browser.snapshot(page);
   ctx.trace.snapshotTaken = true;
   const found = findByFingerprint(tree, ticket.fingerprint);

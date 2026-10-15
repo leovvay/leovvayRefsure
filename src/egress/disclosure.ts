@@ -7,7 +7,8 @@ import { sha256Hex } from './canonical';
 export const DISCLOSURE_TEXT = [
   'refsure sends page text from your browser to a Decision provider. Before you grant a host, know this:',
   '1. Orca\'s default browser profile carries the Chrome cookies you imported, so the pages refsure reads are '
-    + 'logged in.',
+    + 'logged in. Outside Orca, refsure reads whatever agent-browser session it is pointed at: one opened with '
+    + '--profile, --auto-connect or --cdp can be your real, logged-in browser, and refsure cannot tell.',
   '2. Jev goes to TypeSafe via OpenRouter (US, early access). zdr and data_collection:"deny" are request '
     + 'preferences that refsure cannot verify.',
   '3. OpenAI /v1/decisions is a public beta with no retention control in the request body.',

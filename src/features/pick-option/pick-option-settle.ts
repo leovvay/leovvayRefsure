@@ -1,9 +1,9 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import type { Next } from '../../output';
-import { fingerprintOf, urlNorm } from '../../page-model';
+import { fingerprintOf } from '../../page-model';
 import { optionMapSite } from '../../questions';
 import { classify, classifyNames, fieldRaisers, HIGH_RISK, maxRisk, pageRaisers, type RiskReading } from '../../risk';
-import { type Authority, authorityAllows, authorityFor, corroborate } from '../../tickets';
+import { type Authority, authorityAllows, authorityFor, corroborate, ticketPlace } from '../../tickets';
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { ChosenOption } from './chosen-option';
 import { optionCandidates, optionLabel } from './option-nodes';
@@ -60,7 +60,7 @@ export async function settleOption(ctx: CommandContext, scene: OptionScene, chos
     : { site: 'option-map' as const, maturity: chosen.maturity, confidence: chosen.confidence, model: chosen.model };
   const fingerprint = fingerprintOf(tree, target);
   const ticket = ctx.dryRun ? null : await ctx.tickets.issue({
-    pageId: scene.page.id, urlNorm: urlNorm(scene.tab.url), fingerprint, risk: risk.class, authority, ...source,
+    ...ticketPlace(scene.page, scene.tab), fingerprint, risk: risk.class, authority, ...source,
     action, ...(action === 'select' ? { value: label } : {}),
   });
   if (ticket === null) ctx.trace.notes.push('dry_run: no ticket is issued');

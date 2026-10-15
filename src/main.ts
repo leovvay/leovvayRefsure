@@ -82,7 +82,8 @@ async function runVerb(
   signal.addEventListener('abort', () => trace.notes.push('interrupted'), { once: true });
   const config = configOnce(env);
   // Orca in an Orca terminal, else an agent-browser session (see chooseBackend).
-  const backend = createBrowser({ env, trace });
+  const paths = resolvePaths(env);
+  const backend = createBrowser({ env, trace, stateDir: paths.state });
   // The profile of the last tab read, for the isolated-profile rule; null (refused when required) until one is read.
   let profileId: string | null = null;
   const browser: BrowserPort = {
@@ -94,7 +95,7 @@ async function runVerb(
     },
   };
   // Local state lives where the paths say, whatever the config file holds. Expired entries are purged by runCommand.
-  const store = createFileStore(resolvePaths(env).state, trace);
+  const store = createFileStore(paths.state, trace);
   const tickets = createTicketBook(store);
   const { decide, routeCheck } = lazyDecide({ config, env, trace, command: spec.name, profile: () => profileId });
   const deps: RegistryDeps = {

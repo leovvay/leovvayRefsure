@@ -10,6 +10,8 @@ export interface Ticket {
   id: string;
   pageId: string;
   urlNorm: string;
+  /** The tab the pick was made on, when `pageId` can name more than one (an agent-browser session). */
+  tabKey?: string;
   fingerprint: Fingerprint;
   /** Always the computed class. */
   risk: RiskClass;

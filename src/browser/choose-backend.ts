@@ -26,23 +26,27 @@ export function chooseBackend(env: NodeJS.ProcessEnv): BackendChoice {
   return { backend: 'orca', why };
 }
 
-/** The port for this invocation, per `chooseBackend`. */
-export function createBrowser(opts: { env: NodeJS.ProcessEnv; trace: RunTrace }): BrowserPort {
+/** The port for this invocation, per `chooseBackend`. `stateDir` holds the agent-browser backend's empty config. */
+export function createBrowser(opts: { env: NodeJS.ProcessEnv; trace: RunTrace; stateDir: string }): BrowserPort {
   const choice = chooseBackend(opts.env);
   if (choice.backend === 'agent-browser') return createAgentBrowser(opts);
   if (choice.backend === 'orca') return createOrcaBrowser(opts);
   return unknownBackend(choice.why);
 }
 
-/** A port for a `REFSURE_BACKEND` typo: nothing runs, and every page call says why. */
+/**
+ * A port for a `REFSURE_BACKEND` typo: nothing runs, and every page call, and any question about capabilities,
+ * answers `backend_unknown` (not_set_up, exit 23), which a retry cannot fix. `backend` is only a placeholder.
+ */
 function unknownBackend(why: string): BrowserPort {
-  const fail = async (): Promise<never> => {
-    throw new BrowserError('backend_error', why);
+  const refuse = (): never => {
+    throw new BrowserError('backend_unknown', why);
   };
+  const fail = async (): Promise<never> => refuse();
   return {
     backend: 'orca',
     probe: async () => ({ ok: false, binary: null, version: null, running: false, features: [], problem: why }),
-    features: () => new Set(),
+    features: refuse,
     resolvePage: fail,
     tabInfo: fail,
     snapshot: fail,

@@ -32,6 +32,7 @@ export function asTicket(value: unknown): Ticket | null {
     && isTime(t.createdAt) && isTime(t.ttlMs)
     && (t.action === undefined || (typeof t.action === 'string' && ACTIONS.includes(t.action)))
     && (t.value === undefined || typeof t.value === 'string')
-    && (t.within === undefined || (typeof t.within === 'string' && t.within !== ''));
+    && (t.within === undefined || (typeof t.within === 'string' && t.within !== ''))
+    && (t.tabKey === undefined || (typeof t.tabKey === 'string' && t.tabKey !== ''));
   return ok ? (value as Ticket) : null;
 }

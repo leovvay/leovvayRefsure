@@ -7,73 +7,89 @@ import type { BrowserPort } from '../browser-port';
 import type { BrowserCapability } from '../capability';
 import type { PageRef } from '../page-ref';
 import { actOnSession, dismissSessionDialog } from './ab-act';
+import type { AbActDeps } from './ab-act-deps';
+import type { AbBatchRun } from './ab-batch-run';
 import { findAgentBrowserBinary } from './ab-binary';
 import type { AgentBrowserOptions } from './ab-browser-options';
+import { emptyConfigFile } from './ab-empty-config';
 import { abError } from './ab-error-map';
 import { featuresFromHelp } from './ab-features';
 import { probeAgentBrowser } from './ab-probe';
 import type { AbRun } from './ab-run';
-import { helpTextSync, READ_TIMEOUT_MS, runAgentBrowser, runAgentBrowserText, stripChildEnv } from './ab-runner';
-import { readSessions } from './ab-sessions';
-import { checkedSession, notOpen, resolveSession } from './resolve-session';
+import {
+  helpTextSync, READ_TIMEOUT_MS, runAgentBrowser, runAgentBrowserBatch, runAgentBrowserText, stripChildEnv,
+} from './ab-runner';
+import { createSessionGuard } from './ab-session-guard';
+import { activeTabId } from './ab-tabs';
+import { checkedSession, resolveSession, sessionGone } from './resolve-session';
 
 const LOG_LIMIT = 200;
-// agent-browser takes its arguments as argv words, so only a word it could read as a flag is refused.
+// Values travel in a batch's JSON argv, taken literally; these only keep the words well formed.
 const ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/;
-const SELECTOR = /^[^-\s][\s\S]{0,1999}$/;
+const SELECTOR = /^\S[\s\S]{0,1999}$/;
 
 /**
  * The standalone backend: a session the user opened with `agent-browser --session <name> open <url>`, driven
- * through its typed verbs with `--json`. The page id is the session name; refsure acts on its active tab. Nothing
- * here launches a browser: every page call first checks that the session is open.
+ * through its typed verbs with `--json`. The page id is the session name; refsure acts on its active tab. refsure
+ * never launches a browser on purpose: every page call first checks that the session's browser is running (see
+ * ab-session-guard), and an answer from a browser agent-browser started during the call is discarded.
  */
 export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
   const { env, trace } = opts;
   const bin = findAgentBrowserBinary(env);
   const childEnv = stripChildEnv(env);
-  const run: AbRun = (args, timeoutMs, onSpawn) => runAgentBrowser(bin, args, { env: childEnv, timeoutMs, onSpawn });
+  let configFile: string | null = null;
+  const config = (): string => {
+    configFile ??= emptyConfigFile(opts.stateDir);
+    return configFile;
+  };
+  const run: AbRun = async (args, timeoutMs, onSpawn) => runAgentBrowser(bin, args, {
+    env: childEnv, config: config(), timeoutMs, onSpawn,
+  });
+  const batch: AbBatchRun = async (args, commands, timeoutMs, onSpawn) => runAgentBrowserBatch(bin, args, commands, {
+    env: childEnv, config: config(), timeoutMs, onSpawn,
+  });
+  const guard = createSessionGuard(run, batch);
   let features: ReadonlySet<BrowserCapability> | null = null;
   const featureSet = (): ReadonlySet<BrowserCapability> => {
     features ??= featuresFromHelp(bin ? helpTextSync(bin, childEnv) : null);
     return features;
   };
-  const checks = new Map<string, Promise<boolean>>();
 
-  // Any call on a session agent-browser does not list would launch a new browser for it.
-  function isOpen(session: string): Promise<boolean> {
-    let check = checks.get(session);
-    if (!check) {
-      check = run(['session', 'list'], READ_TIMEOUT_MS).then((reply) => {
-        if (!reply.ok) throw abError(reply.message);
-        return readSessions(reply.result).includes(session);
-      });
-      checks.set(session, check);
-    }
-    return check;
-  }
-
-  async function on(page: PageRef): Promise<string[]> {
+  /** The verbs' results, in order, from the session's running browser; the first failure throws. */
+  async function read(page: PageRef, verbs: readonly (readonly string[])[], onSpawn?: () => void): Promise<unknown[]> {
     const session = checkedSession(page.id);
-    if (!(await isOpen(session))) throw notOpen(session);
-    return ['--session', session];
+    const answer = await guard.call(session, verbs, READ_TIMEOUT_MS, onSpawn);
+    if (answer.launched) throw sessionGone(session, 'launched');
+    return verbs.map((verb, i) => {
+      const reply = answer.replies[i];
+      if (!reply) throw new BrowserError('backend_error', `agent-browser batch gave no reply for ${verb[0] ?? '?'}`);
+      if (!reply.ok) throw abError(reply.message);
+      return reply.result;
+    });
   }
 
   async function call(page: PageRef, verb: readonly string[], onSpawn?: () => void): Promise<unknown> {
-    const reply = await run([...await on(page), ...verb], READ_TIMEOUT_MS, onSpawn);
-    if (!reply.ok) throw abError(reply.message);
-    return reply.result;
+    const [result] = await read(page, [verb], onSpawn);
+    return result;
+  }
+
+  function actDeps(page: PageRef): AbActDeps {
+    const session = checkedSession(page.id);
+    return { session, trace, call: (verbs, timeoutMs, onSpawn) => guard.call(session, verbs, timeoutMs, onSpawn) };
   }
 
   return {
     backend: 'agent-browser',
     probe: () => probeAgentBrowser({
-      bin, run, features: featureSet, version: () => runAgentBrowserText(bin!, ['--version'], childEnv),
+      bin, run, state: guard.state, features: featureSet,
+      version: () => runAgentBrowserText(bin!, ['--version'], childEnv),
     }),
     features: featureSet,
-    resolvePage: (hint) => resolveSession(hint, env, isOpen),
+    resolvePage: (hint) => resolveSession(hint, env, guard.state),
 
     async tabInfo(page) {
-      const [url, title] = await Promise.all([call(page, ['get', 'url']), call(page, ['get', 'title'])]);
+      const [tabs, url, title] = await read(page, [['tab', 'list'], ['get', 'url'], ['get', 'title']]);
       return {
         id: page.id,
         url: str(asResult(url, 'agent-browser get url').url) ?? '',
@@ -83,6 +99,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
         certificateFailure: null,
         profileId: null,
         profileLabel: null,
+        tabKey: activeTabId(tabs),
       };
     },
 
@@ -117,7 +134,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
       return readAttr(result, 'agent-browser get attr');
     },
 
-    act: async (page, ref, action, value) => actOnSession({ run, trace }, await on(page), ref, action, value),
+    act: async (page, ref, action, value) => actOnSession(actDeps(page), ref, action, value),
 
     async highlight(page, ref) {
       await call(page, ['highlight', `@${checkedRef(ref)}`]);
@@ -132,7 +149,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
       return readNetwork(await call(page, ['network', 'requests']), 'agent-browser network requests').slice(-LOG_LIMIT);
     },
 
-    dialogDismiss: async (page) => dismissSessionDialog({ run, trace }, await on(page)),
+    dialogDismiss: async (page) => dismissSessionDialog(actDeps(page)),
   };
 }
 
@@ -148,7 +165,7 @@ function checkedAttr(name: string): string {
 
 function checkedSelector(css: string): string {
   if (!SELECTOR.test(css)) {
-    throw new BrowserError('backend_error', 'a selector must be non-empty and must not start with "-" or a space');
+    throw new BrowserError('backend_error', 'a selector must be non-empty and must not start with a space');
   }
   return css;
 }

@@ -9,6 +9,8 @@ const BROWSER_FAILURES: Readonly<Record<BrowserErrorCode, { status: Status; caus
   stale_ref: { status: 'stale', cause: 'ref_gone' },
   timeout: { status: 'unavailable', cause: 'browser_timeout' },
   backend_error: { status: 'unavailable', cause: 'browser_error' },
+  unsupported: { status: 'unsupported_by_backend', cause: 'unsupported' },
+  backend_unknown: { status: 'not_set_up', cause: 'backend_unknown' },
 };
 
 // Duck-typed so the registry needs no runtime import of config: ConfigError carries one of these in `cause_`.

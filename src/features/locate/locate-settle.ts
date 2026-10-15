@@ -1,10 +1,12 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import type { Next } from '../../output';
-import { type Candidate, cutName, fold, rowTextOf, twinsOf, urlNorm } from '../../page-model';
+import { type Candidate, cutName, fold, rowTextOf, twinsOf } from '../../page-model';
 import { findSite, locateSite, thresholdFor } from '../../questions';
 import { classify, HIGH_RISK, maxRisk, pageRaisers, type RiskReading } from '../../risk';
-import { type Authority, authorityAllows, authorityFor, corroborate, type Ticket } from '../../tickets';
+import {
+  type Authority, authorityAllows, authorityFor, corroborate, type Ticket, ticketPlace,
+} from '../../tickets';
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
@@ -114,7 +116,7 @@ export async function settlePick(
   let issued: Ticket | null = null;
   if (!ctx.dryRun) {
     const ticket = await ctx.tickets.issue({
-      pageId: scene.page.id, urlNorm: urlNorm(scene.tab.url), fingerprint: cand.fp, risk: risk.class, authority,
+      ...ticketPlace(scene.page, scene.tab), fingerprint: cand.fp, risk: risk.class, authority,
       ...ticketSource(picked),
       ...(args.within === null ? {} : { within: fold(args.within) }),
     });

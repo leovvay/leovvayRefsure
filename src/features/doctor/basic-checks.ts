@@ -1,5 +1,5 @@
 import { chooseBackend } from '../../browser';
-import type { BackendHealth } from '../../browser';
+import type { BackendChoice, BackendHealth } from '../../browser';
 import type { CommandContext } from '../../cli';
 import type { DoctorCheck } from './doctor-check';
 
@@ -17,8 +17,7 @@ function worktreeSet(env: NodeJS.ProcessEnv): boolean {
 }
 
 /** Which backend drives the browser, and why (spec §5.2; `REFSURE_BACKEND`, the Orca terminal, agent-browser). */
-function backendChoiceCheck(env: NodeJS.ProcessEnv): DoctorCheck {
-  const choice = chooseBackend(env);
+function backendChoiceCheck(choice: BackendChoice): DoctorCheck {
   return { name: 'backend', ok: choice.backend !== null, detail: `${choice.backend ?? 'none'}: ${choice.why}` };
 }
 
@@ -69,16 +68,16 @@ function terminalCheck(inTerminal: boolean): DoctorCheck {
 
 /**
  * Phase 1 doctor (spec §6.3): Node, the chosen backend and its probe, and, for Orca, whether this is an Orca
- * terminal. The agent-browser backend has no worktree guard, so it has no terminal check.
+ * terminal. The agent-browser backend has no worktree guard, so it has no terminal check. With no backend chosen
+ * (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no backend to probe.
  */
 export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
+  const choice = chooseBackend(ctx.env);
+  const node = nodeCheck(process.versions.node);
+  if (choice.backend === null) return [node, backendChoiceCheck(choice)];
   const inTerminal = worktreeSet(ctx.env);
   const health = await ctx.browser.probe();
-  const checks = [
-    nodeCheck(process.versions.node),
-    backendChoiceCheck(ctx.env),
-    ...backendChecks(ctx.browser.backend, health, inTerminal),
-  ];
+  const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health, inTerminal)];
   if (ctx.browser.backend === 'orca') checks.push(terminalCheck(inTerminal));
   return checks;
 }

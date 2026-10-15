@@ -27,6 +27,7 @@ export function ticketGone<Result>(failure: ClaimFailure, id: string): CommandOu
 export function recheckStale<Result>(cause: 'page_changed' | 'ref_gone', id: string): CommandOutcome<Result> {
   const detail = cause === 'ref_gone'
     ? `the element of ticket ${id} is no longer on the page; nothing was done`
-    : `the page changed since ticket ${id} (another URL, or the element's group, row or place moved); nothing was done`;
+    : `the page changed since ticket ${id} (another URL or tab, or the element's group, row or place moved); `
+      + 'nothing was done';
   return nothingDone<Result>('stale', cause, detail, { next: RE_OBSERVE });
 }

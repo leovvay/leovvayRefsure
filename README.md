@@ -79,11 +79,29 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
   refsure state --page work --expect "the example home page"
   ```
 
-  refsure never launches a browser. A page command on a session that is not open answers `no_tab` (exit 20), because
-  any agent-browser call on an unknown session would launch a new browser. The capabilities come from
-  `agent-browser --help`.
+  agent-browser launches a browser for any page command on a session that has none, and its reply does not say
+  so. So before every page call refsure checks that the session's browser is running, with two calls that never
+  launch one (`session list`, then `stream status`); when it is not (closed, crashed), the command answers `no_tab`
+  (exit 20) and no browser is started. The call itself runs as one `batch` that repeats that check: if the browser
+  went away in the instant between, agent-browser starts a new one to answer, and refsure discards the answer
+  (`no_tab`, or `effect_unknown` for an act that may have reached it). A session closed a moment before refsure's
+  check or call can make agent-browser start a new daemon for it; a daemon refsure's call starts has a 0.5 s idle
+  timeout, so that one exits by itself (open the session again a second later, not at once, or your `open` lands in
+  it and ends with it). A daemon of yours whose browser died in that instant keeps the new browser; close it with
+  `agent-browser --session <name> close`. The check needs `stream status` (agent-browser 0.27). Each
+  page call costs two agent-browser round trips (about 0.3 s). The capabilities come from `agent-browser --help`.
+
+  agent-browser also sends launch settings (a profile, headed, a CDP target, auto-connect, a proxy) with every
+  command, and a daemon whose session was launched with other values relaunches its browser to match. So refsure
+  passes `--config` with an empty file of its own (no `~/.agent-browser/config.json`, no `./agent-browser.json` from
+  its working directory) and none of agent-browser's environment (`AGENT_BROWSER_*` apart from the socket directory,
+  `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY`). It sends no launch setting, so it never relaunches a
+  session with other ones, and a browser started in the race above gets agent-browser's defaults (headless, a fresh
+  profile) or, in a daemon of yours, that daemon's own settings.
 - With neither (no Orca terminal, no `agent-browser` binary), refsure falls back to Orca, which answers
   `not_in_orca_terminal`.
+- `REFSURE_BACKEND` set to anything but `orca` or `agent-browser` chooses no backend: page commands answer
+  `backend_unknown` (not_set_up, exit 23), and `doctor` shows only that failed check.
 
 ## Setup
 
@@ -238,6 +256,8 @@ values, console and network bodies.
 
 - Orca's default browser profile carries your imported Chrome cookies, so the pages refsure reads are usually
   logged in. What they show is what gets summarised and sent.
+- Outside Orca, refsure reads whatever agent-browser session it is pointed at. A session opened with `--profile`,
+  `--auto-connect` or `--cdp` can be your real, logged-in browser, and refsure cannot tell.
 - Jev requests go to TypeSafe via OpenRouter (US, early access). refsure asks for zero data retention
   (`provider: { zdr: true, data_collection: "deny" }`). That is a request preference refsure cannot verify.
 - OpenAI `/v1/decisions` is a public beta with no retention control in the request body.
@@ -589,13 +609,14 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `browser_timeout` | `unavailable` | 20 | A browser call timed out before anything was dispatched. |
 | `browser_error` | `unavailable` | 20 | The browser backend failed before anything was dispatched. |
 | `internal` | `unavailable` | 20 | refsure hit an unexpected error before acting. |
-| `unsupported` | `unsupported_by_backend` | 21 | The browser backend lacks a capability this command needs. |
+| `unsupported` | `unsupported_by_backend` | 21 | The browser backend lacks a capability this command needs, or cannot send this input; a retry will not help. |
 | `spend_limit` | `spend_limit` | 22 | The per-minute Decision cap or the daily spend cap was reached. |
 | `not_set_up` | `not_set_up` | 23 | A key or a consent grant is missing; a human runs `refsure setup`. |
 | `config_mode` | `not_set_up` | 23 | The config file is readable or writable by group or others; chmod 600 it. |
 | `literal_key` | `not_set_up` | 23 | The config holds a literal key; name an env variable or a command. |
 | `gateway_insecure` | `not_set_up` | 23 | The gateway URL is neither https nor localhost. |
 | `config_invalid` | `not_set_up` | 23 | The config file could not be read as a refsure config. |
+| `backend_unknown` | `not_set_up` | 23 | REFSURE_BACKEND names no backend; a human sets it to orca or agent-browser. |
 | `not_in_orca_terminal` | `not_in_orca_terminal` | 24 | The Orca backend needs an Orca terminal (ORCA_WORKTREE_ID); elsewhere, use an agent-browser session. |
 | `effect_unknown` | `effect_unknown` | 30 | An act was dispatched and its effect is unconfirmed; re-observe first. |
 | `dry_run` | `ok` | 0 | Dry run: the exact redacted requests are shown; nothing was sent or done. |
@@ -688,11 +709,11 @@ and the envelope lists it under `untrusted`.
   - It reports no browser profile, so `requireIsolatedProfile` refuses every Decision there (`origin_denied`): refsure
     cannot prove the session runs in an isolated profile. Open sessions without `--profile`, which gives a fresh one.
   - It reports no load error or certificate failure, so `triage` and `state` see only what the page shows.
-  - It acts on the session's active tab; a tab you switch to between `locate` and `act` fails the ticket's URL check.
-  - agent-browser reads any argv word it knows as one of its own flags, so refsure refuses a `fill` or `select` value
-    that starts with `-` (other than a number) before anything is sent (`browser_error`, exit 20).
-  - Its environment (`AGENT_BROWSER_*`, apart from the socket directory) is not passed on: refsure never changes how a
-    session was launched.
+  - It acts on the session's active tab. A ticket records that tab's id: if another tab is active by the time you
+    `act`, even one with the same URL, `act` answers `page_changed` (exit 12) and clicks nothing. A mark records no
+    tab, so `outcome --mark` compares whatever tab is active.
+  - A `fill` or `select` value travels inside a `batch` command's JSON argv, which agent-browser takes literally, so
+    a value that starts with `-` is filled as typed.
 
 ## Calibration status
 

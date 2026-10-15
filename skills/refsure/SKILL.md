@@ -102,12 +102,12 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 
 | `why.cause` (status, exit) | What to do |
 |---|---|
-| `not_set_up`, `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid` (not_set_up, 23) | Tell the human the cause: they run `refsure setup` or fix their config file. Never do it yourself |
+| `not_set_up`, `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid`, `backend_unknown` (not_set_up, 23) | Tell the human the cause: they run `refsure setup`, fix their config file, or fix `REFSURE_BACKEND`. Never do it yourself |
 | `not_in_orca_terminal` (24) | Outside an Orca terminal, with no agent-browser to use. Tell the human; do not work around it |
 | `orca_not_running`, `no_tab` (unavailable, 20) | Ask the human to start Orca, open a tab or an agent-browser session, or pass `--page <id>` |
 | `browser_timeout`, `browser_error`, `internal` (unavailable, 20) | Nothing was dispatched. Re-observe (`state`), then retry once |
 | `provider_timeout`, `provider_error` (unavailable, 20) | Retry once a little later. If it persists, tell the human |
-| `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs. Tell the human |
+| `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs; a retry will not help. Tell the human |
 | `spend_limit` (22) | Stop asking Decisions. Code-only verbs (`snap`, `guard`, `mark`, `triage`) still work |
 | `low_confidence`, `none_chosen` (abstained, 10) | Make `--intent` concrete (role, visible text, section), or narrow with `--within` |
 | `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine |
@@ -142,7 +142,10 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 ## With agent-browser
 
 - Outside an Orca terminal, refsure drives an `agent-browser` session instead; `refsure doctor` names the backend.
-- The page is a session name: `--page <session>`, then `REFSURE_PAGE`, then `default`. refsure never opens a session
-  or a browser. On `no_tab`, ask the human to open one.
+- The page is a session name: `--page <session>`, then `REFSURE_PAGE`, then `default`. refsure never opens a session.
+  A session whose browser is not running (closed, crashed) answers `no_tab` before anything starts; ask the human to
+  open it again (`agent-browser --session <name> open <url>`).
+- refsure acts on the session's active tab. A ticket remembers that tab: if another one is active by the time you
+  `act`, even with the same URL, `act` answers `page_changed`. Switch back, or `locate` again.
 - Use the same session for your own calls (`agent-browser --session <name> snapshot`, `… click @eN`), and snapshot
   again after `earlier_refs_void: true`.

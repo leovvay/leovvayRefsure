@@ -5,4 +5,6 @@ export interface AgentBrowserOptions {
   env: NodeJS.ProcessEnv;
   /** Receives `snapshotTaken` and `dispatched`. */
   trace: RunTrace;
+  /** refsure's state directory, where its empty agent-browser config file lives. */
+  stateDir: string;
 }

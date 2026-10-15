@@ -39,7 +39,10 @@ export const CAUSES: readonly CauseRow[] = [
   row('browser_error', 'unavailable', 'The browser backend failed before anything was dispatched.'),
   row('internal', 'unavailable', 'refsure hit an unexpected error before acting.'),
 
-  row('unsupported', 'unsupported_by_backend', 'The browser backend lacks a capability this command needs.'),
+  row(
+    'unsupported', 'unsupported_by_backend',
+    'The browser backend lacks a capability this command needs, or cannot send this input; a retry will not help.',
+  ),
   row('spend_limit', 'spend_limit', 'The per-minute Decision cap or the daily spend cap was reached.'),
 
   row('not_set_up', 'not_set_up', 'A key or a consent grant is missing; a human runs `refsure setup`.'),
@@ -47,6 +50,7 @@ export const CAUSES: readonly CauseRow[] = [
   row('literal_key', 'not_set_up', 'The config holds a literal key; name an env variable or a command.'),
   row('gateway_insecure', 'not_set_up', 'The gateway URL is neither https nor localhost.'),
   row('config_invalid', 'not_set_up', 'The config file could not be read as a refsure config.'),
+  row('backend_unknown', 'not_set_up', 'REFSURE_BACKEND names no backend; a human sets it to orca or agent-browser.'),
 
   row(
     'not_in_orca_terminal', 'not_in_orca_terminal',

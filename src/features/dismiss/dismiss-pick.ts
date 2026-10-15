@@ -1,10 +1,10 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
 import type { Next } from '../../output';
-import { type Candidate, cutName, fingerprintOf, urlNorm } from '../../page-model';
+import { type Candidate, cutName, fingerprintOf } from '../../page-model';
 import type { Decided } from '../../questions';
 import { actionPolicy, classify, findTermEveryReading, maxRisk, pageRaisers, type RiskReading } from '../../risk';
-import { type Authority, authorityAllows, authorityFor } from '../../tickets';
+import { type Authority, authorityAllows, authorityFor, ticketPlace } from '../../tickets';
 import { highRiskNext } from '../shared';
 import type { DismissArgs } from './dismiss.args';
 import type { DismissLevelReport } from './dismiss-level-report';
@@ -83,7 +83,7 @@ export async function settleDismissPick(
   if (scene.args.propose || authority !== 'write' || risk.class !== 'read') {
     const held: Authority = authority === 'none' ? 'none' : 'read';
     const ticket = await ctx.tickets.issue({
-      pageId: scene.page.id, urlNorm: urlNorm(scene.tab.url), fingerprint: pick.fp, risk: risk.class, authority: held,
+      ...ticketPlace(scene.page, scene.tab), fingerprint: pick.fp, risk: risk.class, authority: held,
       site: 'dismiss', maturity: decided.maturity, confidence: decided.verdict.confidence,
       model: ctx.trace.decisions.at(-1)?.model ?? null,
     });

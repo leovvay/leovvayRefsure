@@ -27,7 +27,9 @@ function hintOf(raw: ParsedArgs): PageHint {
   return typeof raw.values.page === 'string' ? { page: raw.values.page } : {};
 }
 
+// A verb that needs no capability never asks: a port with no backend chosen answers that question with an error.
 function missingCapabilities(needs: readonly BrowserCapability[], browser: BrowserPort): BrowserCapability[] {
+  if (needs.length === 0) return [];
   const has = browser.features();
   return needs.filter((capability) => !has.has(capability));
 }

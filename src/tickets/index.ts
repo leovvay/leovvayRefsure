@@ -6,6 +6,7 @@ export type * from './high-risk-request';
 export type * from './high-risk-gate-result';
 export { createTicketBook, TICKET_TTL_MS } from './file-ticket-book';
 export { recheck } from './recheck';
+export { ticketPlace } from './ticket-place';
 export { corroborate } from './corroborate';
 export { authorityFor, EXPERIMENTAL_WRITE_CONFIDENCE } from './authority-for';
 export { authorityAllows } from './authority-allows';
