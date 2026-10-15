@@ -1,2 +1,17 @@
 export type * from './approved-request';
 export type * from './egress-refusal';
+export type * from './approve-context';
+export type * from './consent-record';
+export type * from './egress-log-entry';
+export type * from './secret-shapes';
+export { approve, isEgressRefusal, STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } from './pipeline';
+export { redactSecrets } from './redact';
+export { maskPii } from './pii-masks';
+export { stripControl, boundText } from './bound-text';
+export { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
+export { checkOrigin } from './origin-policy';
+export { DISCLOSURE_TEXT, DISCLOSURE_HASH } from './disclosure';
+export { readConsent, writeConsent, grantFor, withGrant } from './consent';
+export { appendEgressLog, readEgressLog } from './egress-log';
+export { checkLimits } from './limits';
+export { SECRET_SHAPES } from './secret-shapes';

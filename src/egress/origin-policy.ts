@@ -1,0 +1,39 @@
+import { originMatches, parseOriginPattern } from '../config';
+import type { OriginPattern, RefsureConfig } from '../config';
+import type { EgressRefusal } from './egress-refusal';
+
+type OriginConfig = Pick<RefsureConfig, 'allowOrigins' | 'denyOrigins' | 'requireIsolatedProfile'>;
+
+function patterns(entries: readonly string[]): OriginPattern[] {
+  // loadConfig refuses an unparseable entry, so a skipped one here can only come from a hand-built config.
+  return entries.map(parseOriginPattern).filter((pattern): pattern is OriginPattern => pattern !== null);
+}
+
+function parse(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Deny wins; a non-empty allow list must match; `requireIsolatedProfile` refuses Orca's default profile,
+ * and a tab whose profile is unknown, since the default one carries the user's imported cookies.
+ */
+export function checkOrigin(url: string, cfg: OriginConfig, profileId: string | null): 'ok' | EgressRefusal {
+  if (cfg.requireIsolatedProfile && (profileId === null || profileId === 'default')) {
+    return {
+      cause: 'origin_denied',
+      detail: 'requireIsolatedProfile is on and this tab uses Orca\'s default profile; open it in an isolated profile',
+    };
+  }
+  const page = parse(url);
+  const origin = page && (page.protocol === 'http:' || page.protocol === 'https:') ? page.origin : null;
+  if (page && origin && patterns(cfg.denyOrigins).some((pattern) => originMatches(pattern, page))) {
+    return { cause: 'origin_denied', detail: `${origin} is in denyOrigins` };
+  }
+  if (cfg.allowOrigins.length === 0) return 'ok';
+  if (page && origin && patterns(cfg.allowOrigins).some((pattern) => originMatches(pattern, page))) return 'ok';
+  return { cause: 'origin_denied', detail: `${origin ?? 'this page'} is not in allowOrigins` };
+}
