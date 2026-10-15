@@ -1,17 +1,12 @@
-import type { BrowserPort, PageRef, Ref, TabInfo } from '../../browser';
+import type { PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { cutName, norm } from '../../page-model';
 import { outcomeSite } from '../../questions';
-import {
-  actionPolicy, actionRole, classifyNames, confirmDialogRaiser, fieldRaisers, maxRisk, nameCheck, pageRaisers,
-  readLiveName,
-} from '../../risk';
+import { actionPolicy, actionRole, liveRefRisk, nameCheck, readLiveTarget } from '../../risk';
 import type { RiskReading } from '../../risk';
-import { abstainOutcome } from '../shared';
+import { abstainOutcome, highRiskNext } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
-
-const CLICKS: ReadonlySet<string> = new Set(['click', 'dblclick']);
 
 /**
  * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), the risk read, and the
@@ -25,15 +20,6 @@ function refused(status: 'refused' | 'stale', cause: string, detail: string, nex
   const refusal: CommandOutcome<OutcomeResult> = { status, acted: false, effect: 'none', result: null, why: { cause, detail } };
   if (next) refusal.next = next;
   return { refusal };
-}
-
-/** The element's role when it says one, `link` when it has an href; else null (the action's role is used). */
-async function pageRole(port: BrowserPort, page: PageRef, ref: Ref): Promise<string | null> {
-  if (port.attr === undefined || !port.features().has('attr')) return null;
-  const [role, href] = await Promise.all([port.attr(page, ref, 'role'), port.attr(page, ref, 'href')]);
-  const given = role === null ? '' : norm(role).toLowerCase().split(' ')[0] ?? '';
-  if (/^[a-z]{2,30}$/.test(given)) return given;
-  return href !== null && href.trim() !== '' ? 'link' : null;
 }
 
 /**
@@ -65,11 +51,8 @@ export async function checkBeforeAct(
   if (stop) return stop;
 
   const { action, ref } = args.act;
-  const [live, role, bodyText] = await Promise.all([
-    readLiveName(ctx.browser, page, ref, action),
-    pageRole(ctx.browser, page, ref),
-    ctx.browser.text(page, 'body'),
-  ]);
+  const target = await readLiveTarget(ctx.browser, page, ref, action);
+  const { live, role, bodyText } = target;
   const named = nameCheck(live, args.expectName);
   if (named !== 'ok') {
     ctx.trace.untrusted.add('why.detail');
@@ -78,18 +61,18 @@ export async function checkBeforeAct(
       { do: 'snapshot', argv: ['refsure', 'snap'] });
   }
 
-  const lexical = classifyNames(live.sources, { url: tab.url, action, role, ...(args.risk ? { userRisk: args.risk } : {}) });
-  const raisers = await Promise.all(CLICKS.has(action)
-    ? [pageRaisers(ctx.browser, page, action), confirmDialogRaiser(ctx.browser, page, action, { names: live.sources, role, bodyText })]
-    : [fieldRaisers(ctx.browser, page, ref)]);
-  const risk: RiskReading = {
-    class: maxRisk(lexical.class, ...raisers.map((raised) => raised.class)),
-    reasons: [...lexical.reasons, ...raisers.flatMap((raised) => raised.reasons)],
-  };
+  const risk: RiskReading = await liveRefRisk(ctx.browser, page, ref, action, target, {
+    url: tab.url, ...(args.risk ? { userRisk: args.risk } : {}),
+  });
   if (actionPolicy(action, risk.class, 'outcome') !== 'allow') {
+    // The caller's own ref, name and intent: the one command that may take it, spelled out (spec §6.3).
+    const next = highRiskNext({
+      class: risk.class, via: { ref, expectName: args.expectName }, action, intent: args.intent,
+      ...(args.act.value === undefined ? {} : { value: args.act.value }),
+    });
     return refused('refused', 'high_risk_class',
-      `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done`,
-      { do: 'needs_human' });
+      `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done. `
+        + 'Only act-high-risk takes it, and only when the human asked for exactly this', next);
   }
   return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, risk, bodyText } };
 }

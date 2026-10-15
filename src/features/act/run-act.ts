@@ -2,11 +2,13 @@ import type { ActAction, ActResult, PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { cutName } from '../../page-model';
 import { outcomeSite } from '../../questions';
+import { HIGH_RISK } from '../../risk';
 import { recheck, type RecheckResult, type Ticket } from '../../tickets';
 import { abstainOutcome, nothingDone, type PageReading, readPage, recheckStale, ticketGone } from '../shared';
 import type { ActArgs } from './act.args';
 import type { ActCommandResult } from './act.contract';
 import { policyRefusal } from './act-policy';
+import type { PolicyAct } from './policy-act';
 import { dryVerify, verifyAfter } from './act-verify';
 import { VALUE_ACTIONS } from './parse-act';
 
@@ -37,11 +39,16 @@ function bind(args: ActArgs, ticket: Ticket): Bound | Out {
   return { action };
 }
 
-/** The recheck, then the policy on its fresh risk: a fresh ref the act may use, or why nothing is done. */
-async function cleared(ctx: CommandContext, ticket: Ticket, action: ActAction, cause?: 'page_changed'): Promise<Fresh | Out> {
-  const fresh = await recheck(ctx, ticket, { action });
+/**
+ * The recheck, then the policy on its fresh risk: a fresh ref the act may use, or why nothing is done. `spent`:
+ * the ticket was claimed, so a high-risk refusal can point only to the fresh ref, not to the ticket.
+ */
+async function cleared(
+  ctx: CommandContext, ticket: Ticket, act: PolicyAct, spent: boolean, cause?: 'page_changed',
+): Promise<Fresh | Out> {
+  const fresh = await recheck(ctx, ticket, { action: act.action });
   if ('stale' in fresh) return recheckStale(cause ?? fresh.stale, ticket.id);
-  return policyRefusal(ticket, fresh.risk, action) ?? fresh;
+  return policyRefusal(ctx, ticket, fresh, act, spent) ?? fresh;
 }
 
 function isOut(value: object): value is Out {
@@ -81,10 +88,17 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   }
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const piiMasks = args.verify === null ? true : ctx.config.piiMasks;
+  const policy: PolicyAct = { ...bound, intent: args.verify };
+  // Risk only rises, so a ticket issued at a high-risk class can never pass act: refuse before spending it, so the
+  // refusal can hand it on to act-high-risk (spec §6.3). The fresh read still names the class and the ref.
+  if (HIGH_RISK.has(peeked.risk)) {
+    const kept = await cleared(ctx, peeked, policy, false);
+    if (isOut(kept)) return kept;
+  }
 
   const ticket = ctx.dryRun ? peeked : await ctx.tickets.claim(args.ticket, ctx.now());
   if (typeof ticket === 'string') return ticketGone(ticket, args.ticket);
-  let fresh = await cleared(ctx, ticket, bound.action);
+  let fresh = await cleared(ctx, ticket, policy, !ctx.dryRun);
   if (isOut(fresh)) return fresh;
   const element = `${ticket.fingerprint.role} ${JSON.stringify(cutName(ticket.fingerprint.name))}`;
   ctx.trace.untrusted.add('result.element');
@@ -97,7 +111,7 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   let sent: ActResult = await ctx.browser.act(page, fresh.ref, bound.action, bound.value);
   let refound = false;
   if (sent.kind === 'stale_ref') {
-    fresh = await cleared(ctx, ticket, bound.action, 'page_changed');
+    fresh = await cleared(ctx, ticket, policy, !ctx.dryRun, 'page_changed');
     if (isOut(fresh)) return fresh;
     sent = await ctx.browser.act(page, fresh.ref, bound.action, bound.value);
     refound = true;

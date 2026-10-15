@@ -5,7 +5,7 @@ import { type Candidate, cutName, fold, rowTextOf, twinsOf, urlNorm } from '../.
 import { findSite, locateSite, thresholdFor } from '../../questions';
 import { classify, HIGH_RISK, maxRisk, pageRaisers, type RiskReading } from '../../risk';
 import { type Authority, authorityAllows, authorityFor, corroborate, type Ticket } from '../../tickets';
-import { nothingDone } from '../shared';
+import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
 import { keyOf } from './locate-pick';
@@ -111,6 +111,7 @@ export async function settlePick(
 
   const authority = authorityOf(picked, cand, args, scene.cands);
   result.authority = authority;
+  let issued: Ticket | null = null;
   if (!ctx.dryRun) {
     const ticket = await ctx.tickets.issue({
       pageId: scene.page.id, urlNorm: urlNorm(scene.tab.url), fingerprint: cand.fp, risk: risk.class, authority,
@@ -118,6 +119,7 @@ export async function settlePick(
       ...(args.within === null ? {} : { within: fold(args.within) }),
     });
     result.ticket = ticket.id;
+    issued = ticket;
   } else {
     ctx.trace.notes.push('dry_run: no ticket is issued');
   }
@@ -136,7 +138,12 @@ export async function settlePick(
   if (result.ticket !== null && authorityAllows(authority, risk.class)) {
     outcome.next = { do: 'act', argv: ['refsure', 'act', '--ticket', result.ticket] } satisfies Next;
   } else if (HIGH_RISK.has(risk.class)) {
-    outcome.next = { do: 'needs_human' };
+    // The pick is right, and only act-high-risk may take it (spec §6.3): by the ticket when it is fit, else by ref.
+    ctx.trace.untrusted.add('next.argv');
+    outcome.next = highRiskNext({
+      class: risk.class, via: highRiskVia(issued, risk.class, cand.ref, cand.fp.name), action: 'click',
+      intent: args.intent ?? `click ${cand.fp.role} ${JSON.stringify(cutName(cand.fp.name))}`,
+    });
   }
   return outcome;
 }

@@ -5,6 +5,7 @@ import { type Candidate, cutName, fingerprintOf, urlNorm } from '../../page-mode
 import type { Decided } from '../../questions';
 import { actionPolicy, classify, findTermEveryReading, maxRisk, pageRaisers, type RiskReading } from '../../risk';
 import { type Authority, authorityAllows, authorityFor } from '../../tickets';
+import { highRiskNext } from '../shared';
 import type { DismissArgs } from './dismiss.args';
 import type { DismissLevelReport } from './dismiss-level-report';
 import { vetoOf } from './dismiss-veto';
@@ -62,8 +63,15 @@ export async function settleDismissPick(
   const risk = await riskOf(ctx, scene, pick);
   report.risk = risk.class;
   if (actionPolicy('click', risk.class, 'dismiss') !== 'allow') {
+    // The fresh ref and the name it shows (page text): the one command that may take it (spec §6.3).
+    ctx.trace.untrusted.add('next.argv');
+    const next = highRiskNext({
+      class: risk.class, via: { ref: pick.ref, expectName: pick.fp.name }, action: 'click',
+      intent: `dismiss the overlay by clicking ${pick.fp.role} ${name}`,
+    });
     return stop({ ...report, verdict: 'refused' }, 'refused', 'high_risk_class',
-      `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it`, HUMAN);
+      `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it; only act-high-risk takes it, `
+        + 'and only when the human asked for exactly this', next);
   }
   const closeWord = findTermEveryReading('dismissClose', rawName) !== null;
   const agreed = ctx.trace.decisions.at(-1)?.provider === 'agree';

@@ -1,5 +1,6 @@
 export type * from './risk-reading';
 export type * from './live-name';
+export type * from './live-target';
 export type { RiskClass } from './risk-class';
 export { HIGH_RISK, RISK_ORDER } from './risk-class';
 export type * from './lexicons';
@@ -13,6 +14,7 @@ export { classify } from './classify';
 export { actionRole, classifyNames } from './classify-name';
 export { confirmDialogRaiser, fieldRaisers, pageRaisers } from './raisers';
 export { liveRefCheck, nameCheck, readLiveName } from './live-ref-check';
+export { liveRefRisk, readLiveTarget } from './live-ref-risk';
 export { actionPolicy } from './action-policy';
 export { findTerm, findTermAnyReading, findTermEveryReading, findTermLoose, readingsOf } from './term-match';
 export { dialogOf, isConfirmDialog } from './confirm-dialog';
