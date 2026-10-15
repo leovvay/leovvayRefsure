@@ -1,5 +1,15 @@
-import type { CommandSpec } from '../cli';
+import type { AnyCommandSpec } from '../cli';
+import { causesCommand } from './causes';
+import { commandsCommand } from './commands';
+import { doctorCommand } from './doctor';
+import { guardCommand } from './guard';
+import { snapCommand } from './snap';
 
 /** Every command, in `--help` order. A static list: one bundle, no directory scan. Feature tasks append here. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const FEATURES: readonly CommandSpec<any, any>[] = [];
+export const FEATURES: readonly AnyCommandSpec[] = [
+  doctorCommand,
+  snapCommand,
+  guardCommand,
+  commandsCommand(() => FEATURES),
+  causesCommand,
+];
