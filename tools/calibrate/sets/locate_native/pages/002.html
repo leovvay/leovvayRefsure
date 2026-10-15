@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoices - Brightwater Plumbing Supply</title>
+<style>:root { --accent: #1f5f8b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: #1d1f23; background: #f7f7f5; line-height: 1.5; }
+  header { background: var(--accent); color: #fff; padding: 12px 24px; }
+  header a { color: #fff; }
+  .brand { margin: 0 0 6px; font-weight: 700; font-size: 1.15rem; letter-spacing: .01em; }
+  nav a { margin-right: 14px; text-decoration: none; }
+  main { max-width: 860px; margin: 0 auto; padding: 20px 24px 40px; }
+  footer { max-width: 860px; margin: 0 auto; padding: 12px 24px 32px; font-size: .9rem; color: #555; }
+  footer a { color: #555; margin-right: 12px; }
+  h1 { font-size: 1.55rem; margin: 8px 0 14px; }
+  h2 { font-size: 1.15rem; margin: 22px 0 8px; }
+  h3 { font-size: 1rem; margin: 0 0 6px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e3e3df; }
+  button, .btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; margin: 2px 4px 2px 0; }
+  button.primary { background: var(--accent); color: #fff; }
+  button.danger { border-color: #b3261e; color: #b3261e; }
+  label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: .92rem; }
+  input[type=text], input[type=email], input[type=tel], input[type=search], input[type=password], input[type=number], input[type=date], select, textarea {
+    font: inherit; padding: 7px 9px; border: 1px solid #c9c9c4; border-radius: 6px; width: min(420px, 100%); background: #fff; }
+  .check label, label.inline { display: inline; font-weight: 400; margin: 0 0 0 6px; }
+  .check { margin: 8px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .card, article { background: #fff; border: 1px solid #e3e3df; border-radius: 10px; padding: 14px; }
+  .muted { color: #666; font-size: .9rem; }
+  .price { font-weight: 700; margin: 4px 0 10px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; }
+  [role=tablist] { display: flex; gap: 4px; border-bottom: 1px solid #ddd; margin: 10px 0; }
+  [role=tab] { border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #333; }
+  [role=tab][aria-selected=true] { border-bottom-color: var(--accent); color: var(--accent); }
+  [role=switch] { min-width: 52px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); }
+  .modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, 92vw); background: #fff; border-radius: 12px; padding: 20px 22px; box-shadow: 0 12px 40px rgba(0,0,0,.3); }
+  ul.plain { list-style: none; padding: 0; margin: 0; }
+  ul.plain li { background: #fff; border: 1px solid #e3e3df; border-radius: 8px; padding: 10px 12px; margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header><p class="brand">Brightwater Plumbing Supply</p>
+<nav aria-label="Billing"><a href="#dash">Dashboard</a><a href="#inv">Invoices</a><a href="#cust">Customers</a></nav></header>
+<main>
+<h1>Invoices</h1>
+<div class="bar"><button class="primary">New invoice</button> <a href="#csv">Export CSV</a></div>
+<table>
+<thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Actions</th></tr></thead>
+<tbody>
+<tr><td>INV-3301</td><td>Harlow Bakery</td><td>$412.00</td><td><a href="#v1">View</a> <button>Edit</button> <button>Duplicate</button></td></tr>
+<tr><td>INV-3302</td><td>Oakridge Dental</td><td>$1,180.50</td><td><a href="#v2">View</a> <button>Edit</button> <button>Duplicate</button></td></tr>
+<tr><td>INV-3303</td><td>Pine and Pebble Cafe</td><td>$96.25</td><td><a href="#v3">View</a> <button>Edit</button> <button>Duplicate</button></td></tr>
+<tr><td>INV-3304</td><td>Marlow Street Laundry</td><td>$2,045.00</td><td><a href="#v4">View</a> <button>Edit</button> <button>Duplicate</button></td></tr>
+<tr><td>INV-3305</td><td>Greenhollow School</td><td>$318.70</td><td><a href="#v5">View</a> <button>Edit</button> <button>Duplicate</button></td></tr>
+</tbody></table>
+</main>
+</body>
+</html>

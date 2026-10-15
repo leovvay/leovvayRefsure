@@ -24,9 +24,10 @@ export function jevAsker(opts: { deadlineMs: number; attempts: number; piiMasks?
   return {
     host: provider.host,
     model: provider.model,
-    approve(site, request) {
+    approve(site, request, piiMasks) {
+      const masked = piiMasks === undefined ? config : { ...config, piiMasks };
       const approved = approve(request, {
-        site, provider: 'jev', host: provider.host, originUrl: null, profileId: null, config,
+        site, provider: 'jev', host: provider.host, originUrl: null, profileId: null, config: masked,
         dryRun: false, nowMs: Date.now(), egressLog: [],
       });
       return isEgressRefusal(approved) ? { cause: approved.cause, detail: approved.detail } : approved;

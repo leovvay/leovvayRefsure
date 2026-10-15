@@ -7,16 +7,17 @@ import { pool } from './lib/pool';
 import type { RunRow } from './lib/run-row';
 
 /*
-  Calibration step 1, replay. Each converted item goes through refsure's own site `build`, the egress pipeline
-  and the Jev provider, once per salt: candidate sites (locate, dismiss) in a differently shuffled order per salt,
-  the others as plain repeats. One row per call is appended to --out; a rerun skips (id, salt) pairs that already
-  have an answer, so a killed run resumes. OpenAI arms are not run here.
+  Calibration replay (steps 1 and 2). Each converted or Orca-native item goes through refsure's own site `build`,
+  the egress pipeline and the Jev provider, once per salt: candidate sites (locate, find, dismiss) in a differently
+  shuffled order per salt, the others as plain repeats. An item that names its PII mask mode is approved in that
+  mode. One row per call is appended to --out; a rerun skips (id, salt) pairs that already have an answer, so a
+  killed run resumes. OpenAI arms are not run here.
 
-    run --in <converted.jsonl> --out <runs-<site>.jsonl> [--salts s1,s2,s3] [--concurrency 6]
+    run --in <items.jsonl> --out <runs-<site>.jsonl> [--salts s1,s2,s3] [--concurrency 6]
         [--deadline-ms 15000] [--attempts 3] [--max-usd 1] [--limit N]
 */
 
-const USAGE = 'usage: run --in <converted.jsonl> --out <runs.jsonl> [--salts s1,s2,s3] [--concurrency 6] [--deadline-ms 15000] [--attempts 3] [--max-usd 1] [--limit N]';
+const USAGE = 'usage: run --in <items.jsonl> --out <runs.jsonl> [--salts s1,s2,s3] [--concurrency 6] [--deadline-ms 15000] [--attempts 3] [--max-usd 1] [--limit N]';
 const values = flags(process.argv.slice(2), ['in', 'out', 'salts', 'concurrency', 'deadline-ms', 'attempts', 'max-usd', 'limit'], USAGE);
 const inPath = need(values, 'in', USAGE);
 const outPath = need(values, 'out', USAGE);
@@ -50,8 +51,10 @@ await pool(jobs, concurrency, async ({ item, salt }) => {
   const base = {
     id: item.id, site: item.site, salt, gold: item.gold, alt: item.alt, risk: item.risk, lang: item.lang,
     source: item.source, condition: item.condition, wording: built.wording, ts: new Date().toISOString(),
+    ...(item.set === undefined ? {} : { set: item.set }), ...(item.masks === undefined ? {} : { masks: item.masks }),
+    ...(item.visualOnly === true ? { visualOnly: true } : {}),
   };
-  const approved = asker.approve(built.site, built.request);
+  const approved = asker.approve(built.site, built.request, item.masks);
   if ('cause' in approved) {
     tally.refused += 1;
     const row: RunRow = {

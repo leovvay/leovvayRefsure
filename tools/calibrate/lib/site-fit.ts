@@ -20,6 +20,10 @@ export interface SiteFit {
   correct: number;
   coverage: number | null;
   precision: number | null;
+  /** The Wilson 95 % lower bound of that precision over the acted answers (each call one answer). */
+  wilsonLow: number | null;
+  /** Per set the runs came from: answered runs, acted answers at the rows, and how many were right. */
+  bySet: Record<string, { runs: number; acted: number; correct: number }>;
   /** `measured`, or why the site keeps its declared maturity. */
   why: string;
 }

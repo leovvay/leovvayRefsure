@@ -13,6 +13,11 @@ export interface RunRow {
   lang: string;
   source: string;
   condition: string;
+  /** The set file the item came from, and the PII mask mode it was approved in, when the item named them. */
+  set?: string;
+  masks?: boolean;
+  /** The item's answer is visible only in the picture (see CalibItem). */
+  visualOnly?: boolean;
   /** `ok`, a provider status after retries, or `refused:<cause>` when the egress pipeline refused it. */
   status: string;
   choice: string | null;

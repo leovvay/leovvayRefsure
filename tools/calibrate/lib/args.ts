@@ -1,17 +1,27 @@
 import { parseArgs } from 'node:util';
 
-export type Flags = Record<string, string | undefined>;
+export type Flags = Record<string, string | boolean | undefined>;
 
-/** `--name value` options, all strings; an unknown or malformed option exits 64 with the usage line. */
-export function flags(argv: readonly string[], strings: readonly string[], usage: string): Flags {
-  const options: Record<string, { type: 'string' }> = {};
+/**
+ * `--name value` options (strings) and bare `--name` switches (booleans); an unknown or malformed option exits 64
+ * with the usage line.
+ */
+export function flags(argv: readonly string[], strings: readonly string[], usage: string, switches: readonly string[] = []): Flags {
+  const options: Record<string, { type: 'string' | 'boolean' }> = {};
   for (const name of strings) options[name] = { type: 'string' };
+  for (const name of switches) options[name] = { type: 'boolean' };
   try {
     return parseArgs({ args: [...argv], options, strict: true, allowPositionals: false }).values as Flags;
   } catch (error) {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n${usage}\n`);
     process.exit(64);
   }
+}
+
+/** A string option, or `undefined`. */
+export function opt(values: Flags, name: string): string | undefined {
+  const value = values[name];
+  return typeof value === 'string' ? value : undefined;
 }
 
 /** A required string option, or exit 64 with the usage line. */

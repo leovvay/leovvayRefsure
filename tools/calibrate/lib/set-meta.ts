@@ -1,3 +1,5 @@
+import type { NativeCounts } from './native-counts';
+
 /** Written next to a converted set: where it came from and what conversion kept or dropped. */
 export interface SetMeta {
   set: string;
@@ -13,4 +15,6 @@ export interface SetMeta {
   /** Converted lines whose path names a dialog, alertdialog or region: the place live overlay candidates carry. */
   overlayLines: number;
   date: string;
+  /** Set by the Orca-native replay: its lines come from live snapshots, so they carry the overlay place. */
+  native?: NativeCounts;
 }

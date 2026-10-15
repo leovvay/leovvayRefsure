@@ -6,7 +6,7 @@ import type { JevAnswer } from './jev-answer';
 export interface JevAsker {
   host: string;
   model: string;
-  /** The approved request, or the refusal's cause and detail. */
-  approve(site: SiteId, request: SiteRequest): ApprovedRequest | { cause: string; detail: string };
+  /** The approved request, or the refusal's cause and detail; `piiMasks` overrides the config's mask mode. */
+  approve(site: SiteId, request: SiteRequest, piiMasks?: boolean): ApprovedRequest | { cause: string; detail: string };
   ask(request: ApprovedRequest): Promise<JevAnswer>;
 }

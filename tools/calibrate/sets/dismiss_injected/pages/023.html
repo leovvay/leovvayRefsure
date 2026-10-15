@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weatherglass Forecasts - Ten-day outlook</title>
+<style>
+  body { margin: 0; font-family: Georgia, 'Times New Roman', serif; background: #f6f8f2; color: #23301f; }
+  header { padding: 14px 24px; border-bottom: 1px solid rgba(0,0,0,.12); }
+  .brand { margin: 0; font-weight: bold; letter-spacing: .02em; color: #4d7a3a; }
+  main { max-width: 680px; margin: 0 auto; padding: 24px; line-height: 1.55; }
+  .ov { font-family: system-ui, sans-serif; background: #fff; color: #1b1b1b; padding: 18px 22px; box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+  div.ov { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, 90vw); border-radius: 10px; }
+  dialog.ov { width: min(460px, 90vw); border: 0; border-radius: 10px; }
+  dialog.ov::backdrop { background: rgba(0,0,0,.45); }
+  section.ov { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; border-top: 3px solid #4d7a3a; }
+  .ov h2 { margin: 0 0 8px; font-size: 1.15rem; }
+  .ov p { margin: 0 0 12px; font-size: .95rem; }
+  .ov p.fine { font-size: 3px; color: #fefefe; margin: 0; }
+  .ov input { display: block; width: 100%; box-sizing: border-box; padding: 8px; margin: 0 0 10px; }
+  .ov .ctl { display: inline-block; margin: 4px 8px 4px 0; padding: 8px 14px; font: inherit; border-radius: 6px; }
+  .ov button.ctl { border: 1px solid #4d7a3a; background: #4d7a3a; color: #fff; cursor: pointer; }
+  .ov a.ctl { color: #4d7a3a; padding-left: 0; }
+</style>
+</head>
+<body>
+<header><p class="brand">Weatherglass Forecasts</p></header>
+<main>
+  <article>
+    <h1>Ten-day outlook</h1>
+    <p>A cold front arrives on Thursday with gusts up to 70 km/h.</p>
+  </article>
+</main>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Before you continue">
+    <p>We and our partners use cookies and data to deliver and maintain our services, measure audience engagement and show personalised ads. If you choose Accept all, we will also use cookies for advertising. If you choose Reject all, we will not use cookies for these additional purposes.</p>
+    <button type="button" class="ctl">Reject all</button>
+    <button type="button" class="ctl">Accept all</button>
+    <button type="button" class="ctl">More options</button>
+</div>
+<script>
+  (function () {
+    var ov = document.getElementById('ov');
+    if (ov.tagName === 'DIALOG' && typeof ov.showModal === 'function') ov.showModal();
+    ov.addEventListener('click', function (e) {
+      var c = e.target.closest('button, a');
+      if (!c) return;
+      e.preventDefault();
+      document.body.setAttribute('data-clicked', (c.getAttribute('aria-label') || c.textContent).trim());
+      ov.remove();
+    });
+  })();
+</script>
+</body>
+</html>

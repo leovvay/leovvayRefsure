@@ -1,3 +1,5 @@
+import type { NativeProvenance } from './native-provenance';
+
 /**
  * Where a calibration entry's numbers came from (spec §9). The fit writes it beside each entry in calibration.json
  * for people to read; refsure itself never reads it.
@@ -25,4 +27,10 @@ export interface CalibrationProvenance {
   /** Answers acted on at the shipped rows, and how many of them were right. */
   acted: number;
   correct: number;
+  /** The Wilson 95 % lower bound of the precision over the acted answers, when the fit reported it. */
+  wilsonLow?: number | null;
+  /** The Orca-native replay's own reading of this site (spec §9 step 2), when it ran. */
+  native?: NativeProvenance;
+  /** When the native fit raised an entry already shipped: that entry's rows, set and date. */
+  floor?: { threshold: unknown; set: string; n: number; date: string };
 }

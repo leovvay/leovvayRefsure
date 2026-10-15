@@ -58,6 +58,8 @@ function convert(item: SetItem, site: CalibSite): CalibItem {
       return { ...base, site, input: { pageUrl: str(r.pageUrl), page: str(r.page), states: (r.states ?? {}) as Record<string, string> } };
     case 'outcome':
       return { ...base, site, input: { intent: str(r.intent), before: str(r.before), after: str(r.after) } };
+    default:
+      throw new Error(`${item.id}: site ${site} has no thinning conversion`);
   }
 }
 

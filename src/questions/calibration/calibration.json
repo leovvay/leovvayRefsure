@@ -38,7 +38,208 @@
           "write": 0.56
         },
         "acted": 2013,
-        "correct": 2013
+        "correct": 2013,
+        "native": {
+          "sets": [
+            {
+              "set": "vision_locate.jsonl",
+              "sha256": "57c1fd8a00ce28d85f9596a4c7bada587cdc7aa85795180820fe90f8ca39f1e5",
+              "asked": 24,
+              "code": 72,
+              "codeCorrect": 20,
+              "dropped": 0,
+              "goldNotOffered": 0
+            }
+          ],
+          "visualOnlyLeftOut": 78,
+          "runs": 66,
+          "items": 11,
+          "orders": 6,
+          "replays": 2,
+          "model": "jev-1.13-20260917",
+          "route": "openrouter.ai",
+          "rows": {
+            "read": 0.89,
+            "write": 0.89,
+            "consent": 0.89,
+            "auth": 0.89,
+            "money": 0.89,
+            "irreversible": 0.89
+          },
+          "fitted": {
+            "all": 0.85,
+            "read": 0.87,
+            "write": 0.85
+          },
+          "acted": 43,
+          "correct": 43,
+          "coverage": 0.6515,
+          "precision": 1,
+          "wilsonLow": 0.918,
+          "why": "measured",
+          "date": "2026-10-15"
+        }
+      }
+    },
+    {
+      "site": "find",
+      "wordingHash": "5d0ca2c62d7e395fe3e58f2c9f978ff9e61483d3fde3c68bef89a4da39aebea4",
+      "lineFormat": 1,
+      "modelFamily": "jev-1.13",
+      "provider": "jev",
+      "threshold": {
+        "read": 0.71,
+        "write": 0.8,
+        "consent": 0.99,
+        "auth": 0.99,
+        "money": 0.99,
+        "irreversible": 0.99
+      },
+      "setSha256": "3cae50ae200e107bc9a639eb5934c4437f5b52184d9fce9007428a38bec5fdf6",
+      "n": 240,
+      "coverageAtP99": 0.6667,
+      "precisionAtP99": 1,
+      "date": "2026-10-15",
+      "provenance": {
+        "source": "refsure-authored synthetic sets (tools/calibrate/sets), replayed in Orca",
+        "set": "locate_native.jsonl",
+        "items": 40,
+        "runs": 240,
+        "orders": 6,
+        "replays": 2,
+        "model": "jev-1.13-20260917",
+        "route": "openrouter.ai",
+        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence, pooled over every replay; lowest score below 1.0 with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
+        "target": 0.99,
+        "minPoints": 10,
+        "fitted": {
+          "all": 0.61,
+          "read": 0.71,
+          "write": 0.79,
+          "consent": 0.99,
+          "auth": 0.99,
+          "money": 0.61,
+          "irreversible": 0.85
+        },
+        "acted": 160,
+        "correct": 160,
+        "wilsonLow": 0.9766,
+        "native": {
+          "sets": [
+            {
+              "set": "locate_native.jsonl",
+              "sha256": "3cae50ae200e107bc9a639eb5934c4437f5b52184d9fce9007428a38bec5fdf6",
+              "asked": 40,
+              "code": 0,
+              "codeCorrect": 0,
+              "dropped": 0,
+              "goldNotOffered": 0
+            }
+          ],
+          "visualOnlyLeftOut": 0,
+          "runs": 240,
+          "items": 40,
+          "orders": 6,
+          "replays": 2,
+          "model": "jev-1.13-20260917",
+          "route": "openrouter.ai",
+          "rows": {
+            "read": 0.71,
+            "write": 0.8,
+            "consent": 0.99,
+            "auth": 0.99,
+            "money": 0.99,
+            "irreversible": 0.99
+          },
+          "fitted": {
+            "all": 0.61,
+            "read": 0.71,
+            "write": 0.79,
+            "consent": 0.99,
+            "auth": 0.99,
+            "money": 0.61,
+            "irreversible": 0.85
+          },
+          "acted": 160,
+          "correct": 160,
+          "coverage": 0.6667,
+          "precision": 1,
+          "wilsonLow": 0.9766,
+          "why": "measured",
+          "date": "2026-10-15"
+        }
+      }
+    },
+    {
+      "site": "page-state",
+      "wordingHash": "8225b2a040b86017369f6104372698b3f64ea09f3f5f7c2aa3c81c49007d9a60",
+      "lineFormat": 1,
+      "modelFamily": "jev-1.13",
+      "provider": "jev",
+      "threshold": 0.8,
+      "setSha256": "d8bc01af8fe741ae7478bc84394263dcb365d029c1816040a6798001e9e51438",
+      "n": 426,
+      "coverageAtP99": 0.838,
+      "precisionAtP99": 1,
+      "date": "2026-10-15",
+      "provenance": {
+        "source": "refsure-authored synthetic sets (tools/calibrate/sets) and frozen browser benchmark sets with stored pages, 2026-10-13 (not published), replayed in Orca",
+        "set": "pii_masks.jsonl, vision_page_state.jsonl",
+        "items": 71,
+        "runs": 426,
+        "orders": 6,
+        "replays": 2,
+        "model": "jev-1.13-20260917",
+        "route": "openrouter.ai",
+        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence, pooled over every replay; lowest score below 1.0 with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
+        "target": 0.99,
+        "minPoints": 10,
+        "fitted": {
+          "all": 0.6
+        },
+        "acted": 357,
+        "correct": 357,
+        "wilsonLow": 0.9894,
+        "native": {
+          "sets": [
+            {
+              "set": "pii_masks.jsonl",
+              "sha256": "9cfb2d48715d6b039afe32ba1eac1f6f0c773ad08313cd2c5aa5c14c5c8737af",
+              "asked": 58,
+              "code": 0,
+              "codeCorrect": 0,
+              "dropped": 0,
+              "goldNotOffered": 0
+            },
+            {
+              "set": "vision_page_state.jsonl",
+              "sha256": "3460d7e9b9c3c3927338c867b7a9f8dcb3597c46460da25a2fd8a1ac2fbefe81",
+              "asked": 64,
+              "code": 0,
+              "codeCorrect": 0,
+              "dropped": 0,
+              "goldNotOffered": 0
+            }
+          ],
+          "visualOnlyLeftOut": 306,
+          "runs": 426,
+          "items": 71,
+          "orders": 6,
+          "replays": 2,
+          "model": "jev-1.13-20260917",
+          "route": "openrouter.ai",
+          "rows": 0.8,
+          "fitted": {
+            "all": 0.6
+          },
+          "acted": 357,
+          "correct": 357,
+          "coverage": 0.838,
+          "precision": 1,
+          "wilsonLow": 0.9894,
+          "why": "measured",
+          "date": "2026-10-15"
+        }
       }
     },
     {
@@ -74,6 +275,86 @@
         },
         "acted": 447,
         "correct": 447
+      }
+    },
+    {
+      "site": "presence",
+      "wordingHash": "ad674b2b8402738364db010721a30adb6ca3d744d486f0f3db85a56dafbd9cc9",
+      "lineFormat": 1,
+      "modelFamily": "jev-1.13",
+      "provider": "jev",
+      "threshold": {
+        "yesAtLeast": 0.92,
+        "noAtMost": 0.15
+      },
+      "setSha256": "4bca6f37a0c64b0c181113824b19a07b9c8339c6a3425d2ed9bb6c44f2a5fb4e",
+      "n": 324,
+      "coverageAtP99": 0.3889,
+      "precisionAtP99": 1,
+      "date": "2026-10-15",
+      "provenance": {
+        "source": "refsure-authored synthetic sets (tools/calibrate/sets) and frozen browser benchmark sets with stored pages, 2026-10-13 (not published), replayed in Orca",
+        "set": "presence_false.jsonl, vision_presence.jsonl",
+        "items": 54,
+        "runs": 324,
+        "orders": 6,
+        "replays": 2,
+        "model": "jev-1.13-20260917",
+        "route": "openrouter.ai",
+        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence, pooled over every replay; lowest score below 1.0 with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
+        "target": 0.99,
+        "minPoints": 10,
+        "fitted": {
+          "yesAtLeast": 0.92,
+          "noAtMost": 0.74
+        },
+        "acted": 126,
+        "correct": 126,
+        "wilsonLow": 0.9704,
+        "native": {
+          "sets": [
+            {
+              "set": "presence_false.jsonl",
+              "sha256": "ed46f10685ffef52fdbfe3c96a0f717c9887bb976a14f79266e042f52daa7c0f",
+              "asked": 40,
+              "code": 0,
+              "codeCorrect": 0,
+              "dropped": 0,
+              "goldNotOffered": 0
+            },
+            {
+              "set": "vision_presence.jsonl",
+              "sha256": "5341b8846bfab3ccbffd407c24e3bce056b1351fa48966040a06a22b55251683",
+              "asked": 68,
+              "code": 0,
+              "codeCorrect": 0,
+              "dropped": 0,
+              "goldNotOffered": 0
+            }
+          ],
+          "visualOnlyLeftOut": 324,
+          "runs": 324,
+          "items": 54,
+          "orders": 6,
+          "replays": 2,
+          "model": "jev-1.13-20260917",
+          "route": "openrouter.ai",
+          "rows": {
+            "yesAtLeast": 0.92,
+            "noAtMost": 0.15
+          },
+          "fitted": {
+            "yesAtLeast": 0.92,
+            "noAtMost": 0.74
+          },
+          "acted": 126,
+          "correct": 126,
+          "coverage": 0.3889,
+          "precision": 1,
+          "wilsonLow": 0.9704,
+          "why": "measured",
+          "date": "2026-10-15"
+        }
       }
     }
   ]

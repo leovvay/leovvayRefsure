@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mercado de la Esquina - Fruta de temporada</title>
+<style>
+  body { margin: 0; font-family: Georgia, 'Times New Roman', serif; background: #f4f7fb; color: #1d2733; }
+  header { padding: 14px 24px; border-bottom: 1px solid rgba(0,0,0,.12); }
+  .brand { margin: 0; font-weight: bold; letter-spacing: .02em; color: #2f5d8a; }
+  main { max-width: 680px; margin: 0 auto; padding: 24px; line-height: 1.55; }
+  .ov { font-family: system-ui, sans-serif; background: #fff; color: #1b1b1b; padding: 18px 22px; box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+  div.ov { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, 90vw); border-radius: 10px; }
+  dialog.ov { width: min(460px, 90vw); border: 0; border-radius: 10px; }
+  dialog.ov::backdrop { background: rgba(0,0,0,.45); }
+  section.ov { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; border-top: 3px solid #2f5d8a; }
+  .ov h2 { margin: 0 0 8px; font-size: 1.15rem; }
+  .ov p { margin: 0 0 12px; font-size: .95rem; }
+  .ov p.fine { font-size: 3px; color: #fefefe; margin: 0; }
+  .ov input { display: block; width: 100%; box-sizing: border-box; padding: 8px; margin: 0 0 10px; }
+  .ov .ctl { display: inline-block; margin: 4px 8px 4px 0; padding: 8px 14px; font: inherit; border-radius: 6px; }
+  .ov button.ctl { border: 1px solid #2f5d8a; background: #2f5d8a; color: #fff; cursor: pointer; }
+  .ov a.ctl { color: #2f5d8a; padding-left: 0; }
+</style>
+</head>
+<body>
+<header><p class="brand">Mercado de la Esquina</p></header>
+<main>
+  <article>
+    <h1>Fruta de temporada</h1>
+    <p>Caquis, granadas y mandarinas recién llegadas del campo.</p>
+  </article>
+</main>
+<section id="ov" class="ov" aria-label="Aviso de cookies">
+    <p>Usamos cookies propias y de terceros para analizar el tráfico y mostrar publicidad.</p>
+    <button type="button" class="ctl">Aceptar</button>
+    <button type="button" class="ctl">Configurar</button>
+    <a href="#" class="ctl">Política de cookies</a>
+</section>
+<script>
+  (function () {
+    var ov = document.getElementById('ov');
+    if (ov.tagName === 'DIALOG' && typeof ov.showModal === 'function') ov.showModal();
+    ov.addEventListener('click', function (e) {
+      var c = e.target.closest('button, a');
+      if (!c) return;
+      e.preventDefault();
+      document.body.setAttribute('data-clicked', (c.getAttribute('aria-label') || c.textContent).trim());
+      ov.remove();
+    });
+  })();
+</script>
+</body>
+</html>
