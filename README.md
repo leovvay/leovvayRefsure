@@ -15,8 +15,9 @@ often get wrong, or burn tokens on:
 
 You bring your own API key (BYOK). Nothing runs as a service, and there is no account.
 
-> **Status: 0.x.** No Decision site is `measured` yet: refsure runs on starting thresholds carried over from the
-> author's earlier decision code. See [Calibration status](#calibration-status).
+> **Status: 0.x.** Three Decision sites are `measured` on Jev: `locate`, `find` and `outcome`. `dismiss`, `page-state`
+> and `presence` still run on starting thresholds carried over from the author's earlier decision code,
+> `pick-option` is experimental, and no OpenAI answer is measured. See [Calibration status](#calibration-status).
 
 ## Why
 
@@ -651,8 +652,8 @@ These rules live in code, not in the agent skill:
 
 | Class | Examples | Route |
 |---|---|---|
-| read | links, tabs, expanders, close | `act`, confidence ≥0.6 |
-| write | fields, toggles, a plain submit | `act`, confidence ≥0.8 |
+| read | links, tabs, expanders, close | `act`, at the site's read row (0.6-0.89, see [Calibration status](#calibration-status)) |
+| write | fields, toggles, a plain submit | `act`, at the site's write row (0.8-0.89) |
 | money | pay, buy, order, checkout, top up; card, CVV and IBAN forms; `checkout`, `payment`, `billing` paths | `act-high-risk` only |
 | irreversible | delete, remove, send, publish, revoke; "cancel" next to subscription, order, account or booking; the confirming button of a confirm dialog (never its own Cancel or No); `delete`, `close-account` paths | `act-high-risk` only |
 | auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent | `act-high-risk` only |
@@ -717,47 +718,75 @@ and the envelope lists it under `untrusted`.
 
 ## Calibration status
 
-refsure is **0.x until the Orca-native calibration pass**. Every envelope that carries a Decision reports the site's
-`maturity`:
+refsure is **0.x**. Every envelope that carries a Decision reports the site's `maturity`:
 
 | Maturity | Meaning | Authority to act |
 |---|---|---|
 | `measured` | a `calibration.json` entry matches this site, provider, wording hash, line format 1 and model family | `write` |
 | `inherited` | the wording was measured before, but not on refsure's input shape or this model | `write` for `locate --recorded`; for `dismiss`, only when the close/reject lexicon also matches the pick (or with `agree`) |
-| `experimental` | a new wording (`locate --intent`, `verify-target`, `pick-option`, `state --state`) | `write` only at confidence ≥0.85 **and** code corroboration; otherwise `read` |
+| `experimental` | a wording no release has measured yet (`pick-option`, a custom `state --state` set) | `write` only at confidence ≥0.85 **and** code corroboration; otherwise `read` |
 
-**Where it stands in this version.** `src/questions/calibration/calibration.json` ships no entries yet, so no site is
-`measured`. Every site runs at its declared maturity, on the starting thresholds ported from the author's earlier
-decision code:
+**Where it stands in 0.1.0.** Measured on 2026-10-15 with Jev `jev-1.13-20260917` through OpenRouter, on the
+wordings this release ships. Two kinds of evidence were pooled:
 
-| Site | Asked by | Who may answer | Maturity now | Threshold now |
-|---|---|---|---|---|
-| `locate` | `locate --recorded` | Jev | `inherited` | by risk: read 0.6, write 0.8, consent, auth, money and irreversible 0.85; 0.85 without `--risk` |
-| `find` | `locate --intent`, `verify-target` | Jev | `experimental` | the `locate` rows |
-| `dismiss` | `dismiss` | Jev, or `agree` | `inherited` | 0.6 |
-| `page-state` | `state --expect` (a custom `--state` set is `experimental`) | Jev, OpenAI, or `fallback` | `inherited` | 0.8 |
-| `outcome` | `outcome`, `act --verify` | Jev | `inherited` | yes at ≥0.85, no at ≤0.15 |
-| `presence` | `wait-for`, `doctor --ping` | Jev, OpenAI, or `agree` | `inherited` | yes at ≥0.85, no at ≤0.15 |
-| `option-map` | `pick-option` | Jev | `experimental` | 0.8 |
+- **Converted:** labelled sets from the author's earlier work (not published), reshaped to refsure's line format.
+- **Orca-native:** stored pages served locally in an isolated Orca profile and read through refsure's own adapter.
+  The four refsure-authored sets (`locate_native`, `dismiss_injected`, `pii_masks`, `presence_false`) live in
+  `tools/calibrate/sets/` with their pages and labelling notes.
 
-The model families these maturities hold for are `jev-1.13` (Jev) and `gpt-6-luna` (OpenAI). A new model family gets
-no authority at all: its answers are reported as `proposed` until a release re-measures it. A new dated snapshot
-within the same family keeps its maturity, adds `model_changed` to the envelope and raises a `doctor` warning.
+A row is the lowest confidence whose fitted precision is at least 0.99 with at least 10 answers above it, and it is
+never looser than the starting row. "Right of acted" counts calls at the shipped row (or, for a held site, the row it
+reads instead), with the Wilson 95 % lower bound in brackets. Several calls ask the same page, so the page count is
+the honest sample size.
 
-The plan:
+| Site | Asked by | Maturity | Threshold | Pages per set | Calls | Right of acted (Wilson low) | Coverage |
+|---|---|---|---|---|---|---|---|
+| `locate` | `locate --recorded` | `measured` | 0.89 at every risk | browser_locate 428 (converted); vision_locate 96, of which 24 reached the model | 3996 | 2056 of 2056 (0.998) | 51.5 % |
+| `find` | `locate --intent`, `verify-target` | `measured` | read 0.61, write 0.8, consent, auth, money and irreversible 0.85; 0.85 without `--risk` | locate_native 40 | 240 | 185 of 185 (0.980) | 77.1 % |
+| `outcome` | `outcome`, `act --verify` | `measured` | yes at ≥0.93, no at ≤0.15 | browser_outcome 143 (converted) | 1287 | 447 of 447 (0.992) | 34.7 % |
+| `dismiss` | `dismiss` | `inherited` (held) | 0.6, with the close/reject lexicon or `agree` | browser_dismiss 59 (converted); dismiss_injected 40 and vision_dismiss 50, of which 35 and 15 reached the model | 831 | no row ships; at 0.6, 331 of 335 converted (0.970) | |
+| `page-state` | `state --expect` | `inherited` (held) | 0.8 | browser_page_state 117 (converted); pii_masks 29, each asked with masks on and off; vision_page_state 64 | 1785 | no row ships; at 0.8, 899 of 909 converted (0.980), 357 of 357 on Orca pages whose text carries the answer (0.989), 131 of 275 on pages that show it only in pixels (0.418) | |
+| `presence` | `wait-for`, `doctor --ping` | `inherited` (held) | yes at ≥0.85, no at ≤0.15 | presence_false 40; vision_presence 68 | 648 | no row ships; on text pages 126 of 126 at yes ≥0.92 (0.970); on pixel-only pages 18 of 36 (0.345) | |
+| `option-map` | `pick-option` | `experimental` | 0.8 | none | 0 | not measured | |
 
-1. **Before 0.1:** a parity check of OpenRouter Jev against earlier stored answers, then a replay of the earlier
-   labelled sets, reshaped to refsure's line format, to refit the starting thresholds. A fitted row never loosens a
-   threshold below the starting row, and a fitted site becomes `measured` only for line format 1 and family
-   `jev-1.13`.
-2. **Before 1.0:** an Orca-native replay. Stored pages are served on `127.0.0.1` in an isolated Orca profile,
-   snapshotted through refsure's own adapter, and labelled blind. New small sets cover `locate --intent`, false
-   `present` in `wait-for`, injected dismiss walls and PII masks. Sites that pass flip to `measured`, and refsure
-   becomes 1.0.
+OpenAI (`gpt-6-luna`), which may answer `state` and `wait-for`, was not measured in this pass: its answers run at
+the declared maturity on the starting rows. A new model family gets no authority at all: its answers are reported as
+`proposed` until a release re-measures it. A new dated snapshot within the same family keeps its maturity, adds
+`model_changed` to the envelope and raises a `doctor` warning.
+
+**What blocks 1.0.** refsure becomes 1.0 when every site passes an Orca-native replay. Per site:
+
+- `locate`: nothing in its numbers. Most of its evidence is converted; the Orca-native part is 24 pages, 43 of 43
+  right (0.918). A lower write row (0.8) is an open question, so every risk uses 0.89 until it is settled.
+- `find`: passes, but on 40 synthetic pages. A Wilson low of 0.980 is under the 0.99 target, so the set is too
+  small to prove it. No risk class has 10 pages with a wrong answer, so only the read row is fitted; the others are
+  the starting rows.
+- `outcome`: no Orca-native evidence. Its row comes from converted inputs only. The stored vision set was not
+  replayed: an outcome needs the action between two reads, and 47 of its 59 items fail only visually. Needs an
+  Orca-native outcome set.
+- `dismiss`: held for a maintainer decision on the row. The fit gives 0.97, because it counts picks that the
+  never-click veto refuses before any click: every wrong pick at 0.6 or more is "Manage settings" on one injected
+  wall, and leaving vetoed picks out, 187 of 187 native picks at 0.6 were right. At 0.97 it abstains on a plain
+  cookie wall ("Reject all" at 0.95). Two code limits showed up: the veto refuses the French "Continuer sans
+  accepter" because "accepter" matches the accept lexicon, and the overlay finder misses overlays with no dialog
+  role and no consent wording (32 of the 50 vision pages).
+- `page-state`: no score below 1.0 reaches 0.99. One bot-check page read as an error page holds 9 of the 10
+  converted wrong answers at 0.8 or more. On pages whose error or block shows only in pixels, the text reads as
+  `expected`, 76 times at confidence 1.0. The choice left: a stated text-only scope, the cumulative row 0.82, or
+  per-state rows. PII masks on and off agree on 28 of 29 pages.
+- `presence`: no yes edge reaches 0.99. On pixel-only pages it reports false presents, for example a toast faded to
+  opacity 0 that the text still carries. It needs the same text-only scope decision as `page-state`. refsure cannot
+  tell a pixel-only page apart at run time today.
+- `option-map`: no labelled set yet.
+- OpenAI answers at `page-state` and `presence`: not measured.
 
 Each `calibration.json` entry carries its provenance: site, set sha256, wording hash, line format, model family,
-provider, threshold, the number of items, coverage and precision at P=0.99, and date. The calibration harness lives
-in `tools/calibrate/` and is not part of the npm package. No third-party dataset is committed.
+provider, threshold, the number of items, coverage and precision at P=0.99, the Wilson bound, and date. A site with
+no shipped row has a `held` record there instead, with the reason and both readings; refsure reads only `entries`.
+The four refsure-authored sets were labelled blind and matched the frozen gold on 40 of 40 (`locate_native`), 40 of
+40 (`dismiss_injected`), 29 of 29 (`pii_masks`) and 39 of 40 (`presence_false`, one labeller slip, kept as
+authored). The calibration harness lives in `tools/calibrate/` and is not part of the npm package. No third-party
+dataset is committed.
 
 ## Agent skill install
 
