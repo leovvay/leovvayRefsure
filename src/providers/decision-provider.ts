@@ -10,6 +10,8 @@ export interface ProviderAnswer {
   model: string | null;
   usd: number | null;
   ms: number;
+  /** Why it is not `ok`, in refsure's own words: never a key, a response body or model output. */
+  detail?: string;
 }
 
 export interface DecisionProvider {
