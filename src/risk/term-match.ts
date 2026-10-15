@@ -1,4 +1,5 @@
 import { fold, foldVisible } from '../page-model';
+import { escapeRegExp } from './escape-reg-exp';
 import { LEXICONS } from './lexicons';
 
 /** The word lists of a lexicon, by field. */
@@ -12,10 +13,6 @@ export interface TermHit { lang: string; term: string }
 interface Matcher { re: RegExp; langOf: ReadonlyMap<string, string> }
 
 const matchers = new Map<TermField, Matcher>();
-
-function escapeTerm(term: string): string {
-  return term.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
-}
 
 /**
  * One regex per field over the union of every lexicon (spec §8.5): a term matches only on a Unicode word
@@ -32,7 +29,7 @@ function matcherFor(field: TermField): Matcher {
       if (term !== '' && !langOf.has(term)) langOf.set(term, lexicon.lang);
     }
   }
-  const terms = [...langOf.keys()].sort((a, b) => b.length - a.length).map(escapeTerm);
+  const terms = [...langOf.keys()].sort((a, b) => b.length - a.length).map(escapeRegExp);
   const source = terms.length === 0 ? '(?!)' : `(?<![\\p{L}\\p{N}])(?:${terms.join('|')})(?![\\p{L}\\p{N}])`;
   const matcher: Matcher = { re: new RegExp(source, 'u'), langOf };
   matchers.set(field, matcher);
@@ -62,7 +59,7 @@ function looseMatcherFor(field: TermField): LooseMatcher {
     if (key !== '' && !hitOf.has(key)) hitOf.set(key, { lang, term });
   }
   const terms = [...langOf.keys()].sort((a, b) => b.length - a.length)
-    .map((term) => escapeTerm(term).replace(/\s+/gu, '\\s*'));
+    .map((term) => escapeRegExp(term).replace(/\s+/gu, '\\s*'));
   const alt = terms.length === 0 ? '(?!)' : `(?:${terms.join('|')})`;
   const source = `(?<![\\p{L}\\p{N}])${alt}|${alt}(?![\\p{L}\\p{N}])`;
   const matcher: LooseMatcher = { re: new RegExp(source, 'u'), hitOf };

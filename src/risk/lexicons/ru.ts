@@ -1,8 +1,8 @@
-import type { LanguageLexicon } from './language-lexicon';
+import type { Lexicon } from './lexicon';
 
 const cancelVerbs = ['отменить', 'отмени', 'аннулировать', 'прекратить'];
 
-export const RU: LanguageLexicon = {
+export const RU: Lexicon = {
   lang: 'ru',
   money: [
     'оплатить', 'оплата', 'заплатить', 'купить', 'приобрести', 'заказать', 'оформить заказ', 'к оплате',

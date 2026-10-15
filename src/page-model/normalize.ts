@@ -1,10 +1,14 @@
 /** The longest name a line or a path carries; longer ones end in `…` (the earlier descriptor lines' cut). */
 export const NAME_MAX = 90;
 
-// Zero-width characters become spaces, so `Save​now` reads as two words, as a person sees it.
-const ZERO_WIDTH = /[​-‍⁠﻿]/g;
+// Zero-width characters become spaces, so `Save\u200Bnow` reads as two words, as a person sees it.
+const ZERO_WIDTH = /[\u200B-\u200D\u2060\uFEFF]/g;
 // A soft hyphen only marks where a word may break; it is dropped, never turned into a space.
-const SOFT_HYPHEN = /­/g;
+const SOFT_HYPHEN = /\u00AD/g;
+// Typographic apostrophes a page spells "J’accepte" or "can’t" with: left and right single quotes, the reversed
+// quote, the modifier letter apostrophe (Ukrainian), the acute and grave accents and the fullwidth grave. NFKC
+// leaves them apart from `'` (and splits the acute into a space and a combining mark), so `fold` maps them first.
+const APOSTROPHES = /[\u2018\u2019\u201B\u02BC\u00B4\u0060\uFF40]/g;
 
 /** NFKC; NBSP and zero-width characters become spaces; whitespace collapsed; trimmed (spec §8.3). */
 export function norm(s: string): string {
@@ -17,11 +21,13 @@ export function norm(s: string): string {
 }
 
 /**
- * `norm`, then lower case. `toLowerCase` rather than `toLocaleLowerCase`: a Turkish host locale would fold `I`
- * to a dotless `ı`, and a match must not depend on where refsure runs. `І` still folds to `і`.
+ * `norm` with every typographic apostrophe read as `'`, then lower case, so "J’accepte" matches the lexicon's
+ * "j'accepte". `norm` keeps the apostrophe the page shows: a fingerprint name stays what the page says.
+ * `toLowerCase` rather than `toLocaleLowerCase`: a Turkish host locale would fold `I` to a dotless `ı`, and a
+ * match must not depend on where refsure runs. `І` still folds to `і`.
  */
 export function fold(s: string): string {
-  return norm(s).toLowerCase();
+  return norm(s.replace(APOSTROPHES, "'")).toLowerCase();
 }
 
 // What no person sees: format characters (zero-width space and joiners, bidi marks, the BOM) and the other

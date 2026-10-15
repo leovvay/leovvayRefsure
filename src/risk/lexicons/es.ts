@@ -1,8 +1,8 @@
-import type { LanguageLexicon } from './language-lexicon';
+import type { Lexicon } from './lexicon';
 
 const cancelVerbs = ['cancelar', 'anular', 'dar de baja'];
 
-export const ES: LanguageLexicon = {
+export const ES: Lexicon = {
   lang: 'es',
   money: [
     'pagar', 'pagar ahora', 'comprar', 'comprar ahora', 'pedido', 'realizar pedido', 'hacer pedido',

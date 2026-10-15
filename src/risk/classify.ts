@@ -1,5 +1,6 @@
 import type { ActAction, AxNode, AxTree } from '../browser';
-import { dialogOf, isConfirmDialog } from './confirm-dialog';
+import { nodeAt } from '../page-model';
+import { backsOut, CONFIRMING_ROLES, dialogOf, isConfirmDialog } from './confirm-dialog';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
@@ -14,8 +15,6 @@ export interface ClassifyOpts {
 }
 
 const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
-/** What a confirm dialog's confirming control can be: whatever confirms on a click. */
-export const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
 const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;
@@ -49,8 +48,7 @@ function routeOf(url: string): string {
  * a close or cancel word that keeps it calm only when every reading has it.
  */
 export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReading {
-  const node = tree.nodes[i];
-  if (node === undefined) throw new RangeError(`no node ${i} in the snapshot`);
+  const node = nodeAt(tree, i);
   const name = node.name;
   const base = baseOf(node, opts.action);
   let risk = base.risk;
@@ -79,8 +77,7 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
 
   const clicks = opts.action === undefined || !FIELD_ACTIONS.has(opts.action);
   const dialog = clicks && CONFIRMING_ROLES.has(node.role) ? dialogOf(tree, i) : null;
-  if (dialog !== null && isConfirmDialog(tree, dialog)
-    && findTermEveryReading('dismissClose', name) === null && findTermEveryReading('cancelWords', name) === null) {
+  if (dialog !== null && isConfirmDialog(tree, dialog) && !backsOut([name])) {
     risk = maxRisk(risk, 'irreversible');
     reasons.push('dialog:confirm');
   }

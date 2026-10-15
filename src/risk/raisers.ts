@@ -1,32 +1,37 @@
 import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
-import { assumedOn, countProbe, raise } from './raise-probe';
-import type { RiskClass } from './risk-class';
+import type { FieldAttrs } from './field-attrs';
+import { assumedOn, countProbe, emptyReading, raise } from './raise-probe';
 import type { RiskReading } from './risk-reading';
 import { readTagAttrs } from './tag-attrs';
 
 const PASSWORD_INPUTS = 'input[type=password]';
+/** What a card, CVV or IBAN input carries in its name or id; the page and field raisers read the same words. */
+const CARD_WORDS = ['card', 'cvv', 'cvc', 'iban'] as const;
 const CARD_INPUTS = [
   'input[autocomplete*="cc-" i]',
-  'input[name*=card i]', 'input[name*=cvv i]', 'input[name*=cvc i]', 'input[name*=iban i]',
-  'input[id*=card i]', 'input[id*=cvv i]', 'input[id*=cvc i]', 'input[id*=iban i]',
+  ...['name', 'id'].flatMap((attr) => CARD_WORDS.map((word) => `input[${attr}*=${word} i]`)),
 ].join(',');
-const CARD_NAME = /card|cvv|cvc|iban/i;
+const CARD_NAME = new RegExp(CARD_WORDS.join('|'), 'i');
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
 const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
+
+/** What cannot be read counts as both a password and a card input (spec §8.3). */
+function assumedReading(): RiskReading {
+  const out = emptyReading();
+  raise(out, 'auth', 'raiser:password', 'assumed');
+  raise(out, 'money', 'raiser:card', 'assumed');
+  return out;
+}
 
 /**
  * Page-level raisers for a click (spec §8.3): a password input on the page → auth; a card, CVV or IBAN input →
  * money. A backend without `count` counts both as hit. Other actions read nothing here.
  */
 export async function pageRaisers(port: BrowserPort, page: PageRef, action: ActAction): Promise<RiskReading> {
-  if (!CLICKS.has(action)) return { class: 'read', reasons: [] };
-  const out = { class: 'read' as RiskClass, reasons: [] as string[] };
-  if (port.count === undefined || !port.features().has('count')) {
-    raise(out, 'auth', 'raiser:password', 'assumed');
-    raise(out, 'money', 'raiser:card', 'assumed');
-    return out;
-  }
+  if (!CLICKS.has(action)) return emptyReading();
+  if (port.count === undefined || !port.features().has('count')) return assumedReading();
+  const out = emptyReading();
   const [password, card] = await Promise.all([
     countProbe(port, page, PASSWORD_INPUTS),
     countProbe(port, page, CARD_INPUTS),
@@ -35,8 +40,6 @@ export async function pageRaisers(port: BrowserPort, page: PageRef, action: ActA
   raise(out, 'money', 'raiser:card', card);
   return out;
 }
-
-type FieldAttrs = Record<'type' | 'autocomplete' | 'name' | 'id', string>;
 
 async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<FieldAttrs | null> {
   const keys = ['type', 'autocomplete', 'name', 'id'] as const;
@@ -54,21 +57,22 @@ async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<F
 /**
  * Field raisers for fill, select, check and uncheck (spec §8.3): `type=password` or a password/one-time-code
  * autocomplete → auth; a `cc-*` autocomplete or a card, CVV or IBAN name → money. Unreadable counts as hit.
+ * `known` is the field's attributes already read off the same ref (`readLiveName`); without it they are read here.
  */
-export async function fieldRaisers(port: BrowserPort, page: PageRef, ref: Ref): Promise<RiskReading> {
-  const out = { class: 'read' as RiskClass, reasons: [] as string[] };
-  let attrs: FieldAttrs | null;
-  try {
-    attrs = await fieldAttrs(port, page, ref);
-  } catch (error) {
-    assumedOn(error);
-    attrs = null;
-  }
+export async function fieldRaisers(
+  port: BrowserPort, page: PageRef, ref: Ref, known?: FieldAttrs | null,
+): Promise<RiskReading> {
+  let attrs: FieldAttrs | null = known ?? null;
   if (attrs === null) {
-    raise(out, 'auth', 'raiser:password', 'assumed');
-    raise(out, 'money', 'raiser:card', 'assumed');
-    return out;
+    try {
+      attrs = await fieldAttrs(port, page, ref);
+    } catch (error) {
+      assumedOn(error);
+      attrs = null;
+    }
   }
+  if (attrs === null) return assumedReading();
+  const out = emptyReading();
   const password = attrs.type.trim().toLowerCase() === 'password' || AUTH_AUTOCOMPLETE.test(attrs.autocomplete);
   raise(out, 'auth', 'raiser:password', password ? 'hit' : 'miss');
   raise(out, 'money', 'raiser:cc-autocomplete', CC_AUTOCOMPLETE.test(attrs.autocomplete) ? 'hit' : 'miss');

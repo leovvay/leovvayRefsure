@@ -15,8 +15,10 @@ export function isValueField(node: AxNode): boolean {
   return VALUE_FIELD_ROLES.has(node.role) || node.attrs.contenteditable === true;
 }
 
-/** Whether a strict ancestor of node `i` is a value field. */
-export function insideValueField(tree: AxTree, i: number): boolean {
+const insideMemo = new WeakMap<AxTree, readonly boolean[]>();
+
+/** The ancestor walk itself: whether a strict ancestor of node `i` is a value field. */
+function walkInside(tree: AxTree, i: number): boolean {
   let at = tree.nodes[i]?.parent ?? null;
   while (at !== null) {
     const node = tree.nodes[at];
@@ -25,6 +27,29 @@ export function insideValueField(tree: AxTree, i: number): boolean {
     at = node.parent;
   }
   return false;
+}
+
+/**
+ * `walkInside` for every node in one pass: a parent comes before its child in text order, so a node's answer is
+ * its parent's, or whether the parent is a value field. A node whose parent comes later is walked.
+ */
+function insideFlags(tree: AxTree): readonly boolean[] {
+  const known = insideMemo.get(tree);
+  if (known !== undefined) return known;
+  const flags: boolean[] = new Array<boolean>(tree.nodes.length);
+  for (let i = 0; i < tree.nodes.length; i += 1) {
+    const p = tree.nodes[i]?.parent ?? null;
+    const parent = p === null ? undefined : tree.nodes[p];
+    if (p === null || parent === undefined) flags[i] = false;
+    else flags[i] = p < i ? isValueField(parent) || flags[p]! : walkInside(tree, i);
+  }
+  insideMemo.set(tree, flags);
+  return flags;
+}
+
+/** Whether a strict ancestor of node `i` is a value field. */
+export function insideValueField(tree: AxTree, i: number): boolean {
+  return insideFlags(tree)[i] ?? false;
 }
 
 /** Node `root` and its descendants, in text order. */
@@ -46,10 +71,9 @@ export function subtree(tree: AxTree, root: number): number[] {
  * button and the button's StaticText often repeat one word). `staticOnly` keeps StaticText alone.
  * Values never count, nor anything inside a value field.
  */
-export function subtreeText(tree: AxTree, root: number, opts: { staticOnly?: boolean; withRoot?: boolean } = {}): string {
+export function subtreeText(tree: AxTree, root: number, opts: { staticOnly?: boolean } = {}): string {
   const parts: string[] = [];
   for (const at of subtree(tree, root)) {
-    if (at === root && opts.withRoot === false) continue;
     const node = tree.nodes[at]!;
     if (opts.staticOnly && node.role !== 'StaticText') continue;
     if (insideValueField(tree, at)) continue;

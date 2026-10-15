@@ -53,7 +53,7 @@ export async function liveRefRisk(
         names: target.live.sources, role: target.role, text: target.live.text, bodyText: target.bodyText,
       }),
     ]
-    : [fieldRaisers(port, page, ref)]);
+    : [fieldRaisers(port, page, ref, target.live.fieldAttrs)]);
   return {
     class: maxRisk(lexical.class, ...raisers.map((raised) => raised.class)),
     reasons: [...lexical.reasons, ...raisers.flatMap((raised) => raised.reasons)],

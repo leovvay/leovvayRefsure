@@ -3,21 +3,15 @@ import type { Candidate } from './candidate';
 import type { Fingerprint } from './fingerprint';
 import { lineOf, pathOf } from './candidate-line';
 import { INTERACTIVE_ROLES } from './interactive-roles';
+import { nodeAt } from './node-at';
 import { norm } from './normalize';
-import { groupOf, twinsOf } from './twins';
+import { groupOf, twinPlaceOf } from './twins';
 
 /** What `act` re-finds node `i` by on a fresh snapshot: role, `norm`ed name, path, 1-based ordinal, group size. */
 export function fingerprintOf(tree: AxTree, i: number): Fingerprint {
-  const node = tree.nodes[i];
-  if (node === undefined) throw new RangeError(`no node ${i} in the snapshot`);
-  const twins = twinsOf(tree, i);
-  return {
-    role: node.role,
-    name: norm(node.name),
-    path: pathOf(tree, i),
-    ordinal: twins.indexOf(i) + 1,
-    twins: twins.length,
-  };
+  const node = nodeAt(tree, i);
+  const { ordinal, twins } = twinPlaceOf(tree, i);
+  return { role: node.role, name: norm(node.name), path: pathOf(tree, i), ordinal, twins };
 }
 
 /**

@@ -1,8 +1,10 @@
 import type { AxTree } from '../browser';
 import { insideValueField, INTERACTIVE_ROLES } from '../page-model';
-import { findTermAnyReading } from './term-match';
+import { findTermAnyReading, findTermEveryReading } from './term-match';
 
 const DIALOG_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
+/** What a confirm dialog's confirming control can be: whatever confirms on a click. */
+export const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
 
 const memo = new WeakMap<AxTree, Map<number, boolean>>();
 
@@ -58,9 +60,25 @@ export function isConfirmDialog(tree: AxTree, dialog: number): boolean {
   }
   const cached = known.get(dialog);
   if (cached !== undefined) return cached;
-  const found = wordingOf(tree, dialog).some((text) => (
-    findTermAnyReading('confirmCue', text, { loose: true }) !== null
-    || findTermAnyReading('irreversible', text, { loose: true }) !== null));
+  const found = wordingOf(tree, dialog).some(hasConfirmCue);
   known.set(dialog, found);
   return found;
+}
+
+/**
+ * Dialog wording that marks a confirm dialog: a confirm cue ("are you sure", "confirm", ...) or an irreversible
+ * term, spacing-insensitive (`findTermLoose`), in either reading. The tree rule and the live raiser both read it.
+ */
+export function hasConfirmCue(text: string): boolean {
+  return findTermAnyReading('confirmCue', text, { loose: true }) !== null
+    || findTermAnyReading('irreversible', text, { loose: true }) !== null;
+}
+
+/**
+ * A control that backs out of a dialog (spec §8.5: never a confirm dialog's Cancel/No): every name it carries is
+ * a close or cancel word ("No", "Cancel", "×"), in every reading of it. No names never backs out.
+ */
+export function backsOut(names: readonly string[]): boolean {
+  return names.length > 0 && names.every((name) => findTermEveryReading('dismissClose', name) !== null
+    || findTermEveryReading('cancelWords', name) !== null);
 }

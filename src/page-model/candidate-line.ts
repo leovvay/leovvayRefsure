@@ -1,4 +1,5 @@
 import type { AxNode, AxTree } from '../browser';
+import { nodeAt } from './node-at';
 import { cutName, norm } from './normalize';
 
 // Ancestors that place an element on the page (spec §8.3). Navigation and main are shown bare: their names add
@@ -56,18 +57,8 @@ function computePaths(tree: AxTree): string[] {
   return paths;
 }
 
-function nodeAt(tree: AxTree, i: number): AxNode {
-  const node = tree.nodes[i];
-  if (node === undefined) throw new RangeError(`no node ${i} in the snapshot`);
-  return node;
-}
-
-/**
- * Outer to inner: `dialog|alertdialog "<n>"`, `navigation`, `main`, `form "<n>"`, `region "<n>"`, then the
- * nearest preceding `heading "<t>"` within the innermost of them, joined by ` > `. Empty with no ancestors.
- */
-export function pathOf(tree: AxTree, i: number): string {
-  nodeAt(tree, i);
+/** Node `i`'s path from the memo, for a node already known to exist. */
+function pathAt(tree: AxTree, i: number): string {
   let paths = pathMemo.get(tree);
   if (paths === undefined) {
     paths = computePaths(tree);
@@ -77,10 +68,19 @@ export function pathOf(tree: AxTree, i: number): string {
 }
 
 /**
+ * Outer to inner: `dialog|alertdialog "<n>"`, `navigation`, `main`, `form "<n>"`, `region "<n>"`, then the
+ * nearest preceding `heading "<t>"` within the innermost of them, joined by ` > `. Empty with no ancestors.
+ */
+export function pathOf(tree: AxTree, i: number): string {
+  nodeAt(tree, i);
+  return pathAt(tree, i);
+}
+
+/**
  * Line format v1, the only shape a Decision sees: `<role> "<name>" in="<path>"`. The path is JSON-quoted as a
  * whole, so its inner quotes read `\"`. No attributes, no ordinal, never a value.
  */
 export function lineOf(tree: AxTree, i: number): string {
   const node = nodeAt(tree, i);
-  return `${node.role} ${quoted(node.name)} in=${JSON.stringify(pathOf(tree, i))}`;
+  return `${node.role} ${quoted(node.name)} in=${JSON.stringify(pathAt(tree, i))}`;
 }
