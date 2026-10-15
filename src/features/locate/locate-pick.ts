@@ -2,6 +2,7 @@ import type { TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
 import { type Candidate, exactNameMatch, rankCandidates, twinKey } from '../../page-model';
 import { findSite, locateSite } from '../../questions';
+import { notOffered } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateTop } from './locate-top';
 import type { Picked } from './picked';
@@ -71,16 +72,9 @@ export async function decidePick(
     : await ctx.decide(findSite, { intent: args.intent ?? '', lines }, opts);
   const { verdict } = decided;
   const top = topOf(verdict.ranking, lines, args.top);
-  if (verdict.kind === 'abstain') return { kind: 'abstain', verdict, top };
+  if (verdict.kind === 'abstain') return { kind: 'abstain', why: verdict, top };
   const cand = shortlist[verdict.value];
-  if (cand === undefined) {
-    const detail = `answered option ${verdict.index ?? '?'}, which was not offered`;
-    const failed = {
-      kind: 'abstain' as const, cause: 'provider_error' as const, detail, leaned: null,
-      confidence: verdict.confidence, threshold: verdict.threshold,
-    };
-    return { kind: 'abstain', verdict: failed, top };
-  }
+  if (cand === undefined) return { kind: 'abstain', why: notOffered(verdict.index), top };
   return {
     kind: 'decision', cand, site, confidence: verdict.confidence, maturity: decided.maturity,
     newFamily: decided.newFamily, model: ctx.trace.decisions.at(-1)?.model ?? null, top,

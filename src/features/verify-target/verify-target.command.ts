@@ -6,7 +6,7 @@ import {
 } from '../../page-model';
 import { BOUNDS, findSite } from '../../questions';
 import { classify, maxRisk, RISK_ORDER, type RiskClass } from '../../risk';
-import { abstainOutcome, nothingDone } from '../shared';
+import { abstainOutcome, notOffered, nothingDone } from '../shared';
 import type { VerifyTargetArgs } from './verify-target.args';
 import type { VerifyTargetResult } from './verify-target.contract';
 
@@ -35,7 +35,8 @@ async function verify(args: VerifyTargetArgs, ctx: CommandContext): Promise<Out>
   const i = tree.nodes.findIndex((node) => node.ref === args.ref);
   if (i === -1) return nothingDone('stale', 'ref_gone', `@${args.ref} is not in the current snapshot`, { next: SNAPSHOT });
   const all = candidatesOf(tree);
-  const own = all.find((c) => c.node === i) ?? { ref: args.ref, node: i, line: lineOf(tree, i), fp: fingerprintOf(tree, i) };
+  const listed = all.find((c) => c.node === i);
+  const own = listed ?? { ref: args.ref, node: i, line: lineOf(tree, i), fp: fingerprintOf(tree, i) };
   ctx.trace.untrusted.add('result.line');
   ctx.trace.untrusted.add('result.pick');
   const result: VerifyTargetResult = { agrees: false, line: own.line };
@@ -45,7 +46,7 @@ async function verify(args: VerifyTargetArgs, ctx: CommandContext): Promise<Out>
       `@${args.ref} is one of ${own.fp.twins} identical elements; a second look cannot tell them apart; nothing was done`,
       { result, next: SNAPSHOT });
   }
-  const cands = all.some((c) => c.node === i) ? all : [...all, own];
+  const cands = listed === undefined ? [...all, own] : all;
   const shortlist = rankCandidates(distinctWith(cands, own), args.intent, { keep: i });
   // Risk only rises: the element's own class lifts a lower --risk row; without --risk, the strictest row.
   const risk: RiskClass | undefined = args.risk === undefined
@@ -60,7 +61,7 @@ async function verify(args: VerifyTargetArgs, ctx: CommandContext): Promise<Out>
     return veto({ ...result, unconfirmed: verdict.cause }, `the second look named no element (${verdict.cause}: ${verdict.detail})`);
   }
   const pick = shortlist[verdict.value];
-  if (pick === undefined) return veto(result, `the second look answered option ${verdict.index ?? '?'}, which was not offered`);
+  if (pick === undefined) return veto(result, `the second look ${notOffered(verdict.index).detail}`);
   if (pick.node !== i) return veto({ ...result, pick: pick.line }, `the second look named another element`);
   return { status: 'ok', acted: false, effect: 'none', result: { agrees: true, line: own.line, pick: pick.line } };
 }

@@ -1,8 +1,13 @@
 export type * from './page-reading';
-export { abstainOutcome } from './abstain-outcome';
+export type * from './abstain-why';
+export type * from './ticket-on-page';
+export { abstainOutcome, notOffered } from './abstain-outcome';
 export { nothingDone, recheckStale, ticketGone } from './nothing-done';
+export { peekTicketOnPage } from './peek-ticket-on-page';
+export { ticketBindingRefusal } from './ticket-binding';
 export { readPage } from './read-page';
 export { sleep } from './sleep';
 export { urlGlobMatches } from './url-glob';
 export type * from './high-risk-via';
 export { highRiskNext, highRiskVia } from './high-risk-next';
+export { argText } from './arg-text';

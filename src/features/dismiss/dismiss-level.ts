@@ -1,8 +1,8 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { causeStatus } from '../../output';
 import { type Candidate, candidatesOf, cutName, norm, subtree, subtreeText, twinKey } from '../../page-model';
-import { BOUNDS, dismissSite, type Verdict } from '../../questions';
+import { BOUNDS, dismissSite } from '../../questions';
+import { type AbstainWhy, abstainOutcome, notOffered } from '../shared';
 import type { DismissArgs } from './dismiss.args';
 import { settleDismissPick } from './dismiss-pick';
 import { vetoOf } from './dismiss-veto';
@@ -10,7 +10,6 @@ import type { LevelOutcome } from './level-outcome';
 import { detectOverlay } from './overlay-detect';
 
 const CONTROL_ROLES: ReadonlySet<string> = new Set(['button', 'link']);
-const SNAPSHOT = { do: 'snapshot' as const, argv: ['refsure', 'snap'] };
 
 /** One candidate per twin group, the first in page order: identical lines tell a model nothing apart. */
 function distinct(cands: readonly Candidate[]): Candidate[] {
@@ -23,16 +22,16 @@ function distinct(cands: readonly Candidate[]): Candidate[] {
   });
 }
 
-function abstained(level: number, overlay: string, verdict: Extract<Verdict<number>, { kind: 'abstain' }>): LevelOutcome {
-  const status = causeStatus(verdict.cause);
+/** A Decision that gave no answer: the status and the way on as every abstain gives them (`abstainOutcome`). */
+function abstained(level: number, overlay: string, why: AbstainWhy): LevelOutcome {
+  const { status, why: said, next } = abstainOutcome(why, null);
   const out: LevelOutcome = {
-    report: { level, verdict: status === 'refused' ? 'refused' : 'abstained', overlay, by: 'decision', cause: verdict.cause },
+    report: { level, verdict: status === 'refused' ? 'refused' : 'abstained', overlay, by: 'decision', cause: why.cause },
     status,
-    why: { cause: verdict.cause, detail: verdict.detail },
     clicked: false,
   };
-  if (status === 'abstained') out.next = SNAPSHOT;
-  else if (status === 'not_set_up') out.next = { do: 'needs_human' };
+  if (said) out.why = said;
+  if (next) out.next = next;
   return out;
 }
 
@@ -81,11 +80,6 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
   const { verdict } = decided;
   if (verdict.kind === 'abstain') return abstained(level, overlay, verdict);
   const pick = controls[verdict.value];
-  if (pick === undefined) {
-    const detail = `answered option ${verdict.index ?? '?'}, which was not offered`;
-    return abstained(level, overlay, {
-      kind: 'abstain', cause: 'provider_error', detail, leaned: null, confidence: verdict.confidence, threshold: verdict.threshold,
-    });
-  }
+  if (pick === undefined) return abstained(level, overlay, notOffered(verdict.index));
   return settleDismissPick(ctx, { page, tab, tree, container, overlay, level, args }, pick, decided);
 }

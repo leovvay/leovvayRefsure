@@ -12,7 +12,10 @@ function isAction(value: string): value is ActAction {
   return (ACT_ACTIONS as readonly string[]).includes(value);
 }
 
-/** `--ticket` is required; `--value` only with fill or select; `--verify` is a short intent. */
+/**
+ * `--ticket` is required; `--value` never with an action that takes none; `--verify` is a short intent. A fill or
+ * select without `--value` waits for the ticket: pick-option binds its own option (`act --ticket T --action select`).
+ */
 export function parseAct(raw: ParsedArgs): ActArgs | UsageError {
   if (raw.positionals.length > 0) return { usage: `act takes no positional arguments, got ${raw.positionals.length}` };
   if (raw.rest.length > 0) return { usage: 'act takes nothing after --: the element comes from the ticket' };
@@ -26,7 +29,6 @@ export function parseAct(raw: ParsedArgs): ActArgs | UsageError {
     action = given;
   }
   const value = typeof raw.values.value === 'string' ? raw.values.value : null;
-  if (action !== null && VALUE_ACTIONS.has(action) && value === null) return { usage: `--action ${action} needs --value` };
   if (action !== null && !VALUE_ACTIONS.has(action) && value !== null) return { usage: `--action ${action} takes no --value` };
   let verify: string | null = null;
   if (raw.values.verify !== undefined) {

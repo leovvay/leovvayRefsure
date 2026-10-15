@@ -1,10 +1,13 @@
-import type { ActAction, ActResult, PageRef } from '../../browser';
+import type { ActAction, ActResult, PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { cutName } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { HIGH_RISK } from '../../risk';
 import { recheck, type RecheckResult, type Ticket } from '../../tickets';
-import { abstainOutcome, nothingDone, type PageReading, readPage, recheckStale, ticketGone } from '../shared';
+import {
+  abstainOutcome, nothingDone, type PageReading, peekTicketOnPage, readPage, recheckStale, ticketBindingRefusal,
+  ticketGone,
+} from '../shared';
 import type { ActArgs } from './act.args';
 import type { ActCommandResult } from './act.contract';
 import { policyRefusal } from './act-policy';
@@ -15,20 +18,17 @@ import { VALUE_ACTIONS } from './parse-act';
 type Out = CommandOutcome<ActCommandResult>;
 type Bound = { action: ActAction; value?: string };
 type Fresh = Exclude<RecheckResult, { stale: unknown }>;
+type Sent = { sent: ActResult; refound: boolean };
 
 /**
  * The action and value to run: `--action`, else the ticket's pre-bound one, else click; values only for fill and
- * select. A ticket issued for one action and value (pick-option binds select and its option) runs only those:
- * another `--action` or `--value` is a usage error, never a quiet swap. The value itself is never quoted.
+ * select. A ticket issued for one action and value runs only those (`ticketBindingRefusal`).
  */
 function bind(args: ActArgs, ticket: Ticket): Bound | Out {
-  if (args.action !== null && ticket.action !== undefined && args.action !== ticket.action) {
-    return nothingDone('usage', 'usage', `ticket ${ticket.id} was issued for ${ticket.action}, not ${args.action}`);
-  }
-  if (args.value !== null && ticket.value !== undefined && args.value !== ticket.value) {
-    const detail = `ticket ${ticket.id} was issued with its own value: drop --value, or get a ticket for the other one`;
-    return nothingDone('usage', 'usage', detail);
-  }
+  const refused = ticketBindingRefusal<ActCommandResult>(
+    ticket, args.action, args.value, 'drop --value, or get a ticket for the other one',
+  );
+  if (refused !== null) return refused;
   const action = args.action ?? ticket.action ?? 'click';
   const value = args.value ?? ticket.value;
   if (VALUE_ACTIONS.has(action)) {
@@ -56,36 +56,43 @@ function isOut(value: object): value is Out {
 }
 
 /**
- * The ticket path (spec §8.3): peek, the page check, a reachability read and the `--verify` route check, all before
- * the ticket is spent; then claim, recheck, policy, and the typed act at once. A stale ref is re-found once on a
- * fresh snapshot; a second one is `page_changed`. Under `--dry-run` the ticket is only peeked, never claimed.
+ * `--verify` asks the outcome Decision after the act, so its route (keys, consent, provider, origin, caps) is
+ * checked before the ticket is spent: a refusal never comes after the click. `null`: no `--verify`, or the route is open.
  */
-export async function runAct(args: ActArgs, ctx: CommandContext): Promise<Out> {
-  const peeked = await ctx.tickets.peek(args.ticket, ctx.now());
-  if (typeof peeked === 'string') return ticketGone(peeked, args.ticket);
-  if (args.page !== null && args.page !== peeked.pageId) {
-    return nothingDone('usage', 'usage', `ticket ${args.ticket} is for page ${peeked.pageId}, not ${args.page}: drop --page`);
-  }
-  // The page comes from the ticket, so the registry resolved none: bound here, every `refsure` next step names
-  // it, a failure thrown after the click (Orca gone: effect_unknown) included.
-  const page: PageRef = { backend: ctx.browser.backend, id: peeked.pageId };
-  ctx.page = page;
-  return actOnTicket(args, ctx, peeked, page);
+async function verifyRouteRefusal(ctx: CommandContext, tab: TabInfo, args: ActArgs): Promise<Out | null> {
+  if (args.verify === null) return null;
+  const route = await ctx.routeCheck(outcomeSite, { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun });
+  return route.ok ? null : abstainOutcome<ActCommandResult>(route, null);
 }
 
+/**
+ * The typed act on the fresh ref, at once. A stale ref is re-found once on a fresh snapshot (recheck and policy
+ * again); a second stale ref is `page_changed`. An act that may have landed is never sent twice.
+ */
+async function dispatchWithRefind(
+  ctx: CommandContext, page: PageRef, ticket: Ticket, policy: PolicyAct, fresh: Fresh,
+): Promise<Sent | Out> {
+  const first = await ctx.browser.act(page, fresh.ref, policy.action, policy.value);
+  if (first.kind !== 'stale_ref') return { sent: first, refound: false };
+  const again = await cleared(ctx, ticket, policy, !ctx.dryRun, 'page_changed');
+  if (isOut(again)) return again;
+  const sent = await ctx.browser.act(page, again.ref, policy.action, policy.value);
+  if (sent.kind === 'stale_ref') return recheckStale('page_changed', ticket.id);
+  return { sent, refound: true };
+}
+
+/**
+ * The ticket path (spec §8.3): the binding, a reachability read, the `--verify` route check and its before-read,
+ * all before the ticket is spent; then claim, recheck, policy, and the typed act at once, with no other browser
+ * call between the recheck and the act. A stale ref is re-found once on a fresh snapshot; a second one is
+ * `page_changed`. Under `--dry-run` the ticket is only peeked, never claimed.
+ */
 async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, page: PageRef): Promise<Out> {
   const bound = bind(args, peeked);
   if (isOut(bound)) return bound;
   const tab = await ctx.browser.tabInfo(page);
-  if (args.verify !== null) {
-    const route = await ctx.routeCheck(outcomeSite, { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun });
-    if (!route.ok) {
-      const verdict = {
-        kind: 'abstain' as const, cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null,
-      };
-      return abstainOutcome<ActCommandResult>(verdict, null);
-    }
-  }
+  const refusal = await verifyRouteRefusal(ctx, tab, args);
+  if (refusal !== null) return refusal;
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const piiMasks = args.verify === null ? true : ctx.config.piiMasks;
   const policy: PolicyAct = { ...bound, intent: args.verify };
@@ -95,28 +102,24 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
     const kept = await cleared(ctx, peeked, policy, false);
     if (isOut(kept)) return kept;
   }
+  // `--verify`'s before-side, read before the claim: a failed read leaves the ticket unspent, and no read sits
+  // between the recheck and the act, where a renumbering snapshot could move the ref.
+  const before: PageReading | null = args.verify === null ? null : await readPage(ctx.browser, page);
 
   const ticket = ctx.dryRun ? peeked : await ctx.tickets.claim(args.ticket, ctx.now());
   if (typeof ticket === 'string') return ticketGone(ticket, args.ticket);
-  let fresh = await cleared(ctx, ticket, policy, !ctx.dryRun);
+  const fresh = await cleared(ctx, ticket, policy, !ctx.dryRun);
   if (isOut(fresh)) return fresh;
   const element = `${ticket.fingerprint.role} ${JSON.stringify(cutName(ticket.fingerprint.name))}`;
   ctx.trace.untrusted.add('result.element');
-  const before: PageReading | null = args.verify === null ? null : await readPage(ctx.browser, page);
   if (ctx.dryRun && args.verify !== null && before !== null) {
     const { verdict } = await dryVerify(ctx, args.verify, element, before, piiMasks);
     if (verdict.kind === 'abstain') return abstainOutcome<ActCommandResult>(verdict, null);
   }
 
-  let sent: ActResult = await ctx.browser.act(page, fresh.ref, bound.action, bound.value);
-  let refound = false;
-  if (sent.kind === 'stale_ref') {
-    fresh = await cleared(ctx, ticket, policy, !ctx.dryRun, 'page_changed');
-    if (isOut(fresh)) return fresh;
-    sent = await ctx.browser.act(page, fresh.ref, bound.action, bound.value);
-    refound = true;
-    if (sent.kind === 'stale_ref') return recheckStale('page_changed', ticket.id);
-  }
+  const dispatched = await dispatchWithRefind(ctx, page, ticket, policy, fresh);
+  if (isOut(dispatched)) return dispatched;
+  const { sent, refound } = dispatched;
   const base = { action: bound.action, element, ...(refound ? { refound: true as const } : {}) };
   if (sent.kind === 'unknown') {
     return {
@@ -128,4 +131,11 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
     return { status: 'ok', acted: true, effect: 'dispatched', result: { verdict: 'done', ...base } };
   }
   return verifyAfter(ctx, page, { intent: args.verify, acted: element, before, piiMasks, base });
+}
+
+/** `act --ticket T` (spec §6.2, §8.3): the ticket names the page; a different `--page` is a usage error. */
+export async function runAct(args: ActArgs, ctx: CommandContext): Promise<Out> {
+  const peeked = await peekTicketOnPage<ActCommandResult>(ctx, args.ticket, args.page);
+  if (isOut(peeked)) return peeked;
+  return actOnTicket(args, ctx, peeked.ticket, peeked.page);
 }

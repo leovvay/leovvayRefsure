@@ -21,10 +21,13 @@ function underControl(tree: AxTree, i: number, stop: number): boolean {
   return false;
 }
 
-/** A landmark's own wording: its name and the StaticText outside its controls and fields, `fold`ed. */
-function wordingOf(tree: AxTree, root: number): string {
+/**
+ * A landmark's own wording: its name and the StaticText of `inside` (its subtree, walked once by the caller) outside
+ * its controls and fields, `fold`ed.
+ */
+function wordingOf(tree: AxTree, root: number, inside: readonly number[]): string {
   const parts = [tree.nodes[root]?.name ?? ''];
-  for (const at of subtree(tree, root)) {
+  for (const at of inside) {
     const node = tree.nodes[at]!;
     if (node.role !== 'StaticText' || insideValueField(tree, at) || underControl(tree, at, root)) continue;
     parts.push(node.name);
@@ -33,9 +36,10 @@ function wordingOf(tree: AxTree, root: number): string {
 }
 
 function consentBanner(tree: AxTree, i: number): boolean {
-  const buttons = subtree(tree, i).filter((at) => tree.nodes[at]?.role === 'button').length;
+  const inside = subtree(tree, i);
+  const buttons = inside.filter((at) => tree.nodes[at]?.role === 'button').length;
   if (buttons < MIN_BUTTONS) return false;
-  const wording = wordingOf(tree, i);
+  const wording = wordingOf(tree, i, inside);
   return COOKIE_WORDS.test(wording) || findTerm('consent', wording) !== null;
 }
 
@@ -45,11 +49,12 @@ function consentBanner(tree: AxTree, i: number): boolean {
  * at least two buttons. `null` when there is none.
  */
 export function detectOverlay(tree: AxTree): number | null {
-  let dialog: number | null = null;
-  let region: number | null = null;
-  tree.nodes.forEach((node, i) => {
-    if (DIALOG_ROLES.has(node.role)) dialog = i;
-    else if (REGION_ROLES.has(node.role) && consentBanner(tree, i)) region = i;
-  });
-  return dialog ?? region;
+  // From the end: the last match in text order wins, and a region is read only when no dialog is there.
+  for (let i = tree.nodes.length - 1; i >= 0; i -= 1) {
+    if (DIALOG_ROLES.has(tree.nodes[i]!.role)) return i;
+  }
+  for (let i = tree.nodes.length - 1; i >= 0; i -= 1) {
+    if (REGION_ROLES.has(tree.nodes[i]!.role) && consentBanner(tree, i)) return i;
+  }
+  return null;
 }

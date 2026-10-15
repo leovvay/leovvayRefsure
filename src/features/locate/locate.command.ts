@@ -1,11 +1,29 @@
+import type { AxTree } from '../../browser';
 import type { CommandSpec } from '../../cli';
-import { candidatesOf, RANK_MAX, rowContains, rowTextOf } from '../../page-model';
+import { type Candidate, candidatesOf, RANK_MAX, rowContains, rowTextOf } from '../../page-model';
 import { abstainOutcome, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
 import { codePick, decidePick } from './locate-pick';
 import { settlePick } from './locate-settle';
 import { parseLocate } from './parse-locate';
+
+/**
+ * `--within`: the candidates whose row text contains `within`. Every candidate of a row shares its text, so each
+ * text is matched once, not once per candidate: a group of thousands of buttons stays linear.
+ */
+function inRows(tree: AxTree, cands: readonly Candidate[], within: string): Candidate[] {
+  const verdicts = new Map<string, boolean>();
+  return cands.filter((c) => {
+    const text = rowTextOf(tree, c.node);
+    let holds = verdicts.get(text);
+    if (holds === undefined) {
+      holds = rowContains(text, within);
+      verdicts.set(text, holds);
+    }
+    return holds;
+  });
+}
 
 /**
  * Finds the one element an intent or a recorded line means, and returns a single-use ticket for `act` (spec §6.2).
@@ -41,7 +59,7 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
     const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
     const all = candidatesOf(tree);
     const within = args.within;
-    const cands = within === null ? all : all.filter((c) => rowContains(rowTextOf(tree, c.node), within));
+    const cands = within === null ? all : inRows(tree, all, within);
     if (cands.length === 0) {
       const detail = within === null
         ? 'the page offers no interactive element with a ref'
@@ -58,7 +76,7 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
         result.top = picked.top;
         result.note = 'top is a ranking, not probabilities';
       }
-      return abstainOutcome<LocateResult>(picked.verdict, result);
+      return abstainOutcome<LocateResult>(picked.why, result);
     }
     return settlePick(ctx, { page, tab, tree, cands }, picked, args);
   },

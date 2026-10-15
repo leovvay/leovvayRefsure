@@ -2,7 +2,7 @@ import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import type { Next } from '../../output';
 import { gateHighRisk, type HighRiskGateResult, type Ticket } from '../../tickets';
-import { nothingDone, ticketGone } from '../shared';
+import { nothingDone, peekTicketOnPage, ticketBindingRefusal } from '../shared';
 import type { ActHighRiskArgs } from './act-high-risk.args';
 import type { ActHighRiskResult } from './act-high-risk.contract';
 import { VALUE_ACTIONS } from './parse-act-high-risk';
@@ -13,16 +13,12 @@ const SNAPSHOT: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 const HUMAN: Next = { do: 'needs_human' };
 
 /**
- * The value a ticket's act runs with. A ticket issued for one action and value (pick-option binds select and its
- * option) runs only those: another `--action` or `--value` is a usage error, never a quiet swap.
+ * The value a ticket's act runs with. A ticket issued for one action and value runs only those
+ * (`ticketBindingRefusal`); a fill or select takes the ticket's own value when `--value` is not given.
  */
 function ticketValue(args: ActHighRiskArgs, ticket: Ticket): { value: string | undefined } | Out {
-  if (ticket.action !== undefined && ticket.action !== args.action) {
-    return nothingDone('usage', 'usage', `ticket ${ticket.id} was issued for ${ticket.action}, not ${args.action}`);
-  }
-  if (args.value !== null && ticket.value !== undefined && args.value !== ticket.value) {
-    return nothingDone('usage', 'usage', `ticket ${ticket.id} was issued with its own value: drop --value`);
-  }
+  const refused = ticketBindingRefusal<ActHighRiskResult>(ticket, args.action, args.value, 'drop --value');
+  if (refused !== null) return refused;
   const value = args.value ?? ticket.value;
   if (VALUE_ACTIONS.has(args.action) && value === undefined) return nothingDone('usage', 'usage', `${args.action} needs --value`);
   return { value };
@@ -47,13 +43,10 @@ export async function runActHighRisk(args: ActHighRiskArgs, ctx: CommandContext)
   let gate: HighRiskGateResult;
   const raise = args.risk === undefined ? {} : { risk: args.risk };
   if (args.target.kind === 'ticket') {
-    const peeked = await ctx.tickets.peek(args.target.ticket, ctx.now());
-    if (typeof peeked === 'string') return ticketGone(peeked, args.target.ticket);
-    if (args.hint.page !== undefined && args.hint.page !== peeked.pageId) {
-      return nothingDone('usage', 'usage', `ticket ${peeked.id} is for page ${peeked.pageId}, not ${args.hint.page}: drop --page`);
-    }
-    page = { backend: ctx.browser.backend, id: peeked.pageId };
-    ctx.page = page;
+    const onPage = await peekTicketOnPage<ActHighRiskResult>(ctx, args.target.ticket, args.hint.page ?? null);
+    if ('status' in onPage) return onPage;
+    const peeked = onPage.ticket;
+    page = onPage.page;
     const bound = ticketValue(args, peeked);
     if ('status' in bound) return bound;
     value = bound.value;

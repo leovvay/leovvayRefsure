@@ -1,6 +1,6 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { recheck } from '../../tickets';
-import { nothingDone, recheckStale, ticketGone } from '../shared';
+import { peekTicketOnPage, recheckStale } from '../shared';
 import type { GuardArgs } from './guard.args';
 import type { GuardResult } from './guard.contract';
 
@@ -12,13 +12,10 @@ import type { GuardResult } from './guard.contract';
 export async function guardTicket(
   args: Extract<GuardArgs, { mode: 'ticket' }>, ctx: CommandContext,
 ): Promise<CommandOutcome<GuardResult>> {
-  const ticket = await ctx.tickets.peek(args.ticket, ctx.now());
-  if (typeof ticket === 'string') return ticketGone(ticket, args.ticket);
-  if (args.page !== null && args.page !== ticket.pageId) {
-    return nothingDone('usage', 'usage', `ticket ${args.ticket} is for page ${ticket.pageId}, not ${args.page}: drop --page`);
-  }
   // The ticket names the page: the envelope and a `refsure` next step name it too (see CommandContext.page).
-  ctx.page = { backend: ctx.browser.backend, id: ticket.pageId };
+  const onPage = await peekTicketOnPage<GuardResult>(ctx, args.ticket, args.page);
+  if ('status' in onPage) return onPage;
+  const { ticket } = onPage;
   const fresh = await recheck(ctx, ticket);
   if ('stale' in fresh) return recheckStale(fresh.stale, ticket.id);
   ctx.trace.untrusted.add('result.fingerprint');
