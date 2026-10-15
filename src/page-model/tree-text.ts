@@ -1,4 +1,6 @@
 import type { AxNode, AxTree } from '../browser';
+import { escapeRegExp } from '../shared';
+import { nearestAncestor } from './ancestors';
 import { norm } from './normalize';
 
 /**
@@ -19,14 +21,7 @@ const insideMemo = new WeakMap<AxTree, readonly boolean[]>();
 
 /** The ancestor walk itself: whether a strict ancestor of node `i` is a value field. */
 function walkInside(tree: AxTree, i: number): boolean {
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null) {
-    const node = tree.nodes[at];
-    if (node === undefined) return false;
-    if (isValueField(node)) return true;
-    at = node.parent;
-  }
-  return false;
+  return nearestAncestor(tree, i, isValueField) !== null;
 }
 
 /**
@@ -84,17 +79,40 @@ export function subtreeText(tree: AxTree, root: number, opts: { staticOnly?: boo
 }
 
 /**
- * What was typed into text fields, whole and line by line, `norm`ed and longest first: an editable region's
- * text also shows in the body text, and must be cut out of it. A combobox value is a picked option, not typing.
+ * A typed value as text is cut by: whole and line by line, `norm`ed, of three code points or more, longest first.
+ * Shorter pieces would cut ordinary words out of the page.
  */
-export function typedValues(tree: AxTree): string[] {
+export function valuePieces(values: Iterable<string>): string[] {
   const out = new Set<string>();
-  for (const node of tree.nodes) {
-    if (node.value === null || !isValueField(node) || node.role === 'combobox') continue;
-    for (const piece of [node.value, ...node.value.split(/\r?\n/)]) {
-      const value = norm(piece);
-      if (Array.from(value).length >= 3) out.add(value);
+  for (const value of values) {
+    for (const piece of [value, ...value.split(/\r?\n/)]) {
+      const text = norm(piece);
+      if (Array.from(text).length >= 3) out.add(text);
     }
   }
   return [...out].sort((a, b) => b.length - a.length);
+}
+
+/** Text line by line, `norm`ed, with every piece cut out (case ignored) and blank lines dropped. */
+export function cutPieces(text: string, pieces: readonly string[]): string {
+  const res = pieces.map((piece) => new RegExp(escapeRegExp(piece), 'giu'));
+  const lines: string[] = [];
+  for (const raw of text.split(/\r?\n/)) {
+    let line = norm(raw);
+    for (const re of res) line = norm(line.replace(re, ' '));
+    if (line !== '') lines.push(line);
+  }
+  return lines.join('\n');
+}
+
+/**
+ * What was typed into text fields (`valuePieces`): an editable region's text also shows in the body text, and must
+ * be cut out of it. A combobox value is a picked option, not typing.
+ */
+export function typedValues(tree: AxTree): string[] {
+  const values: string[] = [];
+  for (const node of tree.nodes) {
+    if (node.value !== null && isValueField(node) && node.role !== 'combobox') values.push(node.value);
+  }
+  return valuePieces(values);
 }

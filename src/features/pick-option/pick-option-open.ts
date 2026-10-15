@@ -1,13 +1,12 @@
 import type { PageRef, Ref, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
-import { actionPolicy, liveRefRisk, nameCheck, readLiveTarget } from '../../risk';
+import { RE_OBSERVE } from '../../output';
+import { liveRefRisk, nameCheck, readLiveTarget, refusesHighRisk } from '../../risk';
 import { highRiskNext, nothingDone, sleep } from '../shared';
 import type { PickOptionResult } from './pick-option.contract';
 
 /** How long a dropdown gets to render its options after the click. */
 const OPEN_SETTLE_MS = 400;
-const SNAPSHOT: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 
 /**
  * `--open` (spec §6.3, §8.3 live-ref path): click the field itself, with no snapshot taken first. The live ref must
@@ -26,10 +25,10 @@ export async function openField(
     ctx.trace.untrusted.add('why.detail');
     const shown = named.mismatch === '' ? 'no name' : JSON.stringify(named.mismatch);
     return nothingDone('stale', 'expect_name_mismatch',
-      `@${field} shows ${shown}, not ${JSON.stringify(expectName)}; nothing was clicked`, { next: SNAPSHOT });
+      `@${field} shows ${shown}, not ${JSON.stringify(expectName)}; nothing was clicked`, { next: RE_OBSERVE });
   }
   const risk = await liveRefRisk(ctx.browser, page, field, 'click', target, { url: tab.url });
-  if (actionPolicy('click', risk.class, 'pick-option') !== 'allow') {
+  if (refusesHighRisk(risk.class)) {
     ctx.trace.untrusted.add('next.argv');
     const next = highRiskNext({
       class: risk.class, via: { ref: field, expectName: target.live.seen }, action: 'click', intent: `open the field to pick "${want}"`,
@@ -39,12 +38,12 @@ export async function openField(
   }
   const sent = await ctx.browser.act(page, field, 'click');
   if (sent.kind === 'stale_ref') {
-    return nothingDone('stale', 'ref_gone', `@${field} is gone from the page; nothing was clicked`, { next: SNAPSHOT });
+    return nothingDone('stale', 'ref_gone', `@${field} is gone from the page; nothing was clicked`, { next: RE_OBSERVE });
   }
   if (sent.kind === 'unknown') {
     return {
       status: 'effect_unknown', acted: true, effect: 'unknown', result: null,
-      why: { cause: 'effect_unknown', detail: sent.detail }, next: SNAPSHOT,
+      why: { cause: 'effect_unknown', detail: sent.detail }, next: RE_OBSERVE,
     };
   }
   await sleep(OPEN_SETTLE_MS, ctx.signal);

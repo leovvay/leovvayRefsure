@@ -1,6 +1,7 @@
 import { ConfigError } from './config-error';
 import type { GatewayConfig, KeySpec, RefsureConfig } from './config-types';
 import { parseOriginPattern } from './origin-pattern';
+import { isRecord } from '../shared';
 
 // Details never quote a value from the file: a mistyped key spec may hold the key itself.
 
@@ -10,10 +11,6 @@ const HEADER_NAME = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
 const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret|passw|auth/i;
 const GATEWAY_FIELDS = new Set(['url', 'jevPath', 'jevModel', 'openaiPath', 'openaiModel', 'headers']);
 const GATEWAY_TEXT_FIELDS = ['jevPath', 'jevModel', 'openaiPath', 'openaiModel'] as const;
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 export function invalid(detail: string): never {
   throw new ConfigError('config_invalid', detail);
@@ -53,8 +50,12 @@ export function readKeySpec(name: string, value: unknown): KeySpec | null {
   return { command: [...(command as string[])] };
 }
 
-function isLocalHost(hostname: string): boolean {
-  return hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '[::1]'
+/**
+ * A loopback host, as `URL.hostname` spells it: `localhost` and `*.localhost`, `127.0.0.0/8`, `[::1]`. The config
+ * check and the provider endpoints both read it, so a gateway the config accepts is one the providers use.
+ */
+export function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '[::1]' || hostname === '::1'
     || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
 }
 
@@ -71,7 +72,7 @@ export function checkGatewayUrl(where: string, url: string): void {
   }
   if (parsed.hash) invalid(`${where} must not carry a fragment`);
   if (parsed.protocol === 'https:') return;
-  if (parsed.protocol === 'http:' && isLocalHost(parsed.hostname)) return;
+  if (parsed.protocol === 'http:' && isLoopbackHost(parsed.hostname)) return;
   throw new ConfigError('gateway_insecure', `${where} must be https, or http on localhost`);
 }
 

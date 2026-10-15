@@ -1,7 +1,8 @@
+import { ACT_ACTIONS } from '../../browser';
 import type { CommandSpec } from '../../cli';
 import type { ActArgs } from './act.args';
 import type { ActCommandResult } from './act.contract';
-import { ACT_ACTIONS, parseAct } from './parse-act';
+import { parseAct } from './parse-act';
 import { runAct } from './run-act';
 
 /**

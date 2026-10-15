@@ -7,4 +7,5 @@ export { loadConfig } from './load-config';
 export { configOnce } from './config-once';
 export { resolvePaths } from './paths';
 export { parseOriginPattern, originMatches } from './origin-pattern';
+export { isLoopbackHost } from './config-fields';
 export { envKey, commandKey, keySet } from './keys';

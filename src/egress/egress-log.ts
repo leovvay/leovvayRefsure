@@ -1,18 +1,19 @@
 import { closeSync, constants, fstatSync, openSync, readSync, writeSync } from 'node:fs';
 import type { EgressLogEntry } from './egress-log-entry';
 import { ensureParentDir } from './private-file';
+// The file, not the barrel: questions imports egress, and site-id imports nothing.
+import { isProviderId } from '../questions/site-id';
 
 // Covers a full day at the default per-minute cap; the limits never look further back.
 const MAX_READ_BYTES = 16 * 1024 * 1024;
-const PROVIDERS: ReadonlySet<string> = new Set(['jev', 'openai']);
 
 /**
  * Appends one JSON line (file mode 0600, directory 0700). Only the entry's known fields are written, so
  * nothing else an object carries can reach the log. False when the line could not be written.
  */
 export function appendEgressLog(path: string, entry: EgressLogEntry): boolean {
-  const { t, command, site, provider, host, bytes, digest, status, usd, model } = entry;
-  const line = JSON.stringify({ t, command, site, provider, host, bytes, digest, status, usd, model });
+  const { t, command, site, provider, host, bytes, digest, status, usd, model, call } = entry;
+  const line = JSON.stringify({ t, command, site, provider, host, bytes, digest, status, usd, model, call });
   try {
     ensureParentDir(path);
     // Non-blocking: opening a FIFO with no reader then fails at once (ENXIO) instead of hanging.
@@ -33,10 +34,11 @@ function asEntry(value: unknown): EgressLogEntry | null {
   if (typeof value !== 'object' || value === null) return null;
   const v = value as Record<string, unknown>;
   const ok = typeof v.t === 'number' && Number.isFinite(v.t) && typeof v.command === 'string'
-    && typeof v.site === 'string' && typeof v.provider === 'string' && PROVIDERS.has(v.provider)
+    && typeof v.site === 'string' && isProviderId(v.provider)
     && typeof v.host === 'string' && typeof v.bytes === 'number' && typeof v.digest === 'string'
     && typeof v.status === 'string' && (v.usd === null || typeof v.usd === 'number')
-    && (v.model === null || typeof v.model === 'string');
+    && (v.model === null || typeof v.model === 'string')
+    && (v.call === undefined || (typeof v.call === 'string' && v.call !== ''));
   return ok ? (v as unknown as EgressLogEntry) : null;
 }
 
@@ -70,7 +72,27 @@ function readTail(path: string): string {
   }
 }
 
-/** Entries with `t >= sinceMs`, oldest first. A missing log is empty; an unreadable line is skipped. */
+/**
+ * One entry per call: a reservation and the line that settles it read as one, the settled outcome at the time the
+ * call was reserved, so a call counts once against the caps. A reservation never settled (the process died
+ * mid-call) stays `pending`, and counts. A call that never left (`unsent`) is no call at all.
+ */
+function oneLinePerCall(entries: readonly EgressLogEntry[]): EgressLogEntry[] {
+  const at = new Map<string, number>();
+  const out: EgressLogEntry[] = [];
+  for (const entry of entries) {
+    const k = entry.call === undefined ? undefined : at.get(entry.call);
+    if (k === undefined) {
+      if (entry.call !== undefined) at.set(entry.call, out.length);
+      out.push(entry);
+    } else {
+      out[k] = { ...entry, t: out[k]!.t };
+    }
+  }
+  return out.filter((entry) => entry.status !== 'unsent');
+}
+
+/** Calls with `t >= sinceMs`, oldest first (`oneLinePerCall`). A missing log is empty; a bad line is skipped. */
 export function readEgressLog(path: string, sinceMs: number): EgressLogEntry[] {
   const entries: EgressLogEntry[] = [];
   for (const line of readTail(path).split('\n')) {
@@ -84,5 +106,5 @@ export function readEgressLog(path: string, sinceMs: number): EgressLogEntry[] {
     const entry = asEntry(parsed);
     if (entry && entry.t >= sinceMs) entries.push(entry);
   }
-  return entries;
+  return oneLinePerCall(entries);
 }

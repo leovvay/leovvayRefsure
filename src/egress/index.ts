@@ -11,7 +11,9 @@ export { boundJsonBytes, boundText, jsonTextBytes, stripControl } from './bound-
 export { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
 export { checkOrigin } from './origin-policy';
 export { DISCLOSURE_TEXT, DISCLOSURE_HASH } from './disclosure';
-export { readConsent, writeConsent, grantFor, withGrant } from './consent';
+export {
+  consentMissing, currentConsent, grantFor, readConsent, withGrant, withoutGrant, writeConsent,
+} from './consent';
 export { appendEgressLog, readEgressLog } from './egress-log';
 export { checkLimits } from './limits';
 export { SECRET_SHAPES } from './secret-shapes';

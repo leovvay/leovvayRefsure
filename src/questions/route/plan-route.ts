@@ -1,12 +1,12 @@
 import type { DecideOpts } from '../decide-fn';
-import type { ProviderId, SiteId } from '../site-id';
+import { PROVIDER_IDS, type ProviderId, type SiteId } from '../site-id';
 import type { SitePolicy } from '../site-policy';
 import type { Readiness } from './readiness';
 import type { RoutePlan } from './route-plan';
 
 type Combo = NonNullable<DecideOpts['combo']>;
 
-const IDS: readonly ProviderId[] = ['jev', 'openai'];
+const IDS: readonly ProviderId[] = PROVIDER_IDS;
 
 function hasRow(policy: SitePolicy, id: ProviderId): boolean {
   return policy.threshold[id] !== undefined;

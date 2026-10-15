@@ -1,6 +1,6 @@
 import type { AxTree, PageRef } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { classify, maxRisk, pageRaisers, type RiskReading } from '../../risk';
+import { classify, mergeReadings, pageRaisers, type RiskReading } from '../../risk';
 import { turnedReadings } from './dismiss-reading';
 
 /** The tree with node `i` named `name`, for the risk rules to read that name in its place. */
@@ -21,11 +21,6 @@ export async function dismissRisk(
   const lexical = turned === null
     ? [classify(tree, i, { url, action: 'click' })]
     : turned.map((name) => classify(renamed(tree, i, name), i, { url, action: 'click' }));
-  const raised = await pageRaisers(ctx.browser, page, 'click');
-  const readings = [...lexical, raised];
-  const reasons = readings.flatMap((r) => r.reasons);
-  return {
-    class: maxRisk(...readings.map((r) => r.class)),
-    reasons: turned === null ? reasons : [...new Set(reasons), 'negated:accept'],
-  };
+  const merged = mergeReadings(...lexical, await pageRaisers(ctx.browser, page, 'click'));
+  return turned === null ? merged : { ...merged, reasons: [...merged.reasons, 'negated:accept'] };
 }

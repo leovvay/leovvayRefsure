@@ -1,10 +1,10 @@
-import type { ActAction, AxNode, AxTree } from '../browser';
+import { type ActAction, type AxNode, type AxTree, FIELD_ACTIONS } from '../browser';
 import { nodeAt } from '../page-model';
 import { backsOut, CONFIRMING_ROLES, dialogOf, isConfirmDialog } from './confirm-dialog';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
-import { findTermAnyReading, findTermEveryReading } from './term-match';
+import { findTermAnyReading, findWholeTermEveryReading } from './term-match';
 
 export interface ClassifyOpts {
   /** The tab's URL, for the path rules. */
@@ -15,16 +15,18 @@ export interface ClassifyOpts {
 }
 
 const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
-const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;
 const IRREVERSIBLE_PATH = /delete|close-account/i;
 
-/** Rule 1: what the element is, before any word on it counts. A close word must hold in every reading of the name. */
+/**
+ * Rule 1: what the element is, before any word on it counts. A close button reads `read` only when its whole name is
+ * a close word ("Close", "Close dialog", never "Close project"), in every reading of it.
+ */
 function baseOf(node: AxNode, action: ActAction | undefined): { risk: RiskClass; reason: string } {
   if (action !== undefined && FIELD_ACTIONS.has(action)) return { risk: 'write', reason: 'base:write' };
   if (READ_ROLES.has(node.role)) return { risk: 'read', reason: `base:read:${node.role}` };
-  if (node.role === 'button' && findTermEveryReading('dismissClose', node.name) !== null) {
+  if (node.role === 'button' && findWholeTermEveryReading(['dismissClose'], node.name) !== null) {
     return { risk: 'read', reason: 'base:read:close' };
   }
   if (node.role === 'button' && node.attrs.expanded !== undefined) return { risk: 'read', reason: 'base:read:expander' };

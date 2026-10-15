@@ -1,4 +1,4 @@
-import type { Verdict } from '../../questions';
+import type { AbstainVerdict, Verdict } from '../../questions';
 
-export type Abstain<Out> = Extract<Verdict<Out>, { kind: 'abstain' }>;
+export type Abstain<Out> = AbstainVerdict<Out>;
 export type Answer<Out> = Extract<Verdict<Out>, { kind: 'answer' }>;

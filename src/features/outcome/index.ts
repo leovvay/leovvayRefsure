@@ -4,4 +4,4 @@ export type * from './outcome-check';
 export type * from './wrapped-act';
 export { outcomeCommand } from './outcome.command';
 export { landedByCode } from './landed-by-code';
-export { cleanSide, outcomeSide } from './outcome-side';
+export { outcomeInput, SETTLE_MS, unconfirmed } from './outcome-side';

@@ -1,8 +1,7 @@
-import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
+import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef, type Ref } from '../browser';
 import type { FieldAttrs } from './field-attrs';
 import { assumedOn, countProbe, emptyReading, raise } from './raise-probe';
 import type { RiskReading } from './risk-reading';
-import { readTagAttrs } from './tag-attrs';
 
 const PASSWORD_INPUTS = 'input[type=password]';
 /** What a card, CVV or IBAN input carries in its name or id; the page and field raisers read the same words. */
@@ -14,7 +13,6 @@ const CARD_INPUTS = [
 const CARD_NAME = new RegExp(CARD_WORDS.join('|'), 'i');
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
-const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
 
 /** What cannot be read counts as both a password and a card input (spec §8.3). */
 function assumedReading(): RiskReading {
@@ -29,7 +27,7 @@ function assumedReading(): RiskReading {
  * money. A backend without `count` counts both as hit. Other actions read nothing here.
  */
 export async function pageRaisers(port: BrowserPort, page: PageRef, action: ActAction): Promise<RiskReading> {
-  if (!CLICKS.has(action)) return emptyReading();
+  if (!CLICK_ACTIONS.has(action)) return emptyReading();
   if (port.count === undefined || !port.features().has('count')) return assumedReading();
   const out = emptyReading();
   const [password, card] = await Promise.all([
@@ -46,10 +44,6 @@ async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<F
   if (port.attr !== undefined && port.features().has('attr')) {
     const values = await Promise.all(keys.map((k) => port.attr!(page, ref, k)));
     return { type: values[0] ?? '', autocomplete: values[1] ?? '', name: values[2] ?? '', id: values[3] ?? '' };
-  }
-  if (port.html !== undefined && port.features().has('html')) {
-    const attrs = readTagAttrs(await port.html(page, ref));
-    return { type: attrs.type ?? '', autocomplete: attrs.autocomplete ?? '', name: attrs.name ?? '', id: attrs.id ?? '' };
   }
   return null;
 }

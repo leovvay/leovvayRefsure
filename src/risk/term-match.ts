@@ -1,5 +1,5 @@
 import { fold, foldVisible } from '../page-model';
-import { escapeRegExp } from './escape-reg-exp';
+import { escapeRegExp } from '../shared';
 import { LEXICONS } from './lexicons';
 
 /** The word lists of a lexicon, by field. */
@@ -106,13 +106,69 @@ export function findTermAnyReading(field: TermField, raw: string, opts: { loose?
 }
 
 /**
- * A term that lowers risk or grants authority (a close, reject or cancel word) in raw text: found in every
- * reading, so no invisible character makes a control read calmer than a person sees it. The first reading's hit.
+ * Words a back-out control may carry beside its close, cancel or reject word and still be only that: what it closes
+ * ("Close dialog", "No, close this"), or that the page goes on ("Continue without accepting" reads as a reject
+ * after `continue`). Any other word names what the control acts on: "Close project", "Yes, cancel", "End meeting".
  */
-export function findTermEveryReading(field: TermField, raw: string): TermHit | null {
+const BARE_WORDS: ReadonlySet<string> = new Set([
+  'this', 'the', 'it', 'and', 'dialog', 'window', 'popup', 'pop-up', 'modal', 'banner', 'message', 'notice', 'panel',
+  'overlay', 'menu', 'continue', 'continuer', 'weiter', 'continuar', 'kontynuuj', 'продолжить', 'продовжити',
+]);
+
+/** A folded text as the whole-name match reads it: words, punctuation dropped (`×` and its kin are words here). */
+function wordsOf(folded: string): string[] {
+  return folded.replace(/[^\p{L}\p{M}\p{N}×✕✖'-]+/gu, ' ').trim().split(' ').filter((word) => word !== '');
+}
+
+type WholeTerm = { words: readonly string[]; hit: TermHit };
+
+const wholeTerms = new Map<string, readonly WholeTerm[]>();
+
+/** The terms of `fields` as word lists, longest first, so "no thanks" is read before "no". */
+function wholeTermsFor(fields: readonly TermField[]): readonly WholeTerm[] {
+  const key = fields.join('+');
+  const known = wholeTerms.get(key);
+  if (known !== undefined) return known;
+  const out: WholeTerm[] = [];
+  for (const field of fields) {
+    for (const [term, lang] of matcherFor(field).langOf) out.push({ words: wordsOf(term), hit: { lang, term } });
+  }
+  const built = out.filter((t) => t.words.length > 0).sort((a, b) => b.words.length - a.words.length);
+  wholeTerms.set(key, built);
+  return built;
+}
+
+/**
+ * Whether a folded text is, as a whole, a term of `fields` (or several, "No, cancel"), with nothing beside them
+ * but `BARE_WORDS`; the first term read, or null. "Close" and "Close dialog" are; "Close project" is not.
+ */
+export function findWholeTerm(fields: readonly TermField[], folded: string): TermHit | null {
+  const words = wordsOf(folded);
+  const terms = wholeTermsFor(fields);
+  let first: TermHit | null = null;
+  for (let at = 0; at < words.length;) {
+    const term = terms.find((t) => t.words.every((word, k) => words[at + k] === word));
+    if (term !== undefined) {
+      first ??= term.hit;
+      at += term.words.length;
+    } else if (BARE_WORDS.has(words[at]!)) {
+      at += 1;
+    } else {
+      return null;
+    }
+  }
+  return first;
+}
+
+/**
+ * A name that lowers risk or grants authority (a close, reject or cancel control) in raw text: the whole name is
+ * such a term (`findWholeTerm`), in every reading, so neither a word beside it ("Close project") nor an invisible
+ * character makes a control read calmer than a person sees it. The first reading's hit.
+ */
+export function findWholeTermEveryReading(fields: readonly TermField[], raw: string): TermHit | null {
   let first: TermHit | null = null;
   for (const reading of readingsOf(raw)) {
-    const hit = findTerm(field, reading);
+    const hit = findWholeTerm(fields, reading);
     if (hit === null) return null;
     first ??= hit;
   }

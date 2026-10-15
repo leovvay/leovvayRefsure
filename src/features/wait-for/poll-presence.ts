@@ -1,17 +1,14 @@
 import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { boundText, cleanEgressText, sha256Hex } from '../../egress';
-import { causeStatus, type Status } from '../../output';
+import { causeStatus, RE_OBSERVE, type Status } from '../../output';
 import { fold } from '../../page-model';
 import { BOUNDS, presenceSite } from '../../questions';
-import type { Verdict } from '../../questions';
 import { abstainOutcome, nothingDone, readPage, sleep, urlGlobMatches } from '../shared';
-import type { PageReading } from '../shared';
+import type { AbstainWhy, PageReading } from '../shared';
 import { formatDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
 import type { WaitForResult } from './wait-for.contract';
-
-type Abstain = Extract<Verdict<unknown>, { kind: 'abstain' }>;
 
 /** A Decision that cannot be asked will not become askable by waiting: setup, caps, policy. */
 const STOPS: ReadonlySet<Status> = new Set<Status>(['not_set_up', 'spend_limit', 'refused']);
@@ -66,9 +63,9 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
   let closed: string | null = null;
 
   // A Decision that can never be asked on this wait: stop, unless code can still see it.
-  const shut = (verdict: Abstain): CommandOutcome<WaitForResult> | null => {
-    if (!byCode) return abstainOutcome(verdict, result(null, 'decision'));
-    closed = `the Decision is not asked: ${verdict.cause} (${verdict.detail})`;
+  const shut = (why: AbstainWhy): CommandOutcome<WaitForResult> | null => {
+    if (!byCode) return abstainOutcome(why, result(null, 'decision'));
+    closed = `the Decision is not asked: ${why.cause} (${why.detail})`;
     return null;
   };
   // Why no round of `calls` provider calls fits what is left of `--max-decisions`, or null while one does.
@@ -95,7 +92,7 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
         const route = await ctx.routeCheck(presenceSite, { combo, originUrl: reading.tab.url, dryRun: ctx.dryRun });
         const full = route.ok ? capped(route.calls) : null;
         if (!route.ok) {
-          const stop = shut({ kind: 'abstain', cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null });
+          const stop = shut(route);
           if (stop) return stop;
         } else if (full !== null) {
           // Below one round, with nothing spent: without --text or --url this wait could only run out.
@@ -159,7 +156,6 @@ function ended(
   let within = `within ${formatDuration(args.timeoutMs)}`;
   if (end.early && closed !== null) within = `before ${closed}`;
   else if (ctx.signal.aborted) within = 'before the wait was interrupted';
-  const next = { do: 'snapshot' as const, argv: ['refsure', 'snap'] };
   if (!end.byCode && tally.answered === 0 && lastCause !== null && causeStatus(lastCause) === 'unavailable') {
     return {
       status: 'unavailable',
@@ -167,7 +163,7 @@ function ended(
       effect: 'none',
       result: end.result(null, 'decision'),
       why: { cause: lastCause, detail: `no provider answered ${within} (${notes.join('; ')})` },
-      next,
+      next: RE_OBSERVE,
     };
   }
   return {
@@ -176,6 +172,6 @@ function ended(
     effect: 'none',
     result: end.result('not_seen', tally.answered > 0 ? 'decision' : 'code'),
     why: { cause: 'not_seen', detail: `not seen ${within} (${notes.join('; ')})` },
-    next,
+    next: RE_OBSERVE,
   };
 }

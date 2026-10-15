@@ -1,37 +1,25 @@
 import { parseArgs } from 'node:util';
-import { type ActAction, isRef } from '../../browser';
-import type { ParsedArgs, UsageError } from '../../cli';
-import { norm } from '../../page-model';
+import { ACT_ACTIONS, isActAction, VALUE_ACTIONS } from '../../browser';
+import { oneLine, type ParsedArgs, parseRefArg, parseRisk, type UsageError } from '../../cli';
 import { BOUNDS } from '../../questions';
-import { RISK_ORDER, type RiskClass } from '../../risk';
 import { isMarkId } from '../../tickets';
 import type { OutcomeArgs } from './outcome.args';
 import type { OutcomeCheck } from './outcome-check';
 import type { WrappedAct } from './wrapped-act';
 
-const ACTIONS: readonly ActAction[] = ['click', 'dblclick', 'fill', 'select', 'check', 'uncheck'];
-const VALUE_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select']);
 /** Typing has no element-level effect refsure can guard or check (spec §6.2): refused as usage. */
 const TYPING: ReadonlySet<string> = new Set(['type', 'keypress', 'press', 'inserttext', 'keyboard']);
 const EXPECT_URL_MAX = 2_000;
 const SHAPE = '-- <click|dblclick|fill|select|check|uncheck> --element @eN [--value v]';
-
-function isAction(verb: string): verb is ActAction {
-  return (ACTIONS as readonly string[]).includes(verb);
-}
-
-function oneLine(value: unknown): string | null {
-  return typeof value === 'string' ? norm(value) : null;
-}
 
 /** The act after `--`, parsed strictly: one verb, one `--element`, `--value` only for fill and select. */
 export function parseWrappedAct(rest: readonly string[]): WrappedAct | UsageError {
   const [verb, ...flags] = rest;
   if (verb === undefined || verb === '') return { usage: `outcome needs the act after --: ${SHAPE}` };
   if (TYPING.has(verb)) {
-    return { usage: `outcome does not wrap ${verb}: it wraps ${ACTIONS.join('|')} (use fill to enter text)` };
+    return { usage: `outcome does not wrap ${verb}: it wraps ${ACT_ACTIONS.join('|')} (use fill to enter text)` };
   }
-  if (!isAction(verb)) return { usage: `outcome wraps ${ACTIONS.join('|')}, not ${JSON.stringify(verb.slice(0, 40))}` };
+  if (!isActAction(verb)) return { usage: `outcome wraps ${ACT_ACTIONS.join('|')}, not ${JSON.stringify(verb.slice(0, 40))}` };
   let values: { element?: string | undefined; value?: string | undefined };
   try {
     const parsed = parseArgs({
@@ -48,8 +36,8 @@ export function parseWrappedAct(rest: readonly string[]): WrappedAct | UsageErro
   } catch (error) {
     return { usage: `the act after -- is not ${SHAPE}: ${error instanceof Error ? error.message : String(error)}` };
   }
-  const element = values.element?.trim().replace(/^@/, '') ?? '';
-  if (!isRef(element)) return { usage: `the act after -- needs --element @eN from your latest snapshot` };
+  const element = parseRefArg(values.element, '--element after --');
+  if (typeof element === 'object') return element;
   if (VALUE_ACTIONS.has(verb)) {
     if (values.value === undefined) return { usage: `${verb} needs --value after --` };
     return { action: verb, ref: element, value: values.value };
@@ -71,12 +59,6 @@ function parseCheck(raw: ParsedArgs): OutcomeCheck | UsageError {
     return { usage: `--expect-text is ${text.length} characters; keep it to ${BOUNDS.INTENT_MAX}` };
   }
   return { intent, expectUrl: url, expectText: text };
-}
-
-function parseRisk(value: unknown): RiskClass | undefined | UsageError {
-  if (value === undefined) return undefined;
-  if (typeof value === 'string' && (RISK_ORDER as readonly string[]).includes(value)) return value as RiskClass;
-  return { usage: `--risk must be one of ${RISK_ORDER.join(', ')}` };
 }
 
 /** Both modes: `--mark M` reads only; otherwise the act after `--` is wrapped and needs `--expect-name`. */

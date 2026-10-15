@@ -1,4 +1,4 @@
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 
 /** The session names `session list` answers with (`{sessions: ["default", ...]}`); none when the shape is off. */
 export function readSessions(result: unknown): string[] {

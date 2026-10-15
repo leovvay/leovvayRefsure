@@ -1,10 +1,7 @@
-import { type Candidate, fold, twinKey } from '../../../src/page-model';
+import { type Candidate, candidateKey, fold } from '../../../src/page-model';
 import type { GoldRef } from './gold-ref';
 
 type Element = Extract<GoldRef, { kind: 'element' }>;
-
-/** A candidate's twin group: the key gold mapping, the twin stop and `distinct` all group by. */
-export const keyOf = (c: Candidate): string => twinKey(c.fp.role, c.fp.name, c.fp.path);
 
 /**
  * The live candidate a gold element names: the `ordinal`-th, in page order, of the candidates with its role and
@@ -34,7 +31,7 @@ export function offeredIndex(offered: readonly Candidate[], cands: readonly Cand
   if (ref.kind === 'key') return ref.value;
   const gold = findGold(cands, ref);
   if (gold === null) return 'unmapped';
-  const at = offered.findIndex((c) => keyOf(c) === keyOf(gold));
+  const at = offered.findIndex((c) => candidateKey(c) === candidateKey(gold));
   return at < 0 ? null : String(at);
 }
 
@@ -43,6 +40,6 @@ export function codeHit(pick: Candidate, cands: readonly Candidate[], truths: re
   return truths.some((ref) => {
     if (ref.kind !== 'element') return false;
     const gold = findGold(cands, ref);
-    return gold !== null && keyOf(gold) === keyOf(pick);
+    return gold !== null && candidateKey(gold) === candidateKey(pick);
   });
 }

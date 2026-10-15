@@ -1,4 +1,4 @@
-import type { ParsedArgs, UsageError } from '../../cli';
+import { oneLine, type ParsedArgs, type UsageError } from '../../cli';
 import { fold } from '../../page-model';
 import { BOUNDS } from '../../questions';
 import type { StateArgs } from './state.args';
@@ -6,10 +6,6 @@ import type { StateArgs } from './state.args';
 const KEY = /^[a-z][a-z0-9_]{0,39}$/;
 const STATES_MIN = 2;
 const STATES_MAX = 12;
-
-function oneLine(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
-}
 
 /** `key="<when>"` pairs, in the order given: snake-case keys, each once, never `none`, descriptions not empty. */
 function parseStates(given: readonly string[]): { states: Record<string, string> } | UsageError {
@@ -24,7 +20,7 @@ function parseStates(given: readonly string[]): { states: Record<string, string>
     }
     if (fold(key) === 'none') return { usage: '--state may not name a state none: it is reserved for "no option fits"' };
     if (Object.hasOwn(states, key)) return { usage: `--state ${key} is given twice` };
-    const description = oneLine(pair.slice(at + 1));
+    const description = oneLine(pair.slice(at + 1)) ?? '';
     if (description === '') return { usage: `--state ${key} has no description: say when the page is in it` };
     if (description.length > BOUNDS.DESCRIPTION_MAX) {
       return { usage: `--state ${key} is ${description.length} characters; keep it to ${BOUNDS.DESCRIPTION_MAX}` };
@@ -40,7 +36,7 @@ export function parseState(raw: ParsedArgs): StateArgs | UsageError {
   if (raw.rest.length > 0) return { usage: 'state takes nothing after --' };
   let expect: string | null = null;
   if (raw.values.expect !== undefined) {
-    expect = typeof raw.values.expect === 'string' ? oneLine(raw.values.expect) : '';
+    expect = oneLine(raw.values.expect) ?? '';
     if (expect === '') return { usage: '--expect is empty: say what the intended page is' };
     if (expect.length > BOUNDS.INTENT_MAX) return { usage: `--expect is ${expect.length} characters; keep it to ${BOUNDS.INTENT_MAX}` };
   }

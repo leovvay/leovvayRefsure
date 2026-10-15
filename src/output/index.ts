@@ -9,3 +9,4 @@ export { redactPatterns } from './redact-patterns';
 export { renderEnvelope } from './render-json';
 export { applyUntrusted, UNTRUSTED_TEXT_MAX, WIRE_COPY_PATH } from './untrusted';
 export { newTrace } from './new-trace';
+export { NEEDS_HUMAN, RE_OBSERVE } from './next-steps';

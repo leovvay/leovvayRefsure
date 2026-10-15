@@ -7,5 +7,4 @@ export interface TicketBook {
   /** Single use: a second claim is `ticket_used`; expiry never refreshes. */
   claim(id: string, nowMs: number): Promise<Ticket | ClaimFailure>;
   peek(id: string, nowMs: number): Promise<Ticket | ClaimFailure>;
-  forget(scope: { pageId: string } | 'all'): Promise<number>;
 }

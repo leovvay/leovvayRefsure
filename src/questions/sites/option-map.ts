@@ -7,7 +7,8 @@ import { OPTION_MAP_INSTRUCTIONS, OPTION_NONE } from './wordings';
 
 /**
  * Which option of a field means what `want` describes. Options are not cut to the shortlist: a country list is
- * short names, and the questions byte bound refuses one that does not fit.
+ * short names. A list past the questions byte bound is cut from the end (the caller ranks it first), so the site
+ * never refuses `oversize` after `pick-option --open` has clicked the list open.
  */
 export const optionMapSite = candidateSite<OptionMapInput>({
   id: 'option-map',

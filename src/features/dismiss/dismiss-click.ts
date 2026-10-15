@@ -1,10 +1,11 @@
 import type { CommandContext } from '../../cli';
+import { NEEDS_HUMAN, RE_OBSERVE } from '../../output';
 import { type Candidate, cutName, findByFingerprint, fingerprintOf, urlNorm } from '../../page-model';
 import type { DismissLevelReport } from './dismiss-level-report';
 import { dismissRisk } from './dismiss-risk';
 import type { DismissScene } from './dismiss-scene';
 import { vetoOf } from './dismiss-veto';
-import { HUMAN, SNAPSHOT, stop } from './level-stop';
+import { stop } from './level-stop';
 import type { LevelOutcome } from './level-outcome';
 import { overlayGone } from './overlay-gone';
 
@@ -20,7 +21,7 @@ export async function clickPick(
 ): Promise<LevelOutcome> {
   const name = JSON.stringify(cutName(pick.fp.name));
   const stale = (cause: 'page_changed' | 'ref_gone', detail: string): LevelOutcome => (
-    stop({ ...report, verdict: 'stale' }, 'stale', cause, `${detail}; nothing was clicked`, SNAPSHOT));
+    stop({ ...report, verdict: 'stale' }, 'stale', cause, `${detail}; nothing was clicked`, RE_OBSERVE));
   const [tab, tree] = await Promise.all([ctx.browser.tabInfo(scene.page), ctx.browser.snapshot(scene.page)]);
   if (urlNorm(tab.url) !== urlNorm(scene.tab.url) || (tab.tabKey ?? undefined) !== (scene.tab.tabKey ?? undefined)) {
     return stale('page_changed', 'the page moved to another URL or tab after the Decision');
@@ -31,7 +32,7 @@ export async function clickPick(
   const veto = vetoOf(tree.nodes[found.node]?.name ?? pick.fp.name);
   if (veto !== null) {
     return stop({ ...report, verdict: 'vetoed' }, 'refused', 'veto',
-      `${name} now carries "${veto.term}", which is on the never-click list; nothing was clicked`, HUMAN);
+      `${name} now carries "${veto.term}", which is on the never-click list; nothing was clicked`, NEEDS_HUMAN);
   }
   const risk = await dismissRisk(ctx, scene.page, tab.url, tree, found.node);
   if (risk.class !== 'read') {
@@ -41,7 +42,7 @@ export async function clickPick(
   const sent = await ctx.browser.act(scene.page, found.ref, 'click');
   if (sent.kind === 'stale_ref') return stale('ref_gone', `${name} left the page before the click`);
   const unknown = (detail: string, effect: 'dispatched' | 'unknown'): LevelOutcome => ({
-    ...stop({ ...report, verdict: 'unknown' }, 'effect_unknown', 'effect_unknown', detail, SNAPSHOT), clicked: true, effect,
+    ...stop({ ...report, verdict: 'unknown' }, 'effect_unknown', 'effect_unknown', detail, RE_OBSERVE), clicked: true, effect,
   });
   if (sent.kind === 'unknown') return unknown(sent.detail, 'unknown');
   if (!(await overlayGone(ctx, scene.page, fingerprintOf(scene.tree, scene.container)))) {

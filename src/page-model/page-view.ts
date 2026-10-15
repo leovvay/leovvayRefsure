@@ -1,7 +1,8 @@
 import type { AxTree, TabInfo } from '../browser';
+import { DIALOG_ROLES } from './ancestors';
 import type { PageView } from './page-view-shape';
 import { cutName, fold, norm, urlNorm } from './normalize';
-import { insideValueField, subtreeText, typedValues } from './tree-text';
+import { cutPieces, insideValueField, subtreeText, typedValues } from './tree-text';
 
 const HEADINGS_MAX = 12;
 const ALERT_MAX = 300;
@@ -13,20 +14,6 @@ function alertText(tree: AxTree, i: number): string {
   if (name === '' || fold(inner).includes(fold(name))) return inner;
   if (inner === '' || fold(name).includes(fold(inner))) return name;
   return `${name} ${inner}`;
-}
-
-/** Body text per line: `norm`ed, typed field text cut out, blank lines dropped. */
-function bodyLines(tree: AxTree, bodyText: string): string {
-  const typed = typedValues(tree);
-  const lines: string[] = [];
-  for (const raw of bodyText.split(/\r?\n/)) {
-    let line = norm(raw);
-    for (const value of typed) {
-      if (line.includes(value)) line = norm(line.split(value).join(' '));
-    }
-    if (line !== '') lines.push(line);
-  }
-  return lines.join('\n');
 }
 
 /**
@@ -42,7 +29,7 @@ export function pageView(tree: AxTree, tab: TabInfo, bodyText: string): PageView
     if (node.role === 'heading') {
       const name = cutName(norm(node.name));
       if (name !== '' && headings.size < HEADINGS_MAX) headings.add(name);
-    } else if (node.role === 'dialog' || node.role === 'alertdialog') {
+    } else if (DIALOG_ROLES.has(node.role)) {
       const name = cutName(norm(node.name));
       dialogs.push(name === '' ? node.role : name);
     } else if (node.role === 'alert' || node.role === 'status') {
@@ -56,6 +43,7 @@ export function pageView(tree: AxTree, tab: TabInfo, bodyText: string): PageView
     headings: [...headings],
     dialogs,
     alerts: [...alerts],
-    text: bodyLines(tree, bodyText),
+    // Body text per line, `norm`ed, typed field text cut out.
+    text: cutPieces(bodyText, typedValues(tree)),
   };
 }

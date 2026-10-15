@@ -1,4 +1,4 @@
-import type { Next } from '../../output';
+import { NEEDS_HUMAN, type Next } from '../../output';
 
 /** After a rate-limit page, look again in this long; the page's own retry hint is page text and is not read. */
 const RATE_LIMIT_WAIT_MS = 30_000;
@@ -15,7 +15,7 @@ export function stateNext(verdict: string, again: readonly string[]): Next | nul
       return { do: 'wait', after_ms: RATE_LIMIT_WAIT_MS, argv: [...again] };
     case 'login_wall':
     case 'bot_challenge':
-      return { do: 'needs_human' };
+      return NEEDS_HUMAN;
     case 'error_page':
     case 'unexpected_page':
       return { do: 'stop' };

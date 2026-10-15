@@ -1,13 +1,13 @@
-import type { BrowserCapability, BrowserPort, PageHint, PageRef, TabInfo } from '../browser';
+import type { BrowserCapability, BrowserPort, PageRef, TabInfo } from '../browser';
 import { expiresAtOf } from '../local-state';
 import { DryRunStop, type PageInfo, type Status, WIRE_COPY_PATH } from '../output';
+import { hintOf } from './arg-values';
 import { finish } from './build-envelope';
 import type { CommandContext } from './command-context';
 import type { CommandOutcome } from './command-outcome';
 import type { CommandResult } from './command-result';
 import type { CommandSpec } from './command-spec';
 import { isUsageError, parseCommandArgs } from './parse-args';
-import type { ParsedArgs } from './parsed-args';
 import { watchBrowser } from './registry-browser';
 import type { RegistryDeps } from './registry-deps';
 import { RegistryInvariantError } from './registry-invariant-error';
@@ -21,10 +21,6 @@ interface Settled { outcome: CommandOutcome<unknown>; watched: WatchedBrowser | 
 
 // After these the browser is known to be out of reach, so the envelope does not ask it for the page URL.
 const BROWSER_DOWN: ReadonlySet<Status> = new Set<Status>(['unavailable', 'not_in_orca_terminal', 'usage']);
-
-function hintOf(raw: ParsedArgs): PageHint {
-  return typeof raw.values.page === 'string' ? { page: raw.values.page } : {};
-}
 
 // A verb that needs no capability never asks: a port with no backend chosen answers that question with an error.
 function missingCapabilities(needs: readonly BrowserCapability[], browser: BrowserPort): BrowserCapability[] {
@@ -55,7 +51,9 @@ async function settle<Args, Result>(
   const raw = parseCommandArgs(spec, argv);
   if (isUsageError(raw)) return { ...idle, outcome: usageOutcome(spec.name, raw.usage) };
   const dryRun = raw.values['dry-run'] === true;
-  const watched = watchBrowser(deps.browser, { command: spec.name, mayAct: spec.needs.acts !== 'never', dryRun });
+  const watched = watchBrowser(deps.browser, {
+    command: spec.name, mayAct: spec.needs.acts !== 'never', dryRun, signal: deps.signal,
+  });
   let page: PageRef | null = null;
   // A command that finds its own page (a ticket names it) sets `ctx.page`; a thrown failure still names it.
   let ctx: CommandContext | null = null;

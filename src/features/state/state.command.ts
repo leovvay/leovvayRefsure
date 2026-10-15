@@ -1,5 +1,5 @@
 import type { CommandOutcome, CommandSpec } from '../../cli';
-import { pageView } from '../../page-model';
+import { DIALOG_ROLES, pageView } from '../../page-model';
 import { pageStateSite, RESEARCH_STATES } from '../../questions';
 import { abstainOutcome } from '../shared';
 import { parseState } from './parse-state';
@@ -8,7 +8,6 @@ import type { StateResult } from './state.contract';
 import { stateNext } from './state-next';
 import { stateInput } from './state-page';
 
-const BLOCKING_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 
 /** The same `state` call: the custom states in their order, then `--expect`. */
 function askAgain(args: StateArgs): string[] {
@@ -66,7 +65,7 @@ export const stateCommand: CommandSpec<StateArgs, StateResult> = {
       return answered('error_page', 'code', args);
     }
     const tree = await ctx.browser.snapshot(page);
-    if (tree.nodes.some((node) => BLOCKING_ROLES.has(node.role)) && offers(args, 'blocking_modal')) {
+    if (tree.nodes.some((node) => DIALOG_ROLES.has(node.role)) && offers(args, 'blocking_modal')) {
       return answered('blocking_modal', 'code', args);
     }
 

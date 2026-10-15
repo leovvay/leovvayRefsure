@@ -1,6 +1,6 @@
 import { type BrowserErrorCode, isBrowserError, type PageRef } from '../browser';
 import { isConfigError } from '../config';
-import { type Next, redactPatterns, type RunTrace, type Status } from '../output';
+import { type Next, RE_OBSERVE, redactPatterns, type RunTrace, type Status } from '../output';
 import type { CommandOutcome } from './command-outcome';
 
 const BROWSER_FAILURES: Readonly<Record<BrowserErrorCode, { status: Status; cause: string }>> = {
@@ -15,7 +15,6 @@ const BROWSER_FAILURES: Readonly<Record<BrowserErrorCode, { status: Status; caus
 };
 
 const DETAIL_MAX = 500;
-const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 
 function clean(text: string): string {
   const redacted = redactPatterns(text);

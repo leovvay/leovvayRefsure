@@ -6,7 +6,7 @@ import type { Candidate } from '../page-model';
  * or it is the only exact-name match. Only the name counts: a shared heading in the path says little about the
  * element itself.
  */
-export function corroborate(intent: string, cand: Candidate, cands: Candidate[]): boolean {
+export function corroborate(intent: string, cand: Candidate, cands: readonly Candidate[]): boolean {
   const wanted = new Set(contentWords(intent).map(fold));
   if (contentWords(cand.fp.name).some((word: string) => wanted.has(fold(word)))) return true;
   const exact = exactNameMatch(cands, intent);

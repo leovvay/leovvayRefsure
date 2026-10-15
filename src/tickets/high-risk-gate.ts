@@ -1,6 +1,6 @@
 import type { Ref } from '../browser';
 import type { CommandContext } from '../cli';
-import { cutName, norm } from '../page-model';
+import { describeElement } from '../page-model';
 import { actionRole, HIGH_RISK, liveRefRisk, maxRisk, nameCheck, readLiveTarget, type RiskReading } from '../risk';
 import { TICKET_TTL_MS } from './file-ticket-book';
 import type { HighRiskGateResult } from './high-risk-gate-result';
@@ -15,8 +15,8 @@ type Stop = Extract<HighRiskGateResult, { ok: false }>;
 /** Whether a stop leaves the ticket for another try (`kept`) or comes after it was claimed (`spent`). */
 type Held = 'kept' | 'spent' | 'none';
 
-function stop(status: Stop['status'], cause: string, detail: string, computed?: RiskReading): Stop {
-  return computed ? { ok: false, status, cause, detail, computed } : { ok: false, status, cause, detail };
+function stop(status: Stop['status'], cause: string, detail: string): Stop {
+  return { ok: false, status, cause, detail };
 }
 
 function nothing(held: Held): string {
@@ -59,7 +59,7 @@ function classCheck(req: HighRiskRequest, risk: RiskReading, held: Held): Stop |
     ? 'the class a fresh read of the ticket gives (refsure guard --ticket shows it)'
     : 'the class this live ref reads now';
   const tail = HIGH_RISK.has(risk.class) ? `--class must name ${read}` : 'it is not a high-risk class: use act or outcome';
-  return stop('refused', 'high_risk_class', `the element reads ${why}, not ${req.class}: ${tail}; ${nothing(held)}`, risk);
+  return stop('refused', 'high_risk_class', `the element reads ${why}, not ${req.class}: ${tail}; ${nothing(held)}`);
 }
 
 /** The recheck (spec §8.3) and the class check on its fresh risk, for a ticket either still kept or just claimed. */
@@ -74,8 +74,7 @@ async function checkTicket(ctx: CommandContext, req: HighRiskRequest, ticket: Ti
   const risk = raised(fresh.risk, req.risk);
   const mismatch = classCheck(req, risk, held);
   if (mismatch) return mismatch;
-  const element = `${ticket.fingerprint.role} ${JSON.stringify(cutName(ticket.fingerprint.name))}`;
-  return { ok: true, ref: fresh.ref, risk, element };
+  return { ok: true, ref: fresh.ref, element: describeElement(ticket.fingerprint.role, ticket.fingerprint.name) };
 }
 
 /**
@@ -110,8 +109,7 @@ async function byRef(ctx: CommandContext, req: HighRiskRequest & { ref: Ref; exp
   });
   const mismatch = classCheck(req, risk, 'none');
   if (mismatch) return mismatch;
-  const element = `${target.role ?? actionRole(action)} ${JSON.stringify(cutName(norm(target.live.seen)))}`;
-  return { ok: true, ref, risk, element };
+  return { ok: true, ref, element: describeElement(target.role ?? actionRole(action), target.live.seen) };
 }
 
 /**

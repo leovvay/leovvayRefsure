@@ -1,17 +1,16 @@
 import type { DecisionQuestion, SiteRequest } from '../questions';
+import { BOUNDS } from '../questions/bounds';
 import type { ApprovedRequest } from './approved-request';
 import type { ApproveContext } from './approve-context';
 import { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
 import { cleanEgressText } from './clean-text';
-import { grantFor, readConsent } from './consent';
-import { DISCLOSURE_HASH } from './disclosure';
+import { consentMissing, grantFor, readConsent } from './consent';
 import type { EgressRefusal } from './egress-refusal';
 import { checkLimits } from './limits';
 import { checkOrigin } from './origin-policy';
 
-/** Spec §7.3: anything larger is `oversize` before any call is made. Measured on canonical JSON, UTF-8. */
-const STATE_MAX_BYTES = 24_000;
-const QUESTIONS_MAX_BYTES = 12_000;
+// The file, not the barrel: questions imports egress. Anything larger is `oversize` before any call (spec §7.3).
+const { STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } = BOUNDS;
 
 const REFUSAL_CAUSES: ReadonlySet<unknown> = new Set(['not_set_up', 'origin_denied', 'oversize', 'spend_limit']);
 
@@ -24,11 +23,7 @@ export function isEgressRefusal(value: unknown): value is EgressRefusal {
 function consentRefusal(ctx: ApproveContext): EgressRefusal | null {
   const consent = readConsent(ctx.config.paths.consent);
   if (grantFor(consent, ctx.provider, ctx.host)) return null;
-  const grant = `${ctx.provider} at ${ctx.host}`;
-  const detail = consent && consent.disclosure !== DISCLOSURE_HASH
-    ? `the disclosure changed since consent was given; a human runs \`refsure setup\` again to grant ${grant}`
-    : `no consent grant for ${grant}; a human runs \`refsure setup\` in a terminal`;
-  return { cause: 'not_set_up', detail };
+  return { cause: 'not_set_up', detail: consentMissing(consent, ctx.provider, ctx.host) };
 }
 
 type Clean = (text: string) => string;

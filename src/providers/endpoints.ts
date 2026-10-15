@@ -1,4 +1,4 @@
-import type { GatewayConfig } from '../config';
+import { type GatewayConfig, isLoopbackHost } from '../config';
 import type { ProviderId } from '../questions';
 import type { Endpoint } from './endpoint';
 
@@ -22,7 +22,6 @@ const OPENAI_DIRECT: Endpoint = Object.freeze({
   headers: Object.freeze({}),
 });
 
-const LOOPBACK: ReadonlySet<string> = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 /** refsure sets these itself; a gateway header of the same name would split or replace them. */
 const RESERVED_HEADERS: ReadonlySet<string> = new Set(['authorization', 'content-type', 'content-length', 'host']);
 
@@ -48,9 +47,9 @@ function gatewayRoute(cfg: GatewayConfig | null, provider: ProviderId): { path: 
   return nonEmpty(path) && nonEmpty(model) ? { path, model } : null;
 }
 
-/** `https:`, or `http:` on a loopback host only. */
+/** `https:`, or `http:` on a loopback host only (the config's own rule, `isLoopbackHost`). */
 function isSecureUrl(url: URL): boolean {
-  return url.protocol === 'https:' || (url.protocol === 'http:' && LOOPBACK.has(url.hostname));
+  return url.protocol === 'https:' || (url.protocol === 'http:' && isLoopbackHost(url.hostname));
 }
 
 /**

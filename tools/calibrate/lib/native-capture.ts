@@ -1,16 +1,16 @@
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { AxTree, PageRef, TabInfo } from '../../../src/browser';
-import { type Candidate, candidatesOf, fold } from '../../../src/page-model';
+import { type Candidate, candidateKey, candidatesOf, distinctByGroup, fold } from '../../../src/page-model';
 import type { CalibItem } from './calib-item';
 import type { CaptureDeps } from './capture-deps';
 import type { Captured } from './captured';
 import type { CodeRow } from './code-row';
 import type { GoldRef } from './gold-ref';
-import { codeHit, keyOf, offeredIndex, placesOf } from './gold-map';
+import { codeHit, offeredIndex, placesOf } from './gold-map';
 import { modeId } from './item-page';
 import type { NativeItem } from './native-item';
-import { dismissScene, distinct, findScene, locateScene, pageStateCode, pageStateInputOf, presenceInputOf } from './native-inputs';
+import { dismissScene, findScene, locateScene, pageStateCode, pageStateInputOf, presenceInputOf } from './native-inputs';
 
 /*
   One item of the Orca-native replay (spec §9 step 2): the stored page is served on 127.0.0.1 and opened in the
@@ -89,7 +89,7 @@ function codeNone(item: NativeItem, rule: string): Captured {
  * `scope` (the `--within` rows) stops at the twin rule: no answer.
  */
 function codeAnswer(item: NativeItem, pick: Candidate, all: readonly Candidate[], rule: string, scope: readonly Candidate[] = all): Captured {
-  const group = scope.filter((c) => keyOf(c) === keyOf(pick)).length;
+  const group = scope.filter((c) => candidateKey(c) === candidateKey(pick)).length;
   if (pick.fp.twins > 1 && group > 1) return row(item, 'code', `${rule}+twins`, 'twins', null);
   return row(item, 'code', rule, pick.line, codeHit(pick, all, [item.gold, ...item.alt]));
 }
@@ -103,7 +103,7 @@ function recordedLine(item: NativeItem, tree: AxTree): string | { why: string } 
   const ref = item.recordedRef;
   if (ref?.kind !== 'element') return { why: 'no recorded element' };
   const same = candidatesOf(tree).filter((c) => c.fp.role === ref.role && fold(c.fp.name) === fold(ref.name));
-  const lines = [...new Set(distinct(same).map((c) => c.line))];
+  const lines = [...new Set(distinctByGroup(same).map((c) => c.line))];
   if (lines.length === 0) return { why: 'the recorded element is not on the recording page' };
   if (lines.length === 1) return lines[0]!;
   const hint = ref.hint;

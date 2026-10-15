@@ -9,4 +9,6 @@ export interface PresentedCandidates {
   criteria: Record<string, string>;
   /** The caller's index for a presented key; `null` for `none` or a key that was never offered. */
   indexOf(key: string): number | null;
+  /** A key as a refusal names it: the offered line's own text, quoted (`quoteOption`); `none` and unknown keys as is. */
+  quote(key: string): string;
 }

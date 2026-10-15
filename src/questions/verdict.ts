@@ -31,3 +31,5 @@ export type Verdict<Out> =
     /** The provider refused the key itself (HTTP 401, 402, 403): asking again, over any input, fails the same way. */
     permanent?: true;
   };
+
+export type AbstainVerdict<Out> = Extract<Verdict<Out>, { kind: 'abstain' }>;

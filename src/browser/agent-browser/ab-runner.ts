@@ -1,6 +1,6 @@
 import { execFile, execFileSync } from 'node:child_process';
 import { BrowserError } from '../browser-error';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import {
   childFailure, type JsonChild, MAX_BUFFER, parseJsonFrom, READ_TIMEOUT_MS, spawnJson, stripRefsureEnv,
 } from '../run-json';

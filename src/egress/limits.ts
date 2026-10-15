@@ -13,7 +13,8 @@ const UNPRICED_CALL_MICROS = 100;
 
 /**
  * The micro-dollars one logged call counts for: its reported cost, or the estimate when it reported none and may
- * have reached a model. A `transport` failure never arrived, and an `http_*` answer was refused or shed before one.
+ * have reached a model, a call still `pending` (in flight, or cut off by a kill) included. A `transport` failure
+ * never arrived, and an `http_*` answer was refused or shed before one.
  */
 function chargeOf(entry: EgressLogEntry): { micros: number; estimated: boolean } {
   if (typeof entry.usd === 'number') return { micros: entry.usd > 0 ? Math.round(entry.usd * 1e6) : 0, estimated: false };
@@ -22,9 +23,10 @@ function chargeOf(entry: EgressLogEntry): { micros: number; estimated: boolean }
 }
 
 /**
- * Both caps are read from egress.log entries, so every provider call counts, answered or not. `pending` counts the
- * calls the same Decision makes alongside this one (an `agree` asks both providers at once): none of them is in
- * the log yet, and each still counts. A call with no reported cost counts at `UNPRICED_CALL_MICROS`.
+ * Both caps are read from egress.log entries, one per call (`readEgressLog`), so every provider call counts:
+ * answered or not, and in flight in another process. `pending` counts the calls the same Decision makes alongside
+ * this one (an `agree` asks both providers at once): none of them is in the log yet, and each still counts. A call
+ * with no reported cost counts at `UNPRICED_CALL_MICROS`.
  */
 export function checkLimits(
   entries: readonly EgressLogEntry[],

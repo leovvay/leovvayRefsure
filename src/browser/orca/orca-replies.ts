@@ -1,6 +1,6 @@
 import { asResult, str } from '../agent-browser-format';
 import { BrowserError } from '../browser-error';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import type { TabInfo } from '../tab-info';
 
 // Orca passes agent-browser's own payloads on, so the shared readers in agent-browser-format read those; only

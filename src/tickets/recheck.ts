@@ -1,12 +1,10 @@
-import type { ActAction, PageRef } from '../browser';
+import { type ActAction, CLICK_ACTIONS, FIELD_ACTIONS, type PageRef } from '../browser';
 import type { CommandContext } from '../cli';
 import { findByFingerprint, rowContains, rowTextOf, urlNorm } from '../page-model';
-import { classify, fieldRaisers, maxRisk, pageRaisers } from '../risk';
+import { classify, fieldRaisers, maxRisk, mergeReadings, pageRaisers } from '../risk';
 import type { RiskClass, RiskReading } from '../risk';
 import type { RecheckResult } from './recheck-result';
 import type { Ticket } from './ticket';
-
-const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 
 /**
  * Steps 2-6 of the ticket path (spec §8.3): the same URL and tab, a fresh snapshot, the fingerprint's twin group
@@ -33,16 +31,14 @@ export async function recheck(
   }
   const action = opts.action ?? ticket.action ?? 'click';
   const readings: RiskReading[] = [classify(tree, found.node, { url: tab.url, action })];
-  if (action === 'click' || action === 'dblclick') readings.push(await pageRaisers(ctx.browser, page, action));
+  if (CLICK_ACTIONS.has(action)) readings.push(await pageRaisers(ctx.browser, page, action));
   if (FIELD_ACTIONS.has(action)) readings.push(await fieldRaisers(ctx.browser, page, found.ref));
   return { ref: found.ref, risk: rise(ticket.risk, readings) };
 }
 
 /** Risk only rises (spec §8.1 invariant 4): the class the ticket was issued at outlives a calmer fresh read. */
 function rise(issued: RiskClass, readings: RiskReading[]): RiskReading {
-  const fresh = maxRisk(...readings.map((r) => r.class));
-  const reasons = [...new Set(readings.flatMap((r) => r.reasons))];
-  const risk = maxRisk(issued, fresh);
-  if (risk !== fresh) reasons.push(`ticket:${issued}`);
-  return { class: risk, reasons };
+  const fresh = mergeReadings(...readings);
+  const risk = maxRisk(issued, fresh.class);
+  return risk === fresh.class ? fresh : { class: risk, reasons: [...fresh.reasons, `ticket:${issued}`] };
 }

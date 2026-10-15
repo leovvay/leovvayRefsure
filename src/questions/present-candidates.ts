@@ -1,4 +1,4 @@
-import { boundText, redactSecrets, stripControl } from '../egress';
+import { boundText, cleanEgressText, redactSecrets, stripControl } from '../egress';
 import { BOUNDS } from './bounds';
 import type { CandidateOrder, PresentedCandidates } from './presented-candidates';
 
@@ -21,9 +21,23 @@ import type { CandidateOrder, PresentedCandidates } from './presented-candidates
 /** The key a Choice uses for "no candidate fits". A presented position is never this. */
 export const NONE_KEY = 'none';
 
-/** Strip, redact, then cut: the order redaction asks of every bounded sink. */
+/**
+ * Strip, redact, then cut: the order redaction asks of every bounded sink. Text that is cut is masked too, PII
+ * included whatever the config: the part a cut leaves of an e-mail or a card no longer matches its mask.
+ */
 export function boundedText(text: string, max: number, opts: { inline?: boolean } = {}): string {
-  return boundText(redactSecrets(stripControl(text)), { max, ...(opts.inline ? { inline: true } : {}) });
+  const bound = { max, ...(opts.inline ? { inline: true } : {}) };
+  const redacted = redactSecrets(stripControl(text));
+  const shown = opts.inline ? redacted.replace(/\s+/g, ' ').trim() : redacted;
+  return shown.length <= max ? shown : boundText(cleanEgressText(text, true), bound);
+}
+
+/** How a refusal quotes an offered line: one line, at most this long, page text. */
+const QUOTED_MAX = 160;
+
+/** An offered option as a refusal quotes it: its own text, one line and cut (`boundedText`), JSON-quoted. */
+export function quoteOption(text: string): string {
+  return JSON.stringify(boundedText(text, QUOTED_MAX, { inline: true }));
 }
 
 /** 32-bit FNV-1a over the string's UTF-16 units: small, pure, and the same everywhere. */
@@ -87,6 +101,10 @@ export function presentCandidates(
     indexOf(key) {
       if (!/^[1-9]\d*$/.test(key)) return null;
       return presented[Number(key) - 1] ?? null;
+    },
+    quote(key) {
+      const text = key === NONE_KEY ? undefined : criteria[key];
+      return text === undefined ? key : quoteOption(text);
     },
   };
 }

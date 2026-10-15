@@ -1,16 +1,12 @@
-import type { PageRef } from '../../browser';
+import { type PageRef, VALUE_ACTIONS } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
+import { NEEDS_HUMAN, RE_OBSERVE } from '../../output';
 import { gateHighRisk, type HighRiskGateResult, type Ticket } from '../../tickets';
 import { nothingDone, peekTicketOnPage, ticketBindingRefusal } from '../shared';
 import type { ActHighRiskArgs } from './act-high-risk.args';
 import type { ActHighRiskResult } from './act-high-risk.contract';
-import { VALUE_ACTIONS } from './parse-act-high-risk';
 
 type Out = CommandOutcome<ActHighRiskResult>;
-
-const SNAPSHOT: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
-const HUMAN: Next = { do: 'needs_human' };
 
 /**
  * The value a ticket's act runs with. A ticket issued for one action and value runs only those
@@ -27,7 +23,7 @@ function ticketValue(args: ActHighRiskArgs, ticket: Ticket): { value: string | u
 function stopped(ctx: CommandContext, gate: Extract<HighRiskGateResult, { ok: false }>): Out {
   // A name mismatch quotes the name the page shows.
   if (gate.cause === 'expect_name_mismatch') ctx.trace.untrusted.add('why.detail');
-  const next = gate.status === 'refused' ? HUMAN : SNAPSHOT;
+  const next = gate.status === 'refused' ? NEEDS_HUMAN : RE_OBSERVE;
   return nothingDone(gate.status, gate.cause, gate.detail, { next });
 }
 
@@ -67,12 +63,12 @@ export async function runActHighRisk(args: ActHighRiskArgs, ctx: CommandContext)
   if (!ctx.dryRun && ctx.browser.highlight !== undefined) await ctx.browser.highlight(page, gate.ref);
   const sent = await ctx.browser.act(page, gate.ref, args.action, value);
   if (sent.kind === 'stale_ref') {
-    return nothingDone('stale', 'ref_gone', `@${gate.ref} left the page before the act; nothing was dispatched`, { next: SNAPSHOT });
+    return nothingDone('stale', 'ref_gone', `@${gate.ref} left the page before the act; nothing was dispatched`, { next: RE_OBSERVE });
   }
   if (sent.kind === 'unknown') {
     return {
       status: 'effect_unknown', acted: true, effect: 'unknown', result: { verdict: 'unknown', ...base },
-      why: { cause: 'effect_unknown', detail: sent.detail }, next: SNAPSHOT,
+      why: { cause: 'effect_unknown', detail: sent.detail }, next: RE_OBSERVE,
     };
   }
   return { status: 'ok', acted: true, effect: 'dispatched', result: { verdict: 'done', ...base } };

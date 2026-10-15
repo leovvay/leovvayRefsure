@@ -1,6 +1,6 @@
 import { BrowserError } from '../browser-error';
 import type { ConsoleLine } from '../console-line';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import type { NetworkLine } from '../network-line';
 
 // Readers for agent-browser's reply payloads: its own `data`, which Orca passes on as its `result`. Each tolerates

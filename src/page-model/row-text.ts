@@ -1,4 +1,5 @@
 import type { AxTree } from '../browser';
+import { nearestAncestor } from './ancestors';
 import { pathOf } from './candidate-line';
 import { nodeAt } from './node-at';
 import { foldVisible } from './normalize';
@@ -17,16 +18,8 @@ const rowTextMemo = new WeakMap<AxTree, Map<number, string>>();
  * group; `null` when none.
  */
 export function rowOf(tree: AxTree, i: number): number | null {
-  let group: number | null = null;
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null) {
-    const node = tree.nodes[at];
-    if (node === undefined) break;
-    if (ROW_ROLES.has(node.role)) return at;
-    if (group === null && node.role === FALLBACK_ROW_ROLE) group = at;
-    at = node.parent;
-  }
-  return group;
+  return nearestAncestor(tree, i, (node) => ROW_ROLES.has(node.role))
+    ?? nearestAncestor(tree, i, (node) => node.role === FALLBACK_ROW_ROLE);
 }
 
 /** A row's text, built once per row node: every candidate in a row reads the same text. */

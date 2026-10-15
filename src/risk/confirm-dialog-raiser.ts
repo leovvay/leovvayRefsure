@@ -1,4 +1,4 @@
-import type { ActAction, BrowserPort, PageRef } from '../browser';
+import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef } from '../browser';
 import { fold, norm } from '../page-model';
 import { backsOut, CONFIRMING_ROLES, hasConfirmCue } from './confirm-dialog';
 import { wordingXPath } from './dialog-wording-xpath';
@@ -6,7 +6,6 @@ import { assumedOn, countProbe, emptyReading, type Probe, raise } from './raise-
 import type { RiskReading } from './risk-reading';
 import { labelledBySelectors, readsSelectors, selectorTexts } from './selector-texts';
 
-const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
 /** An open dialog: `<dialog open>`, or a dialog, alertdialog or modal role that is not hidden. */
 const OPEN_DIALOG_PARTS = [
   'dialog[open]',
@@ -113,7 +112,7 @@ export async function confirmDialogRaiser(
   port: BrowserPort, page: PageRef, action: ActAction, live: LiveClick,
 ): Promise<RiskReading> {
   const out = emptyReading();
-  if (!CLICKS.has(action) || (live.role !== null && !CONFIRMING_ROLES.has(live.role)) || backsOut(live.names)) return out;
+  if (!CLICK_ACTIONS.has(action) || (live.role !== null && !CONFIRMING_ROLES.has(live.role)) || backsOut(live.names)) return out;
   if (port.count === undefined || !port.features().has('count')) {
     raise(out, 'irreversible', REASON, await wideRead(port, page, 'assumed', live.bodyText));
     return out;

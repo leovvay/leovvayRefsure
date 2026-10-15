@@ -1,6 +1,9 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { type Candidate, candidatesOf, cutName, norm, subtree, subtreeText, twinKey } from '../../page-model';
+import { NEEDS_HUMAN } from '../../output';
+import {
+  type Candidate, candidatesOf, cutName, describeElement, distinctByGroup, subtree, subtreeText,
+} from '../../page-model';
 import { BOUNDS, dismissSite } from '../../questions';
 import { type AbstainWhy, abstainOutcome, notOffered } from '../shared';
 import type { DismissArgs } from './dismiss.args';
@@ -10,17 +13,6 @@ import type { LevelOutcome } from './level-outcome';
 import { detectOverlay } from './overlay-detect';
 
 const CONTROL_ROLES: ReadonlySet<string> = new Set(['button', 'link']);
-
-/** One candidate per twin group, the first in page order: identical lines tell a model nothing apart. */
-function distinct(cands: readonly Candidate[]): Candidate[] {
-  const seen = new Set<string>();
-  return cands.filter((c) => {
-    const key = twinKey(c.fp.role, c.fp.name, c.fp.path);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
 
 /** A Decision that gave no answer: the status and the way on as every abstain gives them (`abstainOutcome`). */
 function abstained(level: number, overlay: string, why: AbstainWhy): LevelOutcome {
@@ -38,7 +30,7 @@ function abstained(level: number, overlay: string, why: AbstainWhy): LevelOutcom
 /** The container's buttons and links with a ref, at most 12, one per twin group. */
 function controlsOf(tree: AxTree, container: number): Candidate[] {
   const inside = new Set(subtree(tree, container));
-  return distinct(candidatesOf(tree, (node) => inside.has(node.i) && CONTROL_ROLES.has(node.role))).slice(0, BOUNDS.DISMISS_MAX);
+  return distinctByGroup(candidatesOf(tree, (node) => inside.has(node.i) && CONTROL_ROLES.has(node.role))).slice(0, BOUNDS.DISMISS_MAX);
 }
 
 /**
@@ -50,14 +42,14 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
   const container = detectOverlay(tree);
   if (container === null) return { report: { level, verdict: 'no_overlay' }, status: 'ok', clicked: false };
   const box = tree.nodes[container]!;
-  const overlay = `${box.role} ${JSON.stringify(cutName(norm(box.name)))}`;
+  const overlay = describeElement(box.role, box.name);
   const controls = controlsOf(tree, container);
   if (controls.length === 0) {
     return {
       report: { level, verdict: 'abstained', overlay, by: 'code', cause: 'none_chosen' },
       status: 'abstained',
       why: { cause: 'none_chosen', detail: 'the overlay has no button or link with a ref to dismiss it by' },
-      next: { do: 'needs_human' },
+      next: NEEDS_HUMAN,
       clicked: false,
     };
   }
@@ -67,7 +59,7 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
       report: { level, verdict: 'vetoed', overlay, by: 'code', cause: 'veto' },
       status: 'refused',
       why: { cause: 'veto', detail: `every control of the overlay is on the never-click list (${names}); nothing was clicked` },
-      next: { do: 'needs_human' },
+      next: NEEDS_HUMAN,
       clicked: false,
     };
   }

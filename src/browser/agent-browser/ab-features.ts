@@ -1,8 +1,7 @@
 import type { BrowserCapability } from '../capability';
 
 // Read from `agent-browser --help` (0.27 prints a command per indented line, and the `get` targets on the line under
-// "Get Info:"). `html` is never declared: `get html` returns innerHTML, which is empty for an input, so the form
-// raisers would read nothing and lower a risk.
+// "Get Info:").
 const COMMANDS: readonly [BrowserCapability, RegExp][] = [
   ['highlight', /^\s+highlight\s+</m],
   ['console', /^\s+console\b/m],

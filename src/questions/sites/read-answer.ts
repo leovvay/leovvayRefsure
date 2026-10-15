@@ -1,3 +1,4 @@
+import { abstainVerdict } from '../abstain-verdict';
 import type { Threshold } from '../site-policy';
 import { noulVerdict } from '../validate-answers';
 import type { Ranking, Verdict } from '../verdict';
@@ -21,14 +22,7 @@ function noulBand(threshold: Threshold): NoulBand {
 }
 
 function wrongKind<Out>(expected: 'choice' | 'noul', threshold: number): Verdict<Out> {
-  return {
-    kind: 'abstain',
-    cause: 'provider_error',
-    detail: `expected a ${expected} answer`,
-    leaned: null,
-    confidence: null,
-    threshold,
-  };
+  return abstainVerdict('provider_error', `expected a ${expected} answer`, threshold);
 }
 
 /** The offered options by probability, best first; `none` and keys never offered are left out. */
@@ -43,13 +37,16 @@ function rankingOf<Out>(probabilities: Readonly<Record<string, number>>, valueOf
 
 /**
  * `valueOf` maps a criteria key to the site's output, or `null` for a key that was never offered. `noneKey` is the
- * reserved "nothing fits" key, or `null` for a site that offers none (page state).
+ * reserved "nothing fits" key, or `null` for a site that offers none (page state). `quote` is how a refusal names
+ * the option the model leaned to (spec §8.1 rule 3): a site whose keys are shuffled positions quotes the option's
+ * own text, since a position means nothing to the caller; by default, the key itself.
  */
 export function readChoice<Out>(
   answer: DecisionAnswer,
   threshold: Threshold,
   valueOf: (key: string) => Out | null,
   noneKey: string | null,
+  quote: (key: string) => string = (key) => key,
 ): Verdict<Out> {
   const min = choiceThreshold(threshold);
   if (answer.type !== 'choice') return wrongKind('choice', min);
@@ -59,7 +56,7 @@ export function readChoice<Out>(
     return {
       kind: 'abstain',
       cause: 'low_confidence',
-      detail: `leaned to ${choice} at ${confidence}, below the threshold ${min}`,
+      detail: `leaned to ${quote(choice)} at ${confidence}, below the threshold ${min}`,
       leaned: choice,
       confidence,
       threshold: min,

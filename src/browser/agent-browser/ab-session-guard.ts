@@ -1,5 +1,5 @@
 import { BrowserError } from '../browser-error';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import { READ_TIMEOUT_MS } from '../run-json';
 import type { AbBatchRun } from './ab-batch-run';
 import { abError } from './ab-error-map';

@@ -4,6 +4,7 @@ import type { Rendering } from '../rendering';
 import type { Wire, WireReading } from '../wire';
 import type { OpenAIBody, OpenAIQuestion } from './openai-body';
 import { renderInput } from './render-input';
+import { isRecord, isUnit } from '../../shared';
 
 /*
   OpenAI's `/v1/decisions` request and response, ported from the author's
@@ -113,9 +114,6 @@ function readOpenAI(json: unknown, questions: Readonly<Record<string, DecisionQu
 }
 
 export const OPENAI_WIRE: Wire = Object.freeze({
-  id: 'openai',
-  kinds: Object.freeze(['choice', 'noul'] as const),
-  refusal: true,
   body: (model: string, req: ApprovedRequest, rendering?: Rendering) => openaiBody(model, req, rendering),
   read: readOpenAI,
 });
@@ -139,12 +137,4 @@ function answerFor(list: unknown[], name: string, position: number): unknown {
   const named = list.find((answer) => isRecord(answer) && answer.name === name);
   const positional = list[position];
   return named ?? (isRecord(positional) && positional.name === undefined ? positional : undefined);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isUnit(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
 }

@@ -107,7 +107,7 @@ Rules for `run`:
   dispatch. Once `acted` is `true`, the only statuses are `ok` and `effect_unknown`; anything that goes wrong after a
   dispatch is `effect_unknown` with `effect: 'dispatched'`.
 - Never forward `type`, `keypress` or `inserttext`: keystrokes go to whatever has focus, which can be a terminal.
-- Money, irreversible, auth and consent go only through `act-high-risk`. Use `actionPolicy` from `src/risk/`.
+- Money, irreversible, auth and consent go only through `act-high-risk`. Use `refusesHighRisk` from `src/risk/`.
 - Put page text in `result` only under paths you add to `ctx.trace.untrusted`.
 - Honour `ctx.dryRun`: nothing is sent and nothing is clicked.
 - `result` is a plain JSON object. Keep the envelope about 1 KB in the common case.

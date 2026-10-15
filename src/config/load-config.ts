@@ -1,7 +1,8 @@
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import { ConfigError } from './config-error';
+import { isRecord } from '../shared';
 import {
-  checkGatewayUrl, invalid, isRecord, onlyFields, readBoolean, readGateway, readKeySpec, readLimits, readOrigins,
+  checkGatewayUrl, invalid, onlyFields, readBoolean, readGateway, readKeySpec, readLimits, readOrigins,
 } from './config-fields';
 import type { GatewayConfig, RefsureConfig } from './config-types';
 import { resolvePaths } from './paths';

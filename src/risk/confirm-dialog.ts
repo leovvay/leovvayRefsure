@@ -1,8 +1,7 @@
 import type { AxTree } from '../browser';
-import { insideValueField, INTERACTIVE_ROLES } from '../page-model';
-import { findTermAnyReading, findTermEveryReading } from './term-match';
+import { DIALOG_ROLES, insideValueField, nearestAncestor, underControl } from '../page-model';
+import { findTermAnyReading, findWholeTermEveryReading } from './term-match';
 
-const DIALOG_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 /** What a confirm dialog's confirming control can be: whatever confirms on a click. */
 export const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
 
@@ -10,26 +9,7 @@ const memo = new WeakMap<AxTree, Map<number, boolean>>();
 
 /** The nearest `dialog|alertdialog` ancestor of node `i`, or null. */
 export function dialogOf(tree: AxTree, i: number): number | null {
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null) {
-    const node = tree.nodes[at];
-    if (node === undefined) return null;
-    if (DIALOG_ROLES.has(node.role)) return at;
-    at = node.parent;
-  }
-  return null;
-}
-
-/** Whether node `i` sits under an interactive control below `stop`: a button's own label is not dialog wording. */
-function underControl(tree: AxTree, i: number, stop: number): boolean {
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null && at !== stop) {
-    const node = tree.nodes[at];
-    if (node === undefined) return false;
-    if (INTERACTIVE_ROLES.has(node.role)) return true;
-    at = node.parent;
-  }
-  return false;
+  return nearestAncestor(tree, i, (node) => DIALOG_ROLES.has(node.role));
 }
 
 /** The dialog's own wording: its name, its headings and its StaticText, never a control's label or a value. */
@@ -75,10 +55,10 @@ export function hasConfirmCue(text: string): boolean {
 }
 
 /**
- * A control that backs out of a dialog (spec §8.5: never a confirm dialog's Cancel/No): every name it carries is
- * a close or cancel word ("No", "Cancel", "×"), in every reading of it. No names never backs out.
+ * A control that backs out of a dialog (spec §8.5: never a confirm dialog's Cancel/No): every name it carries is, as
+ * a whole, a close or cancel word ("No", "Cancel", "No, cancel", "×"), in every reading of it. "Yes, cancel" or
+ * "Close the ticket" confirms. No names never backs out.
  */
 export function backsOut(names: readonly string[]): boolean {
-  return names.length > 0 && names.every((name) => findTermEveryReading('dismissClose', name) !== null
-    || findTermEveryReading('cancelWords', name) !== null);
+  return names.length > 0 && names.every((name) => findWholeTermEveryReading(['dismissClose', 'cancelWords'], name) !== null);
 }

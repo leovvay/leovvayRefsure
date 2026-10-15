@@ -1,11 +1,12 @@
 import { statSync } from 'node:fs';
 import type { CommandContext } from '../../cli';
-import { isConfigError, keySet, resolvePaths } from '../../config';
+import { resolvePaths } from '../../config';
 import type { RefsureConfig } from '../../config';
 import { DISCLOSURE_HASH, grantFor, readConsent, readEgressLog } from '../../egress';
-import { gatewayNames, keyPresent, providerRoster } from '../../providers';
+import { gatewayNames, keyPresent } from '../../providers';
 import type { ProviderSlot } from '../../providers';
-import { bareModel, familyOf, KNOWN_FAMILIES, snapshotChanged } from '../../questions';
+import { bareModel, familyOf, KNOWN_FAMILIES, PROVIDER_IDS, snapshotChanged } from '../../questions';
+import { readConfig, rosterOf } from '../shared';
 import type { DoctorCheck } from './doctor-check';
 
 function keysCheck(slots: readonly ProviderSlot[], present: readonly boolean[]): DoctorCheck {
@@ -39,7 +40,7 @@ function configCheck(config: RefsureConfig): DoctorCheck {
   } catch {
     file = `${paths.config}: no file, defaults in use`;
   }
-  const named = (['jev', 'openai'] as const).filter((id) => gatewayNames(gateway, id));
+  const named = PROVIDER_IDS.filter((id) => gatewayNames(gateway, id));
   const via = gateway ? `gateway ${gateway.url} for ${named.length > 0 ? named.join(', ') : 'nothing (no paths named)'}` : 'no gateway';
   const caps = `${limits.decisionsPerMinute} Decisions/min, $${limits.usdPerDay}/day`;
   return { name: 'config', ok: true, detail: `${file}; ${via}; ${caps}` };
@@ -49,7 +50,7 @@ function configCheck(config: RefsureConfig): DoctorCheck {
 function driftCheck(egressLog: string): DoctorCheck {
   const entries = readEgressLog(egressLog, 0);
   let ok = true;
-  const parts = (['jev', 'openai'] as const).map((id) => {
+  const parts = PROVIDER_IDS.map((id) => {
     const last = entries.filter((entry) => entry.provider === id && entry.model !== null).at(-1);
     if (!last?.model) return `${id}: no answers logged`;
     const model = bareModel(last.model);
@@ -76,14 +77,10 @@ function refusedConfigCheck(error: { cause_: string; detail: string }): DoctorCh
 
 /** Keys (names and presence, never values), consent, config and model drift (spec §6.3 doctor). */
 export async function decisionChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
-  let config: RefsureConfig;
-  try {
-    config = ctx.config;
-  } catch (error) {
-    if (!isConfigError(error)) throw error;
-    return [refusedConfigCheck(error), driftCheck(resolvePaths(ctx.env).egressLog)];
-  }
-  const slots = Object.values(providerRoster(config, keySet(config, ctx.env)));
+  const read = readConfig(ctx);
+  if ('refused' in read) return [refusedConfigCheck(read.refused), driftCheck(resolvePaths(ctx.env).egressLog)];
+  const { config } = read;
+  const slots = Object.values(rosterOf(config, ctx.env));
   const present = await Promise.all(slots.map((slot) => (slot.problem === null ? keyPresent(slot) : false)));
   return [keysCheck(slots, present), consentCheck(config, slots, present), configCheck(config), driftCheck(config.paths.egressLog)];
 }

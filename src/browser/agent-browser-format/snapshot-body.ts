@@ -1,4 +1,4 @@
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import type { SnapshotBody } from './snapshot-body-shape';
 
 type RefEntries = Map<string, { role: string | null; name: string | null }>;

@@ -1,5 +1,5 @@
 import { BrowserError } from '../browser-error';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import { namedPage } from '../named-page';
 import type { PageHint } from '../page-hint';
 import type { PageRef } from '../page-ref';

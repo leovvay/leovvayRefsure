@@ -1,4 +1,4 @@
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 
 /**
  * The active tab's id from `tab list` (`{tabs: [{tabId: "t1", active: true, …}]}`): the tab every other verb on

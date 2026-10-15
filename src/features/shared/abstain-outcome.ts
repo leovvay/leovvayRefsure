@@ -1,9 +1,6 @@
 import type { CommandOutcome } from '../../cli';
-import { causeStatus, type Next } from '../../output';
+import { causeStatus, NEEDS_HUMAN, RE_OBSERVE } from '../../output';
 import type { AbstainWhy } from './abstain-why';
-
-const SNAPSHOT: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
-const HUMAN: Next = { do: 'needs_human' };
 
 /**
  * A Decision that gave no answer, before anything was done (spec §6.1, §8.1 rule 3): the status comes from the
@@ -19,8 +16,8 @@ export function abstainOutcome<Result>(why: AbstainWhy, result: Result | null): 
     result,
     why: { cause: why.cause, detail: why.detail },
   };
-  if (status === 'abstained') outcome.next = SNAPSHOT;
-  else if (status === 'not_set_up') outcome.next = HUMAN;
+  if (status === 'abstained') outcome.next = RE_OBSERVE;
+  else if (status === 'not_set_up') outcome.next = NEEDS_HUMAN;
   return outcome;
 }
 

@@ -1,11 +1,9 @@
 import type { RefsureConfig } from '../config';
-import type { ProviderId } from '../questions';
+import { PROVIDER_IDS, type ProviderId } from '../questions';
 import { endpointFor, gatewayNames } from './endpoints';
 import type { ProviderKeys } from './provider-keys';
 import type { ProviderSlot } from './provider-slot';
 import { readKey } from './read-key';
-
-const IDS: readonly ProviderId[] = ['jev', 'openai'];
 
 function slotFor(id: ProviderId, config: RefsureConfig, keys: ProviderKeys): ProviderSlot {
   const endpoint = endpointFor(id, config.gateway);
@@ -26,7 +24,7 @@ function slotFor(id: ProviderId, config: RefsureConfig, keys: ProviderKeys): Pro
  */
 export function providerRoster(config: RefsureConfig, keys: ProviderKeys): Readonly<Record<ProviderId, ProviderSlot>> {
   const out = {} as Record<ProviderId, ProviderSlot>;
-  for (const id of IDS) out[id] = slotFor(id, config, keys);
+  for (const id of PROVIDER_IDS) out[id] = slotFor(id, config, keys);
   return out;
 }
 

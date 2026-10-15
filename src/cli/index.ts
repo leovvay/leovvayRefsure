@@ -9,6 +9,7 @@ export type * from './command-result';
 export type * from './any-command-spec';
 export type * from './argv-route';
 export { GLOBAL_OPTIONS, isUsageError, parseCommandArgs } from './parse-args';
+export { hintOf, oneLine, parsePageArg, parseRefArg, parseRisk, parseTicketArg } from './arg-values';
 export { runCommand } from './registry';
 export { RegistryInvariantError } from './registry-invariant-error';
 export { pinNextToPage } from './registry-outcomes';

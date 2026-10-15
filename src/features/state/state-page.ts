@@ -13,7 +13,8 @@ function field(name: string, values: readonly string[]): string[] {
  * the block in the research dataset's own layout and field names: `url` (that same cut URL), `title`, `headings`,
  * `alerts_and_toasts`, `dialogs`, then `visible_text` cut to 1,500 characters (the production page view's cap).
  * URL and text are cleaned (redacted, and masked when PII masks are on) before the cut: a cut secret or e-mail no
- * longer matches its shape, so it could pass the egress pipeline half-hidden.
+ * longer matches its shape, so it could pass the egress pipeline half-hidden. Headings, dialogs and alerts come cut
+ * by `pageView`, whose cut (`cutName`) cleans a name before it cuts it.
  */
 export function stateInput(view: PageView, piiMasks: boolean): { pageUrl: string; page: string } {
   const pageUrl = boundText(cleanEgressText(view.url, piiMasks), { max: BOUNDS.URL_MAX, inline: true });

@@ -68,6 +68,10 @@ export function createFileStore(root: string, trace?: RunTrace): StateStore {
     }
   }
 
+  function countDir(dir: string): number {
+    return listDir(dir).filter((name) => ENTRY_RE.test(name)).length;
+  }
+
   function clearDir(dir: string): number {
     let removed = 0;
     for (const name of listDir(dir)) {
@@ -166,6 +170,11 @@ export function createFileStore(root: string, trace?: RunTrace): StateStore {
       let removed = 0;
       for (const dir of pageDirs()) removed += clearDir(dir);
       return removed;
+    },
+
+    async count(scope) {
+      const dirs = scope === 'all' ? pageDirs() : [join(root, pageDirName(scope.pageId))];
+      return dirs.reduce((sum, dir) => sum + countDir(dir), 0);
     },
 
     async purge(nowMs, expiresAt) {

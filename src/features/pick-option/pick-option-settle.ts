@@ -1,8 +1,10 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
+import { RE_OBSERVE } from '../../output';
 import { fingerprintOf } from '../../page-model';
 import { optionMapSite } from '../../questions';
-import { classify, classifyNames, fieldRaisers, HIGH_RISK, maxRisk, pageRaisers, type RiskReading } from '../../risk';
+import {
+  classify, classifyNames, clickRisk, fieldRaisers, floorAtWrite, HIGH_RISK, mergeReadings, type RiskReading,
+} from '../../risk';
 import { type Authority, authorityAllows, authorityFor, corroborate, ticketPlace } from '../../tickets';
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { ChosenOption } from './chosen-option';
@@ -18,16 +20,14 @@ type Out = CommandOutcome<PickOptionResult>;
  */
 async function riskOf(ctx: CommandContext, scene: OptionScene, chosen: ChosenOption, action: 'select' | 'click'): Promise<RiskReading> {
   const url = scene.tab.url;
-  const readings: RiskReading[] = action === 'select'
-    ? [
+  const risk = action === 'select'
+    ? mergeReadings(
       classify(scene.tree, scene.field, { url, action }),
       classifyNames([optionLabel(scene.tree, chosen.at)], { url, action }),
       await fieldRaisers(ctx.browser, scene.page, scene.fieldRef),
-    ]
-    : [classify(scene.tree, chosen.at, { url, action }), await pageRaisers(ctx.browser, scene.page, action)];
-  const cls = maxRisk(...readings.map((r) => r.class));
-  const reasons = [...new Set(readings.flatMap((r) => r.reasons))];
-  return cls === 'read' ? { class: 'write', reasons: [...reasons, 'floor:write'] } : { class: cls, reasons };
+    )
+    : await clickRisk(ctx.browser, scene.page, scene.tree, chosen.at, { url });
+  return floorAtWrite(risk);
 }
 
 function authorityOf(scene: OptionScene, chosen: ChosenOption): Authority {
@@ -79,13 +79,13 @@ export async function settleOption(ctx: CommandContext, scene: OptionScene, chos
     return nothingDone('abstained', 'proposed_only', 'a model family refsure has not measured picked it: propose only', { result });
   }
   if (!authorityAllows(authority, risk.class)) {
-    // A fresh look, as `do` says; the detail names the guard check and the outcome step.
-    const next: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
     const check = ticket === null ? 'refsure guard' : `refsure guard --ticket ${ticket.id}`;
     const own = action === 'select' ? `-- select --element @${targetRef} --value "<the option>"` : `-- click --element @${targetRef}`;
     return nothingDone('abstained', 'proposed_only',
       `the pick may act at ${authority} only, and it reads ${why}: proposed, not for act; check the option yourself (${check}), `
-        + `then run it through outcome with your own ref (refsure outcome --intent … --expect-name … ${own})`, { result, next });
+        + `then run it through outcome with your own ref (refsure outcome --intent … --expect-name … ${own})`,
+      // A fresh look, as `do` says; the detail names the guard check and the outcome step.
+      { result, next: RE_OBSERVE });
   }
   const outcome: Out = { status: 'ok', acted: false, effect: 'none', result };
   if (ticket !== null) outcome.next = { do: 'act', argv: ['refsure', 'act', '--ticket', ticket.id] };

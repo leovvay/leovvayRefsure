@@ -1,6 +1,6 @@
-import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
+import { type ActAction, type BrowserPort, FIELD_ACTIONS, type PageRef, type Ref, VALUE_ACTIONS } from '../browser';
 import { cutName, fold, norm } from '../page-model';
-import { escapeRegExp } from './escape-reg-exp';
+import { escapeRegExp } from '../shared';
 import type { FieldAttrs } from './field-attrs';
 import { labelTexts } from './live-labels';
 import type { LiveName } from './live-name';
@@ -8,10 +8,6 @@ import type { LiveName } from './live-name';
 /** The element's own attributes the name is read from, plus those its labels elsewhere are found by. */
 const ATTRS = ['aria-label', 'placeholder', 'title', 'aria-labelledby', 'id', 'name', 'type'] as const;
 type AttrName = (typeof ATTRS)[number];
-/** For these the element's text is a value or its options, not its name. */
-const FIELD_TEXT: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select']);
-/** The actions the field raisers judge, which also read the field's `autocomplete`. */
-const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 /** `<input>` buttons: no innerText, and the `value` attribute is the label they show. */
 const VALUE_LABELLED: ReadonlySet<string> = new Set(['submit', 'button', 'reset']);
 
@@ -72,7 +68,8 @@ export async function readLiveName(port: BrowserPort, page: PageRef, ref: Ref, a
     const value = raw(name);
     return present(value) ? value : null;
   };
-  const fieldText = action !== undefined && FIELD_TEXT.has(action);
+  // A fill or select's text is a value or its options, not its name.
+  const fieldText = action !== undefined && VALUE_ACTIONS.has(action);
   const labelAttr = fieldText || present(text) || attrs.length === 0 ? null : shownLabelAttr(attr('type'));
   const [labels, shown] = await Promise.all([
     labelTexts(port, page, {

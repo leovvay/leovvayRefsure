@@ -1,8 +1,8 @@
 import type { CommandContext } from '../../cli';
-import type { Next } from '../../output';
-import { type Candidate, cutName } from '../../page-model';
+import { NEEDS_HUMAN, type Next, RE_OBSERVE } from '../../output';
+import { type Candidate, cutName, describeElement } from '../../page-model';
 import type { Decided } from '../../questions';
-import { actionPolicy, type RiskReading } from '../../risk';
+import { refusesHighRisk, type RiskReading } from '../../risk';
 import { type Authority, authorityAllows, authorityFor, ticketPlace } from '../../tickets';
 import { highRiskNext } from '../shared';
 import { clickPick } from './dismiss-click';
@@ -11,7 +11,7 @@ import { closesOrRejects } from './dismiss-reading';
 import { dismissRisk } from './dismiss-risk';
 import type { DismissScene } from './dismiss-scene';
 import { vetoOf } from './dismiss-veto';
-import { HUMAN, SNAPSHOT, stop } from './level-stop';
+import { stop } from './level-stop';
 import type { LevelOutcome } from './level-outcome';
 
 /** Why the pick is only proposed, in the order the reasons apply. */
@@ -40,19 +40,19 @@ export async function settleDismissPick(
   const veto = vetoOf(rawName);
   if (veto !== null) {
     return stop({ ...report, verdict: 'vetoed' }, 'refused', 'veto',
-      `the Decision picked ${name}, and "${veto.term}" is on the never-click list; nothing was clicked`, HUMAN);
+      `the Decision picked ${name}, and "${veto.term}" is on the never-click list; nothing was clicked`, NEEDS_HUMAN);
   }
   if (pick.fp.twins > 1) {
-    return stop(report, 'abstained', 'twins', `${pick.fp.twins} identical controls are named ${name}; nothing was clicked`, SNAPSHOT);
+    return stop(report, 'abstained', 'twins', `${pick.fp.twins} identical controls are named ${name}; nothing was clicked`, RE_OBSERVE);
   }
   const risk = await dismissRisk(ctx, scene.page, scene.tab.url, scene.tree, pick.node);
   report.risk = risk.class;
-  if (actionPolicy('click', risk.class, 'dismiss') !== 'allow') {
+  if (refusesHighRisk(risk.class)) {
     // The fresh ref and the name it shows (page text): the one command that may take it (spec §6.3).
     ctx.trace.untrusted.add('next.argv');
     const next = highRiskNext({
       class: risk.class, via: { ref: pick.ref, expectName: pick.fp.name }, action: 'click',
-      intent: `dismiss the overlay by clicking ${pick.fp.role} ${name}`,
+      intent: `dismiss the overlay by clicking ${describeElement(pick.fp.role, pick.fp.name)}`,
     });
     return stop({ ...report, verdict: 'refused' }, 'refused', 'high_risk_class',
       `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it; only act-high-risk takes it, `
@@ -72,7 +72,7 @@ export async function settleDismissPick(
       site: 'dismiss', maturity: decided.maturity, confidence: decided.verdict.confidence,
       model: ctx.trace.decisions.at(-1)?.model ?? null,
     });
-    const next: Next = authorityAllows(held, risk.class) ? { do: 'act', argv: ['refsure', 'act', '--ticket', ticket.id] } : SNAPSHOT;
+    const next: Next = authorityAllows(held, risk.class) ? { do: 'act', argv: ['refsure', 'act', '--ticket', ticket.id] } : RE_OBSERVE;
     return stop({ ...report, verdict: 'proposed', authority: held, ticket: ticket.id }, 'abstained', 'proposed_only',
       `proposed ${name}, not clicked: ${proposeWhy(scene, authority, risk, closeWord)}`, next);
   }

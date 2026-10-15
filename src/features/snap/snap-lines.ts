@@ -1,23 +1,18 @@
 import type { AxTree } from '../../browser';
-import { fingerprintOf, insideValueField, INTERACTIVE_ROLES, lineOf, norm } from '../../page-model';
+import {
+  DIALOG_ROLES, fingerprintOf, insideValueField, INTERACTIVE_ROLES, lineOf, nearestAncestor, norm,
+} from '../../page-model';
 import type { SnapScope } from './snap.args';
 
 const SCOPE_ROLES: Readonly<Record<SnapScope, ReadonlySet<string>>> = {
-  dialog: new Set(['dialog', 'alertdialog']),
+  dialog: DIALOG_ROLES,
   main: new Set(['main']),
   form: new Set(['form']),
 };
 
 /** Whether a strict ancestor of node `i` has one of `roles`. An ancestor test, so a form inside main is a form. */
 function within(tree: AxTree, i: number, roles: ReadonlySet<string>): boolean {
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null) {
-    const node = tree.nodes[at];
-    if (node === undefined) return false;
-    if (roles.has(node.role)) return true;
-    at = node.parent;
-  }
-  return false;
+  return nearestAncestor(tree, i, (node) => roles.has(node.role)) !== null;
 }
 
 /**

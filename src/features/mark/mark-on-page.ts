@@ -1,10 +1,8 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
+import { RE_OBSERVE } from '../../output';
 import { nothingDone } from '../shared';
 import type { MarkRecord } from './mark-record';
 import { loadMark, MARK_TTL_MS } from './mark-store';
-
-const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 
 /**
  * The mark `id`, still alive and taken on `pageId`, or the outcome that says why not: `stale` (`ticket_expired`)

@@ -1,5 +1,5 @@
 import { BrowserError } from '../browser-error';
-import { isRecord } from '../is-record';
+import { isRecord } from '../../shared';
 import { type JsonChild, parseJsonFrom, spawnJson } from '../run-json';
 import { NO_ORCA_BINARY } from './orca-binary';
 import type { OrcaReply } from './orca-reply';

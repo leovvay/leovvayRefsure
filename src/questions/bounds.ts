@@ -24,10 +24,12 @@ export const BOUNDS = {
   /** The most controls of one overlay a dismiss is asked over. */
   DISMISS_MAX: 12,
   /**
-   * Canonical JSON of the state, in UTF-8 bytes: what outcome fits its two sides to. It must equal the bound `approve`
-   * enforces (egress's own `STATE_MAX_BYTES`), which egress does not export.
+   * Canonical JSON of the state, in UTF-8 bytes (spec §7.3): `approve` refuses more as `oversize`, and outcome fits
+   * its two sides to it.
    */
   STATE_MAX_BYTES: 24_000,
+  /** Canonical JSON of the questions, in UTF-8 bytes: `approve` refuses more, and a candidate site asks over fewer. */
+  QUESTIONS_MAX_BYTES: 12_000,
   /** One Decision's whole budget, retry included. */
   DEADLINE_MS: 5_000,
   /** A second attempt is made only when at least this much of the budget is left. */

@@ -25,11 +25,6 @@ export function createTicketBook(store: StateStore, now: () => number = Date.now
       const hit = await store.find('ticket', id);
       return hit === null ? 'ticket_used' : judge(hit, id, nowMs);
     },
-
-    // The store clears by page, not by kind, so this also drops the page's marks; `forget` wants both anyway.
-    async forget(scope) {
-      return scope === 'all' ? store.clearAll() : store.clearPage(scope.pageId);
-    },
   };
 }
 

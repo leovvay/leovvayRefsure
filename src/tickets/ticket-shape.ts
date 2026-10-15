@@ -1,10 +1,15 @@
+import { isActAction } from '../browser';
 import type { Fingerprint } from '../page-model';
+import type { Maturity } from '../questions';
 import { RISK_ORDER } from '../risk';
-import type { Ticket } from './ticket';
+import type { Authority, Ticket } from './ticket';
 
-const AUTHORITIES: readonly string[] = ['none', 'read', 'write'];
-const MATURITIES: readonly string[] = ['measured', 'inherited', 'experimental'];
-const ACTIONS: readonly string[] = ['click', 'dblclick', 'fill', 'select', 'check', 'uncheck'];
+// Keyed by the union, so a member added to it and left out here is a compile error, never a stored ticket read as
+// malformed (`ticket_used`).
+const AUTHORITIES: readonly string[] = Object.keys({ none: true, read: true, write: true } satisfies Record<Authority, true>);
+const MATURITIES: readonly string[] = Object.keys(
+  { measured: true, inherited: true, experimental: true } satisfies Record<Maturity, true>,
+);
 
 const isCount = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 1;
 const isTime = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -30,7 +35,7 @@ export function asTicket(value: unknown): Ticket | null {
     && (t.confidence === null || typeof t.confidence === 'number')
     && isStringOrNull(t.model)
     && isTime(t.createdAt) && isTime(t.ttlMs)
-    && (t.action === undefined || (typeof t.action === 'string' && ACTIONS.includes(t.action)))
+    && (t.action === undefined || (typeof t.action === 'string' && isActAction(t.action)))
     && (t.value === undefined || typeof t.value === 'string')
     && (t.within === undefined || (typeof t.within === 'string' && t.within !== ''))
     && (t.tabKey === undefined || (typeof t.tabKey === 'string' && t.tabKey !== ''));

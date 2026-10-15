@@ -1,15 +1,13 @@
-import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
+import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef, type Ref } from '../browser';
 import { norm } from '../page-model';
 import { classifyNames } from './classify-name';
 import { readLiveName } from './live-ref-check';
 import type { LiveTarget } from './live-target';
-import { maxRisk } from './max-risk';
+import { mergeReadings } from './merge-readings';
 import { confirmDialogRaiser } from './confirm-dialog-raiser';
 import { fieldRaisers, pageRaisers } from './raisers';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
-
-const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
 
 /** The element's role when it says one, `link` when it has an href; else null (the action's role is used). */
 async function pageRole(port: BrowserPort, page: PageRef, ref: Ref): Promise<string | null> {
@@ -46,7 +44,7 @@ export async function liveRefRisk(
   const lexical = classifyNames(target.live.sources, {
     url: opts.url, action, role: target.role, ...(opts.userRisk ? { userRisk: opts.userRisk } : {}),
   });
-  const raisers = await Promise.all(CLICKS.has(action)
+  const raisers = await Promise.all(CLICK_ACTIONS.has(action)
     ? [
       pageRaisers(port, page, action),
       confirmDialogRaiser(port, page, action, {
@@ -54,8 +52,5 @@ export async function liveRefRisk(
       }),
     ]
     : [fieldRaisers(port, page, ref, target.live.fieldAttrs)]);
-  return {
-    class: maxRisk(lexical.class, ...raisers.map((raised) => raised.class)),
-    reasons: [...lexical.reasons, ...raisers.flatMap((raised) => raised.reasons)],
-  };
+  return mergeReadings(lexical, ...raisers);
 }

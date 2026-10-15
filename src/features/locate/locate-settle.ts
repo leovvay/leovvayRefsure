@@ -1,16 +1,15 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
-import { type Candidate, cutName, fold, rowTextOf, twinsOf } from '../../page-model';
+import { type Next, RE_OBSERVE } from '../../output';
+import { type Candidate, candidateKey, cutShown, describeElement, fold, rowTextOf, twinsOf } from '../../page-model';
 import { findSite, locateSite, thresholdFor } from '../../questions';
-import { classify, HIGH_RISK, maxRisk, pageRaisers, type RiskReading } from '../../risk';
+import { clickRisk, floorAtWrite, HIGH_RISK, type RiskReading } from '../../risk';
 import {
   type Authority, authorityAllows, authorityFor, corroborate, type Ticket, ticketPlace,
 } from '../../tickets';
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
-import { keyOf } from './locate-pick';
 import type { Picked } from './picked';
 
 type Chosen = Exclude<Picked, { kind: 'abstain' }>;
@@ -35,14 +34,10 @@ function base(picked: Chosen, cand: Candidate, args: LocateArgs): LocateResult {
  * has a floor of write (spec §6.1): a read row is claimed only by `--risk read`, never assumed.
  */
 async function riskOf(ctx: CommandContext, scene: Scene, cand: Candidate, args: LocateArgs): Promise<RiskReading> {
-  const lexical = classify(scene.tree, cand.node, {
-    url: scene.tab.url, action: 'click', ...(args.risk === undefined ? {} : { userRisk: args.risk }),
+  const risk = await clickRisk(ctx.browser, scene.page, scene.tree, cand.node, {
+    url: scene.tab.url, ...(args.risk === undefined ? {} : { userRisk: args.risk }),
   });
-  const raised = await pageRaisers(ctx.browser, scene.page, 'click');
-  const risk = maxRisk(lexical.class, raised.class);
-  const reasons = [...lexical.reasons, ...raised.reasons];
-  if (args.risk === undefined && risk === 'read') return { class: 'write', reasons: [...reasons, 'floor:write'] };
-  return { class: risk, reasons };
+  return args.risk === undefined ? floorAtWrite(risk) : risk;
 }
 
 /** Why a ticket below its pick's risk only proposes, and the two ways on from it. */
@@ -66,7 +61,7 @@ function underRow(picked: Chosen, risk: RiskReading): string | null {
 function authorityOf(picked: Chosen, cand: Candidate, args: LocateArgs, cands: readonly Candidate[]): Authority {
   if (picked.kind === 'code') return authorityFor('measured', 'code');
   return authorityFor(picked.maturity, picked.site, {
-    corroborated: corroborate(args.intent ?? '', cand, [...cands]),
+    corroborated: corroborate(args.intent ?? '', cand, cands),
     confidence: picked.confidence,
     newFamily: picked.newFamily,
   });
@@ -90,11 +85,12 @@ function ticketSource(picked: Chosen): Pick<Ticket, 'site' | 'maturity' | 'confi
 export async function settlePick(
   ctx: CommandContext, scene: Scene, picked: Chosen, args: LocateArgs,
 ): Promise<CommandOutcome<LocateResult>> {
-  const group = scene.cands.filter((c) => keyOf(c) === keyOf(picked.cand));
+  const key = candidateKey(picked.cand);
+  const group = scene.cands.filter((c) => candidateKey(c) === key);
   const cand = group[0] ?? picked.cand;
   const twinned = cand.fp.twins > 1 && group.length > 1;
   if (twinned && !args.first) {
-    const rows = twinsOf(scene.tree, cand.node).slice(0, ROWS_SHOWN).map((i) => cutName(rowTextOf(scene.tree, i), ROW_SHOWN));
+    const rows = twinsOf(scene.tree, cand.node).slice(0, ROWS_SHOWN).map((i) => cutShown(rowTextOf(scene.tree, i), ROW_SHOWN));
     ctx.trace.untrusted.add('result.rows');
     return nothingDone('abstained', 'twins',
       `${group.length} identical ${cand.fp.role}s match; narrow it with --within "<text from its row>", or --first`,
@@ -108,23 +104,18 @@ export async function settlePick(
   }
   const under = underRow(picked, risk);
   if (under !== null) {
-    return nothingDone('abstained', 'low_confidence', under, { next: { do: 'snapshot', argv: ['refsure', 'snap'] }, result });
+    return nothingDone('abstained', 'low_confidence', under, { next: RE_OBSERVE, result });
   }
 
   const authority = authorityOf(picked, cand, args, scene.cands);
   result.authority = authority;
-  let issued: Ticket | null = null;
-  if (!ctx.dryRun) {
-    const ticket = await ctx.tickets.issue({
-      ...ticketPlace(scene.page, scene.tab), fingerprint: cand.fp, risk: risk.class, authority,
-      ...ticketSource(picked),
-      ...(args.within === null ? {} : { within: fold(args.within) }),
-    });
-    result.ticket = ticket.id;
-    issued = ticket;
-  } else {
-    ctx.trace.notes.push('dry_run: no ticket is issued');
-  }
+  const issued = ctx.dryRun ? null : await ctx.tickets.issue({
+    ...ticketPlace(scene.page, scene.tab), fingerprint: cand.fp, risk: risk.class, authority,
+    ...ticketSource(picked),
+    ...(args.within === null ? {} : { within: fold(args.within) }),
+  });
+  if (issued === null) ctx.trace.notes.push('dry_run: no ticket is issued');
+  result.ticket = issued?.id ?? null;
   if (authority === 'none') {
     return nothingDone('abstained', 'proposed_only', 'a model family refsure has not measured picked it: propose only', { result });
   }
@@ -132,18 +123,17 @@ export async function settlePick(
   // stays `ok` below: the pick is right, and only act-high-risk may take it.
   if (!HIGH_RISK.has(risk.class) && !authorityAllows(authority, risk.class)) {
     // A fresh look, as `do` says; the detail names the guard check that may come with it.
-    const next: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
-    return nothingDone('abstained', 'proposed_only', proposalWhy(authority, risk, result.ticket), { result, next });
+    return nothingDone('abstained', 'proposed_only', proposalWhy(authority, risk, result.ticket), { result, next: RE_OBSERVE });
   }
   const outcome: CommandOutcome<LocateResult> = { status: 'ok', acted: false, effect: 'none', result };
-  if (result.ticket !== null && authorityAllows(authority, risk.class)) {
-    outcome.next = { do: 'act', argv: ['refsure', 'act', '--ticket', result.ticket] } satisfies Next;
+  if (issued !== null && authorityAllows(authority, risk.class)) {
+    outcome.next = { do: 'act', argv: ['refsure', 'act', '--ticket', issued.id] } satisfies Next;
   } else if (HIGH_RISK.has(risk.class)) {
     // The pick is right, and only act-high-risk may take it (spec §6.3): by the ticket when it is fit, else by ref.
     ctx.trace.untrusted.add('next.argv');
     outcome.next = highRiskNext({
       class: risk.class, via: highRiskVia(issued, risk.class, cand.ref, cand.fp.name), action: 'click',
-      intent: args.intent ?? `click ${cand.fp.role} ${JSON.stringify(cutName(cand.fp.name))}`,
+      intent: args.intent ?? `click ${describeElement(cand.fp.role, cand.fp.name)}`,
       ...(args.risk === undefined ? {} : { risk: args.risk }),
     });
   }

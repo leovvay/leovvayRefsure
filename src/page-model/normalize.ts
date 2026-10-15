@@ -1,3 +1,5 @@
+import { cleanEgressText } from '../egress';
+
 /** The longest name a line or a path carries; longer ones end in `…` (the earlier descriptor lines' cut). */
 export const NAME_MAX = 90;
 
@@ -44,8 +46,20 @@ export function foldVisible(s: string): string {
   return fold(s.replace(INVISIBLE, ''));
 }
 
-/** Cuts at `NAME_MAX` code points, so a cut never splits a surrogate pair. */
+/**
+ * Cuts at `NAME_MAX` code points, so a cut never splits a surrogate pair. Page text that is cut is cleaned first
+ * (spec §7.3): secrets redacted and PII masked, whatever the config, since the part a cut leaves of a key or an
+ * e-mail no longer matches its shape, and the egress pipeline could not catch it later. Uncut text is left as is.
+ */
 export function cutName(s: string, max = NAME_MAX): string {
+  return Array.from(s).length <= max ? s : cutShown(cleanEgressText(s, true), max);
+}
+
+/**
+ * `cutName` without the cleaning, for text only the agent reads and types back: the twin rows `--within` matches
+ * against the page itself. It never leaves the machine.
+ */
+export function cutShown(s: string, max = NAME_MAX): string {
   const points = Array.from(s);
   return points.length > max ? `${points.slice(0, max - 1).join('')}…` : s;
 }

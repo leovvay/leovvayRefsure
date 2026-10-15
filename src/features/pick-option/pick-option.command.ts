@@ -1,7 +1,7 @@
-import { isRef, type PageRef, type TabInfo } from '../../browser';
-import type { CommandContext, CommandOutcome, CommandSpec } from '../../cli';
-import type { Next } from '../../output';
-import { cutName, lineOf, norm } from '../../page-model';
+import type { PageRef, TabInfo } from '../../browser';
+import { type CommandContext, type CommandOutcome, type CommandSpec, oneLine, parseRefArg } from '../../cli';
+import { NEEDS_HUMAN, type Next, RE_OBSERVE } from '../../output';
+import { contentWords, cutName, lineOf, norm } from '../../page-model';
 import { BOUNDS, optionMapSite } from '../../questions';
 import { abstainOutcome, argText, notOffered, nothingDone } from '../shared';
 import type { ChosenOption } from './chosen-option';
@@ -13,7 +13,6 @@ import { openField } from './pick-option-open';
 import { settleOption } from './pick-option-settle';
 
 type Out = CommandOutcome<PickOptionResult>;
-const SNAPSHOT: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 
 function isOut(value: object): value is Out {
   return 'status' in value;
@@ -42,7 +41,7 @@ async function openFirst(ctx: CommandContext, page: PageRef, tab: TabInfo, args:
  */
 function noOptions(ctx: CommandContext, args: PickOptionArgs, fieldName: string, result: PickOptionResult): Out {
   const name = argText(fieldName, BOUNDS.INTENT_MAX);
-  let next: Next = SNAPSHOT;
+  let next: Next = RE_OBSERVE;
   let hint = '';
   if (!args.open && name !== '') {
     // The field's name is page text.
@@ -63,25 +62,38 @@ function ambiguous(scene: OptionScene, at: number, count: number, by: ChosenOpti
   const label = JSON.stringify(cutName(norm(optionLabel(scene.tree, at))));
   return nothingDone('refused', 'ambiguous_option',
     `${count} options read ${label} once folded; refsure will not pick between them; nothing was done`,
-    { result: { ...scene.result, by }, next: { do: 'needs_human' } });
+    { result: { ...scene.result, by }, next: NEEDS_HUMAN });
+}
+
+/**
+ * The options in the order the Decision is offered them: those sharing the most content words with `want` first,
+ * ties in page order. A list too long for one request is cut from its end (`optionMapSite`), so the likeliest stay.
+ */
+function ranked(scene: OptionScene): number[] {
+  const want = new Set(contentWords(scene.want));
+  const score = (at: number): number => contentWords(optionLabel(scene.tree, at)).filter((w) => want.has(w)).length;
+  return scene.found.options.map((at, k) => ({ at, k, score: score(at) }))
+    .sort((a, b) => b.score - a.score || a.k - b.k)
+    .map((o) => o.at);
 }
 
 /**
  * Code first: the option whose folded label is the wanted meaning (two such refuse). Else the option-map Decision
- * over the option labels; its pick refuses when another option folds equal to it.
+ * over the option labels, ranked (`ranked`); its pick refuses when another option folds equal to it.
  */
 async function chooseOption(ctx: CommandContext, scene: OptionScene): Promise<ChosenOption | Out> {
   const { tree, found, result } = scene;
   const exact = foldTwins(tree, found.options, scene.want);
   if (exact.length > 1) return ambiguous(scene, exact[0]!, exact.length, 'code');
   if (exact.length === 1) return { at: exact[0]!, by: 'code' };
-  const labels = found.options.map((at) => cutName(norm(optionLabel(tree, at))));
+  const offered = ranked(scene);
+  const labels = offered.map((at) => cutName(norm(optionLabel(tree, at))));
   const decided = await ctx.decide(optionMapSite, { field: result.field, want: scene.want, options: labels },
     { combo: 'auto', originUrl: scene.tab.url, dryRun: ctx.dryRun, signal: ctx.signal });
   const { verdict } = decided;
   const byDecision: PickOptionResult = { ...result, by: 'decision' };
   if (verdict.kind === 'abstain') return abstainOutcome<PickOptionResult>(verdict, byDecision);
-  const at = found.options[verdict.value];
+  const at = offered[verdict.value];
   if (at === undefined) return abstainOutcome<PickOptionResult>(notOffered(verdict.index), byDecision);
   const twins = foldTwins(tree, found.options, optionLabel(tree, at));
   if (twins.length > 1) return ambiguous(scene, at, twins.length, 'decision');
@@ -103,7 +115,7 @@ async function pick(args: PickOptionArgs, ctx: CommandContext): Promise<Out> {
   }
   const tree = await ctx.browser.snapshot(page);
   const field = tree.nodes.findIndex((node) => node.ref === args.field);
-  if (field === -1) return nothingDone('stale', 'ref_gone', `@${args.field} is not in the current snapshot`, { next: SNAPSHOT });
+  if (field === -1) return nothingDone('stale', 'ref_gone', `@${args.field} is not in the current snapshot`, { next: RE_OBSERVE });
   ctx.trace.untrusted.add('result.field');
   ctx.trace.untrusted.add('result.option');
   ctx.trace.untrusted.add('why.detail');
@@ -138,14 +150,13 @@ export const pickOptionCommand: CommandSpec<PickOptionArgs, PickOptionResult> = 
   parse(raw) {
     if (raw.positionals.length > 0) return { usage: `pick-option takes no positional arguments, got ${raw.positionals.length}` };
     if (raw.rest.length > 0) return { usage: 'pick-option takes nothing after --' };
-    const field = typeof raw.values.field === 'string' ? raw.values.field.trim().replace(/^@/, '') : '';
-    if (!isRef(field)) return { usage: 'pick-option needs --field @eN from your latest snapshot' };
-    const want = typeof raw.values.want === 'string' ? norm(raw.values.want) : '';
+    const field = parseRefArg(raw.values.field, '--field');
+    if (typeof field === 'object') return field;
+    const want = oneLine(raw.values.want) ?? '';
     if (want === '') return { usage: 'pick-option needs --want "<the option you mean>"' };
     if (want.length > BOUNDS.INTENT_MAX) return { usage: `--want is ${want.length} characters; keep it to ${BOUNDS.INTENT_MAX}` };
     const open = raw.values.open === true;
-    const given = raw.values['expect-name'];
-    const expectName = typeof given === 'string' ? norm(given) : null;
+    const expectName = oneLine(raw.values['expect-name']);
     if (expectName !== null && !open) return { usage: '--expect-name goes with --open: it names the field --open clicks' };
     if (open && (expectName === null || expectName === '')) {
       return { usage: '--open needs --expect-name "<the name you saw on the field>"' };

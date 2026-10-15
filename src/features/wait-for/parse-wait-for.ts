@@ -1,5 +1,4 @@
-import type { ParsedArgs, UsageError } from '../../cli';
-import { norm } from '../../page-model';
+import { oneLine, type ParsedArgs, type UsageError } from '../../cli';
 import { BOUNDS } from '../../questions';
 import { formatDuration, parseDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
@@ -30,12 +29,12 @@ function durationOf(name: string, text: string, min: number, max: number): numbe
 export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (raw.positionals.length > 0) return { usage: `wait-for takes no positional arguments, got ${raw.positionals.length}` };
   if (raw.rest.length > 0) return { usage: 'wait-for takes nothing after --' };
-  const expect = typeof raw.values.expect === 'string' ? norm(raw.values.expect) : '';
+  const expect = oneLine(raw.values.expect) ?? '';
   if (expect === '') return { usage: 'wait-for needs --expect "<what should appear>"' };
   if (expect.length > BOUNDS.DESCRIPTION_MAX) {
     return { usage: `--expect is ${expect.length} characters; keep it to ${BOUNDS.DESCRIPTION_MAX}` };
   }
-  const text = typeof raw.values.text === 'string' ? norm(raw.values.text) : null;
+  const text = oneLine(raw.values.text);
   if (text === '') return { usage: '--text is empty: give the literal to look for, or leave it out' };
   if (text !== null && text.length > BOUNDS.INTENT_MAX) return { usage: `--text is over ${BOUNDS.INTENT_MAX} characters` };
   const url = typeof raw.values.url === 'string' ? raw.values.url.trim() : null;

@@ -1,9 +1,11 @@
 import type { CommandOutcome, CommandSpec, UsageError } from '../../cli';
-import { keySet } from '../../config';
-import { DISCLOSURE_HASH, DISCLOSURE_TEXT, readConsent, withGrant, writeConsent } from '../../egress';
+import {
+  currentConsent, DISCLOSURE_HASH, DISCLOSURE_TEXT, readConsent, withGrant, withoutGrant, writeConsent,
+} from '../../egress';
 import type { Consent } from '../../egress';
-import { keyPresent, providerRoster } from '../../providers';
+import { keyPresent } from '../../providers';
 import type { ProviderSlot } from '../../providers';
+import { rosterOf } from '../shared';
 import { openTty } from './open-tty';
 import type { SetupGrant } from './setup-grant';
 import type { SetupPreview } from './setup-preview';
@@ -21,20 +23,10 @@ function notSetUp(detail: string): CommandOutcome<SetupResult | SetupPreview> {
 }
 
 /** The record after this run's answers: a typed phrase grants, anything else revokes, under today's disclosure. */
-function applyAnswers(consent: Consent | null, answers: readonly SetupGrant[]): Consent {
-  let next: Consent = consent && consent.disclosure === DISCLOSURE_HASH
-    ? consent
-    : { v: 1, disclosure: DISCLOSURE_HASH, grants: [] };
-  for (const answer of answers) {
-    if (answer.granted) {
-      next = withGrant(next, answer.provider, answer.host, new Date());
-      continue;
-    }
-    const host = answer.host.toLowerCase();
-    const grants = next.grants.filter((grant) => !(grant.provider === answer.provider && grant.host.toLowerCase() === host));
-    next = { ...next, grants };
-  }
-  return next;
+function applyAnswers(consent: Consent | null, answers: readonly SetupGrant[], at: Date): Consent {
+  return answers.reduce((next, answer) => (answer.granted
+    ? withGrant(next, answer.provider, answer.host, at)
+    : withoutGrant(next, answer.provider, answer.host)), currentConsent(consent));
 }
 
 async function promptFor(slot: ProviderSlot, host: string): Promise<string> {
@@ -60,7 +52,7 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     return {};
   },
   async run(_args, ctx) {
-    const roster = Object.values(providerRoster(ctx.config, keySet(ctx.config, ctx.env)));
+    const roster = Object.values(rosterOf(ctx.config, ctx.env));
     // Each provider that can be asked about, with the host its page text would go to.
     const targets = roster.flatMap((slot) => (
       slot.problem === null && slot.endpoint ? [{ slot, host: slot.endpoint.host }] : []
@@ -99,7 +91,7 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     // No answer at all is a consent step that did not happen, not one that succeeded with nothing granted.
     if (answers.length === 0) return notSetUp(`${NO_ANSWER}: ${unanswered.join(', ')}`);
     const consentPath = ctx.config.paths.consent;
-    writeConsent(consentPath, applyAnswers(readConsent(consentPath), answers));
+    writeConsent(consentPath, applyAnswers(readConsent(consentPath), answers, new Date(ctx.now())));
     const result: SetupResult = { grants: answers, consent: consentPath, disclosure_hash: DISCLOSURE_HASH, unanswered };
     return { status: 'ok', acted: false, effect: 'none', result };
   },

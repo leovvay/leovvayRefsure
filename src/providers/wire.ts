@@ -15,9 +15,6 @@ export interface WireReading {
 
 /** One request/response shape: Jev's `systemone` or OpenAI's `/v1/decisions`. */
 export interface Wire {
-  id: 'jev' | 'openai';
-  kinds: readonly ('choice' | 'noul')[];
-  refusal: boolean;
   body(model: string, req: ApprovedRequest, rendering?: Rendering): unknown;
   read(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading;
 }

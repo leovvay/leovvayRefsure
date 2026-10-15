@@ -1,7 +1,8 @@
+import { ACT_ACTIONS } from '../../browser';
 import type { CommandSpec } from '../../cli';
 import type { ActHighRiskArgs } from './act-high-risk.args';
 import type { ActHighRiskResult } from './act-high-risk.contract';
-import { HIGH_RISK_ACTIONS, parseActHighRisk } from './parse-act-high-risk';
+import { parseActHighRisk } from './parse-act-high-risk';
 import { runActHighRisk } from './run-act-high-risk';
 
 /**
@@ -25,7 +26,7 @@ export const actHighRiskCommand: CommandSpec<ActHighRiskArgs, ActHighRiskResult>
     ticket: { type: 'string', summary: 'A ticket picked at ≥0.85 or by code, with no twins (money and irreversible only)' },
     ref: { type: 'string', summary: 'Your own ref, @eN from your latest snapshot (needs --expect-name)' },
     'expect-name': { type: 'string', summary: 'The name you saw on the element; the live ref must still show it, as whole words' },
-    action: { type: 'string', summary: `${HIGH_RISK_ACTIONS.join(', ')} (required)` },
+    action: { type: 'string', summary: `${ACT_ACTIONS.join(', ')} (required)` },
     value: { type: 'string', summary: 'The text to fill or the option to select (fill and select only); never logged' },
     intent: { type: 'string', summary: 'What the human asked for, in a few words (required)' },
     risk: { type: 'string', summary: 'Raise the class a fresh read gives, as the step that refused did: read … irreversible' },

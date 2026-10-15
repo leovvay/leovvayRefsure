@@ -11,6 +11,7 @@ const MAX_OUTPUT = 64 * 1024;
 export function commandKey(argv: readonly string[]): KeySource {
   const [file, ...args] = argv;
   return {
+    kind: 'command',
     label: file ?? '',
     read: () => new Promise<string | null>((resolve) => {
       if (!file) {

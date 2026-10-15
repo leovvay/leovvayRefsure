@@ -1,5 +1,5 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
-import type { Next } from '../../output';
+import { RE_OBSERVE } from '../../output';
 import { outcomeSite } from '../../questions';
 import { abstainOutcome, readPage, sleep } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
@@ -7,24 +7,7 @@ import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
 import { landedOutcome } from './landed-outcome';
 import { checkBeforeAct } from './pre-act-checks';
-import { cleanSide, outcomeSide } from './outcome-side';
-
-/** How long the page gets to show the act's effect before the after-read (spec §6.2). */
-const SETTLE_MS = 600;
-const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
-/** Under `--dry-run` nothing is acted on, so the after-side can only be a stand-in. */
-const AFTER_UNREAD = `(the page as it reads ${SETTLE_MS} ms after the act; under --dry-run nothing is acted on or read)`;
-
-function unknown(cause: string, detail: string): CommandOutcome<OutcomeResult> {
-  return {
-    status: 'effect_unknown',
-    acted: true,
-    effect: 'dispatched',
-    result: { verdict: 'unknown', by: 'decision', unconfirmed: cause },
-    why: { cause: 'effect_unknown', detail: `dispatched; not confirmed (${cause}): ${detail}` },
-    next: RE_OBSERVE,
-  };
-}
+import { outcomeInput, SETTLE_MS, unconfirmed } from './outcome-side';
 
 /**
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
@@ -36,26 +19,18 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   const tab = await ctx.browser.tabInfo(page);
   const checked = await checkBeforeAct(ctx, page, args, tab);
   if ('refusal' in checked) return checked.refusal;
+  const { action, ref, value } = args.act;
   // Read before the dispatch: a config error after it could only say effect_unknown.
-  const piiMasks = ctx.config.piiMasks;
+  const sides = { piiMasks: ctx.config.piiMasks, value };
   const before = { tab, text: checked.cleared.bodyText };
   if (ctx.dryRun) {
     // The body the outcome Decision would get (spec §6.3), its after-side a stand-in; `decide` throws `DryRunStop`.
     ctx.trace.notes.push('dry_run: the after side is a stand-in; it is read only after the act runs');
-    const { verdict } = await ctx.decide(
-      outcomeSite,
-      {
-        intent: args.intent,
-        acted: checked.cleared.acted,
-        before: outcomeSide(cleanSide(before, piiMasks)),
-        after: outcomeSide({ url: '', title: '', text: AFTER_UNREAD }),
-      },
-      { combo: 'auto', originUrl: tab.url, dryRun: true, signal: ctx.signal },
-    );
+    const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, null, sides),
+      { combo: 'auto', originUrl: tab.url, dryRun: true, signal: ctx.signal });
     if (verdict.kind === 'abstain') return abstainOutcome<OutcomeResult>(verdict, null);
   }
 
-  const { action, ref, value } = args.act;
   const sent = await ctx.browser.act(page, ref, action, value);
   if (sent.kind === 'stale_ref') {
     return {
@@ -83,16 +58,8 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   const rule = landedByCode(args, { url: before.tab.url, text: before.text }, { url: after.tab.url, text: after.text });
   if (rule) return landedOutcome('dispatched', 'code', rule);
 
-  const { verdict } = await ctx.decide(
-    outcomeSite,
-    {
-      intent: args.intent,
-      acted: checked.cleared.acted,
-      before: outcomeSide(cleanSide(before, piiMasks)),
-      after: outcomeSide(cleanSide(after, piiMasks)),
-    },
-    { combo: 'auto', originUrl: after.tab.url, dryRun: ctx.dryRun, signal: ctx.signal },
-  );
+  const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, after, sides),
+    { combo: 'auto', originUrl: after.tab.url, dryRun: ctx.dryRun, signal: ctx.signal });
   if (verdict.kind === 'answer') return landedOutcome('dispatched', 'decision');
-  return unknown(verdict.cause, verdict.detail);
+  return unconfirmed({ verdict: 'unknown', by: 'decision', unconfirmed: verdict.cause }, verdict);
 }

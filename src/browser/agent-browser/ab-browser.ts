@@ -139,7 +139,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
       await call(page, ['highlight', `@${checkedRef(ref)}`]);
     },
 
-    // A mark is resolved by the caller; agent-browser keeps no cursor refsure could use, so `since` is not sent.
+    // The whole recent log: `triage --since` filters it by the mark's time itself.
     async console(page) {
       return readConsole(await call(page, ['console']), 'agent-browser console').slice(-LOG_LIMIT);
     },

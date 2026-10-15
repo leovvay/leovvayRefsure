@@ -1,18 +1,7 @@
-import type { ParsedArgs, UsageError } from '../../cli';
-import { norm, RANK_MAX } from '../../page-model';
+import { oneLine, type ParsedArgs, parseRisk, type UsageError } from '../../cli';
+import { RANK_MAX } from '../../page-model';
 import { BOUNDS } from '../../questions';
-import { RISK_ORDER, type RiskClass } from '../../risk';
 import type { LocateArgs } from './locate.args';
-
-function oneLine(value: unknown): string | null {
-  return typeof value === 'string' ? norm(value) : null;
-}
-
-function parseRisk(value: unknown): RiskClass | undefined | UsageError {
-  if (value === undefined) return undefined;
-  if (typeof value === 'string' && (RISK_ORDER as readonly string[]).includes(value)) return value as RiskClass;
-  return { usage: `--risk must be one of ${RISK_ORDER.join(', ')}` };
-}
 
 function parseTop(value: unknown): number | null | UsageError {
   if (value === undefined) return null;

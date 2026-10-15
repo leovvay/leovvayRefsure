@@ -1,4 +1,4 @@
-import type { Verdict } from '../../questions';
+import { abstainVerdict, quoteOption, type Verdict } from '../../questions';
 import { askOne } from './ask-one';
 import type { ComboOutcome, PartOutcome } from './combo-outcome';
 import type { AskOptions, ComboPart } from './combo-part';
@@ -13,10 +13,18 @@ import type { Answer } from './verdict-kinds';
  */
 export async function askAgree<Out>(parts: readonly ComboPart<Out>[], opts: AskOptions): Promise<ComboOutcome<Out>> {
   const outcomes = await Promise.all(parts.map((part) => askOne(part, opts)));
-  return { verdict: agreeVerdict(outcomes), parts: outcomes };
+  return { verdict: agreeVerdict(outcomes, parts), parts: outcomes };
 }
 
-function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[]): Verdict<Out> {
+/** What a part chose, as a refusal names it: the option's text as that part sent it, never its shuffled key. */
+function chosen<Out>(part: ComboPart<Out> | undefined, answer: Answer<Out> | undefined): string {
+  const index = answer?.index ?? null;
+  const asked = part?.request.questions[part.question];
+  const text = index !== null && asked?.type === 'choice' ? asked.criteria[index] : undefined;
+  return text === undefined ? (index ?? String(answer?.value)) : quoteOption(text);
+}
+
+function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[], parts: readonly ComboPart<Out>[]): Verdict<Out> {
   const abstain = firstAbstain(outcomes);
   if (abstain) return abstain;
   const answers = outcomes.map((outcome) => outcome.verdict as Answer<Out>);
@@ -24,12 +32,12 @@ function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[]): Verdict<Out> 
   const lead = answers[leadAt];
   const low = lowest(answers);
   if (!lead || !low) {
-    return { kind: 'abstain', cause: 'provider_error', detail: 'no provider was asked', leaned: null, confidence: null, threshold: null };
+    return abstainVerdict('provider_error', 'no provider was asked');
   }
   if (answers.every((answer) => sameChoice(answer, lead))) {
     return { kind: 'answer', value: lead.value, index: lead.index, confidence: low.confidence, threshold: low.threshold };
   }
-  const chose = outcomes.map((outcome, at) => `${outcome.provider} chose ${answers[at]?.index ?? String(answers[at]?.value)}`);
+  const chose = outcomes.map((outcome, at) => `${outcome.provider} chose ${chosen(parts[at], answers[at])}`);
   return {
     kind: 'abstain',
     cause: 'disagree',

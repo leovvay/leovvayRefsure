@@ -1,8 +1,9 @@
 import type { PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import { cutName, norm } from '../../page-model';
+import { RE_OBSERVE } from '../../output';
+import { describeElement } from '../../page-model';
 import { outcomeSite } from '../../questions';
-import { actionPolicy, actionRole, liveRefRisk, nameCheck, readLiveTarget } from '../../risk';
+import { actionRole, liveRefRisk, nameCheck, readLiveTarget, refusesHighRisk } from '../../risk';
 import type { RiskReading } from '../../risk';
 import { abstainOutcome, highRiskNext, nothingDone } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
@@ -28,8 +29,7 @@ async function routeRefusal(ctx: CommandContext, args: OutcomeWrapArgs, tab: Tab
     ctx.trace.notes.push(`spend_limit: only --expect-url/--expect-text can confirm this act (${route.detail})`);
     return null;
   }
-  const verdict = { kind: 'abstain' as const, cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null };
-  return { refusal: abstainOutcome<OutcomeResult>(verdict, null) };
+  return { refusal: abstainOutcome<OutcomeResult>(route, null) };
 }
 
 /**
@@ -52,13 +52,13 @@ export async function checkBeforeAct(
     ctx.trace.untrusted.add('why.detail');
     const shown = named.mismatch === '' ? 'no name' : JSON.stringify(named.mismatch);
     const detail = `@${ref} shows ${shown}, not ${JSON.stringify(args.expectName)}; nothing was done`;
-    return { refusal: nothingDone('stale', 'expect_name_mismatch', detail, { next: { do: 'snapshot', argv: ['refsure', 'snap'] } }) };
+    return { refusal: nothingDone('stale', 'expect_name_mismatch', detail, { next: RE_OBSERVE }) };
   }
 
   const risk: RiskReading = await liveRefRisk(ctx.browser, page, ref, action, target, {
     url: tab.url, ...(args.risk ? { userRisk: args.risk } : {}),
   });
-  if (actionPolicy(action, risk.class, 'outcome') !== 'allow') {
+  if (refusesHighRisk(risk.class)) {
     // The caller's own ref, name and intent: the one command that may take it, spelled out (spec §6.3).
     const next = highRiskNext({
       class: risk.class, via: { ref, expectName: args.expectName }, action, intent: args.intent,
@@ -69,5 +69,5 @@ export async function checkBeforeAct(
       + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
-  return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, bodyText } };
+  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen), bodyText } };
 }

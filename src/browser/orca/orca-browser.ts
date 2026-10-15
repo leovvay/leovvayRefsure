@@ -97,7 +97,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
       await call(onPage(page, ['highlight'], `--selector=@${checkedRef(ref)}`));
     },
 
-    // A mark is resolved by the caller; Orca keeps no cursor, so `since` is not sent.
+    // The whole recent log: `triage --since` filters it by the mark's time itself.
     async console(page) {
       return readConsole(await call(onPage(page, ['console'], `--limit=${LOG_LIMIT}`)), 'orca console');
     },

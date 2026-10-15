@@ -1,4 +1,4 @@
-import type { AbstainCause, Verdict } from '../../questions';
+import { type AbstainCause, abstainVerdict, type Verdict } from '../../questions';
 import type { ProviderAnswer } from '../decision-provider';
 import type { PartOutcome } from './combo-outcome';
 import type { AskOptions, ComboPart } from './combo-part';
@@ -49,5 +49,5 @@ export function labelled(who: string, detail: string): string {
 }
 
 function unavailable<Out>(cause: AbstainCause, detail: string): Abstain<Out> {
-  return { kind: 'abstain', cause, detail, leaned: null, confidence: null, threshold: null };
+  return abstainVerdict(cause, detail);
 }

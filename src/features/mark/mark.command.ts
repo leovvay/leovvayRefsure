@@ -11,7 +11,7 @@ const LABEL_MAX = 80;
 /**
  * Remembers the page as it is now (spec §6.2, §8.7), before the agent acts on its own over several steps; then
  * `outcome --mark` asks whether the intent landed since. Stores the query-less URL, the title and the text, all
- * redacted and masked, for 15 minutes. Reads only: nothing is sent and nothing is clicked.
+ * redacted and masked, for 15 minutes. Reads only: nothing is sent and nothing is clicked; `--dry-run` saves nothing.
  */
 export const markCommand: CommandSpec<MarkArgs, MarkResult> = {
   name: 'mark',
@@ -35,8 +35,13 @@ export const markCommand: CommandSpec<MarkArgs, MarkResult> = {
     const page = ctx.page;
     if (page === null) throw new Error('mark needs a page, and none was resolved');
     const view = markView(await readPage(ctx.browser, page));
-    const id = newMarkId();
-    await saveMark(ctx.store, { id, pageId: page.id, label: args.label, ...view, createdAt: ctx.now(), ttlMs: MARK_TTL_MS });
+    let id: string | null = null;
+    if (ctx.dryRun) {
+      ctx.trace.notes.push('dry_run: no mark is saved');
+    } else {
+      id = newMarkId();
+      await saveMark(ctx.store, { id, pageId: page.id, label: args.label, ...view, createdAt: ctx.now(), ttlMs: MARK_TTL_MS });
+    }
     return {
       status: 'ok',
       acted: false,

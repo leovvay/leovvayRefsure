@@ -1,6 +1,7 @@
-import type { ActAction, ActResult, PageRef, TabInfo } from '../../browser';
+import { type ActAction, type ActResult, type PageRef, type TabInfo, VALUE_ACTIONS } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import { cutName } from '../../page-model';
+import { RE_OBSERVE } from '../../output';
+import { describeElement } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { HIGH_RISK } from '../../risk';
 import { recheck, type RecheckResult, type Ticket } from '../../tickets';
@@ -13,7 +14,6 @@ import type { ActCommandResult } from './act.contract';
 import { policyRefusal } from './act-policy';
 import type { PolicyAct } from './policy-act';
 import { dryVerify, verifyAfter } from './act-verify';
-import { VALUE_ACTIONS } from './parse-act';
 
 type Out = CommandOutcome<ActCommandResult>;
 type Bound = { action: ActAction; value?: string };
@@ -110,10 +110,10 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   if (typeof ticket === 'string') return ticketGone(ticket, args.ticket);
   const fresh = await cleared(ctx, ticket, policy, !ctx.dryRun);
   if (isOut(fresh)) return fresh;
-  const element = `${ticket.fingerprint.role} ${JSON.stringify(cutName(ticket.fingerprint.name))}`;
+  const element = describeElement(ticket.fingerprint.role, ticket.fingerprint.name);
   ctx.trace.untrusted.add('result.element');
   if (ctx.dryRun && args.verify !== null && before !== null) {
-    const { verdict } = await dryVerify(ctx, args.verify, element, before, piiMasks);
+    const { verdict } = await dryVerify(ctx, { intent: args.verify, acted: element, before, piiMasks, value: policy.value });
     if (verdict.kind === 'abstain') return abstainOutcome<ActCommandResult>(verdict, null);
   }
 
@@ -124,13 +124,13 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   if (sent.kind === 'unknown') {
     return {
       status: 'effect_unknown', acted: true, effect: 'unknown', result: { verdict: 'unknown', ...base },
-      why: { cause: 'effect_unknown', detail: sent.detail }, next: { do: 'snapshot', argv: ['refsure', 'snap'] },
+      why: { cause: 'effect_unknown', detail: sent.detail }, next: RE_OBSERVE,
     };
   }
   if (args.verify === null || before === null) {
     return { status: 'ok', acted: true, effect: 'dispatched', result: { verdict: 'done', ...base } };
   }
-  return verifyAfter(ctx, page, { intent: args.verify, acted: element, before, piiMasks, base });
+  return verifyAfter(ctx, page, { intent: args.verify, acted: element, before, piiMasks, value: policy.value, base });
 }
 
 /** `act --ticket T` (spec §6.2, §8.3): the ticket names the page; a different `--page` is a usage error. */

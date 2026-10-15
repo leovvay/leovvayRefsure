@@ -1,21 +1,18 @@
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
-import type { ProviderId } from '../questions';
+// The file, not the barrel: questions imports egress, and site-id imports nothing.
+import { isProviderId, type ProviderId } from '../questions/site-id';
 import type { Consent, ConsentGrant } from './consent-record';
 import { DISCLOSURE_HASH } from './disclosure';
 import { writePrivateFile } from './private-file';
+import { isRecord } from '../shared';
 
-const PROVIDERS: ReadonlySet<string> = new Set(['jev', 'openai']);
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 function asGrant(value: unknown): ConsentGrant | null {
   if (!isRecord(value)) return null;
   const { provider, host, at } = value;
-  if (typeof provider !== 'string' || !PROVIDERS.has(provider)) return null;
+  if (!isProviderId(provider)) return null;
   if (typeof host !== 'string' || host === '' || typeof at !== 'string') return null;
-  return { provider: provider as ProviderId, host, at };
+  return { provider, host, at };
 }
 
 /**
@@ -51,20 +48,45 @@ export function writeConsent(path: string, consent: Consent): void {
   writePrivateFile(path, `${JSON.stringify(consent, null, 2)}\n`);
 }
 
-/** True only when the record was given for today's disclosure and holds this provider at this host. */
-export function grantFor(consent: Consent | null, provider: ProviderId, host: string): boolean {
-  if (!consent || consent.disclosure !== DISCLOSURE_HASH) return false;
-  const wanted = host.toLowerCase();
-  return consent.grants.some((grant) => grant.provider === provider && grant.host.toLowerCase() === wanted);
+/** Whether a grant is for this provider at this host: hosts compare without case. */
+function grants(grant: ConsentGrant, provider: ProviderId, host: string): boolean {
+  return grant.provider === provider && grant.host.toLowerCase() === host.toLowerCase();
 }
 
 /**
- * The record with this grant added (or its time refreshed), under today's disclosure. Grants given for an
+ * The record under today's disclosure: its grants when it was given for this one, else none. Grants given for an
  * older disclosure are dropped: the human has not read this one for them.
  */
+export function currentConsent(consent: Consent | null): Consent {
+  const grants = consent && consent.disclosure === DISCLOSURE_HASH ? consent.grants : [];
+  return { v: 1, disclosure: DISCLOSURE_HASH, grants };
+}
+
+/** True only when the record was given for today's disclosure and holds this provider at this host. */
+export function grantFor(consent: Consent | null, provider: ProviderId, host: string): boolean {
+  return currentConsent(consent).grants.some((grant) => grants(grant, provider, host));
+}
+
+/** The record under today's disclosure (`currentConsent`) without this grant: a revoke. */
+export function withoutGrant(consent: Consent | null, provider: ProviderId, host: string): Consent {
+  const current = currentConsent(consent);
+  return { ...current, grants: current.grants.filter((grant) => !grants(grant, provider, host)) };
+}
+
+/** The record under today's disclosure (`currentConsent`) with this grant added, or its time refreshed. */
 export function withGrant(consent: Consent | null, provider: ProviderId, host: string, at: Date): Consent {
-  const kept = consent && consent.disclosure === DISCLOSURE_HASH ? consent.grants : [];
-  const wanted = host.toLowerCase();
-  const others = kept.filter((grant) => !(grant.provider === provider && grant.host.toLowerCase() === wanted));
-  return { v: 1, disclosure: DISCLOSURE_HASH, grants: [...others, { provider, host: wanted, at: at.toISOString() }] };
+  const others = withoutGrant(consent, provider, host).grants;
+  const grant = { provider, host: host.toLowerCase(), at: at.toISOString() };
+  return { v: 1, disclosure: DISCLOSURE_HASH, grants: [...others, grant] };
+}
+
+/**
+ * Why `provider` at `host` may not be sent to: the disclosure changed since consent was given, or no grant is on
+ * file. Both the route check and `approve` say it this way.
+ */
+export function consentMissing(consent: Consent | null, provider: ProviderId, host: string): string {
+  const grant = `${provider} at ${host}`;
+  return consent && consent.disclosure !== DISCLOSURE_HASH
+    ? `the disclosure changed since consent was given: a human runs \`refsure setup\` again to grant ${grant}`
+    : `no consent grant for ${grant}: a human runs \`refsure setup\` in a terminal`;
 }

@@ -12,23 +12,17 @@ function nodeCheck(version: string): DoctorCheck {
   return { name: 'node', ok, detail };
 }
 
-function worktreeSet(env: NodeJS.ProcessEnv): boolean {
-  return Boolean(env.ORCA_WORKTREE_ID?.trim());
-}
-
 /** Which backend drives the browser, and why (spec §5.2; `REFSURE_BACKEND`, the Orca terminal, agent-browser). */
 function backendChoiceCheck(choice: BackendChoice): DoctorCheck {
   return { name: 'backend', ok: choice.backend !== null, detail: `${choice.backend ?? 'none'}: ${choice.why}` };
 }
 
 /**
- * The backend as `probe()` saw it. Orca's `problem` also names a missing ORCA_WORKTREE_ID when Orca itself is fine;
- * that one has its own check below, so it does not fail the backend check too. agent-browser's `detail` lists the
- * open sessions, which `--page` names.
+ * The backend as `probe()` saw it. Orca's worktree is not part of it: the terminal check below reads `worktree`.
+ * agent-browser's `detail` lists the open sessions, which `--page` names.
  */
-function backendChecks(backend: string, health: BackendHealth, inTerminal: boolean): DoctorCheck[] {
-  const worktreeOnly = !inTerminal && health.running && (health.problem ?? '').includes('ORCA_WORKTREE_ID');
-  const runningOk = health.ok || worktreeOnly;
+function backendChecks(backend: string, health: BackendHealth): DoctorCheck[] {
+  const runningOk = health.ok;
   const version = health.version ? ` ${health.version}` : '';
   const seen = health.detail ? `; ${health.detail}` : '';
   return [
@@ -75,9 +69,8 @@ export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
   const choice = chooseBackend(ctx.env);
   const node = nodeCheck(process.versions.node);
   if (choice.backend === null) return [node, backendChoiceCheck(choice)];
-  const inTerminal = worktreeSet(ctx.env);
   const health = await ctx.browser.probe();
-  const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health, inTerminal)];
-  if (ctx.browser.backend === 'orca') checks.push(terminalCheck(inTerminal));
+  const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health)];
+  if (ctx.browser.backend === 'orca') checks.push(terminalCheck(health.worktree === true));
   return checks;
 }

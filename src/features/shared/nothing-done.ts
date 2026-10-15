@@ -1,8 +1,6 @@
 import type { CommandOutcome } from '../../cli';
-import type { Next, Status } from '../../output';
-import type { ClaimFailure } from '../../tickets';
-
-const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
+import { type Next, RE_OBSERVE, type Status } from '../../output';
+import { type ClaimFailure, TICKET_TTL_MS } from '../../tickets';
 
 /** An outcome where nothing was dispatched (spec §8.1 rule 3): a named cause, and `result` when it says more. */
 export function nothingDone<Result>(
@@ -19,7 +17,7 @@ export function nothingDone<Result>(
 export function ticketGone<Result>(failure: ClaimFailure, id: string): CommandOutcome<Result> {
   const detail = failure === 'ticket_used'
     ? `ticket ${id} was already used, or no such ticket is kept; tickets are single use`
-    : `ticket ${id} has expired; tickets live 120 s: locate again`;
+    : `ticket ${id} has expired; tickets live ${TICKET_TTL_MS / 1000} s: locate again`;
   return nothingDone<Result>('stale', failure, detail, { next: RE_OBSERVE });
 }
 

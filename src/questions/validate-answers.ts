@@ -1,3 +1,4 @@
+import { isRecord, isUnit } from '../shared';
 import type {
   DecisionAnswer,
   DecisionChoiceAnswer,
@@ -19,14 +20,6 @@ import type {
   What is returned is rebuilt from the fields read here, never the parsed
   object itself, so nothing a response adds travels any further than this file.
 */
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isUnit(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
-}
 
 /** Every expected key present with a probability; keys the question did not name are dropped. */
 function probabilitiesFor(value: unknown, keys: string[]): Record<string, number> | null {

@@ -2,6 +2,7 @@ import type { ApprovedRequest } from '../../egress';
 import { validateAnswers, type DecisionQuestion } from '../../questions';
 import type { Wire, WireReading } from '../wire';
 import type { JevBody } from './jev-body';
+import { isRecord } from '../../shared';
 
 /*
   Jev's `systemone` request and response, ported from the author's earlier
@@ -19,8 +20,9 @@ function jevBody(model: string, req: ApprovedRequest): JevBody {
 function readJev(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading {
   if (!isRecord(json)) return { status: 'invalid', answers: null, model: null, usd: null, detail: 'the body is not an object' };
   const model = typeof json.model === 'string' ? json.model : null;
-  const usd = isRecord(json.usage) ? costOf(json.usage.cost) : null;
-  if (model === null || !isRecord(json.answers) || !isRecord(json.usage)) {
+  const usage = isRecord(json.usage) ? json.usage : null;
+  const usd = usage === null ? null : costOf(usage.cost);
+  if (model === null || !isRecord(json.answers) || usage === null) {
     return { status: 'invalid', answers: null, model, usd, detail: 'the body lacks a model, answers or usage' };
   }
   const answers = validateAnswers(questions, json.answers);
@@ -29,17 +31,10 @@ function readJev(json: unknown, questions: Readonly<Record<string, DecisionQuest
 }
 
 export const JEV_WIRE: Wire = Object.freeze({
-  id: 'jev',
-  kinds: Object.freeze(['choice', 'noul'] as const),
-  refusal: false,
   body: (model: string, req: ApprovedRequest) => jevBody(model, req),
   read: readJev,
 });
 
 function costOf(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

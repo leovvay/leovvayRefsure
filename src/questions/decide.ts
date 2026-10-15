@@ -13,17 +13,14 @@ import type { DecisionSite } from './decision-site';
 import { planRoute, readReadiness } from './route';
 import type { RoutePlan } from './route';
 import { sentTwins, stopSentTwin } from './sent-twins';
-import type { Maturity, ProviderId } from './site-id';
+import { type Maturity, PROVIDER_IDS, type ProviderId } from './site-id';
 import type { SiteRequest } from './site-request';
-import type { AbstainCause, Verdict } from './verdict';
+import { abstainVerdict as abstain } from './abstain-verdict';
+import type { Verdict } from './verdict';
 
 const DAY_MS = 86_400_000;
 
 type Plan = Exclude<RoutePlan, { kind: 'refused' }>;
-
-function abstain<Out>(cause: AbstainCause, detail: string): Verdict<Out> {
-  return { kind: 'abstain', cause, detail, leaned: null, confidence: null, threshold: null };
-}
 
 /** OpenAI's input rendering: sectioned text only when it answers a presence check alone (spec §7.1). */
 function renderingFor(site: DecisionSite<unknown, unknown, unknown>['id'], plan: RoutePlan): Rendering {
@@ -41,7 +38,7 @@ function capsNow(config: DecideDeps['config'], pending = 0): EgressRefusal | nul
 }
 
 function idsOf(plan: Plan): ProviderId[] {
-  return plan.kind === 'single' ? [plan.provider] : ['jev', 'openai'];
+  return plan.kind === 'single' ? [plan.provider] : [...PROVIDER_IDS];
 }
 
 /**

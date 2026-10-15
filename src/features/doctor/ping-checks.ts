@@ -1,10 +1,8 @@
 import type { CommandContext } from '../../cli';
-import { isConfigError, keySet } from '../../config';
-import type { RefsureConfig } from '../../config';
 import { causeStatus, DryRunStop } from '../../output';
-import { providerRoster } from '../../providers';
 import { presenceSite } from '../../questions';
 import type { ProviderId } from '../../questions';
+import { readConfig, rosterOf } from '../shared';
 import type { DoctorCheck } from './doctor-check';
 
 /** A fixed synthetic page: nothing from a browser is sent by a ping, so origin and profile rules skip it. */
@@ -29,14 +27,11 @@ async function pingOne(ctx: CommandContext, id: ProviderId): Promise<DoctorCheck
  * included). Under `--dry-run` every ping's body is collected before the dry run stops.
  */
 export async function pingChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
-  let config: RefsureConfig;
-  try {
-    config = ctx.config;
-  } catch (error) {
-    if (!isConfigError(error)) throw error;
-    return [{ name: 'ping', ok: false, detail: `not pinged: the config file is refused (${error.cause_})` }];
+  const read = readConfig(ctx);
+  if ('refused' in read) {
+    return [{ name: 'ping', ok: false, detail: `not pinged: the config file is refused (${read.refused.cause_})` }];
   }
-  const roster = providerRoster(config, keySet(config, ctx.env));
+  const roster = rosterOf(read.config, ctx.env);
   const checks: DoctorCheck[] = [];
   let stopped: DryRunStop | null = null;
   for (const slot of Object.values(roster)) {

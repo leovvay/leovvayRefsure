@@ -1,4 +1,5 @@
-import { findTerm, readingsOf, type TermField } from '../../risk';
+import { findTerm, findWholeTerm, readingsOf, type TermField } from '../../risk';
+import { escapeRegExp } from '../../shared';
 
 /**
  * A negation right before a term, in the seven languages refsure reads: en "without", fr "sans", de "ohne" (and
@@ -11,10 +12,6 @@ const ACCEPT_FIELDS: readonly TermField[] = ['consent', 'dismissVeto'];
 const KEPT_FIELDS: readonly TermField[] = ['money', 'irreversible', 'auth'];
 /** What a negated accept reads as: a reject word of the close lexicon (`dismissClose`, matched across every language). */
 const REJECT = 'reject';
-
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
-}
 
 /** Where `term` first stands as a whole word in `text`, as the lexicon matcher found it; -1 when nowhere. */
 function termAt(text: string, term: string): number {
@@ -70,7 +67,10 @@ export function rejectReadings(raw: string): string[] {
   return turnedReadings(raw) ?? readingsOf(raw);
 }
 
-/** A close or reject word in every reading of the name, a negated accept counting as a reject (spec §8.4). */
+/**
+ * The whole name is a close or reject word (`findWholeTerm`: "Close", "Reject all", never "Close project" or
+ * "Reject invoice"), in every reading, a negated accept counting as a reject (spec §8.4).
+ */
 export function closesOrRejects(raw: string): boolean {
-  return rejectReadings(raw).every((reading) => findTerm('dismissClose', reading) !== null);
+  return rejectReadings(raw).every((reading) => findWholeTerm(['dismissClose'], reading) !== null);
 }

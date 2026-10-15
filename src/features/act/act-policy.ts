@@ -1,6 +1,7 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
-import { cutName } from '../../page-model';
-import { actionPolicy } from '../../risk';
+import { RE_OBSERVE } from '../../output';
+import { describeElement } from '../../page-model';
+import { refusesHighRisk } from '../../risk';
 import { authorityAllows, type RecheckResult, type Ticket } from '../../tickets';
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { ActCommandResult } from './act.contract';
@@ -19,7 +20,7 @@ export function policyRefusal(
 ): CommandOutcome<ActCommandResult> | null {
   const { risk } = fresh;
   const why = `${risk.class} (${risk.reasons.join(', ')})`;
-  if (actionPolicy(act.action, risk.class, 'act') !== 'allow') {
+  if (refusesHighRisk(risk.class)) {
     const { role, name } = ticket.fingerprint;
     // The step names the element: page text, as every place that quotes it.
     ctx.trace.untrusted.add('next.argv');
@@ -27,7 +28,7 @@ export function policyRefusal(
       class: risk.class,
       via: highRiskVia(spent ? null : ticket, risk.class, fresh.ref, name),
       action: act.action,
-      intent: act.intent ?? `${act.action} ${role} ${JSON.stringify(cutName(name))}`,
+      intent: act.intent ?? `${act.action} ${describeElement(role, name)}`,
       ...(act.value === undefined ? {} : { value: act.value }),
       // A fresh ref carries no ticket: the class the ticket was issued at goes on as --risk (risk only rises).
       risk: ticket.risk,
@@ -41,7 +42,7 @@ export function policyRefusal(
     return nothingDone('abstained', 'proposed_only',
       `the ticket may act at ${ticket.authority === 'none' ? 'no risk' : ticket.authority} only, and the element reads ${why}; `
         + 'nothing was done: confirm it yourself (refsure guard --ticket), then act through outcome',
-      { next: { do: 'snapshot', argv: ['refsure', 'snap'] } });
+      { next: RE_OBSERVE });
   }
   return null;
 }

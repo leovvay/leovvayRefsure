@@ -20,19 +20,19 @@ export function httpProvider(endpoint: Endpoint, wire: Wire, key: KeySource): De
     id: endpoint.provider,
     model: endpoint.model,
     host: endpoint.host,
-    capabilities: { wire: wire.id, kinds: wire.kinds, refusal: wire.refusal, maxQuestions: MAX_QUESTIONS },
     body: (req, opts) => wire.body(endpoint.model, req, opts.rendering),
     async ask(req, opts) {
       // Consent and limits were granted for one provider at one host; nothing else may carry the request.
       if (req.provider !== endpoint.provider || req.host !== endpoint.host) {
-        return failed('transport', 0, `the request was approved for ${req.provider} at ${req.host}, not ${endpoint.host}`);
+        return unsent('transport', `the request was approved for ${req.provider} at ${req.host}, not ${endpoint.host}`);
       }
       if (Object.keys(req.questions).length > MAX_QUESTIONS) {
-        return failed('invalid', 0, `more than ${MAX_QUESTIONS} questions in one request`);
+        return unsent('invalid', `more than ${MAX_QUESTIONS} questions in one request`);
       }
       const body = JSON.stringify(wire.body(endpoint.model, req, opts.rendering));
       const secret = await readKey(key);
-      if (secret === null) return failed('transport', 0, `the key source ${key.label} gave no key`);
+      if (secret === null) return unsent('transport', `the key source ${key.label} gave no key`);
+      if (opts.signal.aborted) return unsent('transport', 'interrupted before the request was sent');
       const sent = await postDecision(
         endpoint.url,
         { ...endpoint.headers, authorization: `Bearer ${secret}` },
@@ -60,6 +60,11 @@ function answered(req: ApprovedRequest, wire: Wire, json: unknown, ms: number, s
 
 function failed(status: ProviderStatus, ms: number, detail: string): ProviderAnswer {
   return { status, answers: null, model: null, usd: null, ms, detail };
+}
+
+/** A refusal before anything left: no request reached the network. */
+function unsent(status: ProviderStatus, detail: string): ProviderAnswer {
+  return { ...failed(status, 0, detail), unsent: true };
 }
 
 /**

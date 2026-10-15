@@ -1,35 +1,11 @@
 import type { TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { type Candidate, exactNameMatch, rankCandidates, twinKey } from '../../page-model';
+import { type Candidate, distinctByGroup, exactNameMatch, oneGroup, rankCandidates } from '../../page-model';
 import { findSite, locateSite } from '../../questions';
 import { notOffered } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateTop } from './locate-top';
 import type { Picked } from './picked';
-
-/** A twin group's key: equal role, `norm`ed name and path (spec §8.3). */
-export function keyOf(c: Candidate): string {
-  return twinKey(c.fp.role, c.fp.name, c.fp.path);
-}
-
-/** The first match when every match is of one twin group; `null` when none, or when they differ. */
-function oneGroup(matches: readonly Candidate[]): Candidate | null {
-  const first = matches[0];
-  if (first === undefined) return null;
-  const key = keyOf(first);
-  return matches.every((m) => keyOf(m) === key) ? first : null;
-}
-
-/** One candidate per twin group, the first in page order: identical lines tell a model nothing apart. */
-function distinct(cands: readonly Candidate[]): Candidate[] {
-  const seen = new Set<string>();
-  return cands.filter((c) => {
-    const key = keyOf(c);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
 
 /**
  * Code first (spec §6.2): `--recorded` settles when exactly one twin group carries that very line; `--intent` when
@@ -60,7 +36,7 @@ function topOf(
 export async function decidePick(
   args: LocateArgs, ctx: CommandContext, tab: TabInfo, cands: readonly Candidate[],
 ): Promise<Picked> {
-  const shortlist = rankCandidates(distinct(cands), args.intent ?? args.recorded ?? '');
+  const shortlist = rankCandidates(distinctByGroup(cands), args.intent ?? args.recorded ?? '');
   const lines = shortlist.map((c) => c.line);
   const opts = {
     combo: 'auto' as const, originUrl: tab.url, dryRun: ctx.dryRun, signal: ctx.signal,

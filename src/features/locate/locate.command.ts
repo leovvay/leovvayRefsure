@@ -1,5 +1,6 @@
 import type { AxTree } from '../../browser';
 import type { CommandSpec } from '../../cli';
+import { RE_OBSERVE } from '../../output';
 import { type Candidate, candidatesOf, RANK_MAX, rowContains, rowTextOf } from '../../page-model';
 import { abstainOutcome, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
@@ -65,12 +66,14 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
         ? 'the page offers no interactive element with a ref'
         : `no interactive element sits in a row containing ${JSON.stringify(args.within)}`;
       ctx.trace.untrusted.add('why.detail');
-      return nothingDone('abstained', 'none_chosen', detail, { next: { do: 'snapshot', argv: ['refsure', 'snap'] } });
+      return nothingDone('abstained', 'none_chosen', detail, { next: RE_OBSERVE });
     }
     ctx.trace.untrusted.add('result.line');
     ctx.trace.untrusted.add('result.top');
     const picked = codePick(args, cands) ?? await decidePick(args, ctx, tab, cands);
     if (picked.kind === 'abstain') {
+      // A low-confidence or twins refusal quotes the line the model leaned to: page text.
+      ctx.trace.untrusted.add('why.detail');
       const result: LocateResult = { ticket: null, by: 'decision' };
       if (picked.top !== null) {
         result.top = picked.top;

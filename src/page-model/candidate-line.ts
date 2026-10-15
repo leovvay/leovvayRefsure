@@ -20,7 +20,7 @@ function isPlace(node: AxNode): boolean {
 
 function placeLabel(node: AxNode): string {
   if (BARE_PLACES.has(node.role)) return node.role;
-  return norm(node.name) === '' ? node.role : `${node.role} ${quoted(node.name)}`;
+  return norm(node.name) === '' ? node.role : describeElement(node.role, node.name);
 }
 
 /**
@@ -76,11 +76,16 @@ export function pathOf(tree: AxTree, i: number): string {
   return pathAt(tree, i);
 }
 
+/** An element as refsure quotes it: `<role> "<name>"`, the name as a line shows it (page text). */
+export function describeElement(role: string, name: string): string {
+  return `${role} ${quoted(name)}`;
+}
+
 /**
  * Line format v1, the only shape a Decision sees: `<role> "<name>" in="<path>"`. The path is JSON-quoted as a
  * whole, so its inner quotes read `\"`. No attributes, no ordinal, never a value.
  */
 export function lineOf(tree: AxTree, i: number): string {
   const node = nodeAt(tree, i);
-  return `${node.role} ${quoted(node.name)} in=${JSON.stringify(pathAt(tree, i))}`;
+  return `${describeElement(node.role, node.name)} in=${JSON.stringify(pathAt(tree, i))}`;
 }

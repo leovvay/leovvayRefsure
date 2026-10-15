@@ -1,6 +1,6 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { cleanEgressText } from '../../egress';
-import { causeStatus, type Next } from '../../output';
+import { causeStatus, RE_OBSERVE } from '../../output';
 import { outcomeSite } from '../../questions';
 import { markOnPage, markView } from '../mark';
 import { abstainOutcome, readPage } from '../shared';
@@ -10,7 +10,6 @@ import { landedByCode } from './landed-by-code';
 import { landedOutcome } from './landed-outcome';
 import { outcomeSide } from './outcome-side';
 
-const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 const MARK_HINT = 'take a new one (refsure mark) before your next act';
 
 /**

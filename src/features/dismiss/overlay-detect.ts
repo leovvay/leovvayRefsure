@@ -1,25 +1,12 @@
 import type { AxTree } from '../../browser';
-import { fold, INTERACTIVE_ROLES, insideValueField, norm, subtree } from '../../page-model';
+import { DIALOG_ROLES, fold, insideValueField, norm, subtree, underControl } from '../../page-model';
 import { findTerm } from '../../risk';
 
-const DIALOG_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 /** Landmarks a consent banner sits in. Never `banner`: that is the site's own header (spec §6.2). */
 const REGION_ROLES: ReadonlySet<string> = new Set(['region', 'complementary']);
 /** "Cookie" in the seven languages refsure reads; matched inside words ("cookies", "ciasteczka"). */
 const COOKIE_WORDS = /cookie|куки|кукі|ciasteczk|galleta|témoin/u;
 const MIN_BUTTONS = 2;
-
-/** Whether a strict ancestor of node `i` below `stop` is a control: a button's own label is not banner wording. */
-function underControl(tree: AxTree, i: number, stop: number): boolean {
-  let at = tree.nodes[i]?.parent ?? null;
-  while (at !== null && at !== stop) {
-    const node = tree.nodes[at];
-    if (node === undefined) return false;
-    if (INTERACTIVE_ROLES.has(node.role)) return true;
-    at = node.parent;
-  }
-  return false;
-}
 
 /**
  * A landmark's own wording: its name and the StaticText of `inside` (its subtree, walked once by the caller) outside
