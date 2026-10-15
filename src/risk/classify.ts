@@ -1,0 +1,97 @@
+import type { ActAction, AxNode, AxTree } from '../browser';
+import { fold, pathOf } from '../page-model';
+import { dialogOf, isConfirmDialog } from './confirm-dialog';
+import { maxRisk } from './max-risk';
+import type { RiskClass } from './risk-class';
+import type { RiskReading } from './risk-reading';
+import { findTerm } from './term-match';
+
+export interface ClassifyOpts {
+  /** The tab's URL, for the path rules. */
+  url: string;
+  action?: ActAction;
+  /** `--risk`: it can only raise the class. */
+  userRisk?: RiskClass;
+}
+
+const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
+const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
+const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
+const MONEY_PATH = /checkout|payment|billing/i;
+const IRREVERSIBLE_PATH = /delete|close-account/i;
+
+/** Rule 1: what the element is, before any word on it counts. */
+function baseOf(node: AxNode, name: string, action: ActAction | undefined): { risk: RiskClass; reason: string } {
+  if (action !== undefined && FIELD_ACTIONS.has(action)) return { risk: 'write', reason: 'base:write' };
+  if (READ_ROLES.has(node.role)) return { risk: 'read', reason: `base:read:${node.role}` };
+  if (node.role === 'button' && findTerm('dismissClose', name) !== null) return { risk: 'read', reason: 'base:read:close' };
+  if (node.role === 'button' && node.attrs.expanded !== undefined) return { risk: 'read', reason: 'base:read:expander' };
+  return { risk: 'write', reason: 'base:write' };
+}
+
+/** The part of the URL the path rules read: path and fragment (a single-page app routes in the fragment). */
+function routeOf(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.pathname}${parsed.hash}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * The risk of acting on node `i` (spec §8.5). Rules apply in order and only raise the class; every rule that
+ * fired leaves a reason: the base, the lexicon terms (or `lexicon:none`), the confirm dialog, the URL, `--risk`.
+ */
+export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReading {
+  const node = tree.nodes[i];
+  if (node === undefined) throw new RangeError(`no node ${i} in the snapshot`);
+  const name = fold(node.name);
+  const base = baseOf(node, name, opts.action);
+  let risk = base.risk;
+  const reasons = [base.reason];
+
+  let matched = false;
+  for (const cls of LEXICON_CLASSES) {
+    const hit = findTerm(cls, name);
+    if (hit === null) continue;
+    matched = true;
+    risk = maxRisk(risk, cls);
+    reasons.push(`lexicon:${hit.lang}:${cls}:${hit.term}`);
+  }
+  const cancel = findTerm('cancelVerbs', name);
+  if (cancel !== null) {
+    const context = findTerm('cancelContext', name) ?? findTerm('cancelContext', fold(pathOf(tree, i)));
+    if (context !== null) {
+      matched = true;
+      risk = maxRisk(risk, 'irreversible');
+      reasons.push(`lexicon:${cancel.lang}:irreversible:${cancel.term}+${context.term}`);
+    }
+  }
+  if (!matched) reasons.push('lexicon:none');
+
+  const dialog = node.role === 'button' ? dialogOf(tree, i) : null;
+  if (dialog !== null && isConfirmDialog(tree, dialog)
+    && findTerm('dismissClose', name) === null && findTerm('cancelWords', name) === null) {
+    risk = maxRisk(risk, 'irreversible');
+    reasons.push('dialog:confirm');
+  }
+
+  const route = routeOf(opts.url);
+  const money = MONEY_PATH.exec(route);
+  if (money !== null) {
+    risk = maxRisk(risk, 'money');
+    reasons.push(`url:${money[0].toLowerCase()}`);
+  }
+  const gone = IRREVERSIBLE_PATH.exec(route);
+  if (gone !== null) {
+    risk = maxRisk(risk, 'irreversible');
+    reasons.push(`url:${gone[0].toLowerCase()}`);
+  }
+
+  if (opts.userRisk !== undefined) {
+    risk = maxRisk(risk, opts.userRisk);
+    reasons.push('user:--risk');
+  }
+  return { class: risk, reasons };
+}
