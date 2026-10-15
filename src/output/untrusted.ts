@@ -3,6 +3,12 @@ import type { Envelope } from './envelope';
 /** Page text under an untrusted path is cut to this many UTF-16 units per string (spec §8.6 "listed and capped"). */
 export const UNTRUSTED_TEXT_MAX = 2000;
 
+/**
+ * Where `--dry-run` puts the request bodies. They are page text, so the path is listed, but never cut: the point of a
+ * dry run is the exact bytes a granted run would send (spec §6.3), and the egress byte bounds already cap them.
+ */
+export const WIRE_COPY_PATH = 'result.requests';
+
 function segmentsOf(path: string): string[] {
   return path.split('.').filter((segment) => segment.length > 0);
 }
@@ -56,11 +62,13 @@ function replaceAt(node: unknown, segments: readonly string[], replace: (value: 
 
 /**
  * Lists the declared untrusted paths that are present in the envelope (sorted, deduplicated) and caps the
- * page text under each. Paths are dotted from the envelope root, e.g. `result.lines`.
+ * page text under each, except the dry run's wire copy. Paths are dotted from the envelope root, e.g. `result.lines`.
  */
 export function applyUntrusted(envelope: Envelope, declared: Iterable<string>): Envelope {
   const paths = [...new Set(declared)].filter((path) => present(envelope, path)).sort();
   let capped: unknown = envelope;
-  for (const path of paths) capped = replaceAt(capped, segmentsOf(path), capDeep);
+  for (const path of paths) {
+    if (path !== WIRE_COPY_PATH) capped = replaceAt(capped, segmentsOf(path), capDeep);
+  }
   return { ...(capped as Envelope), untrusted: paths };
 }

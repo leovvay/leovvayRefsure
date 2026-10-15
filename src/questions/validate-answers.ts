@@ -52,12 +52,16 @@ function noulAnswer(raw: Record<string, unknown>): DecisionNoulAnswer | null {
   return isUnit(raw.noul) ? { type: 'noul', noul: raw.noul } : null;
 }
 
-/** Every question answered with its own type and in range, or `null`. */
+/**
+ * Every question answered with its own type and in range, and nothing else answered, or `null`. An answer to a
+ * question that was not asked is not one of the options code offered (spec §8.1 rule 1): the reply is invalid.
+ */
 export function validateAnswers(
   questions: Readonly<Record<string, DecisionQuestion>>,
   answers: unknown,
 ): Record<string, DecisionAnswer> | null {
   if (!isRecord(answers)) return null;
+  if (Object.keys(answers).some((name) => !Object.hasOwn(questions, name))) return null;
   const valid: Record<string, DecisionAnswer> = {};
   for (const [name, question] of Object.entries(questions)) {
     const raw = answers[name];

@@ -12,6 +12,7 @@ export interface RegistryDeps {
   routeCheck: RouteCheckFn;
   tickets: TicketBook;
   store: StateStore;
+  /** May be a getter that loads the file on first read and throws its `ConfigError` there. */
   config: RefsureConfig;
   /** One per invocation (`newTrace()`); decide() and the browser adapter write into the same one. */
   trace: RunTrace;

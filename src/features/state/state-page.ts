@@ -1,4 +1,4 @@
-import { boundText, maskPii, redactSecrets, stripControl } from '../../egress';
+import { boundText, cleanEgressText } from '../../egress';
 import type { PageView } from '../../page-model';
 import { BOUNDS } from '../../questions';
 
@@ -9,17 +9,17 @@ function field(name: string, values: readonly string[]): string[] {
 }
 
 /**
- * The `page` a `state` Decision reads, in the research dataset's own layout and field names: `url`, `title`,
- * `headings`, `alerts_and_toasts`, `dialogs`, then `visible_text` cut to 1,500 characters (the production page
- * view's cap). The text is redacted, and masked when PII masks are on, before the cut: a cut secret or e-mail no
+ * What a `state` Decision reads about the page. `pageUrl` is the URL cut to 300 characters (spec §7.3); `page` is
+ * the block in the research dataset's own layout and field names: `url` (that same cut URL), `title`, `headings`,
+ * `alerts_and_toasts`, `dialogs`, then `visible_text` cut to 1,500 characters (the production page view's cap).
+ * URL and text are cleaned (redacted, and masked when PII masks are on) before the cut: a cut secret or e-mail no
  * longer matches its shape, so it could pass the egress pipeline half-hidden.
  */
-export function statePage(view: PageView, piiMasks: boolean): string {
-  const redacted = redactSecrets(stripControl(view.text));
-  const clean = piiMasks ? maskPii(redacted) : redacted;
-  const text = boundText(clean, { max: BOUNDS.STATE_PAGE_TEXT_MAX });
-  return [
-    ...field('url', [view.url]),
+export function stateInput(view: PageView, piiMasks: boolean): { pageUrl: string; page: string } {
+  const pageUrl = boundText(cleanEgressText(view.url, piiMasks), { max: BOUNDS.URL_MAX, inline: true });
+  const text = boundText(cleanEgressText(view.text, piiMasks), { max: BOUNDS.STATE_PAGE_TEXT_MAX });
+  const page = [
+    ...field('url', [pageUrl]),
     ...field('title', [view.title]),
     ...field('headings', view.headings),
     ...field('alerts_and_toasts', view.alerts),
@@ -27,4 +27,5 @@ export function statePage(view: PageView, piiMasks: boolean): string {
     'visible_text:',
     text,
   ].join('\n');
+  return { pageUrl, page };
 }

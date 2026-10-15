@@ -21,8 +21,8 @@ export function familyOf(model: string): string {
 
 /**
  * The dated snapshot of each known family this release was proven on. An answer from another snapshot of the same
- * family keeps its maturity and sets `model_changed` (spec §8.6). A provider without a pin is compared with the
- * model asked for.
+ * family keeps its maturity and sets `model_changed` (spec §8.6). OpenAI has no pin until a live answer shows the
+ * dated name it answers with; until then its snapshots cannot be told apart, so none reads as a change.
  */
 export const KNOWN_SNAPSHOTS: Readonly<Partial<Record<ProviderId, string>>> = Object.freeze({
   jev: 'jev-1.13-20260917',
@@ -30,12 +30,13 @@ export const KNOWN_SNAPSHOTS: Readonly<Partial<Record<ProviderId, string>>> = Ob
 
 /**
  * Whether `answered` is another snapshot of the family asked for: compared with the requested model when that names
- * a snapshot itself (a gateway can pin one), else with the provider's pinned snapshot. A new family is not a
- * snapshot change (it is `newFamily`), and an answer that names no snapshot cannot be told apart.
+ * a snapshot itself (a gateway can pin one), else with the provider's pinned snapshot. With neither there is no
+ * reference: an undated alias answering with its dated name is the alias resolving, not a change. A new family is
+ * not a snapshot change (it is `newFamily`), and an answer that names no snapshot cannot be told apart.
  */
 export function snapshotChanged(provider: ProviderId, requested: string, answered: string): boolean {
   if (familyOf(answered) !== familyOf(requested) || bareModel(answered) === familyOf(answered)) return false;
   const asked = bareModel(requested);
-  const reference = asked !== familyOf(requested) ? asked : (KNOWN_SNAPSHOTS[provider] ?? asked);
-  return bareModel(answered) !== reference;
+  const reference = asked !== familyOf(requested) ? asked : KNOWN_SNAPSHOTS[provider];
+  return reference !== undefined && bareModel(answered) !== reference;
 }

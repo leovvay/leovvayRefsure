@@ -1,6 +1,7 @@
 import { statSync } from 'node:fs';
 import type { CommandContext } from '../../cli';
-import { keySet } from '../../config';
+import { isConfigError, keySet, resolvePaths } from '../../config';
+import type { RefsureConfig } from '../../config';
 import { DISCLOSURE_HASH, grantFor, readConsent, readEgressLog } from '../../egress';
 import { gatewayNames, keyPresent, providerRoster } from '../../providers';
 import type { ProviderSlot } from '../../providers';
@@ -15,8 +16,8 @@ function keysCheck(slots: readonly ProviderSlot[], present: readonly boolean[]):
   return { name: 'keys', ok: present.some(Boolean), detail: parts.join('; ') };
 }
 
-function consentCheck(ctx: CommandContext, slots: readonly ProviderSlot[], present: readonly boolean[]): DoctorCheck {
-  const consent = readConsent(ctx.config.paths.consent);
+function consentCheck(config: RefsureConfig, slots: readonly ProviderSlot[], present: readonly boolean[]): DoctorCheck {
+  const consent = readConsent(config.paths.consent);
   if (!consent) return { name: 'consent', ok: false, detail: 'no consent on file: a human runs `refsure setup` in a terminal' };
   const current = consent.disclosure === DISCLOSURE_HASH;
   const grants = slots.flatMap((slot) => {
@@ -29,8 +30,8 @@ function consentCheck(ctx: CommandContext, slots: readonly ProviderSlot[], prese
   return { name: 'consent', ok: current && usable, detail: [head, ...listed].join('; ') };
 }
 
-function configCheck(ctx: CommandContext): DoctorCheck {
-  const { paths, gateway, limits } = ctx.config;
+function configCheck(config: RefsureConfig): DoctorCheck {
+  const { paths, gateway, limits } = config;
   let file: string;
   try {
     const mode = (statSync(paths.config).mode & 0o777).toString(8).padStart(4, '0');
@@ -45,8 +46,8 @@ function configCheck(ctx: CommandContext): DoctorCheck {
 }
 
 /** The last model each provider answered with, from egress.log, against the families refsure was measured on. */
-function driftCheck(ctx: CommandContext): DoctorCheck {
-  const entries = readEgressLog(ctx.config.paths.egressLog, 0);
+function driftCheck(egressLog: string): DoctorCheck {
+  const entries = readEgressLog(egressLog, 0);
   let ok = true;
   const parts = (['jev', 'openai'] as const).map((id) => {
     const last = entries.filter((entry) => entry.provider === id && entry.model !== null).at(-1);
@@ -64,9 +65,25 @@ function driftCheck(ctx: CommandContext): DoctorCheck {
   return { name: 'drift', ok, detail: parts.join('; ') };
 }
 
+/** A config file refsure refuses: nothing is sent until it is fixed, and keys and consent cannot be read. */
+function refusedConfigCheck(error: { cause_: string; detail: string }): DoctorCheck {
+  return {
+    name: 'config',
+    ok: false,
+    detail: `${error.cause_}: ${error.detail}; no Decision runs until it is fixed, so keys and consent are not checked`,
+  };
+}
+
 /** Keys (names and presence, never values), consent, config and model drift (spec §6.3 doctor). */
 export async function decisionChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
-  const slots = Object.values(providerRoster(ctx.config, keySet(ctx.config, ctx.env)));
+  let config: RefsureConfig;
+  try {
+    config = ctx.config;
+  } catch (error) {
+    if (!isConfigError(error)) throw error;
+    return [refusedConfigCheck(error), driftCheck(resolvePaths(ctx.env).egressLog)];
+  }
+  const slots = Object.values(providerRoster(config, keySet(config, ctx.env)));
   const present = await Promise.all(slots.map((slot) => (slot.problem === null ? keyPresent(slot) : false)));
-  return [keysCheck(slots, present), consentCheck(ctx, slots, present), configCheck(ctx), driftCheck(ctx)];
+  return [keysCheck(slots, present), consentCheck(config, slots, present), configCheck(config), driftCheck(config.paths.egressLog)];
 }

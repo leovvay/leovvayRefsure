@@ -1,4 +1,4 @@
-import type { ApprovedRequest } from '../../egress';
+import type { ApprovedRequest, EgressRefusal } from '../../egress';
 import type { DecisionAnswer, Threshold, Verdict } from '../../questions';
 import type { DecisionProvider } from '../decision-provider';
 import type { Rendering } from '../rendering';
@@ -13,6 +13,11 @@ export interface ComboPart<Out> {
   /** The site's `read` with its presented order bound. */
   read(answer: DecisionAnswer, threshold: Threshold): Verdict<Out>;
   rendering?: Rendering;
+  /**
+   * Checked just before a part that is asked only after another part answered (OpenAI in `fallback`): the caps
+   * again, now counting that earlier call. A refusal means this part is not asked.
+   */
+  admit?(): EgressRefusal | null;
 }
 
 /** Each part gets its own deadline; the signal stops all of them. */

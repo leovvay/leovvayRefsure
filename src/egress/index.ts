@@ -7,6 +7,7 @@ export type * from './secret-shapes';
 export { approve, isEgressRefusal, STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } from './pipeline';
 export { redactSecrets } from './redact';
 export { maskPii } from './pii-masks';
+export { cleanEgressText } from './clean-text';
 export { stripControl, boundText } from './bound-text';
 export { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
 export { checkOrigin } from './origin-policy';

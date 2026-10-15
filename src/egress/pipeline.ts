@@ -1,15 +1,13 @@
 import type { DecisionQuestion, SiteRequest } from '../questions';
 import type { ApprovedRequest } from './approved-request';
 import type { ApproveContext } from './approve-context';
-import { stripControl } from './bound-text';
 import { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
+import { cleanEgressText } from './clean-text';
 import { grantFor, readConsent } from './consent';
 import { DISCLOSURE_HASH } from './disclosure';
 import type { EgressRefusal } from './egress-refusal';
 import { checkLimits } from './limits';
 import { checkOrigin } from './origin-policy';
-import { maskPii } from './pii-masks';
-import { redactSecrets } from './redact';
 
 /** Spec §7.3: anything larger is `oversize` before any call is made. Measured on canonical JSON, UTF-8. */
 export const STATE_MAX_BYTES = 24_000;
@@ -35,12 +33,9 @@ function consentRefusal(ctx: ApproveContext): EgressRefusal | null {
 
 type Clean = (text: string) => string;
 
-// Strip is idempotent and the builders already did it; here it guarantees no control byte leaves.
+// Cleaning is idempotent and some builders already did it; here it guarantees nothing leaves uncleaned.
 function cleaner(masks: boolean): Clean {
-  return (text) => {
-    const redacted = redactSecrets(stripControl(text));
-    return masks ? maskPii(redacted) : redacted;
-  };
+  return (text) => cleanEgressText(text, masks);
 }
 
 function cleanValues(record: Readonly<Record<string, string>>, clean: Clean): Readonly<Record<string, string>> {
@@ -63,16 +58,18 @@ function oversize(part: string, bytes: number, max: number): EgressRefusal {
 }
 
 /**
- * The only constructor of `ApprovedRequest`. In order: consent (skipped under dryRun), origin, secret
- * redaction plus PII masks over every string leaf, byte bounds, spend limits. The first failure wins.
+ * The only constructor of `ApprovedRequest`. In order: consent (skipped under dryRun), origin (skipped for synthetic
+ * input), secret redaction plus PII masks over every string leaf, byte bounds, spend limits. The first failure wins.
  */
 export function approve(req: SiteRequest, ctx: ApproveContext): ApprovedRequest | EgressRefusal {
   if (!ctx.dryRun) {
     const refusal = consentRefusal(ctx);
     if (refusal) return refusal;
   }
-  const origin = checkOrigin(ctx.originUrl, ctx.config, ctx.profileId);
-  if (origin !== 'ok') return origin;
+  if (ctx.originUrl !== null) {
+    const origin = checkOrigin(ctx.originUrl, ctx.config, ctx.profileId);
+    if (origin !== 'ok') return origin;
+  }
 
   const clean = cleaner(ctx.config.piiMasks);
   const state = cleanValues(req.state, clean);
@@ -84,7 +81,7 @@ export function approve(req: SiteRequest, ctx: ApproveContext): ApprovedRequest 
   const questionBytes = utf8Bytes(canonicalJson(questions));
   if (questionBytes > QUESTIONS_MAX_BYTES) return oversize('questions', questionBytes, QUESTIONS_MAX_BYTES);
 
-  const limits = checkLimits(ctx.egressLog, ctx.config, ctx.nowMs);
+  const limits = checkLimits(ctx.egressLog, ctx.config, ctx.nowMs, ctx.pending);
   if (limits !== 'ok') return limits;
 
   const json = canonicalJson({ state, questions });

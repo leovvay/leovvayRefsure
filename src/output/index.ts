@@ -7,5 +7,5 @@ export { EXIT_CODES, exitFor } from './exit-classes';
 export { CAUSES, causeStatus } from './causes';
 export { redactPatterns } from './redact-patterns';
 export { renderEnvelope } from './render-json';
-export { applyUntrusted, UNTRUSTED_TEXT_MAX } from './untrusted';
+export { applyUntrusted, UNTRUSTED_TEXT_MAX, WIRE_COPY_PATH } from './untrusted';
 export { newTrace } from './new-trace';

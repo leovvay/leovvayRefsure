@@ -1,4 +1,4 @@
-import { type BrowserErrorCode, isBrowserError } from '../browser';
+import { type BrowserErrorCode, isBrowserError, type PageRef } from '../browser';
 import { type Next, redactPatterns, type RunTrace, type Status } from '../output';
 import type { CommandOutcome } from './command-outcome';
 
@@ -99,4 +99,19 @@ export function actedRule<R>(outcome: CommandOutcome<R>, dispatched: boolean): C
   const effect = outcome.effect === 'none' ? 'dispatched' : outcome.effect;
   if (outcome.status === 'ok' || outcome.status === 'effect_unknown') return { ...outcome, acted: true, effect };
   return { ...outcome, acted: true, status: 'effect_unknown', effect: 'dispatched' };
+}
+
+/**
+ * A `refsure` next step runs on the page this command ran on: its argv gains `--page <id>` unless it names one.
+ * Without it, an agent that targeted another tab by `--page` or `REFSURE_PAGE` would follow it onto the current tab.
+ */
+export function pinNextToPage<R>(outcome: CommandOutcome<R>, page: PageRef | null): CommandOutcome<R> {
+  const next = outcome.next;
+  const argv = next?.argv;
+  if (!page || !next || !argv || argv[0] !== 'refsure') return outcome;
+  const end = argv.indexOf('--');
+  const own = end === -1 ? argv : argv.slice(0, end);
+  if (own.includes('--page')) return outcome;
+  const rest = end === -1 ? [] : argv.slice(end);
+  return { ...outcome, next: { ...next, argv: [...own, '--page', page.id, ...rest] } };
 }

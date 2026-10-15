@@ -95,6 +95,9 @@ export function readOpenAI(json: unknown, questions: Readonly<Record<string, Dec
   const model = typeof json.model === 'string' ? json.model : null;
   const list = answerList(json.answers);
   if (list === null) return { status: 'invalid', answers: null, model, usd: null, detail: 'the body has no answers' };
+  if (answersUnasked(list, questions)) {
+    return { status: 'invalid', answers: null, model, usd: null, detail: 'it answers a question that was not asked' };
+  }
   const answers: Record<string, DecisionAnswer> = {};
   const problems: { status: 'refusal' | 'invalid'; why: string }[] = [];
   Object.entries(questions).forEach(([name, question], position) => {
@@ -122,6 +125,13 @@ function answerList(raw: unknown): unknown[] | null {
   if (Array.isArray(raw)) return raw;
   if (isRecord(raw)) return Object.entries(raw).map(([name, answer]) => (isRecord(answer) ? { ...answer, name } : answer));
   return null;
+}
+
+/** More answers than questions, or one named for a question that was not asked: all or nothing, like Jev's. */
+function answersUnasked(list: readonly unknown[], questions: Readonly<Record<string, DecisionQuestion>>): boolean {
+  if (list.length > Object.keys(questions).length) return true;
+  return list.some((answer) => isRecord(answer) && answer.name !== undefined
+    && !(typeof answer.name === 'string' && Object.hasOwn(questions, answer.name)));
 }
 
 /** The answer to the question asked at `position` as `name`: by name first, by position when it carries no name. */

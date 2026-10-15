@@ -1,6 +1,6 @@
 import type { BrowserCapability, BrowserPort, PageHint, PageRef, TabInfo } from '../browser';
 import { expiresAtOf } from '../local-state';
-import { DryRunStop, newTrace, type PageInfo, type RunTrace, type Status } from '../output';
+import { DryRunStop, newTrace, type PageInfo, type RunTrace, type Status, WIRE_COPY_PATH } from '../output';
 import { finish } from './build-envelope';
 import type { CommandContext } from './command-context';
 import type { CommandOutcome } from './command-outcome';
@@ -12,7 +12,7 @@ import { watchBrowser } from './registry-browser';
 import type { RegistryDeps } from './registry-deps';
 import { RegistryInvariantError } from './registry-invariant-error';
 import {
-  actedRule, dryRunOutcome, failureOutcome, helpOutcome, unsupportedOutcome, usageOutcome,
+  actedRule, dryRunOutcome, failureOutcome, helpOutcome, pinNextToPage, unsupportedOutcome, usageOutcome,
 } from './registry-outcomes';
 import { commandHelp } from './usage';
 import { wantsHelp } from './verb-help';
@@ -71,7 +71,10 @@ async function settle<Args, Result>(
       routeCheck: deps.routeCheck,
       tickets: deps.tickets,
       store: deps.store,
-      config: deps.config,
+      // Read through, never copied: the config loads when a command first reads it (see CommandContext).
+      get config() {
+        return deps.config;
+      },
       trace: deps.trace,
       signal: deps.signal,
       now: () => deps.now(),
@@ -81,8 +84,8 @@ async function settle<Args, Result>(
     return { watched, page, outcome: await spec.run(args, ctx) };
   } catch (error) {
     if (error instanceof DryRunStop && !deps.trace.dispatched) {
-      // The requests hold page text, redacted and masked, but still the page's words.
-      deps.trace.untrusted.add('result.requests');
+      // The requests hold page text, redacted and masked, but still the page's words: listed, shown uncut.
+      deps.trace.untrusted.add(WIRE_COPY_PATH);
       return { watched, page, outcome: dryRunOutcome(deps.trace) };
     }
     return { watched, page, outcome: failureOutcome(error, deps.trace.dispatched) };
@@ -122,7 +125,7 @@ export async function runCommand<Args, Result>(
   if (spec.needs.acts === 'never' && (settled.outcome.acted || deps.trace.dispatched)) {
     throw new RegistryInvariantError(`${spec.name} declares acts: never, yet it reported an act`);
   }
-  const outcome = actedRule(settled.outcome, deps.trace.dispatched);
+  const outcome = pinNextToPage(actedRule(settled.outcome, deps.trace.dispatched), settled.page);
   const page = await pageInfoOf(settled, outcome.status);
   return finish(spec.name, outcome, page, deps.trace);
 }

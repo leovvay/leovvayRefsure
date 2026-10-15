@@ -12,6 +12,10 @@ export interface CommandContext {
   routeCheck: RouteCheckFn;
   tickets: TicketBook;
   store: StateStore;
+  /**
+   * Loaded on first read. A config file refsure refuses throws its `ConfigError` here, which the registry maps to
+   * `not_set_up` with the error's cause; a command that never reads it runs on a broken file.
+   */
   config: RefsureConfig;
   trace: RunTrace;
   signal: AbortSignal;

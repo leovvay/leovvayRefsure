@@ -8,8 +8,8 @@ export interface ApproveContext {
   provider: ProviderId;
   /** The host the request goes to; consent is granted per provider and host. */
   host: string;
-  /** The page URL, checked against allow/deny origins. */
-  originUrl: string;
+  /** The page URL, checked against allow/deny origins; `null` for synthetic input that holds no page content. */
+  originUrl: string | null;
   /** Orca's profile id for the tab, `null` when unknown. */
   profileId: string | null;
   config: RefsureConfig;
@@ -17,4 +17,6 @@ export interface ApproveContext {
   dryRun: boolean;
   nowMs: number;
   egressLog: readonly EgressLogEntry[];
+  /** Calls the same Decision makes alongside this one, not yet in `egressLog`; they count toward the cap. */
+  pending?: number;
 }

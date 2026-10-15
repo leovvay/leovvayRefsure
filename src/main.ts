@@ -1,18 +1,22 @@
 import { createOrcaBrowser } from './browser';
 import type { BrowserPort } from './browser';
-import { failureResult, routeArgv, runCommand, verbHelp } from './cli';
+import { routeArgv, runCommand, verbHelp } from './cli';
 import type { AnyCommandSpec, CommandResult, RegistryDeps } from './cli';
-import { keySet, loadConfig } from './config';
+import { configOnce, keySet, resolvePaths } from './config';
 import type { RefsureConfig } from './config';
 import { FEATURES } from './features';
 import { createFileStore } from './local-state';
 import { newTrace, redactPatterns, renderEnvelope } from './output';
+import type { RunTrace } from './output';
 import { makeProviders } from './providers';
 import { createDecide } from './questions';
+import type { DecideFn, RouteCheckFn } from './questions';
 import { createTicketBook } from './tickets';
 
 // The composition root, and the only place that sets the process exit (spec §6.1). One invocation, one trace:
-// config → keys → providers → browser → store and tickets → decide → the registry over FEATURES.
+// browser → store and tickets → the registry over FEATURES. The config, and the keys, providers and decide()
+// built on it, load on first use: a verb that reads none of them runs on a broken config file, and one that does
+// gets the file's ConfigError, which the registry maps to not_set_up (exit 23) with its cause.
 
 const CRASH_DETAIL_MAX = 500;
 /** 128 + the signal number: what a shell reports for a process a second signal stopped. */
@@ -39,6 +43,31 @@ function emit(result: CommandResult): number {
   return result.exit;
 }
 
+/** decide() and routeCheck(), composed from config, keys and providers on the first Decision asked. */
+function lazyDecide(parts: {
+  config: () => RefsureConfig;
+  env: NodeJS.ProcessEnv;
+  trace: RunTrace;
+  command: string;
+  profile: () => string | null;
+}): { decide: DecideFn; routeCheck: RouteCheckFn } {
+  let built: { decide: DecideFn; routeCheck: RouteCheckFn } | null = null;
+  const compose = (): { decide: DecideFn; routeCheck: RouteCheckFn } => {
+    if (built) return built;
+    const config = parts.config();
+    const keys = keySet(config, parts.env);
+    built = createDecide({
+      config, keys, providers: makeProviders(config, keys), trace: parts.trace, command: parts.command,
+      pageProfile: parts.profile,
+    });
+    return built;
+  };
+  return {
+    decide: async (site, input, opts) => compose().decide(site, input, opts),
+    routeCheck: async (site, opts) => compose().routeCheck(site, opts),
+  };
+}
+
 async function runVerb(
   spec: AnyCommandSpec,
   argv: string[],
@@ -50,15 +79,7 @@ async function runVerb(
   if (help) return help;
   const trace = newTrace();
   signal.addEventListener('abort', () => trace.notes.push('interrupted'), { once: true });
-  let config: RefsureConfig;
-  try {
-    config = loadConfig(env);
-  } catch (error) {
-    // A ConfigError carries its cause (config_mode, literal_key, ...) and maps to not_set_up (exit 23).
-    return failureResult(spec.name, error, trace);
-  }
-  const keys = keySet(config, env);
-  const providers = makeProviders(config, keys);
+  const config = configOnce(env);
   const orca = createOrcaBrowser({ env, trace });
   // The profile of the last tab read, for the isolated-profile rule; null (refused when required) until one is read.
   let profileId: string | null = null;
@@ -70,14 +91,15 @@ async function runVerb(
       return tab;
     },
   };
-  const store = createFileStore(config.paths.state, trace);
+  // Local state lives where the paths say, whatever the config file holds. Expired entries are purged by runCommand.
+  const store = createFileStore(resolvePaths(env).state, trace);
   const tickets = createTicketBook(store);
-  // Expired local state is purged by runCommand.
-  const { decide, routeCheck } = createDecide({
-    config, keys, providers, trace, command: spec.name, pageProfile: () => profileId,
-  });
+  const { decide, routeCheck } = lazyDecide({ config, env, trace, command: spec.name, profile: () => profileId });
   const deps: RegistryDeps = {
-    browser, decide, routeCheck, tickets, store, config, trace, env, signal,
+    browser, decide, routeCheck, tickets, store, trace, env, signal,
+    get config() {
+      return config();
+    },
     now: () => Date.now(),
   };
   return runCommand(spec, argv, deps);

@@ -10,6 +10,7 @@ import type { SetupPreview } from './setup-preview';
 import type { SetupResult } from './setup.contract';
 
 const NO_TTY = 'setup needs a human at a terminal: run `refsure setup` yourself in a terminal';
+const NO_ANSWER = 'the terminal closed before any answer, so nothing was written; run `refsure setup` again for';
 
 function phraseFor(host: string): string {
   return `send page text to ${host}`;
@@ -93,7 +94,9 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     }
     const unanswered = slots.slice(answers.length).map((slot) => slot.endpoint!.host);
     if (ctx.signal.aborted) return notSetUp('setup was interrupted: nothing was written');
-    if (answers.length > 0) writeConsent(ctx.config.paths.consent, applyAnswers(readConsent(ctx.config.paths.consent), answers));
+    // No answer at all is a consent step that did not happen, not one that succeeded with nothing granted.
+    if (answers.length === 0) return notSetUp(`${NO_ANSWER}: ${unanswered.join(', ')}`);
+    writeConsent(ctx.config.paths.consent, applyAnswers(readConsent(ctx.config.paths.consent), answers));
     const result: SetupResult = { grants: answers, consent: ctx.config.paths.consent, disclosure_hash: DISCLOSURE_HASH, unanswered };
     return { status: 'ok', acted: false, effect: 'none', result };
   },

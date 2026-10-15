@@ -5,7 +5,7 @@ import { abstainOutcome } from '../shared';
 import type { StateArgs } from './state.args';
 import type { StateResult } from './state.contract';
 import { stateNext } from './state-next';
-import { statePage } from './state-page';
+import { stateInput } from './state-page';
 
 const BLOCKING_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 
@@ -50,9 +50,10 @@ export const stateCommand: CommandSpec<StateArgs, StateResult> = {
 
     const body = await ctx.browser.text(page, 'body');
     const view = pageView(tree, tab, body);
+    const { pageUrl, page: block } = stateInput(view, ctx.config.piiMasks);
     const { verdict } = await ctx.decide(
       pageStateSite,
-      { pageUrl: view.url, page: statePage(view, ctx.config.piiMasks), states: RESEARCH_STATES, expect: args.expect },
+      { pageUrl, page: block, states: RESEARCH_STATES, expect: args.expect },
       { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun, signal: ctx.signal },
     );
     if (verdict.kind === 'answer') return answered(verdict.value, 'decision', args.expect);

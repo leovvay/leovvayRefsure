@@ -10,6 +10,11 @@ export interface DecideOpts {
   combo?: 'auto' | 'jev' | 'openai' | 'agree' | 'fallback';
   /** The page URL, checked against allow/deny origins. */
   originUrl: string;
+  /**
+   * The input is refsure's own fixed text, not a page (`doctor --ping`): origin and profile rules, which guard page
+   * content, do not apply. Consent, masks, bounds and caps still do.
+   */
+  synthetic?: boolean;
   /** Build and approve (consent skipped), push the exact body to `trace.dryRun`, then throw `DryRunStop`. */
   dryRun: boolean;
   signal: AbortSignal;

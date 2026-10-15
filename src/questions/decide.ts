@@ -1,4 +1,5 @@
-import { approve, checkOrigin, isEgressRefusal, readEgressLog } from '../egress';
+import { approve, checkLimits, checkOrigin, isEgressRefusal, readEgressLog } from '../egress';
+import type { EgressRefusal } from '../egress';
 import { DryRunStop } from '../output';
 import { askAgree, askFallback, askOne, keyPresent, providerRoster } from '../providers';
 import type { ComboOutcome, ComboPart, Rendering } from '../providers';
@@ -22,6 +23,13 @@ function abstain<Out>(cause: AbstainCause, detail: string): Verdict<Out> {
 /** OpenAI's input rendering: sectioned text only when it answers a presence check alone (spec §7.1). */
 function renderingFor(site: DecisionSite<unknown, unknown, unknown>['id'], plan: RoutePlan): Rendering {
   return site === 'presence' && plan.kind === 'single' ? 'o_s2' : 'o_primary';
+}
+
+/** The caps against egress.log as it is now, calls made earlier in this Decision included. */
+function capsNow(config: DecideDeps['config']): EgressRefusal | null {
+  const nowMs = Date.now();
+  const limits = checkLimits(readEgressLog(config.paths.egressLog, nowMs - DAY_MS), config, nowMs);
+  return limits === 'ok' ? null : limits;
 }
 
 function idsOf(plan: Exclude<RoutePlan, { kind: 'refused' }>): ProviderId[] {
@@ -80,9 +88,12 @@ export function createDecide(deps: DecideDeps): { decide: DecideFn; routeCheck: 
       const provider = deps.providers[id];
       const threshold = thresholdFor(site, id, opts.risk, provider?.model, wording.hash);
       if (!provider || threshold === null) return settle(abstain('provider_not_allowed', `${id} may not answer ${site.id}`));
+      // Every call counts toward the cap (spec §7.1): `agree` asks its parts at once, so each counts the ones
+      // before it; `fallback` asks OpenAI only after Jev, so OpenAI is admitted again then, Jev's call logged.
       const approved = approve(request, {
-        site: site.id, provider: id, host: provider.host, originUrl: opts.originUrl, profileId: deps.pageProfile(),
-        config: deps.config, dryRun: opts.dryRun, nowMs, egressLog,
+        site: site.id, provider: id, host: provider.host, originUrl: opts.synthetic ? null : opts.originUrl,
+        profileId: deps.pageProfile(),
+        config: deps.config, dryRun: opts.dryRun, nowMs, egressLog, pending: plan.kind === 'agree' ? parts.length : 0,
       });
       if (isEgressRefusal(approved)) return settle(abstain(approved.cause, approved.detail));
       const part: ComboPart<Out> = {
@@ -93,6 +104,7 @@ export function createDecide(deps: DecideDeps): { decide: DecideFn; routeCheck: 
         read: (answer, bound) => site.read(answer, context, bound),
       };
       if (id === 'openai') part.rendering = renderingFor(site.id, plan);
+      if (plan.kind === 'fallback' && parts.length > 0) part.admit = () => capsNow(deps.config);
       parts.push(part);
     }
 
