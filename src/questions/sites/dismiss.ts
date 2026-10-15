@@ -14,7 +14,9 @@ export const dismissSite = candidateSite<DismissInput>({
   question: 'control',
   instructions: DISMISS_INSTRUCTIONS,
   none: DISMISS_NONE,
-  policy: { threshold: { jev: DISMISS_START, openai: DISMISS_START }, combos: ['agree'], maturity: 'inherited' },
+  policy: {
+    threshold: { jev: DISMISS_START, openai: DISMISS_START }, combos: ['agree'], solo: ['jev'], maturity: 'inherited',
+  },
   max: BOUNDS.DISMISS_MAX,
   state: (input) => ({ popup: boundedText(input.overlay, BOUNDS.OVERLAY_MAX) }),
   lines: (input) => input.lines,

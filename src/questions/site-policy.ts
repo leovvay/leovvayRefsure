@@ -8,6 +8,8 @@ export type Threshold = number | NoulBand;
 export interface SitePolicy {
   threshold: Readonly<Partial<Record<ProviderId, number | NoulBand | Readonly<Record<RiskClass, number>>>>>;
   combos?: readonly ('agree' | 'fallback')[];
+  /** Who may answer alone; every provider with a row when absent. Dismiss lets OpenAI in only through `agree`. */
+  solo?: readonly ProviderId[];
   /** Declared default; a matching calibration entry makes it `measured`. */
   maturity: Maturity;
 }

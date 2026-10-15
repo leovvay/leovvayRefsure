@@ -1,5 +1,6 @@
 import type { KeySource } from '../config';
 import type { ApprovedRequest } from '../egress';
+import { bareModel } from '../questions';
 import type { DecisionProvider, ProviderAnswer, ProviderStatus } from './decision-provider';
 import type { Endpoint } from './endpoint';
 import { postDecision, scrubKey } from './transport';
@@ -74,9 +75,12 @@ async function readKey(key: KeySource): Promise<string | null> {
   }
 }
 
-/** The answering model's name goes into the envelope and the log: bounded, one line, never the key. */
+/**
+ * The answering model's name goes into the envelope and the log: bounded, one line, never the key, and without
+ * the `vendor/` prefix a router adds, so `typesafe/jev-1.13` reads as the known family `jev-1.13`.
+ */
 function modelName(model: string | null, secret: string): string | null {
   if (model === null) return null;
-  const clean = scrubKey(model, secret).replace(/[\u0000-\u001f\u007f-\u009f]/g, '').slice(0, MODEL_MAX);
+  const clean = bareModel(scrubKey(model, secret).replace(/[\u0000-\u001f\u007f-\u009f]/g, '')).slice(0, MODEL_MAX);
   return clean === '' ? null : clean;
 }

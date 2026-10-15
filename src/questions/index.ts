@@ -9,6 +9,8 @@ export type * from './decide-deps';
 export type * from './calibration';
 export type * from './presented-candidates';
 export type * from './sites';
+export type * from './route';
+export type * from './asking';
 export { BOUNDS } from './bounds';
 export { NONE_KEY, presentCandidates, shuffledOrder } from './present-candidates';
 export { confidentChoice, noulVerdict, validateAnswers } from './validate-answers';
@@ -25,5 +27,7 @@ export {
   researchStatesFor,
   SITES,
 } from './sites';
-export { familyOf, KNOWN_FAMILIES, maturityOf, thresholdFor } from './calibration';
-export { createDecideStub } from './decide-stub';
+export {
+  bareModel, familyOf, KNOWN_FAMILIES, KNOWN_SNAPSHOTS, maturityOf, snapshotChanged, thresholdFor,
+} from './calibration';
+export { createDecide } from './decide';

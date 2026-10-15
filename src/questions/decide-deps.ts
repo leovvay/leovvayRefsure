@@ -2,7 +2,7 @@ import type { KeySet, RefsureConfig } from '../config';
 import type { RunTrace } from '../output';
 import type { DecisionProvider } from '../providers';
 
-/** What the composition root hands a `DecideFn` factory: the stub today, `createDecide` once it lands. */
+/** What the composition root hands `createDecide`. */
 export interface DecideDeps {
   config: RefsureConfig;
   keys: KeySet;

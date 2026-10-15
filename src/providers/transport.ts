@@ -97,7 +97,8 @@ async function attemptOnce(
   if (!response.ok) {
     const head = await readBounded(response, ERROR_BODY_MAX_BYTES).catch(() => ({ text: '', over: false }));
     const status: ProviderStatus = `http_${response.status}`;
-    return { status, detail: `HTTP ${response.status}`, final: response.status === 429 && SPENT.test(head.text) };
+    const why = response.status === 401 || response.status === 403 ? ' (the provider rejected the key)' : '';
+    return { status, detail: `HTTP ${response.status}${why}`, final: response.status === 429 && SPENT.test(head.text) };
   }
   let read: { text: string; over: boolean };
   try {

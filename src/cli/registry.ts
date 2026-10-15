@@ -15,18 +15,13 @@ import {
   actedRule, dryRunOutcome, failureOutcome, helpOutcome, unsupportedOutcome, usageOutcome,
 } from './registry-outcomes';
 import { commandHelp } from './usage';
+import { wantsHelp } from './verb-help';
 import type { WatchedBrowser } from './watched-browser';
 
 interface Settled { outcome: CommandOutcome<unknown>; watched: WatchedBrowser | null; page: PageRef | null }
 
 // After these the browser is known to be out of reach, so the envelope does not ask it for the page URL.
 const BROWSER_DOWN: ReadonlySet<Status> = new Set<Status>(['unavailable', 'not_in_orca_terminal', 'usage']);
-
-function wantsHelp(argv: readonly string[]): boolean {
-  const end = argv.indexOf('--');
-  const own = end === -1 ? argv : argv.slice(0, end);
-  return own.includes('--help') || own.includes('-h');
-}
 
 function hintOf(raw: ParsedArgs): PageHint {
   return typeof raw.values.page === 'string' ? { page: raw.values.page } : {};
@@ -86,6 +81,8 @@ async function settle<Args, Result>(
     return { watched, page, outcome: await spec.run(args, ctx) };
   } catch (error) {
     if (error instanceof DryRunStop && !deps.trace.dispatched) {
+      // The requests hold page text, redacted and masked, but still the page's words.
+      deps.trace.untrusted.add('result.requests');
       return { watched, page, outcome: dryRunOutcome(deps.trace) };
     }
     return { watched, page, outcome: failureOutcome(error, deps.trace.dispatched) };
