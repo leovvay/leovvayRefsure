@@ -2,6 +2,7 @@ import type { Ref } from '../browser';
 import type { CommandContext } from '../cli';
 import { cutName, norm } from '../page-model';
 import { actionRole, HIGH_RISK, liveRefRisk, maxRisk, nameCheck, readLiveTarget, type RiskReading } from '../risk';
+import { TICKET_TTL_MS } from './file-ticket-book';
 import type { HighRiskGateResult } from './high-risk-gate-result';
 import type { HighRiskRequest } from './high-risk-request';
 import { recheck } from './recheck';
@@ -89,7 +90,7 @@ async function byTicket(ctx: CommandContext, req: HighRiskRequest & { ticket: Ti
   if (!before.ok || ctx.dryRun) return before;
   const claimed = await ctx.tickets.claim(req.ticket.id, ctx.now());
   if (claimed === 'ticket_used') return stop('stale', 'ticket_used', `ticket ${req.ticket.id} was already used; tickets are single use`);
-  if (claimed === 'ticket_expired') return stop('stale', 'ticket_expired', `ticket ${req.ticket.id} has expired; tickets live 120 s`);
+  if (claimed === 'ticket_expired') return stop('stale', 'ticket_expired', `ticket ${req.ticket.id} has expired; tickets live ${TICKET_TTL_MS / 1000} s`);
   return checkTicket(ctx, req, claimed, 'spent');
 }
 

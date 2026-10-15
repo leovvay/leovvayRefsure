@@ -1,6 +1,6 @@
 import type { BrowserCapability, BrowserPort, PageHint, PageRef, TabInfo } from '../browser';
 import { expiresAtOf } from '../local-state';
-import { DryRunStop, newTrace, type PageInfo, type RunTrace, type Status, WIRE_COPY_PATH } from '../output';
+import { DryRunStop, type PageInfo, type Status, WIRE_COPY_PATH } from '../output';
 import { finish } from './build-envelope';
 import type { CommandContext } from './command-context';
 import type { CommandOutcome } from './command-outcome';
@@ -12,10 +12,9 @@ import { watchBrowser } from './registry-browser';
 import type { RegistryDeps } from './registry-deps';
 import { RegistryInvariantError } from './registry-invariant-error';
 import {
-  actedRule, dryRunOutcome, failureOutcome, helpOutcome, pinNextToPage, unsupportedOutcome, usageOutcome,
+  actedRule, dryRunOutcome, failureOutcome, pinNextToPage, unsupportedOutcome, usageOutcome,
 } from './registry-outcomes';
-import { commandHelp } from './usage';
-import { wantsHelp } from './verb-help';
+import { verbHelp } from './verb-help';
 import type { WatchedBrowser } from './watched-browser';
 
 interface Settled { outcome: CommandOutcome<unknown>; watched: WatchedBrowser | null; page: PageRef | null }
@@ -53,7 +52,6 @@ async function settle<Args, Result>(
   deps: RegistryDeps,
 ): Promise<Settled> {
   const idle = { watched: null, page: null };
-  if (wantsHelp(argv)) return { ...idle, outcome: helpOutcome(commandHelp(spec)) };
   const raw = parseCommandArgs(spec, argv);
   if (isUsageError(raw)) return { ...idle, outcome: usageOutcome(spec.name, raw.usage) };
   const dryRun = raw.values['dry-run'] === true;
@@ -118,15 +116,18 @@ async function pageInfoOf(settled: Settled, status: Status): Promise<PageInfo | 
 }
 
 /**
- * Runs one verb under the registry rules (spec §5.2, §6.1): parse, capabilities, page, run, then the acted rule.
- * It never throws for a page, provider or input condition; it throws only when a command breaks `acts: never`,
- * which the caller reports as a crash (exit 1, re-observe).
+ * Runs one verb under the registry rules (spec §5.2, §6.1): help, parse, capabilities, page, run, then the acted
+ * rule. It never throws for a page, provider or input condition; it throws only when a command breaks `acts: never`,
+ * which the caller reports as a crash (exit 1, re-observe). `--help` is answered by `verbHelp`, the one help path:
+ * the composition root asks it before building deps, and it is asked here again so `--help` never runs the verb.
  */
 export async function runCommand<Args, Result>(
   spec: CommandSpec<Args, Result>,
   argv: readonly string[],
   deps: RegistryDeps,
 ): Promise<CommandResult> {
+  const help = verbHelp(spec, argv);
+  if (help) return help;
   const settled = await settle(spec, argv, deps);
   if (spec.needs.acts === 'never' && (settled.outcome.acted || deps.trace.dispatched)) {
     throw new RegistryInvariantError(`${spec.name} declares acts: never, yet it reported an act`);
@@ -134,9 +135,4 @@ export async function runCommand<Args, Result>(
   const outcome = pinNextToPage(actedRule(settled.outcome, deps.trace.dispatched), settled.page);
   const page = await pageInfoOf(settled, outcome.status);
   return finish(spec.name, outcome, page, deps.trace);
-}
-
-/** For failures before the registry can run a verb, e.g. a `ConfigError` while composing (→ `not_set_up`). */
-export function failureResult(command: string, error: unknown, trace: RunTrace = newTrace()): CommandResult {
-  return finish(command, failureOutcome(error, trace.dispatched), null, trace);
 }

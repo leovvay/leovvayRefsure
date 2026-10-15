@@ -1,4 +1,5 @@
 import type { Envelope } from './envelope';
+import { redactPatterns } from './redact-patterns';
 
 /** Page text under an untrusted path is cut to this many UTF-16 units per string (spec §8.6 "listed and capped"). */
 export const UNTRUSTED_TEXT_MAX = 2000;
@@ -31,7 +32,9 @@ function present(root: unknown, path: string): boolean {
   return node !== null;
 }
 
-function capText(text: string): string {
+// Redact, then cut: a secret cut in two no longer has its shape, so a later redaction would leak its prefix.
+function capText(raw: string): string {
+  const text = redactPatterns(raw);
   if (text.length <= UNTRUSTED_TEXT_MAX) return text;
   let end = UNTRUSTED_TEXT_MAX - 1;
   const code = text.charCodeAt(end - 1);
@@ -61,8 +64,8 @@ function replaceAt(node: unknown, segments: readonly string[], replace: (value: 
 }
 
 /**
- * Lists the declared untrusted paths that are present in the envelope (sorted, deduplicated) and caps the
- * page text under each, except the dry run's wire copy. Paths are dotted from the envelope root, e.g. `result.lines`.
+ * Lists the declared untrusted paths that are present in the envelope (sorted, deduplicated) and redacts, then caps,
+ * the page text under each, except the dry run's wire copy. Paths are dotted from the envelope root, e.g. `result.lines`.
  */
 export function applyUntrusted(envelope: Envelope, declared: Iterable<string>): Envelope {
   const paths = [...new Set(declared)].filter((path) => present(envelope, path)).sort();

@@ -1,4 +1,4 @@
-import { newTrace } from '../output';
+import { newTrace, redactPatterns } from '../output';
 import { VERSION } from '../version';
 import type { AnyCommandSpec } from './any-command-spec';
 import type { ArgvRoute } from './argv-route';
@@ -21,7 +21,9 @@ export function routeArgv(argv: readonly string[], features: readonly AnyCommand
   if (verb === '--version') return { kind: 'print', text: `refsure ${VERSION}`, exit: 0 };
   const spec = features.find((candidate) => candidate.name === verb);
   if (spec) return { kind: 'command', spec, argv: rest };
-  const shown = verb.length > VERB_SHOWN_MAX ? `${verb.slice(0, VERB_SHOWN_MAX)}…` : verb;
+  // Redact before the cut, which would otherwise leave a pasted key's prefix that no shape matches.
+  const safe = redactPatterns(verb);
+  const shown = safe.length > VERB_SHOWN_MAX ? `${safe.slice(0, VERB_SHOWN_MAX)}…` : safe;
   const result = finish('?', {
     status: 'usage',
     acted: false,

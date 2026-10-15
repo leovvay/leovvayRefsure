@@ -80,13 +80,8 @@ function readKeys(value: unknown): RefsureConfig['keys'] {
 export function loadConfig(env: NodeJS.ProcessEnv): RefsureConfig {
   const paths = resolvePaths(env);
   const limits = { decisionsPerMinute: 30, usdPerDay: 0.5 };
-  const file = readConfigFile(paths.config);
-  if (!file) {
-    return {
-      keys: defaultKeys(), gateway: envGateway(env), allowOrigins: [], denyOrigins: [],
-      piiMasks: true, requireIsolatedProfile: false, limits, paths,
-    };
-  }
+  // No file reads as an empty one: every default below lives in one place.
+  const file: Record<string, unknown> = readConfigFile(paths.config) ?? {};
   onlyFields('config', file, TOP_FIELDS);
   return {
     keys: readKeys(file.keys),

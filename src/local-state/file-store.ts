@@ -16,6 +16,16 @@ const CLAIMED_KEEP_MS = 10 * 60_000;
  */
 const EXPIRED_KEEP_MS = 10 * 60_000;
 
+/** A directory's names; a missing directory has none. Any other failure throws. */
+function listDir(dir: string): string[] {
+  try {
+    return readdirSync(dir);
+  } catch (error) {
+    if (errorCode(error) === 'ENOENT') return [];
+    throw error;
+  }
+}
+
 /** File-backed StateStore (spec §8.7): `<root>/<sha256(pageId)[:16]>/<kind>-<id>.json`, dirs 0700, files 0600. */
 export function createFileStore(root: string, trace?: RunTrace): StateStore {
   const note = (text: string): void => {
@@ -23,14 +33,7 @@ export function createFileStore(root: string, trace?: RunTrace): StateStore {
   };
 
   function pageDirs(): string[] {
-    let names: string[];
-    try {
-      names = readdirSync(root);
-    } catch (error) {
-      if (errorCode(error) === 'ENOENT') return [];
-      throw error;
-    }
-    return names.filter((name) => PAGE_DIR_RE.test(name)).map((name) => join(root, name));
+    return listDir(root).filter((name) => PAGE_DIR_RE.test(name)).map((name) => join(root, name));
   }
 
   /** Reads one entry and checks it is the one its path names. A refused file is absent, with a trace note. */
@@ -66,15 +69,8 @@ export function createFileStore(root: string, trace?: RunTrace): StateStore {
   }
 
   function clearDir(dir: string): number {
-    let names: string[];
-    try {
-      names = readdirSync(dir);
-    } catch (error) {
-      if (errorCode(error) === 'ENOENT') return 0;
-      throw error;
-    }
     let removed = 0;
-    for (const name of names) {
+    for (const name of listDir(dir)) {
       try {
         if (unlinkQuiet(join(dir, name)) && ENTRY_RE.test(name)) removed += 1;
       } catch (error) {
@@ -86,14 +82,7 @@ export function createFileStore(root: string, trace?: RunTrace): StateStore {
   }
 
   function purgeDir(dir: string, nowMs: number, expiresAt: (value: unknown) => number | null): void {
-    let names: string[];
-    try {
-      names = readdirSync(dir);
-    } catch (error) {
-      if (errorCode(error) === 'ENOENT') return;
-      throw error;
-    }
-    for (const name of names) {
+    for (const name of listDir(dir)) {
       const path = join(dir, name);
       try {
         if (TEMP_RE.test(name) || CLAIMED_RE.test(name)) {

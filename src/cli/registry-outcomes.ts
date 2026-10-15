@@ -1,4 +1,5 @@
 import { type BrowserErrorCode, isBrowserError, type PageRef } from '../browser';
+import { isConfigError } from '../config';
 import { type Next, redactPatterns, type RunTrace, type Status } from '../output';
 import type { CommandOutcome } from './command-outcome';
 
@@ -13,11 +14,6 @@ const BROWSER_FAILURES: Readonly<Record<BrowserErrorCode, { status: Status; caus
   backend_unknown: { status: 'not_set_up', cause: 'backend_unknown' },
 };
 
-// Duck-typed so the registry needs no runtime import of config: ConfigError carries one of these in `cause_`.
-const CONFIG_CAUSES: ReadonlySet<string> = new Set([
-  'config_mode', 'literal_key', 'gateway_insecure', 'config_invalid',
-]);
-
 const DETAIL_MAX = 500;
 const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 
@@ -28,12 +24,6 @@ function clean(text: string): string {
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function configCause(error: unknown): string | null {
-  if (typeof error !== 'object' || error === null) return null;
-  const cause = (error as { cause_?: unknown }).cause_;
-  return typeof cause === 'string' && CONFIG_CAUSES.has(cause) ? cause : null;
 }
 
 function nothingDone(status: Status, cause: string, detail: string, next?: Next): CommandOutcome<never> {
@@ -61,12 +51,8 @@ export function failureOutcome(error: unknown, dispatched: boolean): CommandOutc
     const { status, cause } = BROWSER_FAILURES[error.code] ?? BROWSER_FAILURES.backend_error;
     return nothingDone(status, cause, clean(error.detail), cause === 'ref_gone' ? RE_OBSERVE : undefined);
   }
-  const config = configCause(error);
-  if (config) {
-    // `detail` alone: the message repeats the cause, which `why.cause` already carries.
-    const detail = (error as { detail?: unknown }).detail;
-    return nothingDone('not_set_up', config, clean(typeof detail === 'string' ? detail : messageOf(error)));
-  }
+  // `detail` alone: the message repeats the cause, which `why.cause` already carries.
+  if (isConfigError(error)) return nothingDone('not_set_up', error.cause_, clean(error.detail));
   return nothingDone('unavailable', 'internal', clean(messageOf(error)));
 }
 
