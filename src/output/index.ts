@@ -1,4 +1,11 @@
 export type * from './status';
 export type * from './envelope';
 export type * from './run-trace';
+export type * from './cause-row';
 export { DryRunStop } from './dry-run-stop';
+export { EXIT_CODES, exitFor } from './exit-classes';
+export { CAUSES, causeStatus } from './causes';
+export { redactPatterns } from './redact-patterns';
+export { renderEnvelope } from './render-json';
+export { applyUntrusted, UNTRUSTED_TEXT_MAX } from './untrusted';
+export { newTrace } from './new-trace';
