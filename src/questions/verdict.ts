@@ -1,6 +1,6 @@
 export type AbstainCause =
   /** → abstained */
-  | 'none_chosen' | 'low_confidence' | 'disagree'
+  | 'none_chosen' | 'low_confidence' | 'disagree' | 'twins'
   /** → unavailable */
   | 'provider_timeout' | 'provider_error'
   /** → refused */

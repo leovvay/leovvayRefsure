@@ -1,8 +1,6 @@
 import data from './calibration.json' with { type: 'json' };
-import { SITES } from '../sites';
 import type { ProviderId, SiteId } from '../site-id';
 import type { CalibrationEntry } from './calibration-entry';
-import type { CalibratedSite } from './maturity-reading';
 
 function isEntry(value: unknown): value is CalibrationEntry {
   if (typeof value !== 'object' || value === null) return false;
@@ -25,9 +23,4 @@ export function calibrationEntry(
 ): CalibrationEntry | null {
   return ENTRIES.find((entry) => entry.site === site && entry.provider === provider
     && entry.modelFamily === family && entry.wordingHash === wordingHash) ?? null;
-}
-
-/** A bare id names a shipped site; a site object is read as given. */
-export function resolveSite(site: CalibratedSite): Exclude<CalibratedSite, SiteId> {
-  return typeof site === 'string' ? SITES[site] : site;
 }

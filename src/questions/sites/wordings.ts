@@ -4,7 +4,7 @@ import type { DecisionNoulQuestion } from '../wire-types';
   The wording of every browser Decision site. Each is the one its research
   measured, ported verbatim from the author's earlier decision code, except
   FIND and OPTION_MAP, which are new and start experimental. A wording change
-  is a threshold change: every site hashes its wording at load.
+  is a threshold change: every site hashes its wording on first read.
 */
 
 export const LOCATE_INSTRUCTIONS = 'A browser automation recorded an action on one element of a web page. The page has changed since (a new build, edited copy, moved, duplicated or translated elements). `recorded` describes that element as it was. Which current candidate is the same element, the one a replay must act on? Builds often regenerate class names and ids, so weigh what the element is and does (role, link target, form field name, the meaning of its text in any language, its section and heading, its position) over exact class or id strings. Answer none when no candidate is the recorded element.';
@@ -50,12 +50,3 @@ export const RESEARCH_STATES: Readonly<Record<string, string>> = Object.freeze({
   rate_limited: 'A "too many requests", rate-limit or quota-exceeded page or message.',
   unexpected_page: 'A normal working page, but not the intended one (a different item, section or site).',
 });
-
-/** The research set with the caller's description of the intended page in the slot. */
-export function researchStatesFor(expect: string): Record<string, string> {
-  const states: Record<string, string> = {};
-  for (const [key, description] of Object.entries(RESEARCH_STATES)) {
-    states[key] = description.replace(EXPECT_SLOT, () => expect);
-  }
-  return states;
-}

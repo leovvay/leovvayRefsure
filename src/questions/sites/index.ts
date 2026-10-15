@@ -7,4 +7,4 @@ export { outcomeSite } from './outcome';
 export { presenceSite } from './presence';
 export { optionMapSite } from './option-map';
 export { SITES } from './registry';
-export { RESEARCH_STATES, researchStatesFor } from './wordings';
+export { RESEARCH_STATES } from './wordings';

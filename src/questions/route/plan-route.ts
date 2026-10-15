@@ -43,12 +43,12 @@ export function planRoute(
   site: SiteId,
   policy: SitePolicy,
   combo: Combo,
-  ready: Readonly<Record<ProviderId, Readiness>>,
+  ready: Readiness,
 ): RoutePlan {
   const combos = policy.combos ?? [];
-  const usable = (id: ProviderId): boolean => ready[id].missing === null;
+  const usable = (id: ProviderId): boolean => ready[id] === null;
   const missingOf = (ids: readonly ProviderId[]): string[] => ids.flatMap((id) => {
-    const why = ready[id].missing;
+    const why = ready[id];
     return why === null ? [] : [why];
   });
   if (combo === 'jev' || combo === 'openai') {

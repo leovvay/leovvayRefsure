@@ -12,9 +12,8 @@ export type * from './sites';
 export type * from './route';
 export type * from './asking';
 export { BOUNDS } from './bounds';
-export { NONE_KEY, presentCandidates, shuffledOrder } from './present-candidates';
-export { confidentChoice, noulVerdict, validateAnswers } from './validate-answers';
-export { wordingHash } from './wording-hash';
+export { NONE_KEY } from './present-candidates';
+export { noulVerdict, validateAnswers } from './validate-answers';
 export {
   dismissSite,
   findSite,
@@ -24,10 +23,7 @@ export {
   pageStateSite,
   presenceSite,
   RESEARCH_STATES,
-  researchStatesFor,
   SITES,
 } from './sites';
-export {
-  bareModel, familyOf, KNOWN_FAMILIES, KNOWN_SNAPSHOTS, maturityOf, snapshotChanged, thresholdFor,
-} from './calibration';
+export { bareModel, familyOf, KNOWN_FAMILIES, snapshotChanged, thresholdFor } from './calibration';
 export { createDecide } from './decide';

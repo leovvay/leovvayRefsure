@@ -2,7 +2,7 @@ import type { RiskClass } from '../../risk';
 import type { ProviderId } from '../site-id';
 import type { Threshold } from '../site-policy';
 import type { NoulBand } from '../wire-types';
-import { calibrationEntry, resolveSite } from './entries';
+import { calibrationEntry } from './entries';
 import type { CalibratedSite } from './maturity-reading';
 import { familyOf } from './model-family';
 
@@ -28,26 +28,23 @@ function rowFor(row: Row, risk: RiskClass | undefined): Threshold | null {
 }
 
 /**
- * The threshold `site.read` gets (spec §6.1, §9): the calibration entry for this family and wording when one
- * exists, else the policy row for `risk`, else the strictest row. `null` when the provider has no row, which means
- * it is not allowed at the site. Without `family` no entry is consulted.
+ * The threshold `site.read` gets (spec §6.1, §9): the calibration entry for this model's family and wording when
+ * one exists, else the policy row for `risk`, else the strictest row. `null` when the provider has no row, which
+ * means it is not allowed at the site. Without `model` no entry is consulted.
  */
 export function thresholdFor(
   site: CalibratedSite,
   provider: ProviderId,
   risk?: RiskClass,
-  family?: string,
+  model?: string,
   wordingHash?: string,
 ): Threshold | null {
-  const known = resolveSite(site);
-  const row = known.policy.threshold[provider];
+  const row = site.policy.threshold[provider];
   if (row === undefined) return null;
-  if (family !== undefined) {
-    const entry = calibrationEntry(known.id, provider, familyOf(family), wordingHash ?? known.wording.hash);
+  if (model !== undefined) {
+    const entry = calibrationEntry(site.id, provider, familyOf(model), wordingHash ?? site.wording.hash);
     const fitted = entry ? rowFor(entry.threshold, risk) : null;
     if (fitted !== null) return fitted;
   }
-  const policy = rowFor(row, risk);
-  if (policy !== null) return policy;
-  return typeof row === 'object' && !isBand(row) ? strictest(row) : null;
+  return rowFor(row, risk) ?? rowFor(row, undefined);
 }

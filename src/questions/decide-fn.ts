@@ -23,8 +23,6 @@ export interface DecideOpts {
 export interface Decided<Out> {
   verdict: Verdict<Out>;
   maturity: Maturity;
-  /** A different dated snapshot of a known model family answered. */
-  modelChanged: boolean;
   /** A model family refsure has never been calibrated on answered: authority `none`. */
   newFamily: boolean;
 }

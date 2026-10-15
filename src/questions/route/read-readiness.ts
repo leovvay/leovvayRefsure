@@ -20,29 +20,26 @@ function noGrant(consent: Consent | null, id: ProviderId, host: string): string 
   return `no consent grant for ${id} at ${host}: a human runs \`refsure setup\` in a terminal`;
 }
 
+/** Why `id` cannot be asked now, or `null` when it can. */
 async function readOne(
   inputs: ReadinessInputs,
   id: ProviderId,
   consent: Consent | null,
   dryRun: boolean,
-): Promise<Readiness> {
+): Promise<string | null> {
   const slot = inputs.roster[id];
-  const provider = inputs.providers[id] ?? null;
   const host = slot.endpoint?.host ?? null;
-  if (slot.problem !== null || provider === null || host === null) {
-    return { id, provider: null, host, missing: slot.problem ?? `${id} is not configured` };
+  if (slot.problem !== null || !inputs.providers[id] || host === null) {
+    return slot.problem ?? `${id} is not configured`;
   }
-  if (!(await inputs.keyPresent(id))) return { id, provider: null, host, missing: noKey(slot) };
+  if (!(await inputs.keyPresent(id))) return noKey(slot);
   // A dry run skips consent (spec §6.1): it sends nothing, and shows what a granted run would send.
-  if (!dryRun && !grantFor(consent, id, host)) return { id, provider: null, host, missing: noGrant(consent, id, host) };
-  return { id, provider, host, missing: null };
+  if (!dryRun && !grantFor(consent, id, host)) return noGrant(consent, id, host);
+  return null;
 }
 
 /** Both providers' readiness: endpoint, key present, and (unless a dry run) a consent grant for the host. */
-export async function readReadiness(
-  inputs: ReadinessInputs,
-  dryRun: boolean,
-): Promise<Readonly<Record<ProviderId, Readiness>>> {
+export async function readReadiness(inputs: ReadinessInputs, dryRun: boolean): Promise<Readiness> {
   const consent = dryRun ? null : readConsent(inputs.config.paths.consent);
   const [jev, openai] = await Promise.all([
     readOne(inputs, 'jev', consent, dryRun),

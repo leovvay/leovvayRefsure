@@ -27,7 +27,7 @@ export function boundedText(text: string, max: number, opts: { inline?: boolean 
 }
 
 /** 32-bit FNV-1a over the string's UTF-16 units: small, pure, and the same everywhere. */
-export function fnv1a(text: string): number {
+function fnv1a(text: string): number {
   let hash = 0x811c9dc5;
   for (let index = 0; index < text.length; index += 1) {
     hash ^= text.charCodeAt(index);
@@ -37,7 +37,7 @@ export function fnv1a(text: string): number {
 }
 
 /** mulberry32: a seeded generator of [0, 1), enough for a deterministic shuffle. */
-export function seeded(seed: number): () => number {
+function seeded(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
     state = (state + 0x6d2b79f5) >>> 0;

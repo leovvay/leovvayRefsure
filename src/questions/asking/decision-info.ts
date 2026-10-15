@@ -3,12 +3,14 @@ import type { PartOutcome } from '../../providers';
 import type { ProviderChoice, SiteId } from '../site-id';
 import type { Verdict } from '../verdict';
 import type { AnswerReading } from './answer-reading';
+import { answeringModel } from './answering-model';
 
+/** One part as asked: the model that replied (`unnamed` when it gave no name), else the one asked for. */
 function partOf<Out>(part: PartOutcome<Out>): DecisionPart {
   const verdict = part.verdict;
   return {
     provider: part.provider,
-    model: part.answer.model ?? part.model,
+    model: answeringModel(part) ?? part.model,
     index: verdict.kind === 'answer' ? verdict.index : verdict.leaned,
     confidence: verdict.confidence,
     threshold: verdict.threshold,

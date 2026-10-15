@@ -11,12 +11,12 @@ import type { DecisionAnswer, NoulBand } from '../wire-types';
 */
 
 /** A choice site's number; a band handed to one reads at its strict edge. */
-export function choiceThreshold(threshold: Threshold): number {
+function choiceThreshold(threshold: Threshold): number {
   return typeof threshold === 'number' ? threshold : threshold.yesAtLeast;
 }
 
 /** A Noul site's band; a bare number is read as a symmetric band. */
-export function noulBand(threshold: Threshold): NoulBand {
+function noulBand(threshold: Threshold): NoulBand {
   return typeof threshold === 'number' ? { yesAtLeast: threshold, noAtMost: 1 - threshold } : threshold;
 }
 

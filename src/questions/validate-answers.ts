@@ -73,28 +73,18 @@ export function validateAnswers(
   return valid;
 }
 
-/** The chosen key when the answer is a Choice at or above `threshold`, else `null`. */
-export function confidentChoice(answer: DecisionAnswer | undefined, threshold: number): string | null {
-  if (answer?.type !== 'choice') return null;
-  return answer.confidence >= threshold ? answer.choice : null;
-}
-
 /** A band edge to six places: far finer than the model's hundredths, coarse enough to drop float noise. */
 function roundBand(edge: number): number {
   return Math.round(edge * 1e6) / 1e6;
 }
 
-/**
- * `yes`/`no` only outside the band widened by `margin` on both sides; inside
- * it is `abstain`. A negative margin reads as zero: it could only narrow the
- * band past what it was measured at.
- */
-export function noulVerdict(noul: number, band: NoulBand, margin = 0): 'yes' | 'no' | 'abstain' {
-  const widen = Math.max(0, margin);
-  // Rounded, because answers come in hundredths and binary floats do not:
-  // 0.15 - 0.05 is 0.09999999999999999, which would turn an answer of exactly
-  // 0.10, a confident "no" by the band's own definition, into an abstain.
-  if (noul >= roundBand(band.yesAtLeast + widen)) return 'yes';
-  if (noul <= roundBand(band.noAtMost - widen)) return 'no';
+/** `yes` at or above the band's top edge, `no` at or below its bottom edge, `abstain` inside the band. */
+export function noulVerdict(noul: number, band: NoulBand): 'yes' | 'no' | 'abstain' {
+  // Rounded, because answers come in hundredths and binary floats do not: a
+  // bare threshold of 0.9 reads as a band whose bottom edge is 1 - 0.9, which is
+  // 0.09999999999999998, and would turn an answer of exactly 0.10, a confident
+  // "no" by the band's own definition, into an abstain.
+  if (noul >= roundBand(band.yesAtLeast)) return 'yes';
+  if (noul <= roundBand(band.noAtMost)) return 'no';
   return 'abstain';
 }
