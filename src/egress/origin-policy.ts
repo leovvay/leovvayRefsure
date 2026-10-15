@@ -4,14 +4,27 @@ import type { EgressRefusal } from './egress-refusal';
 
 type OriginConfig = Pick<RefsureConfig, 'allowOrigins' | 'denyOrigins' | 'requireIsolatedProfile'>;
 
+/**
+ * `bank.example.` (a fully qualified name) is the same host as `bank.example`, so a trailing dot is dropped from
+ * both sides before they are compared: a denied site stays denied whichever way the page spells it.
+ */
+function bareHost(host: string): string {
+  return host.replace(/\.+$/, '');
+}
+
 function patterns(entries: readonly string[]): OriginPattern[] {
   // loadConfig refuses an unparseable entry, so a skipped one here can only come from a hand-built config.
-  return entries.map(parseOriginPattern).filter((pattern): pattern is OriginPattern => pattern !== null);
+  return entries
+    .map(parseOriginPattern)
+    .filter((pattern): pattern is OriginPattern => pattern !== null)
+    .map((pattern) => ({ ...pattern, host: bareHost(pattern.host) }));
 }
 
 function parse(url: string): URL | null {
   try {
-    return new URL(url);
+    const page = new URL(url);
+    page.hostname = bareHost(page.hostname);
+    return page;
   } catch {
     return null;
   }

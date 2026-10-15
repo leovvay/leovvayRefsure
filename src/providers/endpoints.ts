@@ -3,7 +3,7 @@ import type { ProviderId } from '../questions';
 import type { Endpoint } from './endpoint';
 
 /** Jev through OpenRouter's `systemone` route (spec §7.1). */
-export const JEV_OPENROUTER: Endpoint = Object.freeze({
+const JEV_OPENROUTER: Endpoint = Object.freeze({
   provider: 'jev',
   url: 'https://openrouter.ai/api/v1/systemone',
   host: 'openrouter.ai',
@@ -13,7 +13,7 @@ export const JEV_OPENROUTER: Endpoint = Object.freeze({
 });
 
 /** OpenAI Decisions, called directly (spec §7.1). */
-export const OPENAI_DIRECT: Endpoint = Object.freeze({
+const OPENAI_DIRECT: Endpoint = Object.freeze({
   provider: 'openai',
   url: 'https://api.openai.com/v1/decisions',
   host: 'api.openai.com',
@@ -28,28 +28,7 @@ const RESERVED_HEADERS: ReadonlySet<string> = new Set(['authorization', 'content
 
 /** Whether the gateway config names both the path and the model for this provider. No defaults exist. */
 export function gatewayNames(cfg: GatewayConfig | null, provider: ProviderId): boolean {
-  if (!cfg) return false;
-  return provider === 'jev'
-    ? nonEmpty(cfg.jevPath) && nonEmpty(cfg.jevModel)
-    : nonEmpty(cfg.openaiPath) && nonEmpty(cfg.openaiModel);
-}
-
-/**
- * The gateway's endpoints: one per provider whose path and model the config both names. The URL must be
- * `https:` unless the host is loopback, and carry no credentials; a gateway that fails that yields nothing.
- */
-export function gatewayEndpoints(cfg: GatewayConfig | null): Partial<Record<ProviderId, Endpoint>> {
-  const out: Partial<Record<ProviderId, Endpoint>> = {};
-  if (!cfg) return out;
-  if (gatewayNames(cfg, 'jev')) {
-    const endpoint = gatewayEndpoint(cfg, 'jev', cfg.jevPath!, cfg.jevModel!);
-    if (endpoint) out.jev = endpoint;
-  }
-  if (gatewayNames(cfg, 'openai')) {
-    const endpoint = gatewayEndpoint(cfg, 'openai', cfg.openaiPath!, cfg.openaiModel!);
-    if (endpoint) out.openai = endpoint;
-  }
-  return out;
+  return gatewayRoute(cfg, provider) !== null;
 }
 
 /**
@@ -57,15 +36,27 @@ export function gatewayEndpoints(cfg: GatewayConfig | null): Partial<Record<Prov
  * a gateway that names it but cannot be used gives `null`, never a silent switch to another host.
  */
 export function endpointFor(provider: ProviderId, cfg: GatewayConfig | null): Endpoint | null {
-  if (gatewayNames(cfg, provider)) return gatewayEndpoints(cfg)[provider] ?? null;
+  const route = gatewayRoute(cfg, provider);
+  if (cfg && route) return gatewayEndpoint(cfg, provider, route.path, route.model);
   return provider === 'jev' ? JEV_OPENROUTER : OPENAI_DIRECT;
 }
 
+/** The gateway path and model this provider goes to, or `null` when the config does not name both. */
+function gatewayRoute(cfg: GatewayConfig | null, provider: ProviderId): { path: string; model: string } | null {
+  if (!cfg) return null;
+  const [path, model] = provider === 'jev' ? [cfg.jevPath, cfg.jevModel] : [cfg.openaiPath, cfg.openaiModel];
+  return nonEmpty(path) && nonEmpty(model) ? { path, model } : null;
+}
+
 /** `https:`, or `http:` on a loopback host only. */
-export function isSecureUrl(url: URL): boolean {
+function isSecureUrl(url: URL): boolean {
   return url.protocol === 'https:' || (url.protocol === 'http:' && LOOPBACK.has(url.hostname));
 }
 
+/**
+ * One gateway endpoint. The URL must be `https:` unless the host is loopback, and carry no credentials; a gateway
+ * that fails that gives `null`.
+ */
 function gatewayEndpoint(cfg: GatewayConfig, provider: ProviderId, path: string, model: string): Endpoint | null {
   let url: URL;
   try {

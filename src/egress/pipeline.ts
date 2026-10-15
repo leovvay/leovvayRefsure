@@ -10,8 +10,8 @@ import { checkLimits } from './limits';
 import { checkOrigin } from './origin-policy';
 
 /** Spec §7.3: anything larger is `oversize` before any call is made. Measured on canonical JSON, UTF-8. */
-export const STATE_MAX_BYTES = 24_000;
-export const QUESTIONS_MAX_BYTES = 12_000;
+const STATE_MAX_BYTES = 24_000;
+const QUESTIONS_MAX_BYTES = 12_000;
 
 const REFUSAL_CAUSES: ReadonlySet<unknown> = new Set(['not_set_up', 'origin_denied', 'oversize', 'spend_limit']);
 

@@ -7,9 +7,10 @@ import type { PostOptions, TransportResult } from './transport-result';
   The only `fetch` in refsure. Ported from the author's earlier decision code.
 
   It never throws. Every failure comes back as a status, and every message that
-  leaves has the key replaced by `[key]`. A non-2xx body is read bounded, used
-  only to tell a spent quota from shedding, then dropped: an upstream error can
-  quote the request, and the request is page content.
+  leaves has the key replaced by `[key]`. Only a 429 body is read, bounded, to
+  tell a spent quota from shedding, then dropped; any other non-2xx body is
+  cancelled unread. An upstream error can quote the request, and the request is
+  page content.
 */
 
 const { RETRY_BACKOFF_MS, RETRY_MIN_REMAINING_MS } = BOUNDS;
@@ -95,10 +96,16 @@ async function attemptOnce(
     return thrown(error, timer, outer, budget);
   }
   if (!response.ok) {
-    const head = await readBounded(response, ERROR_BODY_MAX_BYTES).catch(() => ({ text: '', over: false }));
     const status: ProviderStatus = `http_${response.status}`;
     const why = response.status === 401 || response.status === 403 ? ' (the provider rejected the key)' : '';
-    return { status, detail: `HTTP ${response.status}${why}`, final: response.status === 429 && SPENT.test(head.text) };
+    const detail = `HTTP ${response.status}${why}`;
+    // The status is known at the headers; a body that stalls must not hold it until the deadline.
+    if (response.status !== 429) {
+      void response.body?.cancel().catch(() => {});
+      return { status, detail };
+    }
+    const head = await readBounded(response, ERROR_BODY_MAX_BYTES).catch(() => ({ text: '', over: false }));
+    return { status, detail, final: SPENT.test(head.text) };
   }
   let read: { text: string; over: boolean };
   try {
@@ -117,7 +124,8 @@ async function attemptOnce(
 
 function thrown(error: unknown, timer: AbortSignal, outer: AbortSignal, budget: number): Attempt {
   if (timer.aborted) return { status: 'timeout', detail: `no answer within ${budget} ms` };
-  if (outer.aborted) return { status: 'transport', detail: 'aborted by the caller', final: true };
+  // `outer` is the caller's signal, which `postDecision` checks before any retry.
+  if (outer.aborted) return { status: 'transport', detail: 'aborted by the caller' };
   return { status: 'transport', detail: describe(error) };
 }
 

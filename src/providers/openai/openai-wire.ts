@@ -14,7 +14,7 @@ import { renderInput } from './render-input';
   `refusal`, else one bad answer makes it `invalid`.
 */
 
-export function openaiQuestion(name: string, question: DecisionQuestion): OpenAIQuestion {
+function openaiQuestion(name: string, question: DecisionQuestion): OpenAIQuestion {
   if (question.type === 'choice') {
     return {
       type: 'choice',
@@ -29,7 +29,7 @@ export function openaiQuestion(name: string, question: DecisionQuestion): OpenAI
   return { type: 'predicate', name, instructions: `${question.instructions}${means}` };
 }
 
-export function openaiBody(model: string, req: ApprovedRequest, rendering: Rendering = 'o_primary'): OpenAIBody {
+function openaiBody(model: string, req: ApprovedRequest, rendering: Rendering = 'o_primary'): OpenAIBody {
   return {
     model,
     input: renderInput(req.state, rendering),
@@ -38,7 +38,7 @@ export function openaiBody(model: string, req: ApprovedRequest, rendering: Rende
 }
 
 /** `{value: p}` or `[{value, probability}]` → `{value: p}`, unit numbers only; `null` when neither shape. */
-export function probabilityMap(raw: unknown): Record<string, number> | null {
+function probabilityMap(raw: unknown): Record<string, number> | null {
   if (Array.isArray(raw)) {
     const map: Record<string, number> = {};
     for (const entry of raw) {
@@ -64,7 +64,7 @@ export function probabilityMap(raw: unknown): Record<string, number> | null {
 type OneAnswer = { ok: true; answer: DecisionAnswer } | { ok: false; status: 'refusal' | 'invalid'; why: string };
 
 /** One OpenAI answer → the Jev shape of the question asked. `why` never quotes the response. */
-export function mapOpenAIAnswer(name: string, question: DecisionQuestion, raw: unknown): OneAnswer {
+function mapOpenAIAnswer(name: string, question: DecisionQuestion, raw: unknown): OneAnswer {
   if (!isRecord(raw)) return { ok: false, status: 'invalid', why: `${name}: no answer` };
   if (raw.type === 'refusal') return { ok: false, status: 'refusal', why: `${name}: refused` };
   if (question.type === 'noul') {
@@ -89,7 +89,7 @@ export function mapOpenAIAnswer(name: string, question: DecisionQuestion, raw: u
   return { ok: true, answer: { type: 'choice', choice: raw.choice, probabilities: kept, confidence: raw.confidence } };
 }
 
-export function readOpenAI(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading {
+function readOpenAI(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading {
   if (!isRecord(json)) return { status: 'invalid', answers: null, model: null, usd: null, detail: 'the body is not an object' };
   // No published price for this route: the cost is unknown, not zero.
   const model = typeof json.model === 'string' ? json.model : null;

@@ -3,6 +3,7 @@ import type { ProviderId } from '../questions';
 import { endpointFor, gatewayNames } from './endpoints';
 import type { ProviderKeys } from './provider-keys';
 import type { ProviderSlot } from './provider-slot';
+import { readKey } from './read-key';
 
 const IDS: readonly ProviderId[] = ['jev', 'openai'];
 
@@ -31,11 +32,5 @@ export function providerRoster(config: RefsureConfig, keys: ProviderKeys): Reado
 
 /** Whether the key source gives a non-empty key now. The value is dropped at once; a throwing source is "no". */
 export async function keyPresent(slot: ProviderSlot): Promise<boolean> {
-  if (!slot.key) return false;
-  try {
-    const value = await slot.key.read();
-    return typeof value === 'string' && value !== '';
-  } catch {
-    return false;
-  }
+  return slot.key !== null && (await readKey(slot.key)) !== null;
 }

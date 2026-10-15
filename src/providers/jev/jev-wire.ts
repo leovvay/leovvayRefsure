@@ -11,12 +11,12 @@ import type { JevBody } from './jev-body';
   response adds travels further.
 */
 
-export function jevBody(model: string, req: ApprovedRequest): JevBody {
+function jevBody(model: string, req: ApprovedRequest): JevBody {
   // Zero data retention, and no training on it: a request preference refsure cannot verify (spec §7.3).
   return { model, state: req.state, questions: req.questions, provider: { zdr: true, data_collection: 'deny' } };
 }
 
-export function readJev(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading {
+function readJev(json: unknown, questions: Readonly<Record<string, DecisionQuestion>>): WireReading {
   if (!isRecord(json)) return { status: 'invalid', answers: null, model: null, usd: null, detail: 'the body is not an object' };
   const model = typeof json.model === 'string' ? json.model : null;
   const usd = isRecord(json.usage) ? costOf(json.usage.cost) : null;

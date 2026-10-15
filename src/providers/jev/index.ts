@@ -1,2 +1,2 @@
-export { JEV_WIRE, jevBody, readJev } from './jev-wire';
+export { JEV_WIRE } from './jev-wire';
 export type * from './jev-body';

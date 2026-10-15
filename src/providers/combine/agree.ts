@@ -16,7 +16,7 @@ export async function askAgree<Out>(parts: readonly ComboPart<Out>[], opts: AskO
   return { verdict: agreeVerdict(outcomes), parts: outcomes };
 }
 
-export function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[]): Verdict<Out> {
+function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[]): Verdict<Out> {
   const abstain = firstAbstain(outcomes);
   if (abstain) return abstain;
   const answers = outcomes.map((outcome) => outcome.verdict as Answer<Out>);
