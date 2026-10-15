@@ -1,4 +1,4 @@
-import { createOrcaBrowser } from './browser';
+import { createBrowser } from './browser';
 import type { BrowserPort } from './browser';
 import { routeArgv, runCommand, verbHelp } from './cli';
 import type { AnyCommandSpec, CommandResult, RegistryDeps } from './cli';
@@ -81,13 +81,14 @@ async function runVerb(
   const trace = newTrace();
   signal.addEventListener('abort', () => trace.notes.push('interrupted'), { once: true });
   const config = configOnce(env);
-  const orca = createOrcaBrowser({ env, trace });
+  // Orca in an Orca terminal, else an agent-browser session (see chooseBackend).
+  const backend = createBrowser({ env, trace });
   // The profile of the last tab read, for the isolated-profile rule; null (refused when required) until one is read.
   let profileId: string | null = null;
   const browser: BrowserPort = {
-    ...orca,
+    ...backend,
     async tabInfo(page) {
-      const tab = await orca.tabInfo(page);
+      const tab = await backend.tabInfo(page);
       profileId = tab.profileId;
       return tab;
     },

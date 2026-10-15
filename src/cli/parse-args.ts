@@ -9,7 +9,11 @@ type ParseOption = ParseOptions[string];
 
 /** Accepted by every verb; they win over a verb option of the same name. */
 export const GLOBAL_OPTIONS: Readonly<Record<string, OptionSpec>> = {
-  page: { type: 'string', summary: 'Browser page id; else REFSURE_PAGE, else this worktree\'s current tab' },
+  page: {
+    type: 'string',
+    summary: 'Orca page id, or agent-browser session name; else REFSURE_PAGE, else the worktree\'s current tab '
+      + '(agent-browser: the session default)',
+  },
   'dry-run': { type: 'boolean', summary: 'Print the exact redacted request; send nothing, do nothing' },
   help: { type: 'boolean', short: 'h', summary: 'Show this command\'s options' },
   json: { type: 'boolean', summary: 'Accepted and ignored: output is one JSON envelope (skill print: the file itself)' },

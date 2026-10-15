@@ -8,7 +8,11 @@ import type { PageRef } from '../page-ref';
 export function worktreeSelector(env: NodeJS.ProcessEnv): string {
   const id = env.ORCA_WORKTREE_ID?.trim();
   if (!id) {
-    throw new BrowserError('not_in_orca_terminal', 'ORCA_WORKTREE_ID is not set: run refsure from an Orca terminal');
+    throw new BrowserError(
+      'not_in_orca_terminal',
+      'ORCA_WORKTREE_ID is not set: run refsure from an Orca terminal, '
+        + 'or drive an agent-browser session (REFSURE_BACKEND=agent-browser)',
+    );
   }
   return `id:${id}`;
 }

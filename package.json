@@ -1,7 +1,7 @@
 {
   "name": "@leovvay/refsure",
   "version": "0.1.0",
-  "description": "Decision-backed browser judgment for AI agents driving Orca's embedded browser: locate, dismiss, state, outcome, wait-for.",
+  "description": "Decision-backed browser judgment for AI agents driving Orca's embedded browser or an agent-browser session: locate, dismiss, state, outcome, wait-for.",
   "type": "module",
   "bin": {
     "refsure": "dist/refsure.mjs"
@@ -20,6 +20,7 @@
   "author": "Vladyslav Leonchyk",
   "keywords": [
     "orca",
+    "agent-browser",
     "browser",
     "agents",
     "ai-agents",

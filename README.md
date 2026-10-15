@@ -1,9 +1,11 @@
 # refsure
 
-Decision-backed browser judgment for AI agents that drive the embedded browser of the Orca ADE.
+Decision-backed browser judgment for AI agents that drive the embedded browser of the Orca ADE, or a standalone
+`agent-browser` session.
 
-`refsure` is a command-line tool plus an agent skill. Claude Code, Codex and other agents running in Orca terminals
-call it while they work in a browser tab. It answers the questions agents most often get wrong, or burn tokens on:
+`refsure` is a command-line tool plus an agent skill. Claude Code, Codex and other agents running in Orca terminals,
+or beside an `agent-browser` session, call it while they work in a browser tab. It answers the questions agents most
+often get wrong, or burn tokens on:
 
 - Which control on this page means X?
 - How do I get past this cookie banner or pop-up?
@@ -56,9 +58,32 @@ refsure doctor
 
 Install it globally. Agents call refsure many times per task, and `npx` adds package resolution time to every call.
 
-Backend: Orca's embedded browser, through the typed verbs of the `orca` CLI. refsure looks for the binary in
-`$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then `/Applications/Orca.app/Contents/Resources/bin/orca`. A
-standalone `agent-browser` backend is planned for 0.2.
+### Backends
+
+refsure drives one of two browser backends. `refsure doctor` names the one it chose, and why.
+
+| Backend | Chosen when | The page (`--page`) |
+|---|---|---|
+| Orca's embedded browser, through the typed verbs of the `orca` CLI | `ORCA_WORKTREE_ID` is set (an Orca terminal), or `REFSURE_BACKEND=orca` | a browser page id; else `REFSURE_PAGE`, else this worktree's current tab |
+| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or outside an Orca terminal when an `agent-browser` binary is found | a session name; else `REFSURE_PAGE`, else the session `default` |
+
+- **Orca:** refsure looks for the binary in `$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then
+  `/Applications/Orca.app/Contents/Resources/bin/orca`. Page commands outside an Orca terminal answer
+  `not_in_orca_terminal` (exit 24); the worktree guard has no fallback.
+- **agent-browser:** refsure uses `agent-browser` on `PATH` first, then the copy Orca bundles
+  (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). It drives only a session you opened
+  yourself, and acts on that session's active tab:
+
+  ```sh
+  agent-browser --session work open https://example.com
+  refsure state --page work --expect "the example home page"
+  ```
+
+  refsure never launches a browser. A page command on a session that is not open answers `no_tab` (exit 20), because
+  any agent-browser call on an unknown session would launch a new browser. The capabilities come from
+  `agent-browser --help`.
+- With neither (no Orca terminal, no `agent-browser` binary), refsure falls back to Orca, which answers
+  `not_in_orca_terminal`.
 
 ## Setup
 
@@ -173,8 +198,9 @@ if you had granted nothing, because anyone who can write it could grant on your 
   provider you granted.
 - `refsure privacy` prints the disclosure, its hash, your grants and which key source each provider uses (by name,
   never by value).
-- `refsure doctor` checks the `orca` binary, Node, keys (by name), consent, the config file mode, model drift and
-  the installed skill. `refsure doctor --ping` sends one synthetic Decision per configured provider.
+- `refsure doctor` checks Node, the chosen browser backend (the `orca` or `agent-browser` binary, and its open
+  sessions), keys (by name), consent, the config file mode, model drift and the installed skill.
+  `refsure doctor --ping` sends one synthetic Decision per configured provider.
 
 Consent is a disclosure, not a security control: an agent with a terminal could fake the typed step. The point is
 that you, the human, have read what is sent before anything is.
@@ -232,7 +258,7 @@ This reference is generated from `refsure commands --json` and `refsure causes -
 
 Global options, accepted by every command:
 
-- `--page <value>`: Browser page id; else REFSURE_PAGE, else this worktree's current tab
+- `--page <value>`: Orca page id, or agent-browser session name; else REFSURE_PAGE, else the worktree's current tab (agent-browser: the session default)
 - `--dry-run`: Print the exact redacted request; send nothing, do nothing
 - `--help, -h`: Show this command's options
 - `--json`: Accepted and ignored: output is one JSON envelope (skill print: the file itself)
@@ -254,7 +280,7 @@ Global options, accepted by every command:
 |---|---|---|
 | `setup` | never | Read the disclosure and grant consent per provider host (a human, at a terminal) |
 | `privacy` | never | Show what leaves your machine, where it goes, and the consent grants on file |
-| `doctor` | never | Check Node, Orca, keys, consent, config, model drift and the installed skill; --ping asks each provider once |
+| `doctor` | never | Check Node, the browser backend (Orca or agent-browser), keys, consent, config, model drift and the installed skill; --ping asks each provider once |
 | `mark` | never | Remember the page as it is now, for a later outcome --mark or triage --since |
 | `snap` | never | Print compact element lines: line format v1 plus #<ordinal>/<twins> @eN |
 | `guard` | never | Classify the risk of clicking an element (by ref or ticket): read, write, consent, auth, money or irreversible |
@@ -558,7 +584,7 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `expect_name_mismatch` | `stale` | 12 | The live ref shows another name than --expect-name; nothing was done. |
 | `provider_timeout` | `unavailable` | 20 | The provider did not answer within its time budget. |
 | `provider_error` | `unavailable` | 20 | The provider failed or answered invalidly. |
-| `no_tab` | `unavailable` | 20 | No browser tab: none is current, or the page id is unknown. |
+| `no_tab` | `unavailable` | 20 | No browser tab: none is current, the page id is unknown, or the agent-browser session is closed. |
 | `orca_not_running` | `unavailable` | 20 | Orca is not running, or its CLI could not be reached. |
 | `browser_timeout` | `unavailable` | 20 | A browser call timed out before anything was dispatched. |
 | `browser_error` | `unavailable` | 20 | The browser backend failed before anything was dispatched. |
@@ -570,7 +596,7 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `literal_key` | `not_set_up` | 23 | The config holds a literal key; name an env variable or a command. |
 | `gateway_insecure` | `not_set_up` | 23 | The gateway URL is neither https nor localhost. |
 | `config_invalid` | `not_set_up` | 23 | The config file could not be read as a refsure config. |
-| `not_in_orca_terminal` | `not_in_orca_terminal` | 24 | ORCA_WORKTREE_ID is not set: run inside an Orca terminal. |
+| `not_in_orca_terminal` | `not_in_orca_terminal` | 24 | The Orca backend needs an Orca terminal (ORCA_WORKTREE_ID); elsewhere, use an agent-browser session. |
 | `effect_unknown` | `effect_unknown` | 30 | An act was dispatched and its effect is unconfirmed; re-observe first. |
 | `dry_run` | `ok` | 0 | Dry run: the exact redacted requests are shown; nothing was sent or done. |
 | `usage` | `usage` | 64 | The command line was not valid; nothing was done. |
@@ -652,11 +678,21 @@ and the envelope lists it under `untrusted`.
     ```
 
   An agent in bypass or full-auto mode, or one that calls the bundle directly (`node …/refsure.mjs act-high-risk …`),
-  skips that prompt. So can an agent that clicks with raw `orca click`, which refsure never sees.
+  skips that prompt. So can an agent that clicks with raw `orca click` or `agent-browser click`, which refsure never
+  sees.
 - **Consent is a disclosure, not a control.** An agent can fake the typed `setup` step.
 - **Redaction is pattern-based.** It catches common secret shapes and PII, not every secret a page can show. Use
   `denyOrigins`, `requireIsolatedProfile` and `--dry-run` for sensitive sites.
 - **Provider retention is out of refsure's hands.** See the disclosure above.
+- **The agent-browser backend knows less about a page.**
+  - It reports no browser profile, so `requireIsolatedProfile` refuses every Decision there (`origin_denied`): refsure
+    cannot prove the session runs in an isolated profile. Open sessions without `--profile`, which gives a fresh one.
+  - It reports no load error or certificate failure, so `triage` and `state` see only what the page shows.
+  - It acts on the session's active tab; a tab you switch to between `locate` and `act` fails the ticket's URL check.
+  - agent-browser reads any argv word it knows as one of its own flags, so refsure refuses a `fill` or `select` value
+    that starts with `-` (other than a number) before anything is sent (`browser_error`, exit 20).
+  - Its environment (`AGENT_BROWSER_*`, apart from the socket directory) is not passed on: refsure never changes how a
+    session was launched.
 
 ## Calibration status
 

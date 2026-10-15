@@ -30,7 +30,10 @@ export const CAUSES: readonly CauseRow[] = [
 
   row('provider_timeout', 'unavailable', 'The provider did not answer within its time budget.'),
   row('provider_error', 'unavailable', 'The provider failed or answered invalidly.'),
-  row('no_tab', 'unavailable', 'No browser tab: none is current, or the page id is unknown.'),
+  row(
+    'no_tab', 'unavailable',
+    'No browser tab: none is current, the page id is unknown, or the agent-browser session is closed.',
+  ),
   row('orca_not_running', 'unavailable', 'Orca is not running, or its CLI could not be reached.'),
   row('browser_timeout', 'unavailable', 'A browser call timed out before anything was dispatched.'),
   row('browser_error', 'unavailable', 'The browser backend failed before anything was dispatched.'),
@@ -45,7 +48,10 @@ export const CAUSES: readonly CauseRow[] = [
   row('gateway_insecure', 'not_set_up', 'The gateway URL is neither https nor localhost.'),
   row('config_invalid', 'not_set_up', 'The config file could not be read as a refsure config.'),
 
-  row('not_in_orca_terminal', 'not_in_orca_terminal', 'ORCA_WORKTREE_ID is not set: run inside an Orca terminal.'),
+  row(
+    'not_in_orca_terminal', 'not_in_orca_terminal',
+    'The Orca backend needs an Orca terminal (ORCA_WORKTREE_ID); elsewhere, use an agent-browser session.',
+  ),
   row('effect_unknown', 'effect_unknown', 'An act was dispatched and its effect is unconfirmed; re-observe first.'),
   row('dry_run', 'ok', 'Dry run: the exact redacted requests are shown; nothing was sent or done.'),
   row('usage', 'usage', 'The command line was not valid; nothing was done.'),

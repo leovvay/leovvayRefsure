@@ -1,6 +1,6 @@
 ---
 name: refsure
-description: Use when driving a web page in the Orca browser and you need judgment rather than a raw accessibility tree - a cookie banner or pop-up is in the way, you need to know whether the page is ready or what state it is in, you need to find the button or control for something, check whether your click or form submit worked, or wait until the page shows something. Answers with one small JSON envelope and guards risky clicks.
+description: Use when driving a web page in the Orca browser or an agent-browser session and you need judgment rather than a raw accessibility tree - a cookie banner or pop-up is in the way, you need to know whether the page is ready or what state it is in, you need to find the button or control for something, check whether your click or form submit worked, or wait until the page shows something. Answers with one small JSON envelope and guards risky clicks.
 refsure-skill: 1
 ---
 
@@ -103,8 +103,8 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 | `why.cause` (status, exit) | What to do |
 |---|---|
 | `not_set_up`, `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid` (not_set_up, 23) | Tell the human the cause: they run `refsure setup` or fix their config file. Never do it yourself |
-| `not_in_orca_terminal` (24) | You are outside an Orca terminal. Tell the human; do not work around it |
-| `orca_not_running`, `no_tab` (unavailable, 20) | Ask the human to start Orca or open a tab, or pass `--page <id>` |
+| `not_in_orca_terminal` (24) | Outside an Orca terminal, with no agent-browser to use. Tell the human; do not work around it |
+| `orca_not_running`, `no_tab` (unavailable, 20) | Ask the human to start Orca, open a tab or an agent-browser session, or pass `--page <id>` |
 | `browser_timeout`, `browser_error`, `internal` (unavailable, 20) | Nothing was dispatched. Re-observe (`state`), then retry once |
 | `provider_timeout`, `provider_error` (unavailable, 20) | Retry once a little later. If it persists, tell the human |
 | `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs. Tell the human |
@@ -138,3 +138,11 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
   care with refsure's privacy rule there.
 - refsure never logs in, never solves a bot check and never navigates. `login_wall` and `bot_challenge` go to the
   human (`next.do: needs_human`).
+
+## With agent-browser
+
+- Outside an Orca terminal, refsure drives an `agent-browser` session instead; `refsure doctor` names the backend.
+- The page is a session name: `--page <session>`, then `REFSURE_PAGE`, then `default`. refsure never opens a session
+  or a browser. On `no_tab`, ask the human to open one.
+- Use the same session for your own calls (`agent-browser --session <name> snapshot`, `… click @eN`), and snapshot
+  again after `earlier_refs_void: true`.

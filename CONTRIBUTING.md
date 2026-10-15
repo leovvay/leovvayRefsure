@@ -14,7 +14,7 @@ This guide has three recipes (add a Decision site, add a verb, add a language) a
   for a Decision site.
 - **One contract per file.** Every interface or type contract sits in its own file. Files target ≤300 lines.
 - **Ownership.** These are enforced by review:
-  - only `src/browser/orca/` spawns browser processes;
+  - only `src/browser/orca/` and `src/browser/agent-browser/` spawn browser processes;
   - only `src/providers/transport.ts` calls `fetch`;
   - only `src/config/keys/` reads keys;
   - only `src/main.ts` calls `process.exit`;
@@ -179,6 +179,14 @@ There are no test suites. A change is proven by running the real command against
 4. Run the bundle against that tab and read both the envelope and the exit code:
    ```sh
    node dist/refsure.mjs <verb> --page <browserPageId> … ; echo "exit $?"
+   ```
+   A change that touches `src/browser/` is proven on both backends. For the agent-browser backend, outside an Orca
+   terminal, open a dedicated headless session with a fresh profile (never `--profile` with a real one), pass its
+   name as `--page`, and close it afterwards:
+   ```sh
+   agent-browser --session refsure-probe open http://127.0.0.1:8765/<fixture>.html
+   env -u ORCA_WORKTREE_ID REFSURE_BACKEND=agent-browser node dist/refsure.mjs <verb> --page refsure-probe … ; echo "exit $?"
+   agent-browser --session refsure-probe close
    ```
    Cover the refusal paths, not only the happy one: a twin group, a reshuffled page between `locate` and `act`, a
    wrong `--expect-name`, a high-risk control, `--dry-run`. Count clicks on the fixture (a counter on the page) to

@@ -19,13 +19,17 @@ function parse(url: string): URL | null {
 
 /**
  * Deny wins; a non-empty allow list must match; `requireIsolatedProfile` refuses Orca's default profile,
- * and a tab whose profile is unknown, since the default one carries the user's imported cookies.
+ * and a tab whose profile is unknown (every agent-browser session), since the default one carries the user's
+ * imported cookies.
  */
 export function checkOrigin(url: string, cfg: OriginConfig, profileId: string | null): 'ok' | EgressRefusal {
   if (cfg.requireIsolatedProfile && (profileId === null || profileId === 'default')) {
     return {
       cause: 'origin_denied',
-      detail: 'requireIsolatedProfile is on and this tab uses Orca\'s default profile; open it in an isolated profile',
+      detail: profileId === null
+        ? 'requireIsolatedProfile is on and this tab reports no profile (an agent-browser session never does); '
+          + 'open it in an isolated Orca profile'
+        : 'requireIsolatedProfile is on and this tab uses Orca\'s default profile; open it in an isolated profile',
     };
   }
   const page = parse(url);

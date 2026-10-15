@@ -12,7 +12,8 @@ import { skillCheck } from './skill-check';
  */
 export const doctorCommand: CommandSpec<DoctorArgs, DoctorResult> = {
   name: 'doctor',
-  summary: 'Check Node, Orca, keys, consent, config, model drift and the installed skill; --ping asks each provider once',
+  summary: 'Check Node, the browser backend (Orca or agent-browser), keys, consent, config, model drift and the '
+    + 'installed skill; --ping asks each provider once',
   since: '0.1.0',
   stability: 'stable',
   options: {

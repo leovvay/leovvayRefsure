@@ -6,8 +6,8 @@ Report it privately through GitHub security advisories:
 <https://github.com/kma-leovvay/leovvayRefsure/security/advisories/new>.
 
 Please do not open a public issue for a vulnerability. Include the refsure version (`refsure --version` or the
-envelope's `version`), the Orca version, the command you ran, and a minimal page or fixture that reproduces it. Do not
-include real API keys or real logged-in page content; a synthetic fixture is enough.
+envelope's `version`), the Orca or agent-browser version, the command you ran, and a minimal page or fixture that
+reproduces it. Do not include real API keys or real logged-in page content; a synthetic fixture is enough.
 
 Fixes ship as a patch release, and the advisory is published once a fixed version is on npm.
 
@@ -48,7 +48,7 @@ A way to make refsure act on an option code did not offer, or to act past a refu
   a literal in the config file and never from a `--key` flag.
 - `OPENROUTER_API_KEY` and `OPENAI_API_KEY` are never read unless the config names them.
 - A key lives in memory for one request. It is removed from every transport error, never printed, never written to
-  `egress.log`, and `REFSURE_*` variables are stripped from the `orca` child environment.
+  `egress.log`, and `REFSURE_*` variables are stripped from the `orca` and `agent-browser` child environments.
 - refsure writes the consent file, local state and `egress.log` as `0600` (new folders `0700`). It refuses a config
   file with any group or other permission bit (`config_mode`; `0600` or stricter passes), ignores a consent file that
   group or others may write (anyone who could write it could grant on the owner's behalf), and refuses a local-state
@@ -64,8 +64,8 @@ approval for it (`"ask": ["Bash(refsure act-high-risk:*)"]` in Claude Code, a `p
 advisory, not a boundary:
 
 - an agent in bypass or full-auto mode skips the host's prompt;
-- an agent can call the bundle directly (`node …/refsure.mjs`) or click with raw `orca` commands, which refsure never
-  sees;
+- an agent can call the bundle directly (`node …/refsure.mjs`) or click with raw `orca` or `agent-browser` commands,
+  which refsure never sees;
 - the `setup` consent step can be faked by an agent with a terminal: consent is a disclosure, not a control.
 
 Reports that only restate these limits are welcome as documentation issues, not as advisories. A way for an ordinary
