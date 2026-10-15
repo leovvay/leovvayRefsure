@@ -1,4 +1,5 @@
 import type { ProviderId, SiteId } from '../site-id';
+import type { CalibrationProvenance } from './calibration-provenance';
 
 /** One measured threshold with its provenance; shipped in calibration.json (spec §9). */
 export interface CalibrationEntry {
@@ -13,4 +14,5 @@ export interface CalibrationEntry {
   coverageAtP99: number;
   precisionAtP99: number;
   date: string;
+  provenance?: CalibrationProvenance;
 }
