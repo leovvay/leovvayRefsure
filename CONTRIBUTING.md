@@ -115,6 +115,8 @@ Rules for `run`:
   returns the file as `text` on an `ok` outcome, and `main.ts` prints that verbatim instead of the envelope.
 - A new `why.cause` gets a row in `src/output/causes.ts`. A new cause or `next.do` value ships only in a minor
   release, and never moves between exit classes.
+- The envelope major and the `refsure-skill:` line in `skills/refsure/SKILL.md` move together. `npm run build`
+  refuses a skill whose major differs from the binary's, since `doctor` would call the copy it prints stale.
 
 Then update the "Commands" section of `README.md` (the tables and "Options by command") and its causes table from the
 built binary's `refsure commands --json`, `refsure causes --json` and `refsure <verb> --help`, never from memory. Add

@@ -80,8 +80,9 @@ refsure needs at least one Decision provider key. Which verbs each provider unlo
 
 ### Config file
 
-`$XDG_CONFIG_HOME/refsure/config.json` (default `~/.config/refsure/config.json`). It must have mode `0600`; any
-other mode is refused with `not_set_up`.
+`$XDG_CONFIG_HOME/refsure/config.json` (default `~/.config/refsure/config.json`). Only you may read or write it:
+any group or other permission bit (`0640`, `0644`, `0660`…) is refused with `config_mode` (`not_set_up`). `0600` is
+the mode to use; a stricter one such as `0400` also passes.
 
 ```sh
 mkdir -p ~/.config/refsure && touch ~/.config/refsure/config.json && chmod 600 ~/.config/refsure/config.json
@@ -162,7 +163,8 @@ refsure setup
 `setup` prints the disclosure from [What leaves your machine](#what-leaves-your-machine). Then, for each configured
 provider host, it asks you to type the exact phrase `send page text to <host>`, for example
 `send page text to openrouter.ai`. It reads from `/dev/tty`, never asks for a key, and writes the grants to
-`$XDG_CONFIG_HOME/refsure/consent.json` (mode `0600`).
+`$XDG_CONFIG_HOME/refsure/consent.json` (mode `0600`). A consent file that group or others can write is ignored, as
+if you had granted nothing, because anyone who can write it could grant on your behalf.
 
 - A Decision runs only with a grant that matches its provider, its host and the current disclosure text. If the
   disclosure text changes in a new release, or you point a provider at a different gateway host, refsure answers
@@ -564,7 +566,7 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `unsupported` | `unsupported_by_backend` | 21 | The browser backend lacks a capability this command needs. |
 | `spend_limit` | `spend_limit` | 22 | The per-minute Decision cap or the daily spend cap was reached. |
 | `not_set_up` | `not_set_up` | 23 | A key or a consent grant is missing; a human runs `refsure setup`. |
-| `config_mode` | `not_set_up` | 23 | The config file is readable by others; chmod 600 it. |
+| `config_mode` | `not_set_up` | 23 | The config file is readable or writable by group or others; chmod 600 it. |
 | `literal_key` | `not_set_up` | 23 | The config holds a literal key; name an env variable or a command. |
 | `gateway_insecure` | `not_set_up` | 23 | The gateway URL is neither https nor localhost. |
 | `config_invalid` | `not_set_up` | 23 | The config file could not be read as a refsure config. |
@@ -605,17 +607,18 @@ These rules live in code, not in the agent skill:
 | read | links, tabs, expanders, close | `act`, confidence ≥0.6 |
 | write | fields, toggles, a plain submit | `act`, confidence ≥0.8 |
 | money | pay, buy, order, checkout, top up; card, CVV and IBAN forms; `checkout`, `payment`, `billing` paths | `act-high-risk` only |
-| irreversible | delete, remove, send, publish, revoke; "cancel" next to subscription, order, account or booking; the confirming button of a confirm dialog | `act-high-risk` only |
+| irreversible | delete, remove, send, publish, revoke; "cancel" next to subscription, order, account or booking; the confirming button of a confirm dialog (never its own Cancel or No); `delete`, `close-account` paths | `act-high-risk` only |
 | auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent | `act-high-risk` only |
 | consent | accept, agree, allow cookies, opt in | `act-high-risk` only |
 
 Names are matched against the union of all lexicons (English, Ukrainian, Russian, German, Spanish, French and
 Polish), whatever the page language.
 
-**Tickets.** `locate`, `dismiss --propose` and `pick-option` issue a single-use ticket that lives 120 s and stores the
-element's fingerprint (role, name, section path, ordinal among twins), never its ref number. `act` claims it, checks
-the URL, takes a fresh snapshot, finds the same element again, re-reads its risk, and acts at once. If anything
-moved, nothing is clicked (`stale`). Two agents racing one ticket: exactly one wins, the other gets `ticket_used`.
+**Tickets.** `locate`, `dismiss` (when it proposes rather than clicks) and `pick-option` issue a single-use ticket
+that lives 120 s and stores the element's fingerprint (role, name, section path, ordinal among twins), never its ref
+number. `act` claims it, checks the URL, takes a fresh snapshot, finds the same element again, re-reads its risk, and
+acts at once. If anything moved, nothing is clicked (`stale`). Two agents racing one ticket: exactly one wins, the
+other gets `ticket_used`.
 
 **Your own refs.** `outcome`, `act-high-risk --ref` and `pick-option --open` take no snapshot, so your refs survive.
 Instead, `--expect-name` must match the element's live text (or its `aria-label`, `placeholder` or `title`), and page
@@ -722,8 +725,10 @@ under `~/.claude/skills/refsure/`, `~/.codex/skills/refsure/` and `~/.agents/ski
 `skill_stale` check:
 
 - a copy with the same major passes;
-- a copy with another major, or none in its frontmatter, fails the check (`result.failed` lists `skill_stale`), and
-  the detail names the file to refresh with `refsure skill print`;
+- a copy with another major, none in its frontmatter, or a value that is not a whole number fails the check
+  (`result.failed` lists `skill_stale`). The detail names each stale copy and why, and ends with one command that
+  refreshes them all (`refsure skill print > <path>`, or `refsure skill print | tee <path> <path> > /dev/null`). A
+  FIFO or folder at a skill path is reported, never read; remove it before the refresh;
 - no copy at all passes: the skill is optional.
 
 Minor details come from `refsure commands --json` at run time, so a skill installed from the repository and a pinned

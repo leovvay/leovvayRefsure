@@ -49,7 +49,11 @@ A way to make refsure act on an option code did not offer, or to act past a refu
 - `OPENROUTER_API_KEY` and `OPENAI_API_KEY` are never read unless the config names them.
 - A key lives in memory for one request. It is removed from every transport error, never printed, never written to
   `egress.log`, and `REFSURE_*` variables are stripped from the `orca` child environment.
-- The config and consent files must be mode `0600`; local state is `0700` / `0600`.
+- refsure writes the consent file, local state and `egress.log` as `0600` (new folders `0700`). It refuses a config
+  file with any group or other permission bit (`config_mode`; `0600` or stricter passes), ignores a consent file that
+  group or others may write (anyone who could write it could grant on the owner's behalf), and refuses a local-state
+  entry with any group or other bit, or one another user owns. A FIFO or other non-file at any of these paths is
+  refused, never waited on.
 - Secret shapes and PII in page text are redacted before anything is sent.
 
 Any path by which a key value reaches stdout, stderr, the envelope, `egress.log`, local state or a provider request

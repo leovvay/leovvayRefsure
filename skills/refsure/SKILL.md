@@ -8,11 +8,12 @@ refsure-skill: 1
 
 `refsure` is a CLI that answers browser judgment questions for you. Code builds the options from the page, a
 Decision API picks one, and code rechecks the page before anything is clicked. Each call prints one JSON envelope
-of about 1 KB on stdout. Prefer it over reading a whole snapshot whenever the question is "which", "is it", or
-"did it".
+of about 1 KB on stdout; only `skill print` differs (below). Prefer it over reading a whole snapshot whenever the
+question is "which", "is it", or "did it".
 
 Version-specific detail (every verb, option and cause) comes from `refsure commands --json` and
-`refsure causes --json`. `refsure skill print` prints the copy of this skill that matches the installed binary.
+`refsure causes --json`. `refsure skill print` prints the copy of this skill that matches the installed binary: the
+Markdown file itself, not an envelope (`--json` does not change that), for `refsure skill print > <path>`.
 
 ## 1. Setup
 
@@ -48,7 +49,10 @@ refsure commands on it.
 More rules:
 - `outcome` acts for you. Use it for `click`, `dblclick`, `fill`, `select`, `check` and `uncheck`. It refuses
   `type`, `keypress` and `inserttext`.
-- `locate` and `dismiss` never act. `act` uses a single-use ticket and rechecks the page first.
+- `locate` never acts. `act` uses a single-use ticket and rechecks the page first.
+- `dismiss` does click: only a reject or close control, never one the veto names (accept, subscribe, enable…). When
+  it is less sure it proposes a ticket for `act` instead, and `--propose` never clicks. After its click the overlay
+  must be gone, else exit 30.
 - `wait-for` answering `not_seen` does not mean absent. It means not seen within the timeout.
 - `snap` prints compact candidate lines when you must look yourself. `guard --ref @eN` tells you an element's risk
   class before you touch it.

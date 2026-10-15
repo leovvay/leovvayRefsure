@@ -1,4 +1,4 @@
-import { closeSync, fstatSync, openSync, readFileSync } from 'node:fs';
+import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import type { ProviderId } from '../questions';
 import type { Consent, ConsentGrant } from './consent-record';
 import { DISCLOSURE_HASH } from './disclosure';
@@ -25,7 +25,8 @@ function asGrant(value: unknown): ConsentGrant | null {
 export function readConsent(path: string): Consent | null {
   let fd: number;
   try {
-    fd = openSync(path, 'r');
+    // Non-blocking, so a FIFO here cannot hang the open; the fstat below refuses anything but a regular file.
+    fd = openSync(path, constants.O_RDONLY | constants.O_NONBLOCK);
   } catch {
     return null;
   }

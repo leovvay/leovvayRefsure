@@ -1,4 +1,4 @@
-import { appendFileSync, closeSync, fstatSync, openSync, readSync } from 'node:fs';
+import { closeSync, constants, fstatSync, openSync, readSync, writeSync } from 'node:fs';
 import type { EgressLogEntry } from './egress-log-entry';
 import { ensureParentDir } from './private-file';
 
@@ -15,8 +15,15 @@ export function appendEgressLog(path: string, entry: EgressLogEntry): boolean {
   const line = JSON.stringify({ t, command, site, provider, host, bytes, digest, status, usd, model });
   try {
     ensureParentDir(path);
-    appendFileSync(path, `${line}\n`, { mode: 0o600 });
-    return true;
+    // Non-blocking: opening a FIFO with no reader then fails at once (ENXIO) instead of hanging.
+    const fd = openSync(path, constants.O_WRONLY | constants.O_APPEND | constants.O_CREAT | constants.O_NONBLOCK, 0o600);
+    try {
+      if (!fstatSync(fd).isFile()) return false;
+      writeSync(fd, `${line}\n`);
+      return true;
+    } finally {
+      closeSync(fd);
+    }
   } catch {
     return false;
   }
@@ -36,12 +43,15 @@ function asEntry(value: unknown): EgressLogEntry | null {
 function readTail(path: string): string {
   let fd: number;
   try {
-    fd = openSync(path, 'r');
+    // Non-blocking, so a FIFO here cannot hang the open; only a regular file is read.
+    fd = openSync(path, constants.O_RDONLY | constants.O_NONBLOCK);
   } catch {
     return '';
   }
   try {
-    const size = fstatSync(fd).size;
+    const stat = fstatSync(fd);
+    if (!stat.isFile()) return '';
+    const size = stat.size;
     const length = Math.min(size, MAX_READ_BYTES);
     const buffer = Buffer.alloc(length);
     let read = 0;

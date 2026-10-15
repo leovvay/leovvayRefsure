@@ -73,7 +73,8 @@ export function writeEntry(dir: string, entry: StoredEntry): void {
 export function readEntry(path: string): ReadOutcome {
   let fd: number;
   try {
-    fd = openSync(path, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+    // Non-blocking, so a FIFO here cannot hang the open; the fstat below refuses anything but a regular file.
+    fd = openSync(path, constants.O_RDONLY | constants.O_NONBLOCK | (constants.O_NOFOLLOW ?? 0));
   } catch (error) {
     const code = errorCode(error);
     if (code === 'ENOENT' || code === 'ENOTDIR') return 'absent';

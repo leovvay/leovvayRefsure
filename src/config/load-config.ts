@@ -1,4 +1,4 @@
-import { closeSync, fstatSync, openSync, readFileSync } from 'node:fs';
+import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import { ConfigError } from './config-error';
 import {
   checkGatewayUrl, invalid, isRecord, onlyFields, readBoolean, readGateway, readKeySpec, readLimits, readOrigins,
@@ -35,7 +35,8 @@ function errorCode(error: unknown): string | undefined {
 function readConfigFile(path: string): Record<string, unknown> | null {
   let fd: number;
   try {
-    fd = openSync(path, 'r');
+    // Non-blocking, so a FIFO here cannot hang the open; the fstat below refuses anything but a regular file.
+    fd = openSync(path, constants.O_RDONLY | constants.O_NONBLOCK);
   } catch (error) {
     const code = errorCode(error);
     if (code === 'ENOENT' || code === 'ENOTDIR') return null;
