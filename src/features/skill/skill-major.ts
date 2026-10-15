@@ -33,8 +33,3 @@ export function readSkillMajor(text: string): SkillMajorRead {
   if (!WHOLE.test(value)) return { major: null, problem: `refsure-skill value '${shown(value)}' is not a whole number` };
   return { major: Number(value), problem: null };
 }
-
-/** The `refsure-skill:` major in a SKILL.md's frontmatter; `null` when there is none (`readSkillMajor` says why). */
-export function skillMajorOf(text: string): number | null {
-  return readSkillMajor(text).major;
-}

@@ -1,6 +1,6 @@
 import type { ConsoleLine, NetworkLine } from '../../browser';
 import { boundText, cleanEgressText } from '../../egress';
-import { urlNorm } from '../../page-model';
+import { bareUrl } from '../mark';
 import type { TriageConsole } from './triage-console';
 import type { TriageRequest } from './triage-request';
 
@@ -9,19 +9,6 @@ export const TRIAGE_MAX = 50;
 const TEXT_MAX = 300;
 const URL_MAX = 300;
 const KEPT_LEVELS: ReadonlySet<string> = new Set(['error', 'warning', 'warn', 'assert']);
-
-/** `urlNorm` without the query (spec §6.3), then redacted: a path can carry a token too. */
-export function triageUrl(url: string): string {
-  let bare = url.trim();
-  try {
-    const parsed = new URL(bare);
-    parsed.search = '';
-    bare = urlNorm(parsed.href);
-  } catch {
-    bare = bare.split('?', 1)[0] ?? '';
-  }
-  return boundText(cleanEgressText(bare, true), { max: URL_MAX, inline: true });
-}
 
 /** Errors and warnings only. The text is redacted and masked (masks always on, as a mark keeps it), then cut. */
 export function consoleLines(lines: readonly ConsoleLine[]): (TriageConsole & { at: number | null })[] {
@@ -38,7 +25,7 @@ export function consoleLines(lines: readonly ConsoleLine[]): (TriageConsole & { 
 export function networkLines(lines: readonly NetworkLine[]): (TriageRequest & { at: number | null })[] {
   return lines
     .filter((line) => line.status >= 400 || line.status === 0)
-    .map((line) => ({ method: line.method.toUpperCase().slice(0, 16), url: triageUrl(line.url), status: line.status, at: line.at }));
+    .map((line) => ({ method: line.method.toUpperCase().slice(0, 16), url: bareUrl(line.url, { max: URL_MAX }), status: line.status, at: line.at }));
 }
 
 /** Lines at or after `sinceMs`; a line with no time is kept, and the caller says so. */

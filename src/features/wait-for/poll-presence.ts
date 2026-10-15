@@ -5,7 +5,7 @@ import { causeStatus, type Status } from '../../output';
 import { fold } from '../../page-model';
 import { BOUNDS, presenceSite } from '../../questions';
 import type { Verdict } from '../../questions';
-import { abstainOutcome, readPage, sleep, urlGlobMatches } from '../shared';
+import { abstainOutcome, nothingDone, readPage, sleep, urlGlobMatches } from '../shared';
 import type { PageReading } from '../shared';
 import { formatDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
@@ -48,6 +48,8 @@ function plural(n: number, word: string): string {
  *
  * When the Decision cannot be asked (setup, caps, policy, a refused key), a wait that `--text` or `--url` can
  * settle keeps polling by code and names the cause in its notes; any other wait stops at once with that cause.
+ * The same goes for `--max-decisions`: once no round fits what is left, a wait without a code rule ends there, as
+ * `usage` when the cap is below a single round, since nothing else can ever see it.
  */
 export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page: PageRef): Promise<CommandOutcome<WaitForResult>> {
   const tally: Tally = { polls: 0, decisions: 0, answered: 0, started: ctx.now() };
@@ -60,13 +62,20 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
   let lastHash: string | null = null;
   let lastAskAt = Number.NEGATIVE_INFINITY;
   let lastCause: string | null = null;
-  /** Why the Decision is no longer asked, once it is not; code keeps polling. */
+  /** Why the Decision is no longer asked, once it is not; code keeps polling when `--text` or `--url` is set. */
   let closed: string | null = null;
 
   // A Decision that can never be asked on this wait: stop, unless code can still see it.
   const shut = (verdict: Abstain): CommandOutcome<WaitForResult> | null => {
     if (!byCode) return abstainOutcome(verdict, result(null, 'decision'));
     closed = `the Decision is not asked: ${verdict.cause} (${verdict.detail})`;
+    return null;
+  };
+  // Why no round of `calls` provider calls fits what is left of `--max-decisions`, or null while one does.
+  const capped = (calls: number): string | null => {
+    const left = args.maxDecisions - tally.decisions;
+    if (left <= 0) return `the --max-decisions cap of ${args.maxDecisions} was reached`;
+    if (calls > left) return `the --max-decisions cap of ${args.maxDecisions} was reached: a round takes ${calls} calls, ${left} left`;
     return null;
   };
 
@@ -78,18 +87,20 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
       return { status: 'ok', acted: false, effect: 'none', result: { ...result('present', 'code'), rule }, settledByCode: true };
     }
 
-    if (closed === null && tally.decisions >= args.maxDecisions) closed = `the --max-decisions cap of ${args.maxDecisions} was reached`;
+    closed ??= capped(1);
     if (closed === null && ctx.now() - lastAskAt >= args.intervalMs) {
       const input = presenceInput(args, reading, ctx.config.piiMasks);
       const hash = sha256Hex(`${input.pageUrl}\n${input.page}`);
       if (hash !== lastHash) {
         const route = await ctx.routeCheck(presenceSite, { combo, originUrl: reading.tab.url, dryRun: ctx.dryRun });
+        const full = route.ok ? capped(route.calls) : null;
         if (!route.ok) {
           const stop = shut({ kind: 'abstain', cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null });
           if (stop) return stop;
-        } else if (tally.decisions + route.calls > args.maxDecisions) {
-          const left = args.maxDecisions - tally.decisions;
-          closed = `the --max-decisions cap of ${args.maxDecisions} was reached: a round takes ${route.calls} calls, ${left} left`;
+        } else if (full !== null) {
+          // Below one round, with nothing spent: without --text or --url this wait could only run out.
+          if (!byCode && tally.decisions === 0) return belowOneRound(args.maxDecisions, route.calls);
+          closed = full;
         } else {
           lastHash = hash;
           lastAskAt = ctx.now();
@@ -106,26 +117,36 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
             const stop = shut(verdict);
             if (stop) return stop;
           } else if (RETRY.has(verdict.cause)) lastHash = null;
+          closed ??= capped(route.calls);
         }
       }
     }
 
+    // Without --text or --url only the Decision can see it: once it is closed, waiting on cannot change the answer.
+    if (closed !== null && !byCode) return ended(args, ctx, { tally, byCode, closed, early: true, lastCause, result });
     const left = deadline - ctx.now();
     if (left <= 0 || ctx.signal.aborted) break;
     await sleep(Math.min(args.intervalMs, left), ctx.signal);
   }
-  return timedOut(args, ctx, { tally, byCode, closed, lastCause, result });
+  return ended(args, ctx, { tally, byCode, closed, early: false, lastCause, result });
+}
+
+/** `--max-decisions` is below one round and only the Decision could settle the wait: nothing was asked. */
+function belowOneRound(cap: number, calls: number): CommandOutcome<WaitForResult> {
+  return nothingDone<WaitForResult>('usage', 'usage', `--max-decisions ${cap} is below one Decision round of ${calls} `
+    + `provider calls, and without --text or --url nothing else can see it: allow at least ${calls}, or add --text or --url`);
 }
 
 /**
- * The wait ran out. `not_seen` (exit 10) when code looked all along or a provider answered; when the wait rested
- * on the Decision and no provider ever answered, it could not run: `unavailable` with the last provider cause.
+ * The wait is over: it ran out, was interrupted, or (`early`) the Decision closed on a wait no code rule can settle.
+ * `not_seen` (exit 10) when code looked all along or a provider answered; when the wait rested on the Decision and
+ * no provider ever answered, it could not run: `unavailable` with the last provider cause.
  */
-function timedOut(
+function ended(
   args: WaitForArgs,
   ctx: CommandContext,
   end: {
-    tally: Tally; byCode: boolean; closed: string | null; lastCause: string | null;
+    tally: Tally; byCode: boolean; closed: string | null; early: boolean; lastCause: string | null;
     result: (verdict: WaitForResult['verdict'], by: WaitForResult['by']) => WaitForResult;
   },
 ): CommandOutcome<WaitForResult> {
@@ -133,9 +154,11 @@ function timedOut(
   const capped = tally.decisions >= args.maxDecisions ? `the --max-decisions cap of ${args.maxDecisions} was reached` : null;
   const closed = end.closed ?? capped;
   const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
-  if (closed !== null) notes.push(closed);
+  if (closed !== null && !end.early) notes.push(closed);
   if (lastCause !== null && !(closed ?? '').includes(lastCause)) notes.push(`the last Decision: ${lastCause}`);
-  const within = ctx.signal.aborted ? 'before the wait was interrupted' : `within ${formatDuration(args.timeoutMs)}`;
+  let within = `within ${formatDuration(args.timeoutMs)}`;
+  if (end.early && closed !== null) within = `before ${closed}`;
+  else if (ctx.signal.aborted) within = 'before the wait was interrupted';
   const next = { do: 'snapshot' as const, argv: ['refsure', 'snap'] };
   if (!end.byCode && tally.answered === 0 && lastCause !== null && causeStatus(lastCause) === 'unavailable') {
     return {

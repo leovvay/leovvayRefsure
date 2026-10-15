@@ -20,7 +20,7 @@ import { triageCommand } from './triage';
 import { verifyTargetCommand } from './verify-target';
 import { waitForCommand } from './wait-for';
 
-/** Every command, in `--help` order. A static list: one bundle, no directory scan. Feature tasks append here. */
+/** Every command, in `--help` order. A static list: one bundle, no directory scan. A new command is added here. */
 export const FEATURES: readonly AnyCommandSpec[] = [
   setupCommand,
   privacyCommand,

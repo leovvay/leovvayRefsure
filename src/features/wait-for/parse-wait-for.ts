@@ -5,6 +5,7 @@ import { formatDuration, parseDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
 
 export const DEFAULTS = { timeout: '30s', interval: '2s', maxDecisions: '10' } as const;
+const TIMEOUT_MIN_MS = 1_000;
 const TIMEOUT_MAX_MS = 600_000;
 const INTERVAL_MIN_MS = 1_000;
 const INTERVAL_MAX_MS = 300_000;
@@ -22,7 +23,10 @@ function durationOf(name: string, text: string, min: number, max: number): numbe
   return ms;
 }
 
-/** `wait-for`'s options, checked: durations `\d+(ms|s|m)`, an interval of at least 1 s, a bounded call cap. */
+/**
+ * `wait-for`'s options, checked: durations `\d+(ms|s|m)`, an interval of at least 1 s, a bounded call cap, and
+ * something that can settle the wait (a Decision, `--text` or `--url`).
+ */
 export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (raw.positionals.length > 0) return { usage: `wait-for takes no positional arguments, got ${raw.positionals.length}` };
   if (raw.rest.length > 0) return { usage: 'wait-for takes nothing after --' };
@@ -38,7 +42,7 @@ export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (url === '') return { usage: '--url is empty: give a glob such as "*/done*", or leave it out' };
   if (url !== null && url.length > URL_GLOB_MAX) return { usage: `--url is over ${URL_GLOB_MAX} characters` };
 
-  const timeoutMs = durationOf('timeout', stringOf(raw.values.timeout, DEFAULTS.timeout), INTERVAL_MIN_MS, TIMEOUT_MAX_MS);
+  const timeoutMs = durationOf('timeout', stringOf(raw.values.timeout, DEFAULTS.timeout), TIMEOUT_MIN_MS, TIMEOUT_MAX_MS);
   if (typeof timeoutMs !== 'number') return timeoutMs;
   const intervalMs = durationOf('interval', stringOf(raw.values.interval, DEFAULTS.interval), INTERVAL_MIN_MS, INTERVAL_MAX_MS);
   if (typeof intervalMs !== 'number') return intervalMs;
@@ -46,6 +50,10 @@ export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   const maxDecisions = /^\d{1,3}$/.test(capText) ? Number(capText) : Number.NaN;
   if (!Number.isInteger(maxDecisions) || maxDecisions > MAX_DECISIONS_LIMIT) {
     return { usage: `--max-decisions must be a whole number from 0 to ${MAX_DECISIONS_LIMIT}` };
+  }
+  // With no Decision and no code rule, nothing could ever see it: the wait would only run out.
+  if (maxDecisions === 0 && text === null && url === null) {
+    return { usage: '--max-decisions 0 leaves nothing to see it: give --text or --url, or allow at least 1 Decision' };
   }
   return { expect, text, url, timeoutMs, intervalMs, maxDecisions, agree: raw.values.agree === true };
 }

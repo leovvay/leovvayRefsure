@@ -28,14 +28,14 @@ export const forgetCommand: CommandSpec<ForgetArgs, ForgetResult> = {
     return { all: false, hint: page === null ? {} : { page } };
   },
   async run(args, ctx) {
+    // Marks and tickets both live in the state store, filed by page: one clear takes both kinds.
     if (args.all) {
-      // The ticket book clears by page, marks included; the store pass catches whatever it left.
-      const removed = (await ctx.tickets.forget('all')) + (await ctx.store.clearAll());
+      const removed = await ctx.store.clearAll();
       return { status: 'ok', acted: false, effect: 'none', result: { removed, scope: 'all' } };
     }
     const page = await ctx.browser.resolvePage(args.hint);
     ctx.page = page;
-    const removed = (await ctx.tickets.forget({ pageId: page.id })) + (await ctx.store.clearPage(page.id));
+    const removed = await ctx.store.clearPage(page.id);
     return { status: 'ok', acted: false, effect: 'none', result: { removed, scope: 'page' } };
   },
 };

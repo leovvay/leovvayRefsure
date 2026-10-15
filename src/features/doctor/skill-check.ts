@@ -15,15 +15,20 @@ function shellWord(path: string): string {
 }
 
 function describe(skill: InstalledSkill): string {
-  if (skill.notAFile) return `${skill.path}: ${skill.problem ?? 'not a regular file'}, stale; remove it first`;
+  if (skill.notAFile) return `${skill.path}: ${skill.problem}, stale; remove it first`;
   if (skill.problem !== null) return `${skill.path}: ${skill.problem}, stale`;
   if (skill.major !== SKILL_MAJOR) return `${skill.path}: refsure-skill ${skill.major}, this binary speaks ${SKILL_MAJOR}: stale`;
   return `${skill.path}: refsure-skill ${skill.major}, current`;
 }
 
-/** One command that rewrites every stale copy with this binary's skill. */
-function refreshOf(stale: readonly InstalledSkill[]): string {
-  const targets = stale.map((skill) => shellWord(skill.path));
+/**
+ * One command that rewrites every stale copy a write can reach with this binary's skill, or `null` when none can.
+ * A path that is not a regular file is left out: a redirect into a FIFO blocks, into a folder fails. Its own line
+ * says to remove it first.
+ */
+function refreshOf(stale: readonly InstalledSkill[]): string | null {
+  const targets = stale.filter((skill) => !skill.notAFile).map((skill) => shellWord(skill.path));
+  if (targets.length === 0) return null;
   if (targets.length === 1) return `refresh: refsure skill print > ${targets[0]}`;
   return `refresh all: refsure skill print | tee ${targets.join(' ')} > /dev/null`;
 }
@@ -31,7 +36,7 @@ function refreshOf(stale: readonly InstalledSkill[]): string {
 /**
  * `skill_stale` (spec §10): an installed copy whose `refsure-skill:` major differs from the envelope major teaches
  * an agent a contract this binary does not speak. Minor drift is fine: version detail comes from `commands --json`.
- * No copy installed is not stale. The detail ends with one command that refreshes every stale copy.
+ * No copy installed is not stale. The detail ends with one command that refreshes every stale copy it can write.
  */
 export function skillCheck(env: NodeJS.ProcessEnv): DoctorCheck {
   const found = findInstalledSkills(env);
@@ -41,6 +46,7 @@ export function skillCheck(env: NodeJS.ProcessEnv): DoctorCheck {
   }
   const stale = found.filter((skill) => !current(skill));
   const parts = found.map(describe);
-  if (stale.length > 0) parts.push(refreshOf(stale));
+  const refresh = refreshOf(stale);
+  if (refresh !== null) parts.push(refresh);
   return { name: 'skill_stale', ok: stale.length === 0, detail: parts.join('; ') };
 }

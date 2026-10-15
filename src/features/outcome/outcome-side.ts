@@ -1,7 +1,7 @@
 import { boundText, cleanEgressText } from '../../egress';
+import { BOUNDS } from '../../questions';
 import type { PageReading } from '../shared';
 
-const URL_MAX = 300;
 const TITLE_MAX = 300;
 
 /** A page as one side of the outcome Decision: URL, title, then the visible text. Empty fields are left out. */
@@ -19,7 +19,7 @@ export function outcomeSide(view: { url: string; title: string; text: string }):
  */
 export function cleanSide(reading: PageReading, piiMasks: boolean): { url: string; title: string; text: string } {
   return {
-    url: boundText(cleanEgressText(reading.tab.url, piiMasks), { max: URL_MAX, inline: true }),
+    url: boundText(cleanEgressText(reading.tab.url, piiMasks), { max: BOUNDS.URL_MAX, inline: true }),
     title: boundText(cleanEgressText(reading.tab.title, piiMasks), { max: TITLE_MAX, inline: true }),
     text: cleanEgressText(reading.text, piiMasks),
   };

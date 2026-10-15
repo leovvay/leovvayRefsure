@@ -67,9 +67,9 @@ function terminalCheck(inTerminal: boolean): DoctorCheck {
 }
 
 /**
- * Phase 1 doctor (spec §6.3): Node, the chosen backend and its probe, and, for Orca, whether this is an Orca
- * terminal. The agent-browser backend has no worktree guard, so it has no terminal check. With no backend chosen
- * (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no backend to probe.
+ * The Node and backend checks (spec §6.3): Node, the chosen backend and its probe, and, for Orca, whether this is
+ * an Orca terminal. The agent-browser backend has no worktree guard, so it has no terminal check. With no backend
+ * chosen (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no backend to probe.
  */
 export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
   const choice = chooseBackend(ctx.env);

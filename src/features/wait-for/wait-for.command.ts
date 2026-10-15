@@ -21,7 +21,7 @@ export const waitForCommand: CommandSpec<WaitForArgs, WaitForResult> = {
     timeout: { type: 'string', summary: 'How long to wait, as 10s, 90s or 2m; from 1s to 10m', default: DEFAULTS.timeout },
     interval: { type: 'string', summary: 'Time between polls, as 1s or 1500ms; from 1s to 5m', default: DEFAULTS.interval },
     'max-decisions': {
-      type: 'string', summary: 'Provider calls the wait may make; 0 waits by code only', default: DEFAULTS.maxDecisions,
+      type: 'string', summary: 'Provider calls the wait may make; 0 waits by code only (with --text or --url)', default: DEFAULTS.maxDecisions,
     },
     agree: { type: 'boolean', summary: 'Both providers must say present (needs both set up)' },
   },

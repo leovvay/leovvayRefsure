@@ -5,6 +5,7 @@ import { abstainOutcome, readPage, sleep } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
+import { landedOutcome } from './landed-outcome';
 import { checkBeforeAct } from './pre-act-checks';
 import { cleanSide, outcomeSide } from './outcome-side';
 
@@ -13,14 +14,6 @@ const SETTLE_MS = 600;
 const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
 /** Under `--dry-run` nothing is acted on, so the after-side can only be a stand-in. */
 const AFTER_UNREAD = `(the page as it reads ${SETTLE_MS} ms after the act; under --dry-run nothing is acted on or read)`;
-
-function landed(by: OutcomeResult['by'], rule?: OutcomeResult['rule']): CommandOutcome<OutcomeResult> {
-  const result: OutcomeResult = { verdict: 'landed', by };
-  if (rule) result.rule = rule;
-  const outcome: CommandOutcome<OutcomeResult> = { status: 'ok', acted: true, effect: 'dispatched', result };
-  if (by === 'code') outcome.settledByCode = true;
-  return outcome;
-}
 
 function unknown(cause: string, detail: string): CommandOutcome<OutcomeResult> {
   return {
@@ -88,7 +81,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   await sleep(SETTLE_MS, ctx.signal);
   const after = await readPage(ctx.browser, page);
   const rule = landedByCode(args, { url: before.tab.url, text: before.text }, { url: after.tab.url, text: after.text });
-  if (rule) return landed('code', rule);
+  if (rule) return landedOutcome('dispatched', 'code', rule);
 
   const { verdict } = await ctx.decide(
     outcomeSite,
@@ -100,6 +93,6 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
     },
     { combo: 'auto', originUrl: after.tab.url, dryRun: ctx.dryRun, signal: ctx.signal },
   );
-  if (verdict.kind === 'answer') return landed('decision');
+  if (verdict.kind === 'answer') return landedOutcome('dispatched', 'decision');
   return unknown(verdict.cause, verdict.detail);
 }

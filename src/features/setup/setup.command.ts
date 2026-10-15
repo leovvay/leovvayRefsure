@@ -60,13 +60,16 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     return {};
   },
   async run(_args, ctx) {
-    const roster = providerRoster(ctx.config, keySet(ctx.config, ctx.env));
-    const slots = Object.values(roster).filter((slot) => slot.problem === null && slot.endpoint !== null);
-    if (slots.length === 0) {
-      return notSetUp(Object.values(roster).map((slot) => slot.problem ?? slot.id).join('; '));
+    const roster = Object.values(providerRoster(ctx.config, keySet(ctx.config, ctx.env)));
+    // Each provider that can be asked about, with the host its page text would go to.
+    const targets = roster.flatMap((slot) => (
+      slot.problem === null && slot.endpoint ? [{ slot, host: slot.endpoint.host }] : []
+    ));
+    if (targets.length === 0) {
+      return notSetUp(roster.map((slot) => slot.problem ?? slot.id).join('; '));
     }
     if (ctx.dryRun) {
-      const asks = slots.map((slot) => ({ provider: slot.id, host: slot.endpoint!.host, phrase: phraseFor(slot.endpoint!.host) }));
+      const asks = targets.map(({ slot, host }) => ({ provider: slot.id, host, phrase: phraseFor(host) }));
       const preview: SetupPreview = { dry_run: true, would_ask: asks, disclosure_hash: DISCLOSURE_HASH };
       return {
         status: 'ok',
@@ -81,8 +84,7 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     const answers: SetupGrant[] = [];
     try {
       tty.write(`\n${DISCLOSURE_TEXT}\n`);
-      for (const slot of slots) {
-        const host = slot.endpoint!.host;
+      for (const { slot, host } of targets) {
         const line = await tty.ask(await promptFor(slot, host));
         if (line === null) break;
         const granted = line.trim() === phraseFor(host);
@@ -92,12 +94,13 @@ export const setupCommand: CommandSpec<Record<string, never>, SetupResult | Setu
     } finally {
       tty.close();
     }
-    const unanswered = slots.slice(answers.length).map((slot) => slot.endpoint!.host);
+    const unanswered = targets.slice(answers.length).map(({ host }) => host);
     if (ctx.signal.aborted) return notSetUp('setup was interrupted: nothing was written');
     // No answer at all is a consent step that did not happen, not one that succeeded with nothing granted.
     if (answers.length === 0) return notSetUp(`${NO_ANSWER}: ${unanswered.join(', ')}`);
-    writeConsent(ctx.config.paths.consent, applyAnswers(readConsent(ctx.config.paths.consent), answers));
-    const result: SetupResult = { grants: answers, consent: ctx.config.paths.consent, disclosure_hash: DISCLOSURE_HASH, unanswered };
+    const consentPath = ctx.config.paths.consent;
+    writeConsent(consentPath, applyAnswers(readConsent(consentPath), answers));
+    const result: SetupResult = { grants: answers, consent: consentPath, disclosure_hash: DISCLOSURE_HASH, unanswered };
     return { status: 'ok', acted: false, effect: 'none', result };
   },
 };

@@ -10,8 +10,8 @@ const LABEL_MAX = 80;
 
 /**
  * Remembers the page as it is now (spec §6.2, §8.7), before the agent acts on its own over several steps; then
- * `outcome --mark` asks whether the intent landed since. Stores the query-less URL and the redacted, masked
- * title and text for 15 minutes. Reads only: nothing is sent and nothing is clicked.
+ * `outcome --mark` asks whether the intent landed since. Stores the query-less URL, the title and the text, all
+ * redacted and masked, for 15 minutes. Reads only: nothing is sent and nothing is clicked.
  */
 export const markCommand: CommandSpec<MarkArgs, MarkResult> = {
   name: 'mark',

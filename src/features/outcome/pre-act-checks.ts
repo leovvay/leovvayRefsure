@@ -4,23 +4,17 @@ import { cutName, norm } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { actionPolicy, actionRole, liveRefRisk, nameCheck, readLiveTarget } from '../../risk';
 import type { RiskReading } from '../../risk';
-import { abstainOutcome, highRiskNext } from '../shared';
+import { abstainOutcome, highRiskNext, nothingDone } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 
 /**
- * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), the risk read, and the
- * body text read before the act, which is the outcome's before-side.
+ * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), and the body text read
+ * before the act, which is the outcome's before-side.
  */
-type Cleared = { acted: string; risk: RiskReading; bodyText: string };
+type Cleared = { acted: string; bodyText: string };
 
 type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared };
-
-function refused(status: 'refused' | 'stale', cause: string, detail: string, next: CommandOutcome<never>['next']): Checked {
-  const refusal: CommandOutcome<OutcomeResult> = { status, acted: false, effect: 'none', result: null, why: { cause, detail } };
-  if (next) refusal.next = next;
-  return { refusal };
-}
 
 /**
  * The route check, before anything is read or done. Any refusal stops the act, with one exception: over the spend
@@ -57,8 +51,8 @@ export async function checkBeforeAct(
   if (named !== 'ok') {
     ctx.trace.untrusted.add('why.detail');
     const shown = named.mismatch === '' ? 'no name' : JSON.stringify(named.mismatch);
-    return refused('stale', 'expect_name_mismatch', `@${ref} shows ${shown}, not ${JSON.stringify(args.expectName)}; nothing was done`,
-      { do: 'snapshot', argv: ['refsure', 'snap'] });
+    const detail = `@${ref} shows ${shown}, not ${JSON.stringify(args.expectName)}; nothing was done`;
+    return { refusal: nothingDone('stale', 'expect_name_mismatch', detail, { next: { do: 'snapshot', argv: ['refsure', 'snap'] } }) };
   }
 
   const risk: RiskReading = await liveRefRisk(ctx.browser, page, ref, action, target, {
@@ -71,9 +65,9 @@ export async function checkBeforeAct(
       ...(args.act.value === undefined ? {} : { value: args.act.value }),
       ...(args.risk ? { risk: args.risk } : {}),
     });
-    return refused('refused', 'high_risk_class',
-      `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done. `
-        + 'Only act-high-risk takes it, and only when the human asked for exactly this', next);
+    const detail = `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or `
+      + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
+    return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
-  return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, risk, bodyText } };
+  return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, bodyText } };
 }

@@ -1,7 +1,7 @@
 import type { CommandContext } from '../../cli';
 import { isConfigError, keySet } from '../../config';
 import type { RefsureConfig } from '../../config';
-import { DryRunStop } from '../../output';
+import { causeStatus, DryRunStop } from '../../output';
 import { providerRoster } from '../../providers';
 import { presenceSite } from '../../questions';
 import type { ProviderId } from '../../questions';
@@ -16,8 +16,8 @@ async function pingOne(ctx: CommandContext, id: ProviderId): Promise<DoctorCheck
     combo: id, originUrl: PING_INPUT.pageUrl, synthetic: true, dryRun: ctx.dryRun, signal: ctx.signal,
   });
   const info = ctx.trace.decisions.length > before ? ctx.trace.decisions.at(-1) : undefined;
-  // A valid answer under the band still proves the route works; a provider or setup failure does not.
-  const replied = verdict.kind === 'answer' || verdict.cause === 'low_confidence' || verdict.cause === 'none_chosen';
+  // An abstained cause (a valid answer under the band) proves the route works; a provider or setup failure does not.
+  const replied = verdict.kind === 'answer' || causeStatus(verdict.cause) === 'abstained';
   // `by` only when a model replied; a failed call names the model it asked for.
   const via = info ? ` (${replied ? 'by' : 'asked'} ${info.model} in ${info.ms} ms)` : '';
   if (verdict.kind === 'answer') return { name: `ping_${id}`, ok: true, detail: `present at ${verdict.confidence}${via}` };
