@@ -1,4 +1,4 @@
-import type { Ref } from '../../browser';
+import type { PageHint, Ref } from '../../browser';
 
-/** `guard --ref @eN`: the element to classify. (`--ticket` arrives with the ticket path.) */
-export interface GuardArgs { ref: Ref }
+/** `guard --ref @eN` (on the resolved page) or `guard --ticket T` (on the ticket's page, without spending it). */
+export type GuardArgs = { mode: 'ref'; ref: Ref; hint: PageHint } | { mode: 'ticket'; ticket: string; page: string | null };

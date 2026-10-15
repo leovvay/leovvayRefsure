@@ -1,5 +1,6 @@
 import type { Fingerprint } from '../../page-model';
 import type { RiskClass } from '../../risk';
+import type { Authority } from '../../tickets';
 
 /** `refsure guard`: the risk class of clicking the element, every rule that raised it, and what it is on the page. */
 export interface GuardResult {
@@ -8,4 +9,6 @@ export interface GuardResult {
   reasons: string[];
   /** Page text: role, `norm`ed name, path, ordinal and twin count. */
   fingerprint: Fingerprint;
+  /** `--ticket`: what the ticket lets `act` do (`none`, `read`, `write`); the ticket itself is not spent. */
+  authority?: Authority;
 }

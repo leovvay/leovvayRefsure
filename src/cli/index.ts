@@ -11,6 +11,7 @@ export type * from './argv-route';
 export { GLOBAL_OPTIONS, isUsageError, parseCommandArgs } from './parse-args';
 export { failureResult, runCommand } from './registry';
 export { RegistryInvariantError } from './registry-invariant-error';
+export { pinNextToPage } from './registry-outcomes';
 export { routeArgv } from './route-argv';
 export { commandHelp, usageText } from './usage';
 export { verbHelp, wantsHelp } from './verb-help';

@@ -1,8 +1,11 @@
 import type { AnyCommandSpec } from '../cli';
+import { actCommand } from './act';
 import { causesCommand } from './causes';
 import { commandsCommand } from './commands';
+import { dismissCommand } from './dismiss';
 import { doctorCommand } from './doctor';
 import { guardCommand } from './guard';
+import { locateCommand } from './locate';
 import { markCommand } from './mark';
 import { outcomeCommand } from './outcome';
 import { privacyCommand } from './privacy';
@@ -17,6 +20,9 @@ export const FEATURES: readonly AnyCommandSpec[] = [
   privacyCommand,
   doctorCommand,
   stateCommand,
+  locateCommand,
+  actCommand,
+  dismissCommand,
   outcomeCommand,
   waitForCommand,
   markCommand,

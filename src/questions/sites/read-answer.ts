@@ -1,6 +1,6 @@
 import type { Threshold } from '../site-policy';
 import { noulVerdict } from '../validate-answers';
-import type { Verdict } from '../verdict';
+import type { Ranking, Verdict } from '../verdict';
 import type { DecisionAnswer, NoulBand } from '../wire-types';
 
 /*
@@ -31,6 +31,16 @@ function wrongKind<Out>(expected: 'choice' | 'noul', threshold: number): Verdict
   };
 }
 
+/** The offered options by probability, best first; `none` and keys never offered are left out. */
+function rankingOf<Out>(probabilities: Readonly<Record<string, number>>, valueOf: (key: string) => Out | null): Ranking<Out> {
+  const out: { value: Out; p: number }[] = [];
+  for (const [key, p] of Object.entries(probabilities)) {
+    const value = valueOf(key);
+    if (value !== null && typeof p === 'number' && Number.isFinite(p)) out.push({ value, p });
+  }
+  return out.sort((a, b) => b.p - a.p);
+}
+
 /**
  * `valueOf` maps a criteria key to the site's output, or `null` for a key that was never offered. `noneKey` is the
  * reserved "nothing fits" key, or `null` for a site that offers none (page state).
@@ -44,6 +54,7 @@ export function readChoice<Out>(
   const min = choiceThreshold(threshold);
   if (answer.type !== 'choice') return wrongKind('choice', min);
   const { choice, confidence } = answer;
+  const ranking = rankingOf(answer.probabilities, valueOf);
   if (confidence < min) {
     return {
       kind: 'abstain',
@@ -52,6 +63,7 @@ export function readChoice<Out>(
       leaned: choice,
       confidence,
       threshold: min,
+      ranking,
     };
   }
   if (noneKey !== null && choice === noneKey) {
@@ -62,6 +74,7 @@ export function readChoice<Out>(
       leaned: noneKey,
       confidence,
       threshold: min,
+      ranking,
     };
   }
   const value = valueOf(choice);
@@ -75,7 +88,7 @@ export function readChoice<Out>(
       threshold: min,
     };
   }
-  return { kind: 'answer', value, index: choice, confidence, threshold: min };
+  return { kind: 'answer', value, index: choice, confidence, threshold: min, ranking };
 }
 
 /** `yes` is the site's one answer (`landed`, `present`). */

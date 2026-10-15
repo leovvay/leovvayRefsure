@@ -1,6 +1,6 @@
 import type { ActAction, PageRef } from '../browser';
 import type { CommandContext } from '../cli';
-import { findByFingerprint, urlNorm } from '../page-model';
+import { findByFingerprint, fold, rowTextOf, urlNorm } from '../page-model';
 import { classify, fieldRaisers, maxRisk, pageRaisers } from '../risk';
 import type { RiskClass, RiskReading } from '../risk';
 import type { RecheckResult } from './recheck-result';
@@ -10,7 +10,8 @@ const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'selec
 
 /**
  * Steps 2-6 of the ticket path (spec §8.3): the same URL, a fresh snapshot, the fingerprint's twin group unchanged,
- * the ref at the stored ordinal, and the risk re-read on the fresh tree. A stored ref number is never reused.
+ * the ref at the stored ordinal (still in the `--within` row when one was bound), and the risk re-read on the
+ * fresh tree. A stored ref number is never reused.
  * Browser failures propagate for the registry to map. `action` defaults to the ticket's, then `click`.
  */
 export async function recheck(
@@ -24,6 +25,10 @@ export async function recheck(
   const found = findByFingerprint(tree, ticket.fingerprint);
   if (found === 'gone') return { stale: 'ref_gone' };
   if (found === 'changed') return { stale: 'page_changed' };
+  // The same ordinal in another row is another element: `--within` bound the row, and it must still hold.
+  if (ticket.within !== undefined && !fold(rowTextOf(tree, found.node)).includes(ticket.within)) {
+    return { stale: 'page_changed' };
+  }
   const action = opts.action ?? ticket.action ?? 'click';
   const readings: RiskReading[] = [classify(tree, found.node, { url: tab.url, action })];
   if (action === 'click' || action === 'dblclick') readings.push(await pageRaisers(ctx.browser, page, action));

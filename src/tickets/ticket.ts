@@ -23,4 +23,9 @@ export interface Ticket {
   /** pick-option pre-binds `select` and the option. */
   action?: ActAction;
   value?: string;
+  /**
+   * `locate --within`, `fold`ed: the row text the pick was found in. A twin at the same ordinal in another row
+   * (rows sorted or shuffled since) is a changed page, never the target.
+   */
+  within?: string;
 }
