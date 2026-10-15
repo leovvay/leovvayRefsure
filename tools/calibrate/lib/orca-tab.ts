@@ -6,6 +6,8 @@ import type { OrcaTab } from './orca-tab-shape';
   The replay's one tab: created in the isolated Orca profile the caller names (never the default profile, which
   carries a person's cookies), moved from page to page with `goto`, closed at the end. refsure itself never
   navigates; only the harness does, between items. Snapshots go through refsure's own adapter, not this file.
+  Before any tab opens, `tab profile list` must report the named profile with scope `isolated`; after, `tab
+  profile show` must report exactly that profile id for the tab.
 */
 
 const TIMEOUT_MS = 30_000;
@@ -35,13 +37,20 @@ export async function openTab(env: NodeJS.ProcessEnv, opts: { url: string; profi
   const bin = findOrcaBinary(env);
   if (bin === null) throw new Error('no orca binary: set ORCA_CLI_BIN_DIR or put orca on PATH');
   const where = ['--worktree', opts.worktree];
+  const listed = await orcaJson(bin, ['tab', 'profile', 'list']);
+  const profiles = Array.isArray(listed.profiles) ? listed.profiles as { id?: unknown; scope?: unknown }[] : [];
+  const named = profiles.find((profile) => profile.id === opts.profile);
+  if (named === undefined) throw new Error(`Orca lists no browser profile ${opts.profile}`);
+  if (named.scope !== 'isolated') {
+    throw new Error(`Orca profile ${opts.profile} has scope ${String(named.scope)}; stored pages open only in an isolated profile`);
+  }
   const created = await orcaJson(bin, ['tab', 'create', '--url', opts.url, ...where, '--profile', opts.profile]);
   if (typeof created.browserPageId !== 'string') throw new Error('orca tab create gave no browserPageId');
   const pageId: string = created.browserPageId;
-  const shown = await orcaJson(bin, ['tab', 'profile', 'show', '--page', pageId, ...where]).catch(() => ({}));
+  const shown: Record<string, unknown> = await orcaJson(bin, ['tab', 'profile', 'show', '--page', pageId, ...where]).catch(() => ({}));
   return {
     pageId,
-    profile: JSON.stringify(shown).includes(opts.profile) ? opts.profile : null,
+    profile: shown.profileId === opts.profile ? opts.profile : null,
     async goto(url) {
       const result = await orcaJson(bin, ['goto', '--url', url, '--page', pageId, ...where]);
       return typeof result.url === 'string' ? result.url : url;

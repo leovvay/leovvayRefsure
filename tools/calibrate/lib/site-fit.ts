@@ -4,7 +4,10 @@ import type { ThresholdFit } from './threshold-fit';
 /** One site's fit: every edge fitted, the rows the method gives, what they do on the runs, and what ships. */
 export interface SiteFit {
   site: SiteId;
+  /** Distinct pages the runs asked about; a page asked in several PII mask modes counts once. */
   items: number;
+  /** Pages asked with PII masks on and off, when the runs hold both modes. */
+  masks?: { on: number; off: number };
   /** Answered runs on the site's declared wording. */
   runs: number;
   /** Runs left out: another wording, a failed call, or no answer for the question. */

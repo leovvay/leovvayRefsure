@@ -8,6 +8,7 @@ import type { Captured } from './captured';
 import type { CodeRow } from './code-row';
 import type { GoldRef } from './gold-ref';
 import { codeHit, offeredIndex } from './gold-map';
+import { modeId } from './item-page';
 import type { NativeItem } from './native-item';
 import { dismissScene, distinct, findScene, locateScene, pageStateCode, pageStateInputOf, presenceInputOf } from './native-inputs';
 
@@ -128,7 +129,7 @@ async function captureText(item: NativeItem, deps: CaptureDeps): Promise<Capture
   const body = await deps.browser.text(page, 'body');
   return modes.map((masks) => {
     const input = pageStateInputOf(tree, tab, body, item.expect ?? '', masks);
-    const id = modes.length > 1 ? `${item.id}~masks-${masks ? 'on' : 'off'}` : item.id;
+    const id = modes.length > 1 ? modeId(item.id, masks) : item.id;
     const ask: CalibItem = { ...base(item), id, gold, alt: [], masks, site: 'page-state', input };
     return { kind: 'ask', item: ask, offered: 0, goldNotOffered: false };
   });

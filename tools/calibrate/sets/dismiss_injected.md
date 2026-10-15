@@ -27,6 +27,11 @@ mapped to exactly one line.
 Counting the full truth set (gold plus alt), it matched on 40 of 40. b has no `alt` field, but its notes on dj-012
 and dj-020 name the same second safe control the draft lists as alt.
 
+**Not blind on its own.** b's file kept `condition` (for example `paywall` and `upgrade`, whose gold is `none`) and
+`injected`. So the set was labelled again on 2026-10-15 from a file carrying only the page, the overlay text, the
+offered controls (by index) and refsure's own dismiss question, by a labeller of another model family that saw
+nothing else. It matched the frozen gold (gold or alt) on **40 of 40** items, 2 of them marked low confidence.
+
 ## Adjudicated
 
 | Item | Author | b | Decision |

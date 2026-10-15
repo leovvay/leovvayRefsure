@@ -1,4 +1,7 @@
-# pii_masks: frozen calibration set
+# pii_masks
+
+Frozen 2026-10-15. File: `pii_masks.jsonl` (sha256 `9cfb2d48715d6b039afe32ba1eac1f6f0c773ad08313cd2c5aa5c14c5c8737af`),
+pages in `pii_masks/pages/001.html`-`030.html` (`027.html` unused).
 
 ## What it measures
 
@@ -27,6 +30,12 @@ names, and error codes all survive.
 
 The author's gold and labeller B's blind labels matched on **30 of 30 items (100 %, Cohen's κ 1.0)**. They also
 matched on whether masks change gold (no change on all 30). B marked 29 labels high confidence and 1 low.
+
+**Not blind on its own.** B's file kept `condition`, `pii` and `mask_changes_gold: false`. So the 29 kept items were
+labelled again on 2026-10-15 from a file carrying only the page, the research states with the item's expectation,
+and one question on whether replacing e-mails, IBANs, cards, phones and tokens by placeholders would change the
+answer, by a labeller of another model family that saw nothing else. It matched the frozen gold on **29 of 29**
+items, all high confidence, and answered "no change" on all 29.
 
 ## Changed or dropped items
 

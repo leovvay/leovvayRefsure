@@ -37,6 +37,11 @@ b gave role, name and ordinal, not a line index, so each label was mapped to a l
 - 5 `twins_row` labels (ln-002, 011, 021, 026, 033) give ordinal 0 within the row, and the page-wide ordinal in the
   note is the draft's `gold_ref.ordinal` minus 1 in every case.
 
+**Not blind on its own.** b's file kept `condition` (for example `decoy`, which 5 of 9 times has gold `none`), `risk`,
+`source` and `lang`. So the set was labelled again on 2026-10-15 from a file carrying only the page, the intent, the
+offered lines (by index) and refsure's own `find` question, by a labeller of another model family that saw nothing
+else. It matched the frozen gold (gold or alt) on **40 of 40** items, 6 of them marked low confidence.
+
 ## Adjudicated
 
 No label disagreed. Every page was still opened, to look for an item two careful humans could label two ways.

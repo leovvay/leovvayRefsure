@@ -6,9 +6,14 @@
 export interface FitOptions {
   target: number;
   minPoints: number;
+  /**
+   * The fewest distinct pages a risk label needs before it gets a row of its own; below it the label reads the
+   * all-points fit. The calls of one page are correlated, so `minPoints` alone counts one page several times.
+   */
+  minItems: number;
   method: 'isotonic' | 'cumulative';
   /** Rows already shipped for the site: each starting row is raised to its row here (never loosen). */
   floor?: number | Readonly<Record<string, number>> | { yesAtLeast: number; noAtMost: number };
-  /** The runs are Orca-native: a site held for want of native lines is fitted to ship. */
+  /** The runs include Orca-native ones: a site held for want of native lines is fitted to ship. */
   native?: boolean;
 }

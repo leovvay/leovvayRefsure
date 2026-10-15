@@ -9,7 +9,10 @@ export interface CalibrationProvenance {
   source: string;
   /** The set's file name within that source. */
   set: string;
+  /** Distinct pages; a page asked in several PII mask modes counts once (`masks` counts the modes). */
   items: number;
+  /** Pages asked with PII masks on and off, when the runs hold both modes. */
+  masks?: { on: number; off: number };
   /** Answered calls the fit read, pooled over every replay; failures left out. */
   runs: number;
   /** Distinct shuffle salts (repeats, for unshuffled sites) across the pooled replays. */
@@ -22,6 +25,8 @@ export interface CalibrationProvenance {
   method: string;
   target: number;
   minPoints: number;
+  /** The fewest pages a risk label needs for a row of its own (older entries predate the rule). */
+  minItems?: number;
   /** Each row's value as fitted, before the max with the starting row; `null` where the fit fell back. */
   fitted: Record<string, number | null>;
   /** Answers acted on at the shipped rows, and how many of them were right. */

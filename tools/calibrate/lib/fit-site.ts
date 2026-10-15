@@ -5,6 +5,7 @@ import type { NoulBand, SiteId } from '../../../src/questions';
 import type { FitOptions } from './fit-options';
 import { fitLowerCumulative, fitUpperCumulative } from './cumulative';
 import { fitLower, fitUpper } from './isotonic';
+import { pageKey } from './item-page';
 import type { Point } from './point';
 import type { RunRow } from './run-row';
 import type { SiteFit } from './site-fit';
@@ -17,9 +18,11 @@ import { wilsonLow } from './wilson';
   precision ≥ target; a Noul site (outcome, presence) fits its band.
   - Every row is max(fitted, starting row), so calibration never loosens the starting rows. `opts.floor` raises
     the starting rows to an entry already shipped (step 2 never ships below step 1). Locate and find fit a row per
-    risk label the set carries (a label with too few points uses the all-points fit); risks the set never labels
-    take the all-points fit. Their rows never decrease along the risk order: `--risk` is the caller's claim and
-    the page can only raise it, so naming a riskier row must never loosen the gate.
+    risk label the set carries, but only from a real sample: a label with fewer than `minItems` pages, or with no
+    wrong answer at all, reads the all-points fit. With nothing wrong, a label's own fit is just its lowest score,
+    no boundary between right and wrong, and the next replay moves it. Risks the set never labels take the
+    all-points fit. The rows never decrease along the risk order: `--risk` is the caller's claim and the page can
+    only raise it, so naming a riskier row must never loosen the gate.
   - A fit that only certainty reaches (a row of 1.0) is no boundary on the confidence scale: one confident wrong
     answer below 1.0 puts it there, and one at 1.0 takes it away. Such a site keeps its declared rows.
   - HELD sites are fitted and reported, but stay at their declared maturity whatever the fit says: the thinning
@@ -27,15 +30,17 @@ import { wilsonLow } from './wilson';
 */
 
 /** Sites a replay reports but does not make `measured`, and why: by step 1 (converted) and step 2 (native). */
-const HELD: Readonly<Record<'converted' | 'native', Partial<Record<SiteId, string>>>> = {
+const HELD: Readonly<Record<'converted' | 'native', Partial<Record<SiteId, (row: string) => string>>>> = {
   converted: {
-    dismiss: 'held: dismiss ships inherited with the close/reject lexicon (spec §8.4); its lines are measured in the '
-      + 'Orca-native replay (spec §9 step 2), as the converted candidates carry no overlay place and live ones always do',
+    dismiss: () => 'held: dismiss ships inherited with the close/reject lexicon (spec §8.4); its lines are measured '
+      + 'in the Orca-native replay (spec §9 step 2), as the converted candidates carry no overlay place and live ones '
+      + 'always do',
   },
   native: {
-    dismiss: 'held for the owner: the fit counts every pick, and its row (0.97 on these runs) abstains on a plain '
-      + 'cookie wall answered "Reject all" at 0.95; every wrong pick at 0.6 or more is a never-click name the code '
-      + 'veto refuses before any click. Dismiss stays inherited (0.6 with the close/reject lexicon) until a row is chosen',
+    dismiss: (row) => `held for the owner: the fit counts every pick, vetoed ones too, and its row (${row} on these `
+      + 'runs) sits far above the declared 0.6; tools/calibrate/README.md lists the wrong picks and the never-click '
+      + 'veto that refuses them before any click. Dismiss stays inherited (0.6 with the close/reject lexicon) until a '
+      + 'row is chosen',
   },
 };
 
@@ -59,10 +64,22 @@ function lower(points: readonly Point[], opts: FitOptions): ThresholdFit {
 
 const round4 = (value: number) => Math.round(value * 10_000) / 10_000;
 
-function actedPoints(rows: readonly RunRow[]): (Point & { risk: string | null; set: string })[] {
+type Acted = Point & { risk: string | null; set: string; page: string };
+
+function actedPoints(rows: readonly RunRow[]): Acted[] {
   return rows
     .filter((row) => row.choice !== null && row.choice !== 'none' && row.confidence !== null)
-    .map((row) => ({ score: row.confidence!, positive: row.correct === true, risk: row.risk, set: row.set ?? '' }));
+    .map((row) => ({ score: row.confidence!, positive: row.correct === true, risk: row.risk, set: row.set ?? '', page: pageKey(row) }));
+}
+
+/** A risk label's own row: fitted only on enough pages, and only when something in it was wrong. */
+function labelFit(points: readonly Acted[], opts: FitOptions): ThresholdFit {
+  const pages = new Set(points.map((point) => point.page)).size;
+  if (pages < opts.minItems) return { value: null, beyond: 0, precision: null, why: `${pages} pages, need ${opts.minItems}` };
+  if (points.every((point) => point.positive)) {
+    return { value: null, beyond: points.length, precision: 1, why: 'no wrong answer, so no boundary to fit' };
+  }
+  return upper(points, opts);
 }
 
 /** A starting row raised to the floor's, where the floor has one of the same shape. */
@@ -97,7 +114,7 @@ function choiceFit(site: ChoiceSite, rows: readonly RunRow[], opts: FitOptions) 
   for (const risk of RISK_ORDER) {
     let fitted = all.value;
     if (labels.has(risk)) {
-      const own = upper(points.filter((point) => point.risk === risk), opts);
+      const own = labelFit(points.filter((point) => point.risk === risk), opts);
       fits[risk] = own;
       if (own.value !== null) fitted = own.value;
       else if (own.why.startsWith('no score')) why = `${risk}: ${own.why}`;
@@ -148,13 +165,20 @@ function bySet(usable: readonly RunRow[], acted: readonly { positive: boolean; s
   return out;
 }
 
+/** Pages asked with masks on and off, when the runs hold both modes. */
+function masksOf(rows: readonly RunRow[]): { masks?: { on: number; off: number } } {
+  const on = new Set(rows.filter((row) => row.masks === true).map(pageKey));
+  const off = new Set(rows.filter((row) => row.masks === false).map(pageKey));
+  return off.size === 0 ? {} : { masks: { on: on.size, off: off.size } };
+}
+
 /** Fits one site on its runs, pooled over every replay given. Rows of another site are ignored. */
 export function fitSite(site: SiteId, rows: readonly RunRow[], opts: FitOptions): SiteFit {
   if (!(site in SITES)) throw new Error(`no calibration fit for site ${site}`);
   const known = SITES[site as FittedSite];
   const usable = rows.filter((row) => row.site === site && row.status === 'ok' && row.wording === known.wording.hash
     && row.choice !== null && row.confidence !== null);
-  const base = { site, items: new Set(usable.map((row) => row.id)).size, runs: usable.length, skipped: rows.length - usable.length };
+  const base = { site, items: new Set(usable.map(pageKey)).size, ...masksOf(usable), runs: usable.length, skipped: rows.length - usable.length };
   const fit = site === 'outcome' || site === 'presence'
     ? noulFit(site, usable.map((row) => ({ score: row.noul ?? row.confidence!, positive: row.gold === 'true', set: row.set ?? '' })), opts)
     : (() => {
@@ -162,7 +186,7 @@ export function fitSite(site: SiteId, rows: readonly RunRow[], opts: FitOptions)
         return { ...choice, acted: choice.points.filter((point) => point.score >= choice.rowOf(point.risk)) };
       })();
   const correct = fit.acted.filter((point) => point.positive).length;
-  const held = HELD[opts.native === true ? 'native' : 'converted'][site];
+  const held = fit.rows === null ? undefined : HELD[opts.native === true ? 'native' : 'converted'][site]?.(JSON.stringify(fit.rows));
   return {
     ...base, fits: fit.fits, starting: fit.starting, rows: fit.rows,
     threshold: fit.rows !== null && held === undefined ? fit.rows : null,
