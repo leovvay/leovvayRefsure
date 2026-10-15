@@ -6,9 +6,9 @@ export interface LocateArgs {
   intent: string | null;
   /** A v1 line the agent recorded earlier, verbatim: asks the `locate` site. */
   recorded: string | null;
-  /** `--risk`: raises the class and picks the threshold row; the strictest row without it. */
+  /** `--risk`: raises the class and picks the threshold row; without it, a floor of write and the strictest row. */
   risk?: RiskClass;
-  /** Keep only the candidates whose row text contains this (`fold`ed). */
+  /** Keep only the candidates whose row text contains this (`fold`ed, spacing ignored: `rowContains`). */
   within: string | null;
   /** Take ordinal 1 of a twin group; refused at money and irreversible. */
   first: boolean;

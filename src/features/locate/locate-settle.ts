@@ -28,12 +28,28 @@ function base(picked: Chosen, cand: Candidate, args: LocateArgs): LocateResult {
   return result;
 }
 
+/**
+ * The lexicon, confirm-dialog and URL rules, the page raisers for a click, and `--risk`. With no `--risk` the class
+ * has a floor of write (spec §6.1): a read row is claimed only by `--risk read`, never assumed.
+ */
 async function riskOf(ctx: CommandContext, scene: Scene, cand: Candidate, args: LocateArgs): Promise<RiskReading> {
   const lexical = classify(scene.tree, cand.node, {
     url: scene.tab.url, action: 'click', ...(args.risk === undefined ? {} : { userRisk: args.risk }),
   });
   const raised = await pageRaisers(ctx.browser, scene.page, 'click');
-  return { class: maxRisk(lexical.class, raised.class), reasons: [...lexical.reasons, ...raised.reasons] };
+  const risk = maxRisk(lexical.class, raised.class);
+  const reasons = [...lexical.reasons, ...raised.reasons];
+  if (args.risk === undefined && risk === 'read') return { class: 'write', reasons: [...reasons, 'floor:write'] };
+  return { class: risk, reasons };
+}
+
+/** Why a ticket below its pick's risk only proposes, and the two ways on from it. */
+function proposalWhy(authority: Authority, risk: RiskReading, ticket: string | null): string {
+  const ask = ticket === null ? 'refsure guard --ticket' : `refsure guard --ticket ${ticket}`;
+  const floor = risk.reasons.includes('floor:write')
+    ? 'if it only reads (a link, a tab), locate again with --risk read; otherwise ' : '';
+  return `the pick may act at ${authority} only, and it reads ${risk.class} (${risk.reasons.join(', ')}): `
+    + `proposed, not for act; ${floor}confirm it yourself (${ask}), then act through outcome with your own ref`;
 }
 
 /** A pick under the threshold of its own risk row: only possible when `--risk` named a lower row than it has. */
@@ -66,8 +82,8 @@ function ticketSource(picked: Chosen): Pick<Ticket, 'site' | 'maturity' | 'confi
 /**
  * The twin rule, the risk read and the ticket (spec §6.2, §8.3). A pick with twins stops unless `--within` left
  * one of its group or `--first` takes the first; `--first` never takes money or irreversible. Risk is the lexicon,
- * confirm-dialog and URL rules, the page raisers for a click and `--risk`. Authority comes from maturity and
- * corroboration; a new model family proposes only.
+ * confirm-dialog and URL rules, the page raisers for a click and `--risk`, at least write without it. Authority
+ * comes from maturity and corroboration; a new model family, or authority below the pick's risk, proposes only.
  */
 export async function settlePick(
   ctx: CommandContext, scene: Scene, picked: Chosen, args: LocateArgs,
@@ -107,6 +123,14 @@ export async function settlePick(
   }
   if (authority === 'none') {
     return nothingDone('abstained', 'proposed_only', 'a model family refsure has not measured picked it: propose only', { result });
+  }
+  // A ticket `act` would refuse is a proposal (as dismiss reports one), never `ok` with nowhere to go. High risk
+  // stays `ok` below: the pick is right, and only act-high-risk may take it.
+  if (!HIGH_RISK.has(risk.class) && !authorityAllows(authority, risk.class)) {
+    const next: Next = result.ticket === null
+      ? { do: 'snapshot', argv: ['refsure', 'snap'] }
+      : { do: 'snapshot', argv: ['refsure', 'guard', '--ticket', result.ticket] };
+    return nothingDone('abstained', 'proposed_only', proposalWhy(authority, risk, result.ticket), { result, next });
   }
   const outcome: CommandOutcome<LocateResult> = { status: 'ok', acted: false, effect: 'none', result };
   if (result.ticket !== null && authorityAllows(authority, risk.class)) {

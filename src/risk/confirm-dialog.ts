@@ -1,6 +1,6 @@
 import type { AxTree } from '../browser';
-import { fold, insideValueField, INTERACTIVE_ROLES } from '../page-model';
-import { findTermLoose } from './term-match';
+import { insideValueField, INTERACTIVE_ROLES } from '../page-model';
+import { findTermAnyReading } from './term-match';
 
 const DIALOG_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 
@@ -48,7 +48,7 @@ function wordingOf(tree: AxTree, dialog: number): string[] {
 /**
  * A confirm dialog (spec §8.5): its name, a heading in it or its StaticText carries a confirm cue ("are you
  * sure", "confirm", ...) or an irreversible term ("Delete this invoice?"). Dialog wording mostly has no ref to
- * take spacing from, so the cues are matched spacing-insensitively (`findTermLoose`).
+ * take spacing from, so the cues are matched spacing-insensitively (`findTermLoose`), in either reading.
  */
 export function isConfirmDialog(tree: AxTree, dialog: number): boolean {
   let known = memo.get(tree);
@@ -58,10 +58,9 @@ export function isConfirmDialog(tree: AxTree, dialog: number): boolean {
   }
   const cached = known.get(dialog);
   if (cached !== undefined) return cached;
-  const found = wordingOf(tree, dialog).some((text) => {
-    const folded = fold(text);
-    return findTermLoose('confirmCue', folded) !== null || findTermLoose('irreversible', folded) !== null;
-  });
+  const found = wordingOf(tree, dialog).some((text) => (
+    findTermAnyReading('confirmCue', text, { loose: true }) !== null
+    || findTermAnyReading('irreversible', text, { loose: true }) !== null));
   known.set(dialog, found);
   return found;
 }

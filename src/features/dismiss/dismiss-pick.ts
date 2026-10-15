@@ -1,9 +1,9 @@
 import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
 import type { Next } from '../../output';
-import { type Candidate, cutName, fingerprintOf, fold, urlNorm } from '../../page-model';
+import { type Candidate, cutName, fingerprintOf, urlNorm } from '../../page-model';
 import type { Decided } from '../../questions';
-import { actionPolicy, classify, findTerm, maxRisk, pageRaisers, type RiskReading } from '../../risk';
+import { actionPolicy, classify, findTermEveryReading, maxRisk, pageRaisers, type RiskReading } from '../../risk';
 import { type Authority, authorityAllows, authorityFor } from '../../tickets';
 import type { DismissArgs } from './dismiss.args';
 import type { DismissLevelReport } from './dismiss-level-report';
@@ -50,7 +50,8 @@ export async function settleDismissPick(
   const report: DismissLevelReport = {
     level: scene.level, verdict: 'abstained', overlay: scene.overlay, control: pick.line, by: 'decision',
   };
-  const veto = vetoOf(pick.fp.name);
+  const rawName = scene.tree.nodes[pick.node]?.name ?? pick.fp.name;
+  const veto = vetoOf(rawName);
   if (veto !== null) {
     return stop({ ...report, verdict: 'vetoed' }, 'refused', 'veto',
       `the Decision picked ${name}, and "${veto.term}" is on the never-click list; nothing was clicked`, HUMAN);
@@ -64,7 +65,7 @@ export async function settleDismissPick(
     return stop({ ...report, verdict: 'refused' }, 'refused', 'high_risk_class',
       `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it`, HUMAN);
   }
-  const closeWord = findTerm('dismissClose', fold(pick.fp.name)) !== null;
+  const closeWord = findTermEveryReading('dismissClose', rawName) !== null;
   const agreed = ctx.trace.decisions.at(-1)?.provider === 'agree';
   const authority = authorityFor(decided.maturity, 'dismiss', {
     lexiconCloseMatch: closeWord, agreed, newFamily: decided.newFamily, confidence: decided.verdict.confidence,

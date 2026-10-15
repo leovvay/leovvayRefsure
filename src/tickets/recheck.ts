@@ -1,6 +1,6 @@
 import type { ActAction, PageRef } from '../browser';
 import type { CommandContext } from '../cli';
-import { findByFingerprint, fold, rowTextOf, urlNorm } from '../page-model';
+import { findByFingerprint, rowContains, rowTextOf, urlNorm } from '../page-model';
 import { classify, fieldRaisers, maxRisk, pageRaisers } from '../risk';
 import type { RiskClass, RiskReading } from '../risk';
 import type { RecheckResult } from './recheck-result';
@@ -26,7 +26,7 @@ export async function recheck(
   if (found === 'gone') return { stale: 'ref_gone' };
   if (found === 'changed') return { stale: 'page_changed' };
   // The same ordinal in another row is another element: `--within` bound the row, and it must still hold.
-  if (ticket.within !== undefined && !fold(rowTextOf(tree, found.node)).includes(ticket.within)) {
+  if (ticket.within !== undefined && !rowContains(rowTextOf(tree, found.node), ticket.within)) {
     return { stale: 'page_changed' };
   }
   const action = opts.action ?? ticket.action ?? 'click';

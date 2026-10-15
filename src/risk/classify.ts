@@ -1,10 +1,9 @@
 import type { ActAction, AxNode, AxTree } from '../browser';
-import { fold } from '../page-model';
 import { dialogOf, isConfirmDialog } from './confirm-dialog';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
-import { findTerm } from './term-match';
+import { findTermAnyReading, findTermEveryReading } from './term-match';
 
 export interface ClassifyOpts {
   /** The tab's URL, for the path rules. */
@@ -22,11 +21,13 @@ const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;
 const IRREVERSIBLE_PATH = /delete|close-account/i;
 
-/** Rule 1: what the element is, before any word on it counts. */
-function baseOf(node: AxNode, name: string, action: ActAction | undefined): { risk: RiskClass; reason: string } {
+/** Rule 1: what the element is, before any word on it counts. A close word must hold in every reading of the name. */
+function baseOf(node: AxNode, action: ActAction | undefined): { risk: RiskClass; reason: string } {
   if (action !== undefined && FIELD_ACTIONS.has(action)) return { risk: 'write', reason: 'base:write' };
   if (READ_ROLES.has(node.role)) return { risk: 'read', reason: `base:read:${node.role}` };
-  if (node.role === 'button' && findTerm('dismissClose', name) !== null) return { risk: 'read', reason: 'base:read:close' };
+  if (node.role === 'button' && findTermEveryReading('dismissClose', node.name) !== null) {
+    return { risk: 'read', reason: 'base:read:close' };
+  }
   if (node.role === 'button' && node.attrs.expanded !== undefined) return { risk: 'read', reason: 'base:read:expander' };
   return { risk: 'write', reason: 'base:write' };
 }
@@ -44,18 +45,20 @@ function routeOf(url: string): string {
 /**
  * The risk of acting on node `i` (spec §8.5). Rules apply in order and only raise the class; every rule that
  * fired leaves a reason: the base, the lexicon terms (or `lexicon:none`), the confirm dialog, the URL, `--risk`.
+ * A term that raises counts in any reading of the name (`readingsOf`: a zero-width character spaced or dropped);
+ * a close or cancel word that keeps it calm only when every reading has it.
  */
 export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReading {
   const node = tree.nodes[i];
   if (node === undefined) throw new RangeError(`no node ${i} in the snapshot`);
-  const name = fold(node.name);
-  const base = baseOf(node, name, opts.action);
+  const name = node.name;
+  const base = baseOf(node, opts.action);
   let risk = base.risk;
   const reasons = [base.reason];
 
   let matched = false;
   for (const cls of LEXICON_CLASSES) {
-    const hit = findTerm(cls, name);
+    const hit = findTermAnyReading(cls, name);
     if (hit === null) continue;
     matched = true;
     risk = maxRisk(risk, cls);
@@ -63,9 +66,9 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   }
   // "Cancel subscription" names what it ends. A bare "Cancel" never takes the word from its dialog title or a
   // heading: in "Delete account?" it backs out (spec §8.5: never a confirm dialog's Cancel/No).
-  const cancel = findTerm('cancelVerbs', name);
+  const cancel = findTermAnyReading('cancelVerbs', name);
   if (cancel !== null) {
-    const context = findTerm('cancelContext', name);
+    const context = findTermAnyReading('cancelContext', name);
     if (context !== null) {
       matched = true;
       risk = maxRisk(risk, 'irreversible');
@@ -77,7 +80,7 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   const clicks = opts.action === undefined || !FIELD_ACTIONS.has(opts.action);
   const dialog = clicks && CONFIRMING_ROLES.has(node.role) ? dialogOf(tree, i) : null;
   if (dialog !== null && isConfirmDialog(tree, dialog)
-    && findTerm('dismissClose', name) === null && findTerm('cancelWords', name) === null) {
+    && findTermEveryReading('dismissClose', name) === null && findTermEveryReading('cancelWords', name) === null) {
     risk = maxRisk(risk, 'irreversible');
     reasons.push('dialog:confirm');
   }

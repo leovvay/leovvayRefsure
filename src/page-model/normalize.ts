@@ -24,6 +24,20 @@ export function fold(s: string): string {
   return norm(s).toLowerCase();
 }
 
+// What no person sees: format characters (zero-width space and joiners, bidi marks, the BOM) and the other
+// default-ignorable code points (soft hyphen, variation selectors, the combining grapheme joiner, fillers).
+const INVISIBLE = /[\p{Cf}\p{Default_Ignorable_Code_Point}]/gu;
+
+/**
+ * `fold` with every invisible character dropped, never spaced: `Acc&#8203;ept` (a zero-width space inside the
+ * word) reads `accept` here and `acc ept` through `fold`; a bidi mark, which `fold` keeps, goes too. A zero-width
+ * character may part two words or sit inside one, and a person sees neither, so the risk lexicons read a name
+ * both ways (`readingsOf`).
+ */
+export function foldVisible(s: string): string {
+  return fold(s.replace(INVISIBLE, ''));
+}
+
 /** Cuts at `NAME_MAX` code points, so a cut never splits a surrogate pair. */
 export function cutName(s: string, max = NAME_MAX): string {
   const points = Array.from(s);

@@ -14,5 +14,5 @@ export { actionRole, classifyNames } from './classify-name';
 export { confirmDialogRaiser, fieldRaisers, pageRaisers } from './raisers';
 export { liveRefCheck, nameCheck, readLiveName } from './live-ref-check';
 export { actionPolicy } from './action-policy';
-export { findTerm, findTermLoose } from './term-match';
+export { findTerm, findTermAnyReading, findTermEveryReading, findTermLoose, readingsOf } from './term-match';
 export { dialogOf, isConfirmDialog } from './confirm-dialog';

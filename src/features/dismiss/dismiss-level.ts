@@ -62,7 +62,7 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
       clicked: false,
     };
   }
-  if (controls.every((c) => vetoOf(c.fp.name) !== null)) {
+  if (controls.every((c) => vetoOf(tree.nodes[c.node]?.name ?? c.fp.name) !== null)) {
     const names = controls.map((c) => JSON.stringify(cutName(c.fp.name))).join(', ');
     return {
       report: { level, verdict: 'vetoed', overlay, by: 'code', cause: 'veto' },

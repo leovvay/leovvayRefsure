@@ -1,5 +1,5 @@
 import type { CommandSpec } from '../../cli';
-import { candidatesOf, fold, RANK_MAX, rowTextOf } from '../../page-model';
+import { candidatesOf, RANK_MAX, rowContains, rowTextOf } from '../../page-model';
 import { abstainOutcome, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
@@ -24,7 +24,11 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
   options: {
     intent: { type: 'string', summary: 'What the element is for, in a few words' },
     recorded: { type: 'string', summary: 'A v1 line recorded earlier (from snap), matched verbatim first' },
-    risk: { type: 'string', summary: 'Raise the risk class and its threshold row: read, write, consent, auth, money or irreversible' },
+    risk: {
+      type: 'string',
+      summary: 'The risk row: read, write, consent, auth, money or irreversible; the page can only raise it. '
+        + 'Without it: at least write, at the strictest threshold',
+    },
     within: { type: 'string', summary: 'Only elements whose row contains this text (e.g. "Invoice 1042")' },
     first: { type: 'boolean', summary: 'Take the first of identical twins (never at money or irreversible)' },
     top: { type: 'string', summary: `Also list up to N presented candidates by the model's ranking (1-${RANK_MAX})` },
@@ -36,10 +40,10 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
     if (page === null) throw new Error('locate needs a page, and none was resolved');
     const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
     const all = candidatesOf(tree);
-    const want = args.within === null ? '' : fold(args.within);
-    const cands = want === '' ? all : all.filter((c) => fold(rowTextOf(tree, c.node)).includes(want));
+    const within = args.within;
+    const cands = within === null ? all : all.filter((c) => rowContains(rowTextOf(tree, c.node), within));
     if (cands.length === 0) {
-      const detail = want === ''
+      const detail = within === null
         ? 'the page offers no interactive element with a ref'
         : `no interactive element sits in a row containing ${JSON.stringify(args.within)}`;
       ctx.trace.untrusted.add('why.detail');

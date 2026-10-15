@@ -1,4 +1,4 @@
-import { fold } from '../page-model';
+import { fold, foldVisible } from '../page-model';
 import { LEXICONS } from './lexicons';
 
 /** The word lists of a lexicon, by field. */
@@ -82,4 +82,42 @@ export function findTermLoose(field: TermField, folded: string): TermHit | null 
   const found = re.exec(folded);
   if (found === null) return null;
   return hitOf.get(found[0].replace(/\s+/gu, '')) ?? { lang: '?', term: found[0] };
+}
+
+/**
+ * The readings of a raw name or text the lexicons are matched in: `fold`, where a zero-width character is a
+ * space, and `foldVisible`, where it is nothing, as a person sees it (`Acc&#8203;ept` is "accept"). One reading
+ * when both agree. Pass the raw text: once `fold`ed, the invisible characters are spaces and the second is lost.
+ */
+export function readingsOf(raw: string): string[] {
+  const spaced = fold(raw);
+  const seen = foldVisible(raw);
+  return seen === spaced ? [spaced] : [spaced, seen];
+}
+
+/**
+ * A term that raises risk or refuses (a lexicon class, the dismiss veto, a confirm cue) in raw text: found in
+ * any reading. `loose` matches as `findTermLoose`.
+ */
+export function findTermAnyReading(field: TermField, raw: string, opts: { loose?: boolean } = {}): TermHit | null {
+  const find = opts.loose === true ? findTermLoose : findTerm;
+  for (const reading of readingsOf(raw)) {
+    const hit = find(field, reading);
+    if (hit !== null) return hit;
+  }
+  return null;
+}
+
+/**
+ * A term that lowers risk or grants authority (a close, reject or cancel word) in raw text: found in every
+ * reading, so no invisible character makes a control read calmer than a person sees it. The first reading's hit.
+ */
+export function findTermEveryReading(field: TermField, raw: string): TermHit | null {
+  let first: TermHit | null = null;
+  for (const reading of readingsOf(raw)) {
+    const hit = findTerm(field, reading);
+    if (hit === null) return null;
+    first ??= hit;
+  }
+  return first;
 }

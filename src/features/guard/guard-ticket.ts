@@ -1,4 +1,4 @@
-import { type CommandContext, type CommandOutcome, pinNextToPage } from '../../cli';
+import type { CommandContext, CommandOutcome } from '../../cli';
 import { recheck } from '../../tickets';
 import { nothingDone, recheckStale, ticketGone } from '../shared';
 import type { GuardArgs } from './guard.args';
@@ -17,10 +17,10 @@ export async function guardTicket(
   if (args.page !== null && args.page !== ticket.pageId) {
     return nothingDone('usage', 'usage', `ticket ${args.ticket} is for page ${ticket.pageId}, not ${args.page}: drop --page`);
   }
+  // The ticket names the page: the envelope and a `refsure` next step name it too (see CommandContext.page).
+  ctx.page = { backend: ctx.browser.backend, id: ticket.pageId };
   const fresh = await recheck(ctx, ticket);
-  if ('stale' in fresh) {
-    return pinNextToPage(recheckStale(fresh.stale, ticket.id), { backend: ctx.browser.backend, id: ticket.pageId });
-  }
+  if ('stale' in fresh) return recheckStale(fresh.stale, ticket.id);
   ctx.trace.untrusted.add('result.fingerprint');
   return {
     status: 'ok',

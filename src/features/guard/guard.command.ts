@@ -10,6 +10,7 @@ import { guardTicket } from './guard-ticket';
 /** `--ref`: a snapshot of the resolved page, then classify and the page raisers for a click. */
 async function guardRef(args: Extract<GuardArgs, { mode: 'ref' }>, ctx: CommandContext): Promise<CommandOutcome<GuardResult>> {
   const page = await ctx.browser.resolvePage(args.hint);
+  ctx.page = page;
   const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
   const i = tree.nodes.findIndex((node) => node.ref === args.ref);
   if (i === -1) {

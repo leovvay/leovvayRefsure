@@ -1,12 +1,11 @@
 import { isBrowserError } from '../browser';
 import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
-import { fold } from '../page-model';
 import { CONFIRMING_ROLES } from './classify';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
 import { readTagAttrs } from './tag-attrs';
-import { findTerm, findTermLoose } from './term-match';
+import { findTermAnyReading, findTermEveryReading } from './term-match';
 
 const PASSWORD_INPUTS = 'input[type=password]';
 const CARD_INPUTS = [
@@ -113,12 +112,13 @@ export async function fieldRaisers(port: BrowserPort, page: PageRef, ref: Ref): 
   return out;
 }
 
-/** A control that backs out of a dialog: every name it carries is a close or cancel word ("No", "Cancel", "×"). */
+/**
+ * A control that backs out of a dialog: every name it carries is a close or cancel word ("No", "Cancel", "×"),
+ * in every reading of it.
+ */
 function backsOut(names: readonly string[]): boolean {
-  return names.length > 0 && names.every((name) => {
-    const folded = fold(name);
-    return findTerm('dismissClose', folded) !== null || findTerm('cancelWords', folded) !== null;
-  });
+  return names.length > 0 && names.every((name) => findTermEveryReading('dismissClose', name) !== null
+    || findTermEveryReading('cancelWords', name) !== null);
 }
 
 /**
@@ -139,8 +139,9 @@ export async function confirmDialogRaiser(
     [open, labelled] = await Promise.all([countProbe(port, page, OPEN_DIALOGS), countProbe(port, page, LABELLED_DIALOGS)]);
   }
   if (open === 'miss') return out;
-  const text = fold(live.bodyText);
-  const cue = findTermLoose('confirmCue', text) !== null || findTermLoose('irreversible', text) !== null;
+  const text = live.bodyText;
+  const cue = findTermAnyReading('confirmCue', text, { loose: true }) !== null
+    || findTermAnyReading('irreversible', text, { loose: true }) !== null;
   if (!cue && labelled === 'miss') return out;
   const sure = open === 'hit' && (cue || labelled === 'hit');
   raise(out, 'irreversible', 'raiser:confirm-dialog', sure ? 'hit' : 'assumed');

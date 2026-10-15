@@ -20,7 +20,7 @@ export const EN: LanguageLexicon = {
   ],
   consent: [
     'accept', 'accept all', 'agree', 'i agree', 'allow cookies', 'allow all', 'opt in', 'opt-in', 'consent',
-    'i accept', 'allow', 'subscribe',
+    'i accept', 'allow', 'subscribe', 'accepted', 'agreed',
   ],
   dismissClose: [
     'close', 'reject', 'reject all', 'no thanks', 'no, thanks', 'later', 'maybe later', 'not now', 'dismiss',
@@ -29,6 +29,8 @@ export const EN: LanguageLexicon = {
   dismissVeto: [
     'accept', 'agree', 'allow', 'subscribe', 'buy', 'trial', 'enable', 'upgrade', 'manage', 'settings',
     'preferences', 'customize', 'customise',
+    // Past forms say yes too ("Agreed, close"). Never the -ing form: "Continue without accepting" rejects.
+    'accepted', 'agreed',
   ],
   cancelContext: ['subscription', 'order', 'account', 'booking', 'membership', 'reservation', 'plan', 'payment'],
   cancelVerbs,

@@ -1,5 +1,5 @@
 import type { ActAction, ActResult, PageRef } from '../../browser';
-import { type CommandContext, type CommandOutcome, pinNextToPage } from '../../cli';
+import type { CommandContext, CommandOutcome } from '../../cli';
 import { cutName } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { recheck, type RecheckResult, type Ticket } from '../../tickets';
@@ -14,10 +14,18 @@ type Out = CommandOutcome<ActCommandResult>;
 type Bound = { action: ActAction; value?: string };
 type Fresh = Exclude<RecheckResult, { stale: unknown }>;
 
-/** The action and value to run: `--action`, else the ticket's pre-bound one, else click; values only for fill/select. */
+/**
+ * The action and value to run: `--action`, else the ticket's pre-bound one, else click; values only for fill and
+ * select. A ticket issued for one action and value (pick-option binds select and its option) runs only those:
+ * another `--action` or `--value` is a usage error, never a quiet swap. The value itself is never quoted.
+ */
 function bind(args: ActArgs, ticket: Ticket): Bound | Out {
   if (args.action !== null && ticket.action !== undefined && args.action !== ticket.action) {
     return nothingDone('usage', 'usage', `ticket ${ticket.id} was issued for ${ticket.action}, not ${args.action}`);
+  }
+  if (args.value !== null && ticket.value !== undefined && args.value !== ticket.value) {
+    const detail = `ticket ${ticket.id} was issued with its own value: drop --value, or get a ticket for the other one`;
+    return nothingDone('usage', 'usage', detail);
   }
   const action = args.action ?? ticket.action ?? 'click';
   const value = args.value ?? ticket.value;
@@ -51,9 +59,11 @@ export async function runAct(args: ActArgs, ctx: CommandContext): Promise<Out> {
   if (args.page !== null && args.page !== peeked.pageId) {
     return nothingDone('usage', 'usage', `ticket ${args.ticket} is for page ${peeked.pageId}, not ${args.page}: drop --page`);
   }
-  // The page comes from the ticket, so the registry resolved none: a `refsure` next step names it here.
+  // The page comes from the ticket, so the registry resolved none: bound here, every `refsure` next step names
+  // it, a failure thrown after the click (Orca gone: effect_unknown) included.
   const page: PageRef = { backend: ctx.browser.backend, id: peeked.pageId };
-  return pinNextToPage(await actOnTicket(args, ctx, peeked, page), page);
+  ctx.page = page;
+  return actOnTicket(args, ctx, peeked, page);
 }
 
 async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, page: PageRef): Promise<Out> {

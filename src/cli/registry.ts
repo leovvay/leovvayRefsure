@@ -57,6 +57,8 @@ async function settle<Args, Result>(
   const dryRun = raw.values['dry-run'] === true;
   const watched = watchBrowser(deps.browser, { command: spec.name, mayAct: spec.needs.acts !== 'never', dryRun });
   let page: PageRef | null = null;
+  // A command that finds its own page (a ticket names it) sets `ctx.page`; a thrown failure still names it.
+  let ctx: CommandContext | null = null;
   try {
     const args = spec.parse(raw);
     if (isUsageError(args)) return { ...idle, outcome: usageOutcome(spec.name, args.usage) };
@@ -64,7 +66,7 @@ async function settle<Args, Result>(
     if (missing.length > 0) return { ...idle, outcome: unsupportedOutcome(deps.browser.backend, missing) };
     await purgeExpired(deps);
     if (spec.needs.page === 'required') page = await watched.port.resolvePage(hintOf(raw));
-    const ctx: CommandContext = {
+    ctx = {
       browser: watched.port,
       page,
       decide: deps.decide,
@@ -81,8 +83,10 @@ async function settle<Args, Result>(
       dryRun,
       env: deps.env,
     };
-    return { watched, page, outcome: await spec.run(args, ctx) };
+    const outcome = await spec.run(args, ctx);
+    return { watched, page: ctx.page, outcome };
   } catch (error) {
+    page = ctx?.page ?? page;
     if (error instanceof DryRunStop && !deps.trace.dispatched) {
       // The requests hold page text, redacted and masked, but still the page's words: listed, shown uncut.
       deps.trace.untrusted.add(WIRE_COPY_PATH);
