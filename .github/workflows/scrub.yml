@@ -1,0 +1,30 @@
+name: scrub
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scrub:
+    # Pull requests from forks get no secrets, so the gate cannot run there. It runs on the push that merges them,
+    # and again before every publish.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Build first, so the scanned tarball holds the bundle that would be published.
+      - run: npm run build
+      - run: sh tools/scrub/scrub.sh
+        env:
+          REFSURE_SCRUB_PATTERNS: ${{ secrets.REFSURE_SCRUB_PATTERNS }}
+          REFSURE_SCRUB_ALLOW: ${{ secrets.REFSURE_SCRUB_ALLOW }}

@@ -1,0 +1,203 @@
+# Contributing to refsure
+
+refsure has no runtime plugins. Extension is by pull request, and composition is by calling `refsure` from a script.
+This guide has three recipes (add a Decision site, add a verb, add a language) and the rules every change follows.
+
+## Ground rules
+
+- **No test suites and no test files.** Changes are proven live, against local fixtures, in an isolated Orca browser
+  profile (see [Proving a change](#proving-a-change)). A build is not proof.
+- **Zero runtime dependencies.** One esbuild ESM bundle, `dist/refsure.mjs`, on plain Node ≥22. Dev dependencies
+  are TypeScript, esbuild and `@types/node` only.
+- **Domains by folder.** Each folder under `src/` is a domain, and its `index.ts` is its only import surface. A
+  feature imports another feature only through that feature's `index.ts`, and only for an exported helper, never
+  for a Decision site.
+- **One contract per file.** Every interface or type contract sits in its own file. Files target ≤300 lines.
+- **Ownership.** These are enforced by review:
+  - only `src/browser/orca/` spawns browser processes;
+  - only `src/providers/transport.ts` calls `fetch`;
+  - only `src/config/keys/` reads keys;
+  - only `src/main.ts` calls `process.exit`;
+  - only `src/egress/pipeline.ts` constructs an `ApprovedRequest`, the only thing a provider accepts.
+- **Never send textbox values.** The snapshot carries them after `: ` on a textbox line. They never enter a line,
+  `snap` output or a Decision.
+
+## Recipe 1: add a Decision site
+
+A site is one fixed question and the rule for reading its answer. Sites live in `src/questions/sites/`, because a
+wording and its thresholds are one unit and several verbs reuse the same site.
+
+1. **Write the wording.** Add its constants to `src/questions/sites/wordings.ts`: the instructions, the `none` label
+   for a choice, or the `true`/`false` criteria for a yes/no (Noul) question. Caller text never goes into a wording;
+   it goes into a state field or a slot such as `{expect}`.
+2. **Add the id.** Extend `SiteId` in `src/questions/site-id.ts`.
+3. **Implement `DecisionSite<In, Ctx, Out>`** in `src/questions/sites/<site>.ts`:
+   - `id`, `kind` (`'choice'` or `'noul'`) and `question`, the key the answer is read back by;
+   - `wording: { version: 1, hash }`, computed at module load with
+     `wordingHash(kind, instructions, labels)` from `src/questions/wording-hash.ts`. The hash covers the kind, the
+     instructions and the fixed labels in key order. Candidate lines and page text are never hashed;
+   - `build(input)`, pure: returns `{ request, context }`. Bound every string with the caps in
+     `src/questions/bounds.ts`. A request over 24,000 bytes of state or 12,000 bytes of questions is refused as
+     `oversize`;
+   - `read(answer, context, threshold)`, pure: returns a `Verdict`. A choice of `none` is `none_chosen`; below the
+     threshold is `low_confidence`, with `leaned`, `confidence` and `threshold` filled in. A Noul site answers only
+     on a clear yes. "No" and "unsure" are both abstains, because no verdict may say "failed" or "absent".
+4. **Write its `SitePolicy`:**
+   - `threshold`: one row per provider that may answer. A provider with no row is not allowed at the site
+     (`provider_not_allowed`). A row is a number (choice), a band `{ yesAtLeast, noAtMost }` (Noul), or a record by
+     `RiskClass` for risk-scaled sites. Start no looser than the existing rows: choice 0.8, Noul 0.85 / 0.15;
+   - `combos`: `'agree'` and/or `'fallback'`, only where two providers make the site safer. `fallback` adds wrong acts
+     where an answer leads to a click (`locate`, `dismiss`, `outcome`), so it is never allowed there;
+   - `maturity: 'experimental'`. A new wording always starts experimental. `inherited` is reserved for wordings
+     measured earlier, and `measured` is never declared: it only comes from a matching `calibration.json` entry.
+5. **Register it** in `src/questions/sites/index.ts`, and list it in the `needs.sites` of every command that asks it.
+6. **Disclose it.** Add a row to the "What leaves your machine" table in `README.md`, and add any new cause to
+   `src/output/causes.ts`.
+7. **Calibrate it.** Build a labelled set written for refsure (synthetic pages, or pages you may publish). Run it
+   through the harness in `tools/calibrate/`, which takes dataset paths as arguments, and fit the lowest threshold
+   with precision ≥0.99 on acted items. Add a `src/questions/calibration/calibration.json` entry with its
+   provenance: site, set sha256, wording hash, line format, model family, provider, coverage and precision, date.
+   Never commit a dataset or stored HTML you may not publish.
+
+**A wording change is a threshold change.** Editing one character changes the hash, so a `measured` site drops back
+to its declared maturity until it is measured again. Do not tidy a measured wording.
+
+## Recipe 2: add a verb
+
+A verb is a `CommandSpec` in its own feature folder.
+
+1. **Create the folder** `src/features/<verb>/` with:
+   - `<verb>.contract.ts`: the `Args` and `Result` types, one contract per file;
+   - `<verb>.command.ts`: the `CommandSpec<Args, Result>`;
+   - `index.ts`: exports the spec, and any helper another feature may use;
+   - any rule only this verb needs (as `dismiss/` holds `overlay-detect.ts` and `dismiss-veto.ts`).
+2. **Fill in the `CommandSpec`:**
+   - `name`, `summary`, `since` (the release that adds it) and `stability: 'experimental'` for a new verb;
+   - `options`: one `OptionSpec` per flag. They feed `util.parseArgs`, `--help` and `commands --json`. `--page`,
+     `--dry-run` and `--help` are global; do not redeclare them;
+   - `parse(raw)`: returns `Args`, or a `UsageError` (exit 64) for a missing or malformed flag;
+   - `run(args, ctx)`: returns a `CommandOutcome`.
+3. **Declare `needs` honestly.** The registry acts on it:
+   - `page: 'required'` makes the registry resolve the page (`--page`, then `REFSURE_PAGE`, then the worktree's
+     current tab); `'none'` skips it;
+   - `capabilities`: browser features the verb needs (`highlight`, `dialog`, `console`, `network`, `count`, `attr`).
+     A backend without them answers `unsupported_by_backend` (21) before `run` is called;
+   - `sites`: every Decision site the verb may ask;
+   - `acts`: `'never'`, `'own-ref'` (the agent's ref, after a name check), `'ticket'` (a claimed ticket and a
+     fingerprint recheck) or `'high-risk'`. The registry asserts that an `acts: 'never'` verb never returns
+     `acted: true`.
+4. **Register it** in the static `FEATURES` array in `src/features/index.ts`. There is no directory scan; the array
+   order is the `--help` order.
+
+Rules for `run`:
+
+- **Statuses never set exits.** Return `status`, `acted`, `effect`, `result`, `why` and `next`. The registry derives
+  the exit code from the status. Never call `process.exit`.
+- Reach the browser only through `ctx.browser` and Decisions only through `ctx.decide`. Never spawn a process and
+  never call `fetch` from a feature.
+- Run every check that can refuse (consent, origin, bounds, the name check, the risk policy) **before** the first
+  dispatch. Once `acted` is `true`, the only statuses are `ok` and `effect_unknown`; anything that goes wrong after a
+  dispatch is `effect_unknown` with `effect: 'dispatched'`.
+- Never forward `type`, `keypress` or `inserttext`: keystrokes go to whatever has focus, which can be a terminal.
+- Money, irreversible, auth and consent go only through `act-high-risk`. Use `actionPolicy` from `src/risk/`.
+- Put page text in `result` only under paths you add to `ctx.trace.untrusted`.
+- Honour `ctx.dryRun`: nothing is sent and nothing is clicked.
+- `result` is a plain JSON object. Keep the envelope under 1 KB in the common case.
+- A new `why.cause` gets a row in `src/output/causes.ts`. A new cause or `next.do` value ships only in a minor
+  release, and never moves between exit classes.
+
+Then add the verb to the Commands table in `README.md`, and to `skills/refsure/SKILL.md` if agents should reach for
+it unprompted.
+
+## Recipe 3: add a language
+
+Risk classes and the dismiss veto come from lexicons. Every element name is matched against the union of all
+lexicons, whatever the page language.
+
+1. **Create `src/risk/lexicons/<lang>.ts`** exporting a `Lexicon`:
+
+   | Field | Holds |
+   |---|---|
+   | `lang` | the language code, such as `it` |
+   | `money` | pay, buy, order, checkout, top up, and similar |
+   | `irreversible` | delete, remove, send, publish, revoke, and similar |
+   | `auth` | sign in, log in, password, two-factor, authorize, switch account |
+   | `consent` | accept, agree, allow cookies, opt in |
+   | `dismissClose` | close, reject, no thanks, later, dismiss |
+   | `dismissVeto` | the veto list: accept, agree, allow, subscribe, buy, trial, enable, upgrade, manage, settings, preferences, customize |
+   | `cancelContext` | words that make "cancel" irreversible: subscription, order, account, booking |
+   | `cancelWords` | the plain cancel / no words of a confirm dialog, which never become irreversible |
+   | `confirmCue` | dialog wording that marks a confirm dialog: "are you sure", "confirm", "this cannot be undone" |
+
+2. Aim for at least eight terms per risk class. Write terms in lower case: they are matched against the folded name
+   (NFKC, lower-cased) on Unicode word boundaries, and multi-word phrases are fine. Include common inflections, since
+   matching is by whole word.
+3. **Register it** in `src/risk/lexicons/index.ts`.
+4. **Check collisions.** A term that is an everyday word in another language raises the risk class on every page.
+   Risk only rises, so a too-broad risk term costs refusals, not wrong clicks. A missing veto term can cost a wrong
+   click, so err towards a longer `dismissVeto`.
+5. **Prove it** with `guard --ref` on a fixture page in that language: a delete button reads `irreversible`, a
+   confirm dialog's own cancel button does not, and `dismiss` refuses an accept-style button.
+
+## Proving a change
+
+There are no test suites. A change is proven by running the real command against a real page:
+
+1. Build and typecheck:
+   ```sh
+   npm ci
+   npm run typecheck
+   npm run build
+   ```
+2. Write fixtures **outside the repo**, for example in `/tmp/refsure-probe/site/`, and serve them locally:
+   ```sh
+   python3 -m http.server 8765 --bind 127.0.0.1 -d /tmp/refsure-probe/site
+   ```
+   Use synthetic content only. A `data:` URL works for one-off pages.
+3. In an Orca terminal, open the fixture in an **isolated** browser profile, never your default one (it carries your
+   imported cookies):
+   ```sh
+   orca tab profile create --label refsure-probe --scope isolated --json
+   orca tab create --url http://127.0.0.1:8765/<fixture>.html --profile <profile id> --json
+   ```
+4. Run the bundle against that tab and read both the envelope and the exit code:
+   ```sh
+   node dist/refsure.mjs <verb> --page <browserPageId> … ; echo "exit $?"
+   ```
+   Cover the refusal paths, not only the happy one: a twin group, a reshuffled page between `locate` and `act`, a
+   wrong `--expect-name`, a high-risk control, `--dry-run`. Count clicks on the fixture (a counter on the page) to
+   prove that nothing was clicked when the envelope says `acted: false`.
+5. Throwaway helper scripts live outside the repo too, and are deleted afterwards.
+
+Describe the scenarios you ran and their envelopes in the pull request. Use `--dry-run` or a localhost mock gateway
+(configured with `jevPath`/`jevModel` and `openaiPath`/`openaiModel`) when a scenario does not need a real provider.
+
+## The scrub gate
+
+`tools/scrub/scrub.sh` (`npm run scrub`) blocks a release that contains strings the maintainer has listed as private.
+It scans, case-insensitively:
+
+- every path from `git ls-files` (untracked files that are not ignored included), and the content of each file;
+- the unpacked `npm pack` tarball;
+- every author, committer and commit message in `git log --all`.
+
+The patterns are **never committed**. CI reads them from the repository secret `REFSURE_SCRUB_PATTERNS`, and a
+maintainer's machine from `~/.config/refsure-scrub/patterns` (one extended regex per line). An optional allowlist of
+literal strings comes from `REFSURE_SCRUB_ALLOW` or `~/.config/refsure-scrub/allow`. A hit prints only
+`<source>:<file>:<line>: pattern #<n>`, never the matched text or the pattern.
+
+Without a pattern source the script exits 2 ("no scrub patterns configured"). That is expected on a contributor's
+machine. CI runs the gate on every push and on pull requests from this repository's branches (fork pull requests get
+no secrets, so the gate runs on the push that merges them), and `prepublishOnly` runs it before a publish. If CI
+reports a hit in your change, the maintainer will tell you which line to change.
+
+## Style
+
+- TypeScript with `strict`, `noUncheckedIndexedAccess` and `verbatimModuleSyntax`; `moduleResolution: "bundler"`,
+  imports without extensions, `import type` for types.
+- Two spaces, single quotes, semicolons, kebab-case file names.
+- Comments explain why, not what. Provenance comments say "ported from the author's earlier decision code", or
+  nothing.
+- Commit subjects are scoped and imperative: `feat(locate): …`, `fix(egress): …`, `docs: …`.
+- Run `npm run typecheck`, `npm run build` and `npm pack --dry-run` before you open a pull request. The tarball holds
+  only `dist/`, `skills/`, `README.md`, `LICENSE`, `SECURITY.md` and `package.json`.
