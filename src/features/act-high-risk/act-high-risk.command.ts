@@ -16,18 +16,19 @@ export const actHighRiskCommand: CommandSpec<ActHighRiskArgs, ActHighRiskResult>
   since: '0.1.0',
   stability: 'experimental',
   forms: [
-    '--class money|irreversible --ticket T --action <a> [--value v] --intent "<what the human asked for>"',
+    '--class money|irreversible --ticket T --action <a> [--value v] [--risk r] --intent "<what the human asked for>"',
     '--class money|irreversible|auth|consent --ref @eN --expect-name "<name you saw>" --action <a> [--value v] '
-      + '--intent "<what the human asked for>"',
+      + '[--risk r] --intent "<what the human asked for>"',
   ],
   options: {
     class: { type: 'string', summary: 'money, irreversible, auth or consent: must equal the class a fresh read gives (required)' },
     ticket: { type: 'string', summary: 'A ticket picked at ≥0.85 or by code, with no twins (money and irreversible only)' },
     ref: { type: 'string', summary: 'Your own ref, @eN from your latest snapshot (needs --expect-name)' },
-    'expect-name': { type: 'string', summary: 'The name you saw on the element; the live ref must still show it' },
+    'expect-name': { type: 'string', summary: 'The name you saw on the element; the live ref must still show it, as whole words' },
     action: { type: 'string', summary: `${HIGH_RISK_ACTIONS.join(', ')} (required)` },
     value: { type: 'string', summary: 'The text to fill or the option to select (fill and select only); never logged' },
     intent: { type: 'string', summary: 'What the human asked for, in a few words (required)' },
+    risk: { type: 'string', summary: 'Raise the class a fresh read gives, as the step that refused did: read … irreversible' },
   },
   needs: { page: 'none', capabilities: ['highlight'], sites: [], acts: 'high-risk' },
   parse: parseActHighRisk,

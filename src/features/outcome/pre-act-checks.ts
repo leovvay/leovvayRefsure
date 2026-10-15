@@ -69,6 +69,7 @@ export async function checkBeforeAct(
     const next = highRiskNext({
       class: risk.class, via: { ref, expectName: args.expectName }, action, intent: args.intent,
       ...(args.act.value === undefined ? {} : { value: args.act.value }),
+      ...(args.risk ? { risk: args.risk } : {}),
     });
     return refused('refused', 'high_risk_class',
       `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done. `

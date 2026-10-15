@@ -29,6 +29,8 @@ export function policyRefusal(
       action: act.action,
       intent: act.intent ?? `${act.action} ${role} ${JSON.stringify(cutName(name))}`,
       ...(act.value === undefined ? {} : { value: act.value }),
+      // A fresh ref carries no ticket: the class the ticket was issued at goes on as --risk (risk only rises).
+      risk: ticket.risk,
     });
     const kept = spent ? 'the ticket is spent' : 'the ticket is kept';
     return nothingDone('refused', 'high_risk_class',

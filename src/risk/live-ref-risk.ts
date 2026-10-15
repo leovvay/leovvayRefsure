@@ -4,7 +4,8 @@ import { classifyNames } from './classify-name';
 import { readLiveName } from './live-ref-check';
 import type { LiveTarget } from './live-target';
 import { maxRisk } from './max-risk';
-import { confirmDialogRaiser, fieldRaisers, pageRaisers } from './raisers';
+import { confirmDialogRaiser } from './confirm-dialog-raiser';
+import { fieldRaisers, pageRaisers } from './raisers';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
 
@@ -48,7 +49,9 @@ export async function liveRefRisk(
   const raisers = await Promise.all(CLICKS.has(action)
     ? [
       pageRaisers(port, page, action),
-      confirmDialogRaiser(port, page, action, { names: target.live.sources, role: target.role, bodyText: target.bodyText }),
+      confirmDialogRaiser(port, page, action, {
+        names: target.live.sources, role: target.role, text: target.live.text, bodyText: target.bodyText,
+      }),
     ]
     : [fieldRaisers(port, page, ref)]);
   return {

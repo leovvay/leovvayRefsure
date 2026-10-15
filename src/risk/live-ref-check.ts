@@ -1,22 +1,37 @@
 import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
 import { cutName, fold, norm } from '../page-model';
+import { labelTexts } from './live-labels';
 import type { LiveName } from './live-name';
 
-/** The element's own attributes the name is read from, plus the two that point at a label elsewhere. */
-const ATTRS = ['aria-label', 'placeholder', 'title', 'aria-labelledby', 'id'] as const;
+/** The element's own attributes the name is read from, plus those its labels elsewhere are found by. */
+const ATTRS = ['aria-label', 'placeholder', 'title', 'aria-labelledby', 'id', 'name', 'type'] as const;
 type AttrName = (typeof ATTRS)[number];
 /** For these the element's text is a value or its options, not its name. */
 const FIELD_TEXT: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select']);
-const LABELLED_BY_MAX = 4;
-const ID_MAX = 200;
+
+/** How `--expect-name` must sit in a name: anywhere (`contains`), or as whole words (`words`). */
+export type NameMatch = 'contains' | 'words';
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+}
+
+/** `want` in `name`, both folded: anywhere, or bounded by no letter or digit on either side. */
+function holds(name: string, want: string, match: NameMatch): boolean {
+  if (match === 'contains') return name.includes(want);
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(want)}(?![\\p{L}\\p{N}])`, 'u').test(name);
+}
 
 /**
- * The name check itself (spec §8.3): `fold(expectName)` is contained in one of the names the live ref carries. A
- * mismatch carries the name it shows, `norm`ed and cut at 90; an empty `expectName` never passes.
+ * The name check itself (spec §8.3): `fold(expectName)` is contained in one of the names the live ref carries; with
+ * `words`, as whole words, so one letter never passes for "Delete project". A mismatch carries the name it shows,
+ * `norm`ed and cut at 90; an empty `expectName` never passes.
  */
-export function nameCheck(live: Pick<LiveName, 'seen' | 'names'>, expectName: string): 'ok' | { mismatch: string } {
+export function nameCheck(
+  live: Pick<LiveName, 'seen' | 'names'>, expectName: string, match: NameMatch = 'contains',
+): 'ok' | { mismatch: string } {
   const want = fold(expectName);
-  if (want !== '' && live.names.some((name) => fold(name).includes(want))) return 'ok';
+  if (want !== '' && live.names.some((name) => holds(fold(name), want, match))) return 'ok';
   return { mismatch: cutName(norm(live.seen)) };
 }
 
@@ -31,46 +46,14 @@ function hasAttr(port: BrowserPort): boolean {
   return port.attr !== undefined && port.features().has('attr');
 }
 
-/** A CSS string literal: quotes and backslashes escaped, control characters as hex escapes. */
-function cssString(value: string): string {
-  const escaped = value
-    .replace(/[\\"]/g, '\\$&')
-    .replace(/[\u0000-\u001f\u007f]/g, (c) => `\\${c.charCodeAt(0).toString(16)} `);
-  return `"${escaped}"`;
-}
-
 function present(value: string | null | undefined): value is string {
   return typeof value === 'string' && norm(value) !== '';
 }
 
 /**
- * The text of the labels that live elsewhere on the page: the elements `aria-labelledby` names (up to four) and a
- * `<label for>` of the element's id. Each is counted before it is read, so a dangling id reads as no label while a
- * failing read still propagates: a label that could not be read must never lower the risk.
- */
-async function labelTexts(
-  port: BrowserPort, page: PageRef, labelledBy: string | null, id: string | null,
-): Promise<{ labelledBy: string | null; labelFor: string | null }> {
-  const none = { labelledBy: null, labelFor: null };
-  const has = port.features();
-  if (port.count === undefined || port.selectorText === undefined || !has.has('count') || !has.has('selector-text')) {
-    return none;
-  }
-  const ids = labelledBy === null ? [] : [...new Set(labelledBy.split(/\s+/u))]
-    .filter((one) => one !== '' && one.length <= ID_MAX).slice(0, LABELLED_BY_MAX);
-  const selectors = ids.map((one) => `[id=${cssString(one)}]`);
-  if (id !== null && id.trim() !== '' && id.length <= ID_MAX) selectors.push(`label[for=${cssString(id)}]`);
-  if (selectors.length === 0) return none;
-  const counts = await Promise.all(selectors.map((css) => port.count!(page, css)));
-  const texts = await Promise.all(selectors.map((css, i) => ((counts[i] ?? 0) > 0 ? port.selectorText!(page, css) : '')));
-  const byText = texts.slice(0, ids.length).map(norm).filter((text) => text !== '').join(' ');
-  const forText = selectors.length > ids.length ? norm(texts[ids.length] ?? '') : '';
-  return { labelledBy: byText === '' ? null : byText, labelFor: forText === '' ? null : forText };
-}
-
-/**
- * Every name a live ref carries, read without a snapshot (spec §8.3): its text and label attributes at once, then
- * the labels elsewhere on the page when it points at any. `action` keeps a field's text out of its names.
+ * Every name a live ref carries, read without a snapshot (spec §8.3): its text and attributes at once, then the
+ * labels elsewhere on the page that name it (`aria-labelledby`, `<label for>`, a wrapping `<label>`). `action`
+ * keeps a field's text out of its names.
  */
 export async function readLiveName(port: BrowserPort, page: PageRef, ref: Ref, action?: ActAction): Promise<LiveName> {
   const attrs: readonly AttrName[] = hasAttr(port) ? ATTRS : [];
@@ -82,10 +65,13 @@ export async function readLiveName(port: BrowserPort, page: PageRef, ref: Ref, a
     const value = values[attrs.indexOf(name)];
     return present(value) ? value : null;
   };
-  const labels = await labelTexts(port, page, attr('aria-labelledby'), attr('id'));
+  const labels = await labelTexts(port, page, {
+    labelledBy: attr('aria-labelledby'), id: attr('id'), name: attr('name'), type: attr('type'),
+  });
   const inner = present(text) && !(action !== undefined && FIELD_TEXT.has(action)) ? text : null;
-  const names = [labels.labelledBy, attr('aria-label'), labels.labelFor, inner, attr('placeholder'), attr('title')]
-    .filter(present);
+  const names = [
+    labels.labelledBy, attr('aria-label'), labels.labelFor, labels.wrapping, inner, attr('placeholder'), attr('title'),
+  ].filter(present);
   const sources = [...new Set([text, ...names].filter(present).map(norm))];
-  return { seen: names[0] ?? '', names, sources };
+  return { seen: names[0] ?? '', names, sources, text: norm(text) };
 }

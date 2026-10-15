@@ -10,10 +10,19 @@ import { stateInput } from './state-page';
 
 const BLOCKING_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog']);
 
-/** The `next` table is the research set's (spec §6.2); a custom set's keys mean what the caller said: `next` null. */
+/** The same `state` call: the custom states in their order, then `--expect`. */
+function askAgain(args: StateArgs): string[] {
+  const custom = args.states === null ? [] : Object.entries(args.states).flatMap(([key, when]) => ['--state', `${key}=${when}`]);
+  return ['refsure', 'state', ...custom, ...(args.expect === null ? [] : ['--expect', args.expect])];
+}
+
+/**
+ * The `next` table belongs to the research keys (spec §6.2, §6.3), whichever set offered them: a custom set that
+ * names `blocking_modal` still points to dismiss. Any other key means what the caller said: `next` null.
+ */
 function answered(verdict: string, by: StateResult['by'], args: StateArgs): CommandOutcome<StateResult> {
   const outcome: CommandOutcome<StateResult> = { status: 'ok', acted: false, effect: 'none', result: { verdict, by } };
-  const next = args.states === null && args.expect !== null ? stateNext(verdict, args.expect) : null;
+  const next = stateNext(verdict, askAgain(args));
   if (next) outcome.next = next;
   return outcome;
 }
@@ -27,7 +36,7 @@ function offers(args: StateArgs, key: string): boolean {
  * Which state the page is in (spec §6.2). Code first: a tab that failed to load is `error_page`, an open dialog is
  * `blocking_modal`; neither sends anything. Otherwise one `page-state` Choice over the research state set,
  * unshuffled, with `expected` naming the page the agent meant to reach. `--state` replaces that set with the
- * caller's own (spec §6.3): a new wording, so experimental, and its keys carry no `next`. Reads only.
+ * caller's own (spec §6.3): a new wording, so experimental; only the research keys in it carry a `next`. Reads only.
  */
 export const stateCommand: CommandSpec<StateArgs, StateResult> = {
   name: 'state',
@@ -43,7 +52,8 @@ export const stateCommand: CommandSpec<StateArgs, StateResult> = {
     expect: { type: 'string', summary: 'What the intended page is, in a few words (required without --state)' },
     state: {
       type: 'string', multiple: true,
-      summary: 'A custom state, key="<when the page is in it>"; two or more replace the research set (experimental, next: null)',
+      summary: 'A custom state, key="<when the page is in it>"; two or more replace the research set (experimental; '
+        + 'only research keys get a next)',
     },
   },
   needs: { page: 'required', capabilities: [], sites: ['page-state'], acts: 'never' },

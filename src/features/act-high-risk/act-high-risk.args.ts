@@ -14,6 +14,8 @@ export interface ActHighRiskArgs {
   action: ActAction;
   value: string | null;
   intent: string;
+  /** `--risk`: it only raises the class a fresh read gives, as on every other path. */
+  risk?: RiskClass;
   /** `--page`: the page for `--ref`; with `--ticket` it must be the ticket's own. */
   hint: PageHint;
 }

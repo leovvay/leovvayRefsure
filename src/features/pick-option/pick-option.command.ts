@@ -20,6 +20,15 @@ async function pick(args: PickOptionArgs, ctx: CommandContext): Promise<Out> {
   if (page === null) throw new Error('pick-option needs a page, and none was resolved');
   let tab = await ctx.browser.tabInfo(page);
   if (args.open) {
+    // Every check that can refuse runs before the click (spec §6.1): an option no name matches is asked of the
+    // option-map Decision after it, so its route (keys, consent, origin, caps) is checked here, not after the list opened.
+    const route = await ctx.routeCheck(optionMapSite, { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun });
+    if (!route.ok) {
+      const detail = `${route.detail}; nothing was clicked. --open checks this first, since the list it opens may `
+        + 'match no option by name; open the list yourself, then run pick-option without --open (a name match needs no Decision)';
+      const verdict = { kind: 'abstain' as const, cause: route.cause, detail, leaned: null, confidence: null, threshold: null };
+      return abstainOutcome<PickOptionResult>(verdict, null);
+    }
     const stopped = await openField(ctx, page, tab, args.field, args.want);
     if (stopped !== null) return stopped;
     tab = await ctx.browser.tabInfo(page);
@@ -34,9 +43,10 @@ async function pick(args: PickOptionArgs, ctx: CommandContext): Promise<Out> {
   const result: PickOptionResult = { ticket: null, by: 'code', field: lineOf(tree, field), options: found.options.length };
   if (args.open) result.opened = true;
   if (found.options.length === 0) {
+    // Without --open, the way on clicks the field (pick-option --open acts on your ref), so `do` says act.
     const next: Next = args.open
       ? SNAPSHOT
-      : { do: 'snapshot', argv: ['refsure', 'pick-option', '--field', `@${args.field}`, '--want', args.want, '--open'] };
+      : { do: 'act', argv: ['refsure', 'pick-option', '--field', `@${args.field}`, '--want', args.want, '--open'] };
     const hint = args.open ? '' : ': a custom dropdown lists them only once open (--open)';
     return nothingDone('abstained', 'none_chosen', `the field offers no options${hint}; nothing was done`, { result, next });
   }

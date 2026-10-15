@@ -28,6 +28,12 @@ export interface BrowserPort {
   count?(page: PageRef, css: string): Promise<number>;
   /** innerText of the first element a CSS selector matches; a backend error when none does. Read only. */
   selectorText?(page: PageRef, css: string): Promise<string>;
+  /**
+   * An attribute of the first element a selector matches (null when it lacks it); a backend error when none does.
+   * Read only. The selector (CSS, or `xpath=…` as agent-browser reads it) has no double quote or backslash: Orca
+   * hands it to agent-browser's own tokenizer as one quoted token.
+   */
+  selectorAttr?(page: PageRef, css: string, name: string): Promise<string | null>;
   act(page: PageRef, ref: Ref, action: ActAction, value?: string): Promise<ActResult>;
   highlight?(page: PageRef, ref: Ref): Promise<void>;
   console?(page: PageRef, since?: MarkId): Promise<ConsoleLine[]>;

@@ -2,7 +2,7 @@ import { type ActAction, isRef } from '../../browser';
 import type { ParsedArgs, UsageError } from '../../cli';
 import { norm } from '../../page-model';
 import { BOUNDS } from '../../questions';
-import { HIGH_RISK, type RiskClass } from '../../risk';
+import { HIGH_RISK, RISK_ORDER, type RiskClass } from '../../risk';
 import { isTicketId } from '../../tickets';
 import type { ActHighRiskArgs, HighRiskTarget } from './act-high-risk.args';
 
@@ -60,6 +60,13 @@ export function parseActHighRisk(raw: ParsedArgs): ActHighRiskArgs | UsageError 
   const intent = text(raw.values.intent) ?? '';
   if (intent === '') return { usage: 'act-high-risk needs --intent "<what the human asked for>"' };
   if (intent.length > BOUNDS.INTENT_MAX) return { usage: `--intent is ${intent.length} characters; keep it to ${BOUNDS.INTENT_MAX}` };
+  const risk = raw.values.risk;
+  if (risk !== undefined && (typeof risk !== 'string' || !(RISK_ORDER as readonly string[]).includes(risk))) {
+    return { usage: `--risk must be one of ${RISK_ORDER.join(', ')}` };
+  }
   const page = typeof raw.values.page === 'string' ? raw.values.page.trim() : null;
-  return { class: cls as RiskClass, target, action: typed, value, intent, hint: page === null ? {} : { page } };
+  return {
+    class: cls as RiskClass, target, action: typed, value, intent, hint: page === null ? {} : { page },
+    ...(risk === undefined ? {} : { risk: risk as RiskClass }),
+  };
 }

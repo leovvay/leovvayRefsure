@@ -7,7 +7,9 @@ import type { TriageArgs } from './triage.args';
 import type { TriageResult } from './triage.contract';
 import { capLines, consoleLines, networkLines, sinceFilter, TRIAGE_MAX } from './triage-lines';
 
-const MARK_AGAIN: Next = { do: 'snapshot', argv: ['refsure', 'mark'] };
+/** A fresh look, as `do` says; the detail names the new mark to take. */
+const MARK_AGAIN: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
+const MARK_HINT = 'take a new one (refsure mark) before your next act, or run triage without --since';
 
 /** Drops the line times the cut needed: the envelope shows what happened, not when. */
 function bare<T extends { at: number | null }>(lines: readonly T[]): Omit<T, 'at'>[] {
@@ -17,8 +19,10 @@ function bare<T extends { at: number | null }>(lines: readonly T[]): Omit<T, 'at
 async function sinceMs(args: TriageArgs, ctx: CommandContext, pageId: string): Promise<number | null | CommandOutcome<TriageResult>> {
   if (args.since === null) return null;
   const mark = await loadMark(ctx.store, args.since, ctx.now());
-  if (mark === 'missing') return nothingDone('stale', 'ticket_expired', `no mark ${args.since} is kept; marks live 15 minutes`, { next: MARK_AGAIN });
-  if (mark === 'expired') return nothingDone('stale', 'ticket_expired', `mark ${args.since} has expired; take a new one`, { next: MARK_AGAIN });
+  if (mark === 'missing' || mark === 'expired') {
+    const what = mark === 'missing' ? `no mark ${args.since} is kept; marks live 15 minutes` : `mark ${args.since} has expired`;
+    return nothingDone('stale', 'ticket_expired', `${what}: ${MARK_HINT}`, { next: MARK_AGAIN });
+  }
   if (mark.pageId !== pageId) {
     return nothingDone('usage', 'usage', `mark ${args.since} was taken on page ${mark.pageId}, not ${pageId}: pass --page ${mark.pageId}`);
   }

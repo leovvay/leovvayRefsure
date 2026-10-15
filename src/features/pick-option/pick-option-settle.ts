@@ -79,12 +79,12 @@ export async function settleOption(ctx: CommandContext, scene: OptionScene, chos
     return nothingDone('abstained', 'proposed_only', 'a model family refsure has not measured picked it: propose only', { result });
   }
   if (!authorityAllows(authority, risk.class)) {
-    const next: Next = ticket === null
-      ? { do: 'snapshot', argv: ['refsure', 'snap'] }
-      : { do: 'snapshot', argv: ['refsure', 'guard', '--ticket', ticket.id] };
+    // A fresh look, as `do` says; the detail names the guard check and the outcome step.
+    const next: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
+    const check = ticket === null ? 'refsure guard' : `refsure guard --ticket ${ticket.id}`;
     const own = action === 'select' ? `-- select --element @${targetRef} --value "<the option>"` : `-- click --element @${targetRef}`;
     return nothingDone('abstained', 'proposed_only',
-      `the pick may act at ${authority} only, and it reads ${why}: proposed, not for act; check the option yourself, `
+      `the pick may act at ${authority} only, and it reads ${why}: proposed, not for act; check the option yourself (${check}), `
         + `then run it through outcome with your own ref (refsure outcome --intent … --expect-name … ${own})`, { result, next });
   }
   const outcome: Out = { status: 'ok', acted: false, effect: 'none', result };

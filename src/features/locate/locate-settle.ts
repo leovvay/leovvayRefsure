@@ -129,9 +129,8 @@ export async function settlePick(
   // A ticket `act` would refuse is a proposal (as dismiss reports one), never `ok` with nowhere to go. High risk
   // stays `ok` below: the pick is right, and only act-high-risk may take it.
   if (!HIGH_RISK.has(risk.class) && !authorityAllows(authority, risk.class)) {
-    const next: Next = result.ticket === null
-      ? { do: 'snapshot', argv: ['refsure', 'snap'] }
-      : { do: 'snapshot', argv: ['refsure', 'guard', '--ticket', result.ticket] };
+    // A fresh look, as `do` says; the detail names the guard check that may come with it.
+    const next: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
     return nothingDone('abstained', 'proposed_only', proposalWhy(authority, risk, result.ticket), { result, next });
   }
   const outcome: CommandOutcome<LocateResult> = { status: 'ok', acted: false, effect: 'none', result };
@@ -143,6 +142,7 @@ export async function settlePick(
     outcome.next = highRiskNext({
       class: risk.class, via: highRiskVia(issued, risk.class, cand.ref, cand.fp.name), action: 'click',
       intent: args.intent ?? `click ${cand.fp.role} ${JSON.stringify(cutName(cand.fp.name))}`,
+      ...(args.risk === undefined ? {} : { risk: args.risk }),
     });
   }
   return outcome;

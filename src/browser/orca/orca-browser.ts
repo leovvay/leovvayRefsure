@@ -20,6 +20,8 @@ const LOG_LIMIT = 200;
 const UNREACHED: ReadonlySet<BrowserErrorCode> = new Set<BrowserErrorCode>(['no_tab', 'orca_not_running', 'not_in_orca_terminal']);
 // `exec` hands its command to agent-browser's own tokenizer, so only plain attribute names may pass.
 const ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]{0,63}$/;
+// A selector for `exec`, sent as one double-quoted token: no double quote, backslash or control character in it.
+const EXEC_SELECTOR = /^[^"\\\u0000-\u001f\u007f]{1,2000}$/;
 
 /** The Orca backend: every call spawns the typed `orca` CLI with `--json`; nothing else in refsure spawns it. */
 export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
@@ -82,6 +84,12 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
     async selectorText(page, css) {
       if (css.trim() === '') throw new BrowserError('backend_error', 'selectorText needs a CSS selector');
       return readText(await call(onPage(page, ['get'], '--what=text', `--element=${css}`)), 'get text');
+    },
+
+    async selectorAttr(page, css, name) {
+      if (!ATTR_NAME.test(name)) throw new BrowserError('backend_error', `not a plain attribute name: ${name}`);
+      if (!EXEC_SELECTOR.test(css)) throw new BrowserError('backend_error', 'selectorAttr takes no double quote or backslash');
+      return readAttr(await call(onPage(page, ['exec'], `--command=get attr "${css}" ${name}`)));
     },
 
     act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),

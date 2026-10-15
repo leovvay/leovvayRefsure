@@ -1,11 +1,8 @@
-import { isBrowserError } from '../browser';
 import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
-import { CONFIRMING_ROLES } from './classify';
-import { maxRisk } from './max-risk';
+import { assumedOn, countProbe, raise } from './raise-probe';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
 import { readTagAttrs } from './tag-attrs';
-import { findTermAnyReading, findTermEveryReading } from './term-match';
 
 const PASSWORD_INPUTS = 'input[type=password]';
 const CARD_INPUTS = [
@@ -17,39 +14,6 @@ const CARD_NAME = /card|cvv|cvc|iban/i;
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
 const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
-/** An open dialog: `<dialog open>`, or a dialog, alertdialog or modal role that is not hidden. */
-const OPEN_DIALOG_PARTS = [
-  'dialog[open]',
-  ...['[role~=dialog]', '[role~=alertdialog]', '[aria-modal=true]'].map((css) => `${css}:not([hidden]):not([aria-hidden=true])`),
-];
-const OPEN_DIALOGS = OPEN_DIALOG_PARTS.join(', ');
-/** An open dialog named by its `aria-label`: wording the page text never shows. */
-const LABELLED_DIALOGS = OPEN_DIALOG_PARTS.map((css) => `${css}[aria-label]`).join(', ');
-
-type Probe = 'hit' | 'miss' | 'assumed';
-
-/**
- * A raiser that cannot read counts as hit (spec §8.3). A slow or failing backend call is such a case; a page that
- * is gone, Orca down or a stale ref still propagate for the registry to map.
- */
-function assumedOn(error: unknown): Probe {
-  if (isBrowserError(error) && (error.code === 'timeout' || error.code === 'backend_error')) return 'assumed';
-  throw error;
-}
-
-async function countProbe(port: BrowserPort, page: PageRef, css: string): Promise<Probe> {
-  try {
-    return (await port.count!(page, css)) > 0 ? 'hit' : 'miss';
-  } catch (error) {
-    return assumedOn(error);
-  }
-}
-
-function raise(into: { class: RiskClass; reasons: string[] }, cls: RiskClass, reason: string, probe: Probe): void {
-  if (probe === 'miss') return;
-  into.class = maxRisk(into.class, cls);
-  into.reasons.push(probe === 'assumed' ? `${reason}:assumed` : reason);
-}
 
 /**
  * Page-level raisers for a click (spec §8.3): a password input on the page → auth; a card, CVV or IBAN input →
@@ -109,41 +73,5 @@ export async function fieldRaisers(port: BrowserPort, page: PageRef, ref: Ref): 
   raise(out, 'auth', 'raiser:password', password ? 'hit' : 'miss');
   raise(out, 'money', 'raiser:cc-autocomplete', CC_AUTOCOMPLETE.test(attrs.autocomplete) ? 'hit' : 'miss');
   raise(out, 'money', 'raiser:card', CARD_NAME.test(`${attrs.name} ${attrs.id}`) ? 'hit' : 'miss');
-  return out;
-}
-
-/**
- * A control that backs out of a dialog: every name it carries is a close or cancel word ("No", "Cancel", "×"),
- * in every reading of it.
- */
-function backsOut(names: readonly string[]): boolean {
-  return names.length > 0 && names.every((name) => findTermEveryReading('dismissClose', name) !== null
-    || findTermEveryReading('cancelWords', name) !== null);
-}
-
-/**
- * The confirm-dialog rule (spec §8.5) for a click on a live ref, where no snapshot shows whether the element sits
- * in a dialog: the confirming button of a confirm dialog is irreversible, never its Cancel or No. Read wider, so
- * risk only rises: a dialog is open on the page, and its wording may carry a confirm cue or an irreversible term
- * (the page text does, or an open dialog is named by an `aria-label`). A control whose every name backs out, or
- * whose explicit role cannot confirm, is left alone. A backend without `count` counts the dialog as open.
- */
-export async function confirmDialogRaiser(
-  port: BrowserPort, page: PageRef, action: ActAction, live: { names: readonly string[]; role: string | null; bodyText: string },
-): Promise<RiskReading> {
-  const out = { class: 'read' as RiskClass, reasons: [] as string[] };
-  if (!CLICKS.has(action) || (live.role !== null && !CONFIRMING_ROLES.has(live.role)) || backsOut(live.names)) return out;
-  let open: Probe = 'assumed';
-  let labelled: Probe = 'assumed';
-  if (port.count !== undefined && port.features().has('count')) {
-    [open, labelled] = await Promise.all([countProbe(port, page, OPEN_DIALOGS), countProbe(port, page, LABELLED_DIALOGS)]);
-  }
-  if (open === 'miss') return out;
-  const text = live.bodyText;
-  const cue = findTermAnyReading('confirmCue', text, { loose: true }) !== null
-    || findTermAnyReading('irreversible', text, { loose: true }) !== null;
-  if (!cue && labelled === 'miss') return out;
-  const sure = open === 'hit' && (cue || labelled === 'hit');
-  raise(out, 'irreversible', 'raiser:confirm-dialog', sure ? 'hit' : 'assumed');
   return out;
 }

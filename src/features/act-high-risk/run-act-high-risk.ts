@@ -37,13 +37,15 @@ function stopped(ctx: CommandContext, gate: Extract<HighRiskGateResult, { ok: fa
 
 /**
  * The only path for money, irreversible, auth and consent (spec §6.3, §8.5). Every check runs before the dispatch
- * and none is a Decision: the gate (ticket fitness, claim and recheck, or the live name), then `--class` against
- * the fresh class. Then the element is highlighted and the typed act runs once; it is never retried.
+ * and none is a Decision: the gate (ticket fitness, a recheck before and after the claim, or the live name), then
+ * `--class` against the fresh class (raised by `--risk`). Then the element is highlighted and the typed act runs
+ * once; it is never retried.
  */
 export async function runActHighRisk(args: ActHighRiskArgs, ctx: CommandContext): Promise<Out> {
   let page: PageRef;
   let value: string | undefined;
   let gate: HighRiskGateResult;
+  const raise = args.risk === undefined ? {} : { risk: args.risk };
   if (args.target.kind === 'ticket') {
     const peeked = await ctx.tickets.peek(args.target.ticket, ctx.now());
     if (typeof peeked === 'string') return ticketGone(peeked, args.target.ticket);
@@ -55,13 +57,13 @@ export async function runActHighRisk(args: ActHighRiskArgs, ctx: CommandContext)
     const bound = ticketValue(args, peeked);
     if ('status' in bound) return bound;
     value = bound.value;
-    gate = await gateHighRisk(ctx, { class: args.class, action: args.action, page, ticket: peeked });
+    gate = await gateHighRisk(ctx, { class: args.class, action: args.action, page, ticket: peeked, ...raise });
   } else {
     page = await ctx.browser.resolvePage(args.hint);
     ctx.page = page;
     value = args.value ?? undefined;
     gate = await gateHighRisk(ctx, {
-      class: args.class, action: args.action, page, ref: args.target.ref, expectName: args.target.expectName,
+      class: args.class, action: args.action, page, ref: args.target.ref, expectName: args.target.expectName, ...raise,
     });
   }
   if (!gate.ok) return stopped(ctx, gate);
