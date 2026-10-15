@@ -32,6 +32,13 @@ export interface Decided<Out> {
 /** Hides providers, combos, egress, consent and limits from every command. */
 export type DecideFn = <In, Ctx, Out>(site: DecisionSite<In, Ctx, Out>, input: In, opts: DecideOpts) => Promise<Decided<Out>>;
 
-/** Whether a site could be asked now (keys, consent, allowlist), without asking: lets acts refuse before dispatch. */
+/**
+ * Whether a site could be asked now (keys, consent, allowlist, origin, spend caps), without asking: lets acts
+ * refuse before dispatch, and lets a wait stop asking before a round it has no calls left for. `calls` is how many
+ * provider calls one Decision on this route may make (2 for `agree` and `fallback`).
+ */
 export type RouteCheckFn = (site: DecisionSite<unknown, unknown, unknown>, opts: Pick<DecideOpts, 'combo' | 'originUrl' | 'dryRun'>) =>
-  Promise<{ ok: true } | { ok: false; cause: 'not_set_up' | 'provider_not_allowed' | 'origin_denied'; detail: string }>;
+  Promise<
+    | { ok: true; calls: number }
+    | { ok: false; cause: 'not_set_up' | 'provider_not_allowed' | 'origin_denied' | 'spend_limit'; detail: string }
+  >;

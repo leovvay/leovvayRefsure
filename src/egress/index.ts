@@ -8,7 +8,7 @@ export { approve, isEgressRefusal, STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } from '
 export { redactSecrets } from './redact';
 export { maskPii } from './pii-masks';
 export { cleanEgressText } from './clean-text';
-export { stripControl, boundText } from './bound-text';
+export { boundJsonBytes, boundText, jsonTextBytes, stripControl } from './bound-text';
 export { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
 export { checkOrigin } from './origin-policy';
 export { DISCLOSURE_TEXT, DISCLOSURE_HASH } from './disclosure';

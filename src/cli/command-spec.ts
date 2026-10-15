@@ -14,6 +14,11 @@ export interface CommandSpec<Args, Result> {
   stability: 'stable' | 'experimental';
   /** Feeds util.parseArgs, --help and `commands --json`. */
   options: Readonly<Record<string, OptionSpec>>;
+  /**
+   * The invocation shapes, without `refsure <name>`, when options alone do not show them: e.g. the act a verb
+   * takes after `--`. Shown in --help and `commands --json`.
+   */
+  forms?: readonly string[];
   needs: {
     page: 'required' | 'none';
     capabilities: readonly BrowserCapability[];

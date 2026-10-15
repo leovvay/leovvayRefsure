@@ -7,5 +7,7 @@ export interface CommandEntry {
   since: string;
   stability: AnyCommandSpec['stability'];
   options: Readonly<Record<string, OptionSpec>>;
+  /** The invocation shapes, when options alone do not show them (e.g. the act after `--`). */
+  forms?: readonly string[];
   needs: AnyCommandSpec['needs'];
 }

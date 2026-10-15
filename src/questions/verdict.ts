@@ -18,4 +18,6 @@ export type Verdict<Out> =
     leaned: string | null;
     confidence: number | null;
     threshold: number | null;
+    /** The provider refused the key itself (HTTP 401, 402, 403): asking again, over any input, fails the same way. */
+    permanent?: true;
   };

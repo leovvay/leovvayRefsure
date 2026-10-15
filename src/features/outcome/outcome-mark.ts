@@ -20,7 +20,9 @@ function nothing(status: 'stale' | 'usage', cause: string, detail: string): Comm
 function landed(by: OutcomeResult['by'], rule?: OutcomeResult['rule']): CommandOutcome<OutcomeResult> {
   const result: OutcomeResult = { verdict: 'landed', by };
   if (rule) result.rule = rule;
-  return { status: 'ok', acted: false, effect: 'none', result };
+  const outcome: CommandOutcome<OutcomeResult> = { status: 'ok', acted: false, effect: 'none', result };
+  if (by === 'code') outcome.settledByCode = true;
+  return outcome;
 }
 
 /**

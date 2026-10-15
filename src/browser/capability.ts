@@ -1,1 +1,1 @@
-export type BrowserCapability = 'highlight' | 'dialog' | 'console' | 'network' | 'count' | 'attr' | 'html';
+export type BrowserCapability = 'highlight' | 'dialog' | 'console' | 'network' | 'count' | 'attr' | 'html' | 'selector-text';

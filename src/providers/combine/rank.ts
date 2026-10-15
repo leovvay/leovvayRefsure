@@ -18,7 +18,8 @@ export function firstAbstain<Out>(outcomes: readonly PartOutcome<Out>[]): Abstai
   for (const outcome of outcomes) {
     const verdict = outcome.verdict;
     if (verdict.kind !== 'abstain') continue;
-    const rank = RANK[verdict.cause] ?? Number.MAX_SAFE_INTEGER;
+    // A refused key outranks a slow provider: waiting cannot heal it.
+    const rank = verdict.permanent ? -1 : RANK[verdict.cause] ?? Number.MAX_SAFE_INTEGER;
     if (best === null || rank < best.rank) best = { outcome, verdict, rank };
   }
   if (best === null) return null;

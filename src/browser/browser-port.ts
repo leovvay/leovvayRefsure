@@ -26,6 +26,8 @@ export interface BrowserPort {
   attr?(page: PageRef, ref: Ref, name: string): Promise<string | null>;
   html?(page: PageRef, ref: Ref): Promise<string>;
   count?(page: PageRef, css: string): Promise<number>;
+  /** innerText of the first element a CSS selector matches; a backend error when none does. Read only. */
+  selectorText?(page: PageRef, css: string): Promise<string>;
   act(page: PageRef, ref: Ref, action: ActAction, value?: string): Promise<ActResult>;
   highlight?(page: PageRef, ref: Ref): Promise<void>;
   console?(page: PageRef, since?: MarkId): Promise<ConsoleLine[]>;

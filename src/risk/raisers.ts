@@ -1,9 +1,12 @@
 import { isBrowserError } from '../browser';
 import type { ActAction, BrowserPort, PageRef, Ref } from '../browser';
+import { fold } from '../page-model';
+import { CONFIRMING_ROLES } from './classify';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
 import { readTagAttrs } from './tag-attrs';
+import { findTerm, findTermLoose } from './term-match';
 
 const PASSWORD_INPUTS = 'input[type=password]';
 const CARD_INPUTS = [
@@ -15,6 +18,14 @@ const CARD_NAME = /card|cvv|cvc|iban/i;
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
 const CLICKS: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick']);
+/** An open dialog: `<dialog open>`, or a dialog, alertdialog or modal role that is not hidden. */
+const OPEN_DIALOG_PARTS = [
+  'dialog[open]',
+  ...['[role~=dialog]', '[role~=alertdialog]', '[aria-modal=true]'].map((css) => `${css}:not([hidden]):not([aria-hidden=true])`),
+];
+const OPEN_DIALOGS = OPEN_DIALOG_PARTS.join(', ');
+/** An open dialog named by its `aria-label`: wording the page text never shows. */
+const LABELLED_DIALOGS = OPEN_DIALOG_PARTS.map((css) => `${css}[aria-label]`).join(', ');
 
 type Probe = 'hit' | 'miss' | 'assumed';
 
@@ -99,5 +110,39 @@ export async function fieldRaisers(port: BrowserPort, page: PageRef, ref: Ref): 
   raise(out, 'auth', 'raiser:password', password ? 'hit' : 'miss');
   raise(out, 'money', 'raiser:cc-autocomplete', CC_AUTOCOMPLETE.test(attrs.autocomplete) ? 'hit' : 'miss');
   raise(out, 'money', 'raiser:card', CARD_NAME.test(`${attrs.name} ${attrs.id}`) ? 'hit' : 'miss');
+  return out;
+}
+
+/** A control that backs out of a dialog: every name it carries is a close or cancel word ("No", "Cancel", "×"). */
+function backsOut(names: readonly string[]): boolean {
+  return names.length > 0 && names.every((name) => {
+    const folded = fold(name);
+    return findTerm('dismissClose', folded) !== null || findTerm('cancelWords', folded) !== null;
+  });
+}
+
+/**
+ * The confirm-dialog rule (spec §8.5) for a click on a live ref, where no snapshot shows whether the element sits
+ * in a dialog: the confirming button of a confirm dialog is irreversible, never its Cancel or No. Read wider, so
+ * risk only rises: a dialog is open on the page, and its wording may carry a confirm cue or an irreversible term
+ * (the page text does, or an open dialog is named by an `aria-label`). A control whose every name backs out, or
+ * whose explicit role cannot confirm, is left alone. A backend without `count` counts the dialog as open.
+ */
+export async function confirmDialogRaiser(
+  port: BrowserPort, page: PageRef, action: ActAction, live: { names: readonly string[]; role: string | null; bodyText: string },
+): Promise<RiskReading> {
+  const out = { class: 'read' as RiskClass, reasons: [] as string[] };
+  if (!CLICKS.has(action) || (live.role !== null && !CONFIRMING_ROLES.has(live.role)) || backsOut(live.names)) return out;
+  let open: Probe = 'assumed';
+  let labelled: Probe = 'assumed';
+  if (port.count !== undefined && port.features().has('count')) {
+    [open, labelled] = await Promise.all([countProbe(port, page, OPEN_DIALOGS), countProbe(port, page, LABELLED_DIALOGS)]);
+  }
+  if (open === 'miss') return out;
+  const text = fold(live.bodyText);
+  const cue = findTermLoose('confirmCue', text) !== null || findTermLoose('irreversible', text) !== null;
+  if (!cue && labelled === 'miss') return out;
+  const sure = open === 'hit' && (cue || labelled === 'hit');
+  raise(out, 'irreversible', 'raiser:confirm-dialog', sure ? 'hit' : 'assumed');
   return out;
 }

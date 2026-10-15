@@ -3,7 +3,8 @@ import type { CommandContext, CommandOutcome } from '../../cli';
 import { cutName, norm } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import {
-  actionPolicy, actionRole, classifyNames, fieldRaisers, maxRisk, nameCheck, pageRaisers, readLiveName,
+  actionPolicy, actionRole, classifyNames, confirmDialogRaiser, fieldRaisers, maxRisk, nameCheck, pageRaisers,
+  readLiveName,
 } from '../../risk';
 import type { RiskReading } from '../../risk';
 import { abstainOutcome } from '../shared';
@@ -12,8 +13,11 @@ import type { OutcomeResult } from './outcome.contract';
 
 const CLICKS: ReadonlySet<string> = new Set(['click', 'dblclick']);
 
-/** What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), and the risk read. */
-type Cleared = { acted: string; risk: RiskReading };
+/**
+ * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), the risk read, and the
+ * body text read before the act, which is the outcome's before-side.
+ */
+type Cleared = { acted: string; risk: RiskReading; bodyText: string };
 
 type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared };
 
@@ -33,23 +37,40 @@ async function pageRole(port: BrowserPort, page: PageRef, ref: Ref): Promise<str
 }
 
 /**
+ * The route check, before anything is read or done. Any refusal stops the act, with one exception: over the spend
+ * cap, an act that `--expect-url` or `--expect-text` can confirm by code still runs, with a note, since only its
+ * Decision would have been refused. Without a code rule it could only end `effect_unknown`, so it never starts.
+ */
+async function routeRefusal(ctx: CommandContext, args: OutcomeWrapArgs, tab: TabInfo): Promise<Checked | null> {
+  const route = await ctx.routeCheck(outcomeSite, { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun });
+  if (route.ok) return null;
+  if (route.cause === 'spend_limit' && (args.expectUrl !== null || args.expectText !== null)) {
+    ctx.trace.notes.push(`spend_limit: only --expect-url/--expect-text can confirm this act (${route.detail})`);
+    return null;
+  }
+  const verdict = { kind: 'abstain' as const, cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null };
+  return { refusal: abstainOutcome<OutcomeResult>(verdict, null) };
+}
+
+/**
  * Every check that can refuse, before anything is dispatched (spec §6.1, §6.2, §8.3 live-ref path), in order:
- * route (keys, consent, provider allowlist) and origin, so `not_set_up` never comes after the click; the name the
- * live ref shows; the risk read without a snapshot (names, path `""`, raisers, `--risk`); the outcome route's
- * action policy, which refuses money, irreversible, auth and consent.
+ * route (keys, consent, provider allowlist, origin, spend caps), so `not_set_up` never comes after the click; the
+ * names the live ref shows; the risk read without a snapshot (every name, path `""`, the raisers, a confirm dialog
+ * that may be open, `--risk`); the outcome route's action policy, which refuses money, irreversible, auth and consent.
  */
 export async function checkBeforeAct(
   ctx: CommandContext, page: PageRef, args: OutcomeWrapArgs, tab: TabInfo,
 ): Promise<Checked> {
-  const route = await ctx.routeCheck(outcomeSite, { combo: 'auto', originUrl: tab.url, dryRun: ctx.dryRun });
-  if (!route.ok) {
-    const verdict = { kind: 'abstain' as const, cause: route.cause, detail: route.detail, leaned: null, confidence: null, threshold: null };
-    return { refusal: abstainOutcome<OutcomeResult>(verdict, null) };
-  }
+  const stop = await routeRefusal(ctx, args, tab);
+  if (stop) return stop;
 
   const { action, ref } = args.act;
-  const [live, role] = await Promise.all([readLiveName(ctx.browser, page, ref), pageRole(ctx.browser, page, ref)]);
-  const named = nameCheck(live.seen, args.expectName);
+  const [live, role, bodyText] = await Promise.all([
+    readLiveName(ctx.browser, page, ref, action),
+    pageRole(ctx.browser, page, ref),
+    ctx.browser.text(page, 'body'),
+  ]);
+  const named = nameCheck(live, args.expectName);
   if (named !== 'ok') {
     ctx.trace.untrusted.add('why.detail');
     const shown = named.mismatch === '' ? 'no name' : JSON.stringify(named.mismatch);
@@ -58,12 +79,17 @@ export async function checkBeforeAct(
   }
 
   const lexical = classifyNames(live.sources, { url: tab.url, action, role, ...(args.risk ? { userRisk: args.risk } : {}) });
-  const raised = CLICKS.has(action) ? await pageRaisers(ctx.browser, page, action) : await fieldRaisers(ctx.browser, page, ref);
-  const risk: RiskReading = { class: maxRisk(lexical.class, raised.class), reasons: [...lexical.reasons, ...raised.reasons] };
+  const raisers = await Promise.all(CLICKS.has(action)
+    ? [pageRaisers(ctx.browser, page, action), confirmDialogRaiser(ctx.browser, page, action, { names: live.sources, role, bodyText })]
+    : [fieldRaisers(ctx.browser, page, ref)]);
+  const risk: RiskReading = {
+    class: maxRisk(lexical.class, ...raisers.map((raised) => raised.class)),
+    reasons: [...lexical.reasons, ...raisers.flatMap((raised) => raised.reasons)],
+  };
   if (actionPolicy(action, risk.class, 'outcome') !== 'allow') {
     return refused('refused', 'high_risk_class',
       `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done`,
       { do: 'needs_human' });
   }
-  return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, risk } };
+  return { cleared: { acted: `${role ?? actionRole(action)} ${JSON.stringify(cutName(norm(live.seen)))}`, risk, bodyText } };
 }

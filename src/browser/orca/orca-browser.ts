@@ -79,6 +79,11 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
       return readCount(await call(onPage(page, ['get'], '--what=count', `--element=${css}`)), css);
     },
 
+    async selectorText(page, css) {
+      if (css.trim() === '') throw new BrowserError('backend_error', 'selectorText needs a CSS selector');
+      return readText(await call(onPage(page, ['get'], '--what=text', `--element=${css}`)), 'get text');
+    },
+
     act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),
 
     async highlight(page, ref) {

@@ -1,7 +1,7 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import type { Next } from '../../output';
 import { outcomeSite } from '../../questions';
-import { readPage, sleep } from '../shared';
+import { abstainOutcome, readPage, sleep } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
@@ -11,11 +11,15 @@ import { cleanSide, outcomeSide } from './outcome-side';
 /** How long the page gets to show the act's effect before the after-read (spec §6.2). */
 const SETTLE_MS = 600;
 const RE_OBSERVE: Next = { do: 'snapshot', argv: ['refsure', 'snap'] };
+/** Under `--dry-run` nothing is acted on, so the after-side can only be a stand-in. */
+const AFTER_UNREAD = `(the page as it reads ${SETTLE_MS} ms after the act; under --dry-run nothing is acted on or read)`;
 
 function landed(by: OutcomeResult['by'], rule?: OutcomeResult['rule']): CommandOutcome<OutcomeResult> {
   const result: OutcomeResult = { verdict: 'landed', by };
   if (rule) result.rule = rule;
-  return { status: 'ok', acted: true, effect: 'dispatched', result };
+  const outcome: CommandOutcome<OutcomeResult> = { status: 'ok', acted: true, effect: 'dispatched', result };
+  if (by === 'code') outcome.settledByCode = true;
+  return outcome;
 }
 
 function unknown(cause: string, detail: string): CommandOutcome<OutcomeResult> {
@@ -41,7 +45,22 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   if ('refusal' in checked) return checked.refusal;
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const piiMasks = ctx.config.piiMasks;
-  const before = { tab, text: await ctx.browser.text(page, 'body') };
+  const before = { tab, text: checked.cleared.bodyText };
+  if (ctx.dryRun) {
+    // The body the outcome Decision would get (spec §6.3), its after-side a stand-in; `decide` throws `DryRunStop`.
+    ctx.trace.notes.push('dry_run: the after side is a stand-in; it is read only after the act runs');
+    const { verdict } = await ctx.decide(
+      outcomeSite,
+      {
+        intent: args.intent,
+        acted: checked.cleared.acted,
+        before: outcomeSide(cleanSide(before, piiMasks)),
+        after: outcomeSide({ url: '', title: '', text: AFTER_UNREAD }),
+      },
+      { combo: 'auto', originUrl: tab.url, dryRun: true, signal: ctx.signal },
+    );
+    if (verdict.kind === 'abstain') return abstainOutcome<OutcomeResult>(verdict, null);
+  }
 
   const { action, ref, value } = args.act;
   const sent = await ctx.browser.act(page, ref, action, value);

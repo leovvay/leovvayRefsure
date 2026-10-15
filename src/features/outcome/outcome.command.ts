@@ -16,6 +16,11 @@ export const outcomeCommand: CommandSpec<OutcomeArgs, OutcomeResult> = {
   summary: 'Run your own act on a live ref, guarded, and say whether its intent landed (or check since a mark)',
   since: '0.1.0',
   stability: 'stable',
+  forms: [
+    '--intent "<what should happen>" --expect-name "<name you saw>" [--expect-url g] [--expect-text t] [--risk r] '
+      + '-- <click|dblclick|fill|select|check|uncheck> --element @eN [--value v]',
+    '--intent "<what should happen>" --mark M [--expect-url g] [--expect-text t]',
+  ],
   options: {
     intent: { type: 'string', summary: 'What should happen, in a few words (required)' },
     'expect-name': { type: 'string', summary: 'The name you saw on the element; the live ref must still show it (wrapped act)' },

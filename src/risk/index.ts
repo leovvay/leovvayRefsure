@@ -11,7 +11,7 @@ export type { TermField, TermHit } from './term-match';
 export { maxRisk } from './max-risk';
 export { classify } from './classify';
 export { actionRole, classifyNames } from './classify-name';
-export { fieldRaisers, pageRaisers } from './raisers';
+export { confirmDialogRaiser, fieldRaisers, pageRaisers } from './raisers';
 export { liveRefCheck, nameCheck, readLiveName } from './live-ref-check';
 export { actionPolicy } from './action-policy';
 export { findTerm, findTermLoose } from './term-match';

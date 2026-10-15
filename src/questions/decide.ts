@@ -66,7 +66,13 @@ export function createDecide(deps: DecideDeps): { decide: DecideFn; routeCheck: 
     const plan = await route(site, opts);
     if (plan.kind === 'refused') return { ok: false, cause: plan.cause, detail: plan.detail };
     const origin = checkOrigin(opts.originUrl, deps.config, deps.pageProfile());
-    return origin === 'ok' ? { ok: true } : { ok: false, cause: 'origin_denied', detail: origin.detail };
+    if (origin !== 'ok') return { ok: false, cause: 'origin_denied', detail: origin.detail };
+    // The caps as `approve` will read them: an `agree` needs room for both of its calls at once.
+    const nowMs = Date.now();
+    const logged = readEgressLog(deps.config.paths.egressLog, nowMs - DAY_MS);
+    const caps = checkLimits(logged, deps.config, nowMs, plan.kind === 'agree' ? 1 : 0);
+    if (caps !== 'ok') return { ok: false, cause: 'spend_limit', detail: caps.detail };
+    return { ok: true, calls: idsOf(plan).length };
   };
 
   const decide: DecideFn = async <In, Ctx, Out>(

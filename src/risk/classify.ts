@@ -15,8 +15,8 @@ export interface ClassifyOpts {
 }
 
 const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
-// What a confirm dialog's confirming control can be: whatever confirms on a click.
-const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
+/** What a confirm dialog's confirming control can be: whatever confirms on a click. */
+export const CONFIRMING_ROLES: ReadonlySet<string> = new Set(['button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio']);
 const FIELD_ACTIONS: ReadonlySet<ActAction> = new Set<ActAction>(['fill', 'select', 'check', 'uncheck']);
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;

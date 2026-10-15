@@ -33,11 +33,12 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
       return browser.act(page, ref, action, value);
     },
   };
-  const { attr, html, count, highlight, network, dialogDismiss } = browser;
+  const { attr, html, count, selectorText, highlight, network, dialogDismiss } = browser;
   const consoleLines = browser.console;
   if (attr) port.attr = (page, ref, name) => attr.call(browser, page, ref, name);
   if (html) port.html = (page, ref) => html.call(browser, page, ref);
   if (count) port.count = (page, css) => count.call(browser, page, css);
+  if (selectorText) port.selectorText = (page, css) => selectorText.call(browser, page, css);
   if (highlight) port.highlight = (page, ref) => highlight.call(browser, page, ref);
   if (consoleLines) port.console = (page, since) => consoleLines.call(browser, page, since);
   if (network) port.network = (page, since) => network.call(browser, page, since);

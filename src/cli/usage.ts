@@ -3,7 +3,7 @@ import type { AnyCommandSpec } from './any-command-spec';
 import type { OptionSpec } from './option-spec';
 import { GLOBAL_OPTIONS } from './parse-args';
 
-type Described = Pick<AnyCommandSpec, 'name' | 'summary' | 'since' | 'stability' | 'options' | 'needs'>;
+type Described = Pick<AnyCommandSpec, 'name' | 'summary' | 'since' | 'stability' | 'options' | 'needs' | 'forms'>;
 
 const EXIT_LINE = 'Exit: 0 ok; 10-19 decided not to act; 20-29 could not run; 30-39 effect unknown, re-observe '
   + 'before repeating; 64 usage.';
@@ -63,8 +63,9 @@ export function commandHelp(spec: Described): string {
     needs.sites.length > 0 ? `decisions: ${needs.sites.join(', ')}` : 'no decisions',
     ...(needs.capabilities.length > 0 ? [`capabilities: ${needs.capabilities.join(', ')}`] : []),
   ];
+  const forms = spec.forms && spec.forms.length > 0 ? spec.forms : ['[options]'];
   return [
-    `Usage: refsure ${spec.name} [options]`,
+    ...forms.map((form, i) => `${i === 0 ? 'Usage:' : '      '} refsure ${spec.name} ${form}`),
     spec.summary,
     `(${facts.join('; ')})`,
     '',

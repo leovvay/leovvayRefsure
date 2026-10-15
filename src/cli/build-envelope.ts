@@ -1,4 +1,4 @@
-import { applyUntrusted, type Envelope, exitFor, type PageInfo, type RunTrace } from '../output';
+import { applyUntrusted, type EgressEntry, type Envelope, exitFor, type PageInfo, type RunTrace } from '../output';
 import { VERSION } from '../version';
 import type { CommandOutcome } from './command-outcome';
 import type { CommandResult } from './command-result';
@@ -12,6 +12,14 @@ function resultObject(result: unknown, notes: readonly string[]): Record<string,
   const base = out ?? {};
   const prior = Array.isArray(base.notes) ? base.notes : base.notes === undefined ? [] : [base.notes];
   return { ...base, notes: [...prior, ...notes] };
+}
+
+// One row per host, in first-call order: a wait's tenth call to one host says no more than its total does.
+function egressByHost(entries: RunTrace['egress']): EgressEntry[] | null {
+  if (entries.length === 0) return null;
+  const bytes = new Map<string, number>();
+  for (const entry of entries) bytes.set(entry.host, (bytes.get(entry.host) ?? 0) + entry.bytes);
+  return [...bytes].map(([host, total]) => ({ host, bytes: total }));
 }
 
 export function buildEnvelope(
@@ -30,8 +38,8 @@ export function buildEnvelope(
     page,
     result: resultObject(outcome.result, trace.notes),
     why: outcome.why ?? null,
-    decision: trace.decisions.at(-1) ?? null,
-    egress: trace.egress.length > 0 ? [...trace.egress] : null,
+    decision: outcome.settledByCode ? null : trace.decisions.at(-1) ?? null,
+    egress: egressByHost(trace.egress),
     refs: { snapshot: trace.snapshotTaken, earlier_refs_void: trace.snapshotTaken },
     untrusted: [],
     next: outcome.next ?? null,

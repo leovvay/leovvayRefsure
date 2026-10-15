@@ -3,8 +3,8 @@ import type { CommandEntry } from './command-entry';
 import type { CommandsResult } from './commands.contract';
 
 function entryOf(spec: AnyCommandSpec): CommandEntry {
-  const { name, summary, since, stability, options, needs } = spec;
-  return { name, summary, since, stability, options, needs };
+  const { name, summary, since, stability, options, forms, needs } = spec;
+  return { name, summary, since, stability, options, ...(forms ? { forms } : {}), needs };
 }
 
 /**
