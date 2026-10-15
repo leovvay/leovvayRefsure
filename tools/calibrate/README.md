@@ -9,7 +9,7 @@ dataset is committed: every input path is an argument, and every output belongs 
 | `parity.ts` | 0 | Sends frozen requests, byte for byte, through refsure's Jev provider and compares the answers with the ones stored for the same requests. Pass: ≥90 % of Choice answers pick the same key. |
 | `convert-v1.ts` | 1 | Turns a labelled set into refsure site inputs, every element line in line format v1. |
 | `run.ts` | 1 | Builds each item through refsure's own site, approves it through the egress pipeline and asks Jev, once per salt. |
-| `fit.ts` | 1 | Fits each site's rows and, with `--write`, replaces its Jev entry in `calibration.json`. |
+| `fit.ts` | 1 | Fits each site on every replay given for it, pooled, and with `--write` replaces its Jev entry in `calibration.json`. |
 
 ## Build and run
 
@@ -29,13 +29,17 @@ REFSURE_OPENROUTER_KEY=… node dist/refsure.mjs setup     # type: send page tex
 ```
 
 Harness calls are not written to `egress.log` and do not count toward its caps; `run --max-usd` (default 1) stops a
-run instead. A rerun of `run` skips the (item, salt) pairs already answered, so a killed run resumes.
+run instead. A rerun of `run` skips the (item, salt) pairs already answered, so a killed run resumes. A second
+replay of the same salts goes to its own `--out` file; the fit pools every file it is given for a site.
 
 ```sh
 node $OUT/bin/parity.mjs --in parity-items.jsonl --out parity-runs.jsonl
 node $OUT/bin/convert-v1.mjs --set browser_locate.jsonl --out conv-locate.jsonl      # also writes conv-locate.jsonl.meta.json
-node $OUT/bin/run.mjs --in conv-locate.jsonl --out runs-locate.jsonl --salts s1,s2,s3
-node $OUT/bin/fit.mjs --runs runs-locate.jsonl,… --metas conv-locate.jsonl.meta.json,… --write src/questions/calibration/calibration.json
+node $OUT/bin/run.mjs --in conv-locate.jsonl --out a/runs-locate.jsonl --salts s1,s2,s3
+node $OUT/bin/run.mjs --in conv-locate.jsonl --out b/runs-locate.jsonl --salts s1,s2,s3
+node $OUT/bin/run.mjs --in conv-locate.jsonl --out c/runs-locate.jsonl --salts s4,s5,s6
+node $OUT/bin/fit.mjs --runs a/runs-locate.jsonl,b/runs-locate.jsonl,c/runs-locate.jsonl,… \
+  --metas conv-locate.jsonl.meta.json,… --write src/questions/calibration/calibration.json
 ```
 
 ## Inputs
@@ -53,39 +57,79 @@ node $OUT/bin/fit.mjs --runs runs-locate.jsonl,… --metas conv-locate.jsonl.met
 A descriptor line `<tag role=R> name="N" … in="a > b#id > c.cls" under_heading="H" box=…` becomes
 `R "N" in="<path>"`, the name `norm`ed and cut at 90 characters:
 - the role is `role=`, else the tag's implicit role (`a` link, `button` button, `select` combobox, …);
-- the name is `name=`, else `text=`, `alt=`, `title=`, `placeholder=`, and `value=` only for non-text roles;
+- the name is `name=`, else `text=`, `alt=`, `title=`, `placeholder=`, and `value=` only for a button (an
+  `<input type=submit>` is labelled by its value; a textbox's, checkbox's or radio's value is data, never a name);
 - the path keeps the `in=` segments that name a place (`dialog`, `nav` → `navigation`, `main`, `form`, or a
   `[role=…]` of dialog, alertdialog, navigation, main, form or region), outer to inner and unnamed, then
   `heading "H"`; with neither it is `""`. Classes, ids, hrefs, boxes and values never reach a line.
 
 Locate's recorded line and candidates, and dismiss candidates, are converted. Page-state and outcome inputs pass
-unchanged; page state keeps the research state set, so its rows measure the wording `state --expect` sends.
+unchanged; page state keeps the research state set, so its rows measure the wording `state --expect` sends. The meta
+file counts `overlayLines`, the converted lines placed in a dialog, alertdialog or region, where every live dismiss
+candidate sits.
 
 ## Fit
 
 - Points are the answers a site would act on: a candidate or a state (never `none`), scored by confidence; a Noul
-  is scored by its probability against `gold`. Each salt is one point, as each order is a different request.
+  is scored by its probability against `gold`. Each call is one point, and every replay given for a site is
+  pooled: a row fitted on one replay sits just above that replay's highest wrong answer, so another replay moves
+  it. The report line carries each replay's rows beside the pooled ones.
 - `isotonic` (the default) is the method of the author's earlier decision reports: pool-adjacent-violators of
   "right" on score, then the lowest score whose calibrated precision is at least `--target` (0.99) with at least
   `--min-points` (10) points beyond it. `--method cumulative` reads precision over every answer at or above the
   threshold instead; it ships looser rows and is kept for comparison.
+- A fit that only certainty reaches (a row of 1.0) is not a row: one confident wrong answer below 1.0 puts it
+  there and one at 1.0 removes it, and with a second provider configured a Jev row of 1.0 sends most calls to that
+  provider's unmeasured row. Such a site gets no entry.
 - Every row is max(fitted, starting row): calibration never loosens the starting rows. Locate fits a row per risk
   label the set carries; a label with too few points uses the all-points fit, and the rows never decrease along
-  the risk order. A Noul's "no" edge only ever tightens (min with the starting edge).
-- A site whose fit finds no qualifying score gets no entry and keeps its declared maturity.
+  the risk order (see Results). A Noul's "no" edge only ever tightens (min with the starting edge).
+- Dismiss is fitted and reported but never written: it ships `inherited` with the close/reject lexicon (spec §8.4)
+  until the Orca-native replay (spec §9 step 2) measures it on lines that carry the overlay.
+- A site without an entry keeps its declared maturity and rows. `lib/calibration-provenance.ts` types the
+  provenance written beside each entry; refsure itself never reads it.
 
 ## Results, 2026-10-15 (Jev `jev-1.13-20260917` via openrouter.ai)
 
-Parity: 50 frozen requests, every body unchanged by the egress pipeline; Choice 39/40 same key (97.5 %), Noul
-10/10 same side; |Δ confidence| mean 0.021 (Choice), 0.001 (Noul), max 0.10. The one change is a page-state item
-the stored answers themselves split on, at confidence 0.48.
+Parity, run twice on 50 frozen requests: every body unchanged by the egress pipeline; Choice 39/40 and 40/40 same
+key, Noul 10/10 same side; mean |Δ confidence| 0.02 (Choice), 0.002 (Noul), max 0.10.
 
-| Site | Items × orders | Accuracy | Starting row: acted, right | Shipped row | Acted, right (coverage) |
-|---|---|---|---|---|---|
-| locate | 428 × 3 | 83.3 % | 845, 816 | 0.87 at every risk | 695, 695 (54.1 %) |
-| dismiss | 59 × 3 | 83.6 % | 108, 107 | 0.68 | 104, 104 (58.8 %) |
-| page-state | 117 × 3 repeats | 94.9 % | 302, 299 | 1.0 | 186, 186 (53.0 %) |
-| outcome | 143 × 3 repeats | 95.6 % | 160, 157 | yes ≥ 0.93, no ≤ 0.15 | 147, 147 (34.3 %) |
+Step 1 pools three replays per site, 9 calls per item over 6 orders: salts s1-s3 twice and s4-s6 once ($0.28 in
+all). The fitted row below is the all-points isotonic fit before the starting rows; every answer at or above it was
+right on both line formats. The earlier descriptor lines are the stored answers of the same sets (locate and
+dismiss in 5 shuffled orders, page state and outcome in 3 repeats), fitted the same way.
 
-Page state ships at 1.0 because one bot-check page is read as an error page at 0.94–0.99; `--method cumulative`
-would ship 0.81 (302 acted, 299 right, 99.0 %). OpenAI arms were not run: they need a working, approved OpenAI key.
+| Site | v1 lines: calls, accuracy | Fitted row, coverage | Descriptor lines: calls, accuracy | Fitted row, coverage |
+|---|---|---|---|---|
+| locate | 3852, 83.6 % | 0.89, 52.3 % | 2140, 96.1 % | 0.79, 78.1 % |
+| dismiss | 531, 83.6 % | 0.75, 55.7 % | 295, 93.2 % | 0.62, 68.5 % |
+| page-state (inputs unchanged) | 1053, 94.8 % | 1.0 only, 53.4 % | 351, 94.9 % | 0.99, 60.7 % |
+| outcome (inputs unchanged) | 1287, 95.8 % | yes ≥ 0.93, 34.7 % | 429, 95.1 % | yes ≥ 0.93, 34.7 % |
+
+Thinning to v1 costs locate 26 points of coverage and dismiss 13. Page state and outcome send the same inputs on
+both sides, so their difference is sampling alone.
+
+What ships in `calibration.json`:
+
+| Site | Maturity | Rows | Acted, right (coverage) | Rows per replay alone |
+|---|---|---|---|---|
+| locate | measured | 0.89 at every risk | 2013, 2013 (52.3 %) | 0.87, 0.88, 0.89 |
+| outcome | measured | yes ≥ 0.93, no ≤ 0.15 | 447, 447 (34.7 %) | 0.93 each |
+| dismiss | inherited (held) | 0.6 with the close/reject lexicon | 335, 331 at 0.6 alone | 0.68, 0.76, 0.75 |
+| page-state | inherited (no row below 1.0) | 0.8 | 909, 899 (86.3 %) | none, 0.99, none |
+
+Open for the owner before 0.1:
+- **Page state.** One bot-check page read as an error page holds 9 of the 10 wrong answers at 0.8 or more
+  (0.94-0.99, both states stop the agent), so no score below 1.0 reaches 0.99. A row of 1.0 abstains on intended
+  pages answered at 0.96-0.98, never answers `unexpected_page` (its highest score is 0.94), and with both keys sends
+  about half of the calls to OpenAI. The choices: the cumulative 0.82 (904 acted, 895 right, 99.0 %), per-state
+  rows (a change in how `state` reads its row), or the declared 0.8 it keeps until then.
+- **Locate's write row.** The plan's rule, max(fitted, starting row) per label, would ship write at 0.8 (545 of
+  545 right, 58.2 % of write calls) under read at 0.89 (474 of 474 at 0.89, 50.6 %). `--risk` is the caller's claim
+  and the page can only raise it, so a write row under the read row lets `--risk write` act on a read pick at 0.8,
+  where read-labelled answers are 8 of 198 wrong between 0.80 and 0.89. The rows stay non-decreasing until the
+  owner rules.
+- **Dismiss.** The converted candidates carry no overlay place (0 of 175 lines) and live ones always do. Its only
+  wrong picks at 0.6 or more are one accept-only wall answered "Manage choices", which the code veto refuses.
+
+OpenAI arms were not run: the vault OpenAI key returns 401 until the owner refreshes it.

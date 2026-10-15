@@ -8,96 +8,37 @@
       "modelFamily": "jev-1.13",
       "provider": "jev",
       "threshold": {
-        "read": 0.87,
-        "write": 0.87,
-        "consent": 0.87,
-        "auth": 0.87,
-        "money": 0.87,
-        "irreversible": 0.87
+        "read": 0.89,
+        "write": 0.89,
+        "consent": 0.89,
+        "auth": 0.89,
+        "money": 0.89,
+        "irreversible": 0.89
       },
       "setSha256": "53c6ff6f5a94a6f28c9e0e3cba28176fc69eec1ae935f9863effcb985706bdc3",
-      "n": 1284,
-      "coverageAtP99": 0.5413,
+      "n": 3852,
+      "coverageAtP99": 0.5226,
       "precisionAtP99": 1,
       "date": "2026-10-15",
       "provenance": {
         "source": "frozen browser benchmark sets, 2026-10-13 (not published)",
         "set": "browser_locate.jsonl",
         "items": 428,
-        "runs": 1284,
-        "orders": 3,
+        "runs": 3852,
+        "orders": 6,
+        "replays": 3,
         "model": "jev-1.13-20260917",
         "route": "openrouter.ai",
-        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence; lowest score with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
+        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence, pooled over every replay; lowest score below 1.0 with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
         "target": 0.99,
         "minPoints": 10,
         "fitted": {
-          "all": 0.87,
-          "read": 0.87,
-          "write": 0.49
+          "all": 0.89,
+          "read": 0.89,
+          "write": 0.56
         },
-        "acted": 695,
-        "correct": 695
-      }
-    },
-    {
-      "site": "dismiss",
-      "wordingHash": "b9abaddeecf5e2a247617dbab2433a73847d79b33c28cc8711ea235a813526b5",
-      "lineFormat": 1,
-      "modelFamily": "jev-1.13",
-      "provider": "jev",
-      "threshold": 0.68,
-      "setSha256": "863723a752e5e9befa7222ee868ba799a53bc4b57414ea60d2aff83a743a81f1",
-      "n": 177,
-      "coverageAtP99": 0.5876,
-      "precisionAtP99": 1,
-      "date": "2026-10-15",
-      "provenance": {
-        "source": "frozen browser benchmark sets, 2026-10-13 (not published)",
-        "set": "browser_dismiss.jsonl",
-        "items": 59,
-        "runs": 177,
-        "orders": 3,
-        "model": "jev-1.13-20260917",
-        "route": "openrouter.ai",
-        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence; lowest score with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
-        "target": 0.99,
-        "minPoints": 10,
-        "fitted": {
-          "all": 0.68
-        },
-        "acted": 104,
-        "correct": 104
-      }
-    },
-    {
-      "site": "page-state",
-      "wordingHash": "8225b2a040b86017369f6104372698b3f64ea09f3f5f7c2aa3c81c49007d9a60",
-      "lineFormat": 1,
-      "modelFamily": "jev-1.13",
-      "provider": "jev",
-      "threshold": 1,
-      "setSha256": "7fc1361923410510a9dde51351ff30087f58d99c383f57371b8cdff4828649ae",
-      "n": 351,
-      "coverageAtP99": 0.5299,
-      "precisionAtP99": 1,
-      "date": "2026-10-15",
-      "provenance": {
-        "source": "frozen browser benchmark sets, 2026-10-13 (not published)",
-        "set": "browser_page_state.jsonl",
-        "items": 117,
-        "runs": 351,
-        "orders": 3,
-        "model": "jev-1.13-20260917",
-        "route": "openrouter.ai",
-        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence; lowest score with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
-        "target": 0.99,
-        "minPoints": 10,
-        "fitted": {
-          "all": 1
-        },
-        "acted": 186,
-        "correct": 186
+        "acted": 2013,
+        "correct": 2013
       }
     },
     {
@@ -111,27 +52,28 @@
         "noAtMost": 0.15
       },
       "setSha256": "47f604cf37f0479fdc124577a9eca0a82c807a39fc5d261db97af688bf6ab5cb",
-      "n": 429,
-      "coverageAtP99": 0.3427,
+      "n": 1287,
+      "coverageAtP99": 0.3473,
       "precisionAtP99": 1,
       "date": "2026-10-15",
       "provenance": {
         "source": "frozen browser benchmark sets, 2026-10-13 (not published)",
         "set": "browser_outcome.jsonl",
         "items": 143,
-        "runs": 429,
-        "orders": 3,
+        "runs": 1287,
+        "orders": 6,
+        "replays": 3,
         "model": "jev-1.13-20260917",
         "route": "openrouter.ai",
-        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence; lowest score with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
+        "method": "isotonic fit (pool-adjacent-violators) of acted answers on confidence, pooled over every replay; lowest score below 1.0 with calibrated precision at or above the target and at least min-points answers beyond it; each row max(fitted, starting row), non-decreasing along the risk order",
         "target": 0.99,
         "minPoints": 10,
         "fitted": {
           "yesAtLeast": 0.93,
           "noAtMost": 0.65
         },
-        "acted": 147,
-        "correct": 147
+        "acted": 447,
+        "correct": 447
       }
     }
   ]

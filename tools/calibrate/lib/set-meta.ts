@@ -10,5 +10,7 @@ export interface SetMeta {
   droppedById: number;
   lines: number;
   unparsedLines: number;
+  /** Converted lines whose path names a dialog, alertdialog or region: the place live overlay candidates carry. */
+  overlayLines: number;
   date: string;
 }

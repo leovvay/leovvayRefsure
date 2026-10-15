@@ -1,14 +1,19 @@
-/** Where a calibration entry's numbers came from (spec §9); shipped with the entry, read by people only. */
+/**
+ * Where a calibration entry's numbers came from (spec §9). The fit writes it beside each entry in calibration.json
+ * for people to read; refsure itself never reads it.
+ */
 export interface CalibrationProvenance {
   /** The data the fit was run on, named without publishing it. */
   source: string;
   /** The set's file name within that source. */
   set: string;
   items: number;
-  /** Answered calls the fit read: items × orders, failures left out. */
+  /** Answered calls the fit read, pooled over every replay; failures left out. */
   runs: number;
-  /** Shuffled orders (or repeats, for unshuffled sites) per item. */
+  /** Distinct shuffle salts (repeats, for unshuffled sites) across the pooled replays. */
   orders: number;
+  /** Replays pooled: separate `run` outputs, each its own calls to the model. */
+  replays: number;
   /** The exact snapshot that answered, and the host it answered through. */
   model: string;
   route: string;

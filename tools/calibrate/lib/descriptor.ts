@@ -21,8 +21,11 @@ const TAG_ROLES: Readonly<Record<string, string>> = {
   a: 'link', button: 'button', select: 'combobox', textarea: 'textbox', input: 'textbox', summary: 'button',
 };
 
-/** Roles whose `value=` is what the user typed: never a name. */
-const VALUE_ROLES: ReadonlySet<string> = new Set(['textbox', 'searchbox', 'combobox', 'spinbutton', 'slider']);
+/**
+ * Roles whose `value=` is their label (`<input type=submit|reset|button>`). Every other role's value is typed or
+ * submitted data (a textbox's text, a checkbox's or radio's `on`), never its accessible name.
+ */
+const NAME_FROM_VALUE_ROLES: ReadonlySet<string> = new Set(['button']);
 
 const PLACE_TAGS: Readonly<Record<string, string>> = { dialog: 'dialog', nav: 'navigation', main: 'main', form: 'form' };
 const PLACE_ROLES: ReadonlySet<string> = new Set(['dialog', 'alertdialog', 'navigation', 'main', 'form', 'region']);
@@ -53,7 +56,7 @@ export function parseDescriptor(line: string): Descriptor | null {
 export function nameOf(d: Descriptor): string {
   const { attrs } = d;
   const order = ['name', 'text', 'alt', 'title', 'placeholder'];
-  if (!VALUE_ROLES.has(d.role)) order.push('value');
+  if (NAME_FROM_VALUE_ROLES.has(d.role)) order.push('value');
   for (const key of order) {
     const value = attrs[key];
     if (value !== undefined && norm(value) !== '') return value;

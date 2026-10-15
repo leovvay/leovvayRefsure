@@ -1,7 +1,7 @@
 import type { CalibrationEntry, SiteId } from '../../../src/questions';
 import type { ThresholdFit } from './threshold-fit';
 
-/** One site's fit: every edge fitted, the rows that would ship, and what they do on the runs. */
+/** One site's fit: every edge fitted, the rows the method gives, what they do on the runs, and what ships. */
 export interface SiteFit {
   site: SiteId;
   items: number;
@@ -11,12 +11,15 @@ export interface SiteFit {
   skipped: number;
   fits: Record<string, ThresholdFit>;
   starting: CalibrationEntry['threshold'];
-  /** The shipped rows; `null` when the site does not qualify as measured. */
+  /** The rows the method gives: each fitted edge max'ed with its starting row; `null` when no edge qualifies. */
+  rows: CalibrationEntry['threshold'] | null;
+  /** The rows that ship as `measured`: `rows`, unless the site is held at its declared maturity; else `null`. */
   threshold: CalibrationEntry['threshold'] | null;
+  /** Answers acted on at `rows`, and how many were right; coverage is acted over runs. */
   acted: number;
   correct: number;
   coverage: number | null;
   precision: number | null;
-  /** Why the site is not measured, or `measured`. */
+  /** `measured`, or why the site keeps its declared maturity. */
   why: string;
 }

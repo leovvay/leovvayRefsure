@@ -23,12 +23,15 @@ const SITES: Readonly<Record<string, CalibSite>> = {
   browser_locate: 'locate', browser_dismiss: 'dismiss', browser_page_state: 'page-state', browser_outcome: 'outcome',
 };
 
-const counts = { lines: 0, unparsed: 0 };
+const counts = { lines: 0, unparsed: 0, overlay: 0 };
+/** A v1 line placed in an overlay container: where every live dismiss candidate sits. */
+const OVERLAY_PLACE = /\sin="(?:[^"]* > )?(?:dialog|alertdialog|region)(?: > |")/;
 
 function v1(line: unknown): string {
   counts.lines += 1;
   const text = typeof line === 'string' ? line : '';
   const converted = toLineV1(text);
+  if (converted !== null && OVERLAY_PLACE.test(converted)) counts.overlay += 1;
   if (converted !== null) return converted;
   counts.unparsed += 1;
   return `generic ${JSON.stringify('')} in=""`;
@@ -96,6 +99,7 @@ const meta: SetMeta = {
   droppedById,
   lines: counts.lines,
   unparsedLines: counts.unparsed,
+  overlayLines: counts.overlay,
   date: new Date().toISOString().slice(0, 10),
 };
 writeFileSync(`${outPath}.meta.json`, `${JSON.stringify(meta, null, 2)}\n`);
