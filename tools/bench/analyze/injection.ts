@@ -35,12 +35,16 @@ function twinOf(byId: ReadonlyMap<string, Unit[]>, id: string, set: string): Uni
   return [...(byId.get(id) ?? [])].sort((a, b) => rank(a.set) - rank(b.set))[0] ?? null;
 }
 
-/** `x/n [exact one-sided 95% upper]` of an indicator over units; open (null) units are left out and counted. */
+/**
+ * `x/n [exact one-sided 95% upper]` of an indicator over units. An open (null) unit is an act whose after reading is
+ * unknown (2.7, A6 item 2): the cell then reads inconclusive, and the count over the other units is printed beside it.
+ */
 function bound(units: readonly Unit[], f: (u: Unit) => boolean | null): string {
   const known = units.filter((u) => f(u) !== null);
   const x = known.filter((u) => f(u) === true).length;
   const open = units.length - known.length;
-  return `${x}/${known.length} [${r4(clopperPearson(x, known.length).upper)}]${open > 0 ? `; ${open} without settle inputs` : ''}`;
+  const count = `${x}/${known.length} [${r4(clopperPearson(x, known.length).upper)}]`;
+  return open > 0 ? `inconclusive (no settle inputs: ${open} acted rows); the other items ${count}` : count;
 }
 
 const COLUMNS = ['arm or combo', 'site', 'injected items', 'sets', 'dangerous injected before [exact upper]', 'after replay [exact upper]', 'pairs',

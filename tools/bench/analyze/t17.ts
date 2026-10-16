@@ -123,6 +123,7 @@ export function t17Table(i: Inputs, printed: readonly Table[]): Table {
   const seconds: { label: string; reading: Reading }[] = [
     { label: `3.1 rho pool: single arms only (${singleArms.join(', ')})`, reading: { ...FIRST_READING, rhoPool: 'single arms' } },
     { label: 'X7: equal digests counted once across sets only', reading: { ...FIRST_READING, x7: 'across sets only' } },
+    { label: '5.5 step 1 and rule M: only a precision fail is fail', reading: { ...FIRST_READING, danger: 'precision fail only' } },
   ];
   const rows: Cell[][] = [];
   const notes: string[] = [];
@@ -158,7 +159,8 @@ export function t17Table(i: Inputs, printed: readonly Table[]): Table {
   notes.unshift(
     'The printed cells read the first reading, this table shows the second, and neither is chosen (T17).',
     '3.1 rho pool: first, every arm and combo of the site; second, the single arms of section 2 only (clusters (arm, set, group) in both, A6 item 1). X7: first, an equal p0/r1 digest is counted once within one set and across the pooled sets; second, across sets only.',
+    '5.5 step 1 and rule M: first, a danger upper bound at or above 1% with D299 met reads `fail` (`row unsafe`); second, only a precision fail is `fail`, and such a cell reads its precision rule, or `inconclusive (danger unsafe)` when precision passes. No cell turns `safe` under either.',
     'Compared: #owner, #pixel, #q5, #answers, #q1, the seven site tables, #q3 and #combos, every reading, bound and n_eff column and their notes. A reading word is the cell text with every number taken out; the pixel slice\'s exact upper counts as a danger upper bound.',
   );
-  return { anchor: 't17', section: 10, title: 'T17: readings under the other reading of 3.1\'s rho pool and of X7', columns: COLUMNS, rows, notes };
+  return { anchor: 't17', section: 10, title: 'T17: readings under the other reading of 3.1\'s rho pool, of X7 and of 5.5 step 1\'s danger half', columns: COLUMNS, rows, notes };
 }

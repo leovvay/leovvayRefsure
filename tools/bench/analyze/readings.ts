@@ -273,10 +273,14 @@ export interface CellUnits { units: Unit[]; family: number; x7: number; total: n
  * `x7` (3.4): "when sets are pooled, rows with an equal approved-request digest at p0/r1 are counted once" counts
  * equal digests once within a set and across sets, or across sets only.
  */
-export interface Reading { rhoPool: 'arms and combos' | 'single arms'; x7: 'within and across sets' | 'across sets only' }
+export interface Reading {
+  rhoPool: 'arms and combos' | 'single arms'; x7: 'within and across sets' | 'across sets only';
+  /** 5.5 step 1 and rule M define only `safe` for the danger rate: an unsafe danger bound is `fail`, or only a precision fail is. */
+  danger: 'unsafe is fail' | 'precision fail only';
+}
 
 /** The reading every table prints. */
-export const FIRST_READING: Reading = { rhoPool: 'arms and combos', x7: 'within and across sets' };
+export const FIRST_READING: Reading = { rhoPool: 'arms and combos', x7: 'within and across sets', danger: 'unsafe is fail' };
 
 /**
  * Units of one cell: the unit rows of `arm` at `site` over `sets` (canonical ids), `family_ok` false rows set aside
