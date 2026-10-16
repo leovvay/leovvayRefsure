@@ -1,9 +1,7 @@
 import type { ApprovedRequest } from '../egress';
 import { quoteOption } from './present-candidates';
+import type { SentTwins } from './sent-twins-map';
 import type { Verdict } from './verdict';
-
-/** Each option key of a Choice that reads the same as sent as another option: its text, and the keys it reads like. */
-export type SentTwins = ReadonlyMap<string, { text: string; others: readonly string[] }>;
 
 /**
  * The options of `question` that read the same as sent. Redaction, PII masks and cuts run after the caller kept one

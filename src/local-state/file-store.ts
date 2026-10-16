@@ -3,9 +3,10 @@ import { basename, join } from 'node:path';
 import type { RunTrace } from '../output';
 import {
   CLAIMED_RE, ENTRY_RE, PAGE_DIR_RE, TEMP_RE, ensureDir, entryName, errorCode, isEntryId, pageDirName, readEntry,
-  unlinkQuiet, writeEntry, type StoredEntry,
+  unlinkQuiet, writeEntry,
 } from './entry-file';
 import type { EntryKind, StateStore } from './state-store';
+import type { StoredEntry } from './stored-entry';
 
 /** Claimed files and write leftovers are kept this long, then purged. */
 const CLAIMED_KEEP_MS = 10 * 60_000;

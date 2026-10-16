@@ -1,18 +1,11 @@
 import { type ActAction, type AxNode, type AxTree, FIELD_ACTIONS } from '../browser';
 import { nodeAt } from '../page-model';
+import type { ClassifyOpts } from './classify-opts';
 import { backsOut, CONFIRMING_ROLES, dialogOf, isConfirmDialog } from './confirm-dialog';
 import { maxRisk } from './max-risk';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
 import { findTermAnyReading, findWholeTermEveryReading } from './term-match';
-
-export interface ClassifyOpts {
-  /** The tab's URL, for the path rules. */
-  url: string;
-  action?: ActAction;
-  /** `--risk`: it can only raise the class. */
-  userRisk?: RiskClass;
-}
 
 const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'option']);
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;

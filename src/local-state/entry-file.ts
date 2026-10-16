@@ -5,11 +5,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import type { EntryKind } from './state-store';
-
-/** What one entry file holds; the page id is inside because the directory name is only its hash. */
-export interface StoredEntry { v: 1; pageId: string; kind: EntryKind; id: string; value: unknown }
-
-export type ReadOutcome = { entry: StoredEntry } | { refused: string } | 'absent' | 'corrupt';
+import type { ReadOutcome, StoredEntry } from './stored-entry';
 
 const ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
 export const ENTRY_RE = /^(ticket|mark)-[A-Za-z0-9_-]{1,80}\.json$/;

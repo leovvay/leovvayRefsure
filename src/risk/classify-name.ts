@@ -1,18 +1,8 @@
 import type { ActAction, AxNode, AxTree } from '../browser';
 import { classify } from './classify';
 import { maxRisk } from './max-risk';
-import type { RiskClass } from './risk-class';
+import type { NameClassifyOpts } from './name-classify-opts';
 import type { RiskReading } from './risk-reading';
-
-export interface NameClassifyOpts {
-  /** The tab's URL, for the path rules. */
-  url: string;
-  action: ActAction;
-  /** `--risk`: it can only raise the class. */
-  userRisk?: RiskClass;
-  /** The element's explicit `role` attribute, when it has one; else a role is taken from the action. */
-  role?: string | null;
-}
 
 // What an element acted on this way usually is, when no snapshot says. Fields are `write` by base anyway.
 const ROLE_OF: Readonly<Record<ActAction, string>> = {

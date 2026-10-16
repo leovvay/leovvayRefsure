@@ -3,31 +3,13 @@ import { BOUNDS } from '../bounds';
 import type { DecisionSite } from '../decision-site';
 import { NONE_KEY, presentCandidates } from '../present-candidates';
 import type { CandidateOrder, PresentedCandidates } from '../presented-candidates';
-import type { SiteId } from '../site-id';
-import type { SitePolicy } from '../site-policy';
 import { siteWording } from '../wording-hash';
+import type { CandidateSiteSpec } from './candidate-site-spec';
 import { readChoice } from './read-answer';
 
 /** The questions bound with a tenth to spare, and how much of the list each fitting pass keeps. */
 const FIT_BYTES = Math.floor(BOUNDS.QUESTIONS_MAX_BYTES * 0.9);
 const FIT_STEP = 0.9;
-
-/** One shuffled Choice over caller lines plus `none`: locate, find, dismiss and option-map differ only in these. */
-export interface CandidateSiteSpec<In> {
-  id: SiteId;
-  question: string;
-  instructions: string;
-  none: string;
-  policy: SitePolicy;
-  /**
-   * The most lines asked over; more are cut from the end, where a ranked list keeps its weakest. Lines past the
-   * questions byte bound are cut from the end too, so a site never refuses `oversize` for its own options.
-   */
-  max: number;
-  /** The request state from the caller's text, bounded; its values also seed the shuffle. */
-  state(input: In): Record<string, string>;
-  lines(input: In): readonly string[];
-}
 
 export function candidateSite<In extends { order?: CandidateOrder }>(
   spec: CandidateSiteSpec<In>,

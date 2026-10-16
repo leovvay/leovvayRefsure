@@ -1,12 +1,10 @@
 import type { RunTrace } from '../output';
 import { boundDetail } from './bound-detail';
 import { isBrowserError } from './browser-error';
+import type { Sent } from './sent';
 
 /** Both backends pass on agent-browser's own answer to `dialog dismiss` with no dialog open. */
 export const NO_DIALOG = /no dialog is showing/i;
-
-/** `before`: what `trace.dispatched` said until this call, for an answer that proves nothing was sent. */
-export type Sent<R> = { kind: 'reply'; reply: R; before: boolean } | { kind: 'lost'; error: unknown };
 
 /**
  * One page-changing call. From the moment the process exists it counts as dispatched; only an answer that proves

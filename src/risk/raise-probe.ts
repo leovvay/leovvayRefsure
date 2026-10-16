@@ -1,11 +1,9 @@
 import { isBrowserError } from '../browser';
 import type { BrowserPort, PageRef } from '../browser';
 import { maxRisk } from './max-risk';
+import type { Probe } from './probe';
 import type { RiskClass } from './risk-class';
 import type { RiskReading } from './risk-reading';
-
-/** What one raiser read: it fired, it did not, or it could not read and counts as fired. */
-export type Probe = 'hit' | 'miss' | 'assumed';
 
 /**
  * A raiser that cannot read counts as hit (spec §8.3). A slow or failing backend call is such a case; a page that

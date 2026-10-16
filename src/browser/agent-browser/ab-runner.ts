@@ -1,9 +1,8 @@
 import { execFile, execFileSync } from 'node:child_process';
 import { BrowserError } from '../browser-error';
 import { isRecord } from '../../shared';
-import {
-  childFailure, type JsonChild, MAX_BUFFER, parseJsonFrom, READ_TIMEOUT_MS, spawnJson, stripRefsureEnv,
-} from '../run-json';
+import type { JsonChild } from '../json-child';
+import { childFailure, MAX_BUFFER, parseJsonFrom, READ_TIMEOUT_MS, spawnJson, stripRefsureEnv } from '../run-json';
 import type { AbReply } from './ab-reply';
 import type { AbRunOptions } from './ab-run-options';
 

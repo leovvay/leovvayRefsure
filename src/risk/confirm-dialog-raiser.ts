@@ -2,7 +2,8 @@ import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef } from '.
 import { fold, norm } from '../page-model';
 import { backsOut, CONFIRMING_ROLES, hasConfirmCue } from './confirm-dialog';
 import { wordingXPath } from './dialog-wording-xpath';
-import { assumedOn, countProbe, emptyReading, type Probe, raise } from './raise-probe';
+import type { Probe } from './probe';
+import { assumedOn, countProbe, emptyReading, raise } from './raise-probe';
 import type { RiskReading } from './risk-reading';
 import { labelledBySelectors, readsSelectors, selectorTexts } from './selector-texts';
 
