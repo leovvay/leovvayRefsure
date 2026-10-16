@@ -1,5 +1,5 @@
-import { RISK_ORDER } from './risk-class';
 import type { RiskClass } from './risk-class';
+import { RISK_ORDER } from './risk-order';
 
 /** The highest class along `RISK_ORDER` (spec §8.1 invariant 4); `read` when given none. */
 export function maxRisk(...r: RiskClass[]): RiskClass {

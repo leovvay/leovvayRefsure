@@ -2,7 +2,7 @@ export type * from './risk-reading';
 export type * from './live-name';
 export type * from './live-target';
 export type { RiskClass } from './risk-class';
-export { HIGH_RISK, RISK_ORDER } from './risk-class';
+export { HIGH_RISK, RISK_ORDER } from './risk-order';
 export type { ClassifyOpts } from './classify';
 export type { NameClassifyOpts } from './classify-name';
 export type { TermField, TermHit } from './term-match';

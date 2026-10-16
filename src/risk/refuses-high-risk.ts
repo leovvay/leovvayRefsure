@@ -1,5 +1,5 @@
-import { HIGH_RISK } from './risk-class';
 import type { RiskClass } from './risk-class';
+import { HIGH_RISK } from './risk-order';
 
 /**
  * Spec §8.1 invariant 5: money, irreversible, auth and consent never go through `act`, `outcome`, `dismiss` or
