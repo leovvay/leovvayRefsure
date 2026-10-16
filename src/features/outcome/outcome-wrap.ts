@@ -22,7 +22,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   const checked = await checkBeforeAct(ctx, page, args, tab);
   if ('refusal' in checked) return checked.refusal;
   const { action, ref, value } = args.act;
-  const before = await readPage(ctx.browser, page);
+  const before = await readPage(ctx, page);
   // The route, origin and risk were read on the URL the checks saw: a page that moved on since is not the one judged.
   if (urlNorm(before.tab.url) !== urlNorm(tab.url) || (before.tab.tabKey ?? undefined) !== (tab.tabKey ?? undefined)) {
     return nothingDone('stale', 'page_changed', 'the page moved to another URL or tab while the act was checked; '
@@ -61,7 +61,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   }
 
   await sleep(SETTLE_MS, ctx.signal);
-  const after = await readPage(ctx.browser, page);
+  const after = await readPage(ctx, page);
   const rule = landedByCode(args, { url: before.tab.url, text: before.text }, { url: after.tab.url, text: after.text });
   if (rule) return landedOutcome('dispatched', 'code', rule);
 

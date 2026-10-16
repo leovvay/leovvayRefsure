@@ -1,6 +1,6 @@
 import { boundText, cleanEgressText } from '../../egress';
 import type { StateStore } from '../../local-state';
-import type { PageReading } from '../shared';
+import { type PageReading, withoutTyped } from '../shared';
 import { bareUrl } from './bare-url';
 import type { MarkRecord } from './mark-record';
 
@@ -12,11 +12,12 @@ const TITLE_MAX = 300;
 const URL_MAX = 2_000;
 
 /**
- * A page as a mark keeps it: query-less URL; URL, title and text redacted and PII-masked (masks always on, whatever
- * the config says), then cut. Both sides of a `--mark` comparison go through this, so they compare alike.
+ * A page as a mark keeps it: query-less URL; the text without what was typed into editable regions (spec §7.3); URL,
+ * title and text redacted and PII-masked (masks always on, whatever the config says), then cut. Both sides of a
+ * `--mark` comparison go through this, so they compare alike.
  */
 export function markView(reading: PageReading): Pick<MarkRecord, 'url' | 'title' | 'text' | 'textCut'> {
-  const text = cleanEgressText(reading.text, true);
+  const text = cleanEgressText(withoutTyped(reading.text, reading.typed), true);
   return {
     url: bareUrl(reading.tab.url, { max: URL_MAX }),
     title: boundText(cleanEgressText(reading.tab.title, true), { max: TITLE_MAX, inline: true }),

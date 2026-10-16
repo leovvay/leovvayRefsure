@@ -34,7 +34,7 @@ export const markCommand: CommandSpec<MarkArgs, MarkResult> = {
   async run(args, ctx) {
     const page = ctx.page;
     if (page === null) throw new Error('mark needs a page, and none was resolved');
-    const view = markView(await readPage(ctx.browser, page));
+    const view = markView(await readPage(ctx, page));
     let id: string | null = null;
     if (ctx.dryRun) {
       ctx.trace.notes.push('dry_run: no mark is saved');

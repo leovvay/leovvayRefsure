@@ -4,7 +4,7 @@ import { boundText, cleanEgressText, sha256Hex } from '../../egress';
 import { causeStatus, RE_OBSERVE, type Status } from '../../output';
 import { fold } from '../../page-model';
 import { BOUNDS, presenceSite } from '../../questions';
-import { abstainOutcome, nothingDone, readPage, sleep, urlGlobMatches } from '../shared';
+import { abstainOutcome, nothingDone, readPage, sleep, urlGlobMatches, withoutTyped } from '../shared';
 import type { AbstainWhy, PageReading } from '../shared';
 import { formatDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
@@ -24,12 +24,15 @@ function codePresence(args: WaitForArgs, reading: PageReading): WaitForResult['r
   return null;
 }
 
-/** What a presence Decision reads: the cleaned URL and body text. Cleaned before the site cuts it (spec §7.3). */
+/**
+ * What a presence Decision reads: the cleaned URL and body text, without what was typed into editable regions.
+ * Cleaned before the site cuts it (spec §7.3).
+ */
 function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolean) {
   return {
     expectation: args.expect,
     pageUrl: boundText(cleanEgressText(reading.tab.url, piiMasks), { max: BOUNDS.URL_MAX, inline: true }),
-    page: cleanEgressText(reading.text, piiMasks),
+    page: cleanEgressText(withoutTyped(reading.text, reading.typed), piiMasks),
   };
 }
 
@@ -77,7 +80,7 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
   };
 
   for (;;) {
-    const reading = await readPage(ctx.browser, page);
+    const reading = await readPage(ctx, page);
     tally.polls += 1;
     const rule = codePresence(args, reading);
     if (rule) {

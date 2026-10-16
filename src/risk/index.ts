@@ -14,4 +14,5 @@ export { fieldRaisers, pageRaisers } from './raisers';
 export { nameCheck } from './live-ref-check';
 export { liveRefRisk, readLiveTarget } from './live-ref-risk';
 export { refusesHighRisk } from './refuses-high-risk';
+export { readsSelectors } from './selector-texts';
 export { findTerm, findTermAnyReading, findWholeTerm, findWholeTermEveryReading, readingsOf } from './term-match';

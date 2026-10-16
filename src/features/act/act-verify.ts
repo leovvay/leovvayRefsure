@@ -27,7 +27,7 @@ export async function verifyAfter(
   ctx: CommandContext, page: PageRef, opts: VerifyOpts & { base: Base },
 ): Promise<CommandOutcome<ActCommandResult>> {
   await sleep(SETTLE_MS, ctx.signal);
-  const after = await readPage(ctx.browser, page);
+  const after = await readPage(ctx, page);
   const { verdict } = await ctx.decide(outcomeSite, outcomeInput(opts.intent, opts.acted, opts.before, after, opts),
     { combo: 'auto', originUrl: after.tab.url, dryRun: false, signal: ctx.signal });
   if (verdict.kind === 'answer') {

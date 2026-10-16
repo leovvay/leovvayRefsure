@@ -252,7 +252,12 @@ weakest, so those verbs never refuse `oversize` for their own options. `pick-opt
 the likeliest stay, and `--open` is never followed by an `oversize` refusal once it has clicked the list open.
 
 **Never sent:** cookies, local or session storage, screenshots, API keys, values you typed or filled, textbox
-values, console and network bodies.
+values, console and network bodies. Text in an editable region (`contenteditable`: a comment box, a rich editor)
+shows in the page text, so `outcome`, `act --verify`, `wait-for` and `mark` read each such region (up to 16) without
+a snapshot and cut its text out; `state` cuts it by its snapshot. With more regions, or a backend that cannot read
+them one by one, the page text is withheld from the Decision (note `typed_text_withheld`). `wait-for --text` and
+`outcome -- … --expect-text` still match the whole page text, locally; `outcome --mark` compares the mark's text,
+cut the same way.
 
 **Before anything is sent:**
 

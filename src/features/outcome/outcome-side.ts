@@ -4,7 +4,7 @@ import { RE_OBSERVE } from '../../output';
 import { cutPieces, fold, norm, valuePieces } from '../../page-model';
 import { BOUNDS } from '../../questions';
 import { escapeRegExp } from '../../shared';
-import type { AbstainWhy, PageReading } from '../shared';
+import { type AbstainWhy, type PageReading, withoutTyped } from '../shared';
 
 const TITLE_MAX = 300;
 
@@ -38,9 +38,9 @@ function withoutValue(text: string, value: string | undefined): string {
 }
 
 /**
- * A live reading cleaned for egress (spec §7.3): the value a fill or select typed cut out, then URL, title and text
- * redacted, and masked when PII masks are on, before anything is cut; a cut secret no longer matches its shape.
- * The site cuts the whole side to 4,000.
+ * A live reading cleaned for egress (spec §7.3): what was typed into editable regions and the value a fill or select
+ * typed cut out, then URL, title and text redacted, and masked when PII masks are on, before anything is cut; a cut
+ * secret no longer matches its shape. The site cuts the whole side to 4,000.
  */
 function cleanSide(
   reading: PageReading, piiMasks: boolean, value?: string,
@@ -48,7 +48,7 @@ function cleanSide(
   return {
     url: boundText(cleanEgressText(reading.tab.url, piiMasks), { max: BOUNDS.URL_MAX, inline: true }),
     title: boundText(cleanEgressText(withoutValue(reading.tab.title, value), piiMasks), { max: TITLE_MAX, inline: true }),
-    text: cleanEgressText(withoutValue(reading.text, value), piiMasks),
+    text: cleanEgressText(withoutValue(withoutTyped(reading.text, reading.typed), value), piiMasks),
   };
 }
 

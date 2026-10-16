@@ -104,7 +104,7 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   }
   // `--verify`'s before-side, read before the claim: a failed read leaves the ticket unspent, and no read sits
   // between the recheck and the act, where a renumbering snapshot could move the ref.
-  const before: PageReading | null = args.verify === null ? null : await readPage(ctx.browser, page);
+  const before: PageReading | null = args.verify === null ? null : await readPage(ctx, page);
 
   const ticket = ctx.dryRun ? peeked : await ctx.tickets.claim(args.ticket, ctx.now());
   if (typeof ticket === 'string') return ticketGone(ticket, args.ticket);

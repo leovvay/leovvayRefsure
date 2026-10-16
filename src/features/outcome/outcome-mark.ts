@@ -24,7 +24,7 @@ export async function runMark(args: OutcomeMarkArgs, ctx: CommandContext): Promi
   const mark = await markOnPage<OutcomeResult>(ctx, args.mark, page.id, MARK_HINT);
   if ('status' in mark) return mark;
 
-  const reading = await readPage(ctx.browser, page);
+  const reading = await readPage(ctx, page);
   const now = markView(reading);
   // A needle past the mark's cut reads as absent before while it was there all along: only the Decision can say.
   if (args.expectText !== null && mark.textCut) {
