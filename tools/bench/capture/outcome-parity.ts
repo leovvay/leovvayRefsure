@@ -27,7 +27,7 @@ export interface OutcomeParity {
 
 const standIn = (item: BenchItem): BenchItem => {
   const input = item.input as { intent: string; acted: string; before: string; after: string };
-  const blank = { tab: { url: '', title: '' } as TabInfo, text: '' };
+  const blank = { tab: { url: '', title: '' } as TabInfo, text: '', typed: { pieces: [] } };
   return { ...item, input: { ...input, after: outcomeInput('', '', blank, null, { piiMasks: true }).after } } as BenchItem;
 };
 

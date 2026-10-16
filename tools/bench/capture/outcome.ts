@@ -1,6 +1,7 @@
 import type { PageRef } from '../../../src/browser';
 import { outcomeInput, SETTLE_MS } from '../../../src/features/outcome';
 import { type Candidate, candidatesOf, describeElement, fold } from '../../../src/page-model';
+import { readTyped } from '../../../src/features/shared';
 import type { PageReading } from '../../../src/features/shared';
 import { actionRole, liveRefRisk, readLiveTarget } from '../../../src/risk';
 import { findGold } from '../../calibrate/lib/gold-map';
@@ -37,14 +38,18 @@ export async function readOutcome(item: CaptureItem, deps: BenchDeps): Promise<O
     const tab = await deps.browser.tabInfo(page);
     const risk = await liveRefRisk(deps.browser, page, node.ref, 'click', target, { url: tab.url });
     const acted = describeElement(target.role ?? actionRole('click'), target.live.seen);
-    return { before: { tab, text: target.bodyText }, acted, riskClass: risk.class, actedRef: String(node.ref) };
+    // What was typed into editable regions, read as refsure's readPage reads it (spec §7.3: never sent).
+    const typed = await readTyped(deps.browser, page);
+    return { before: { tab, text: target.bodyText, typed }, acted, riskClass: risk.class, actedRef: String(node.ref) };
   };
   const before = await onPage(deps, o.before, read);
   if ('away' in before) return { drop: 'navigated_away' };
   if ('drop' in before.read) return before.read;
   const after = await onPage(deps, o.after, async (page) => {
-    const [tab, text] = await Promise.all([deps.browser.tabInfo(page), deps.browser.text(page, 'body')]);
-    return { tab, text };
+    const [tab, text, typed] = await Promise.all([
+      deps.browser.tabInfo(page), deps.browser.text(page, 'body'), readTyped(deps.browser, page),
+    ]);
+    return { tab, text, typed };
   }, SETTLE_MS);
   if ('away' in after) return { drop: 'after page navigated_away' };
   return { ...before.read, after: after.read };

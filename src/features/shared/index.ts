@@ -7,6 +7,7 @@ export { nothingDone, recheckStale, ticketGone } from './nothing-done';
 export { peekTicketOnPage } from './peek-ticket-on-page';
 export { ticketBindingRefusal } from './ticket-binding';
 export { readPage } from './read-page';
+export { readTyped } from './read-typed';
 export { withoutTyped } from './without-typed';
 export { readConfig, rosterOf } from './read-config';
 export { sleep } from './sleep';
