@@ -26,6 +26,11 @@ export type Verdict<Out> =
     detail: string;
     /** The option the model leaned to, quoted in refusals. */
     leaned: string | null;
+    /**
+     * A `disagree` only: the value Jev's pick stands for, so the caller can run the twin rule and the guard on it,
+     * which come before the agreement in the abstain order (spec §8.2 steps 9-11).
+     */
+    leanedValue?: Out;
     confidence: number | null;
     threshold: number | null;
     /** The provider refused the key itself (HTTP 401, 402, 403): asking again, over any input, fails the same way. */

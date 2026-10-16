@@ -8,7 +8,7 @@ import type { Answer } from './verdict-kinds';
 /**
  * Ask every part in parallel, each with its own deadline. It passes only when every part answers the same
  * presented index (on a Noul site, every part says yes within its own band). A part's abstain is the
- * verdict, an unavailable one first; differing answers are `disagree`, leaning to Jev's index. The
+ * verdict, an unavailable one first; differing answers are `disagree`, leaning to Jev's index and value. The
  * reported confidence is the lowest, with that part's threshold.
  */
 export async function askAgree<Out>(parts: readonly ComboPart<Out>[], opts: AskOptions): Promise<ComboOutcome<Out>> {
@@ -43,6 +43,7 @@ function agreeVerdict<Out>(outcomes: readonly PartOutcome<Out>[], parts: readonl
     cause: 'disagree',
     detail: chose.join(', '),
     leaned: lead.index,
+    leanedValue: lead.value,
     confidence: low.confidence,
     threshold: low.threshold,
   };

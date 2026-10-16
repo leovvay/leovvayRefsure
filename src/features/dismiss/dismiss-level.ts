@@ -7,7 +7,8 @@ import {
 import { BOUNDS, dismissSite } from '../../questions';
 import { type AbstainWhy, abstainOutcome, notOffered } from '../shared';
 import type { DismissArgs } from './dismiss.args';
-import { settleDismissPick } from './dismiss-pick';
+import { guardDismissPick, settleDismissPick } from './dismiss-pick';
+import type { DismissScene } from './dismiss-scene';
 import { vetoOf } from './dismiss-veto';
 import type { LevelOutcome } from './level-outcome';
 import { detectOverlay } from './overlay-detect';
@@ -35,7 +36,8 @@ function controlsOf(tree: AxTree, container: number): Candidate[] {
 
 /**
  * One overlay (spec §6.2, §8.4): find it by code; refuse by code when every control is on the never-click list;
- * else ask the dismiss Decision over its controls (v1 lines) with its text as the popup, then settle the pick.
+ * else ask the dismiss Decision over its controls (v1 lines) with its text as the popup, then settle the pick (or
+ * guard Jev's lean when the providers disagreed).
  */
 export async function dismissLevel(ctx: CommandContext, page: PageRef, args: DismissArgs, level: number): Promise<LevelOutcome> {
   const [tab, tree]: [TabInfo, AxTree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
@@ -70,8 +72,20 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
     { combo: args.agree ? 'agree' : 'auto', originUrl: tab.url, dryRun: ctx.dryRun, signal: ctx.signal },
   );
   const { verdict } = decided;
-  if (verdict.kind === 'abstain') return abstained(level, overlay, verdict);
+  const scene: DismissScene = { page, tab, tree, container, overlay, level, args };
+  if (verdict.kind === 'abstain') {
+    // The twin rule and the guard come before the agreement (spec §8.2 steps 9-11): when the providers disagree, Jev's
+    // pick still meets them first, so a vetoed, twinned or high-risk lean names that cause, not `disagree`.
+    const leaned = verdict.cause === 'disagree' ? verdict.leanedValue : undefined;
+    const lean = leaned === undefined ? undefined : controls[leaned];
+    if (lean !== undefined) {
+      const aside = ` (Jev's pick; the providers disagreed: ${verdict.detail})`;
+      const guarded = await guardDismissPick(ctx, scene, lean, aside);
+      if ('stop' in guarded) return guarded.stop;
+    }
+    return abstained(level, overlay, verdict);
+  }
   const pick = controls[verdict.value];
   if (pick === undefined) return abstained(level, overlay, notOffered(verdict.index));
-  return settleDismissPick(ctx, { page, tab, tree, container, overlay, level, args }, pick, decided);
+  return settleDismissPick(ctx, scene, pick, decided);
 }
