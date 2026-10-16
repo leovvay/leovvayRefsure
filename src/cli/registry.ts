@@ -29,7 +29,8 @@ function missingCapabilities(needs: readonly BrowserCapability[], browser: Brows
   return needs.filter((capability) => !has.has(capability));
 }
 
-// Spec §8.7: every call purges expired entries. A purge failure never blocks the command.
+// Spec §8.7: every call purges expired entries, a usage error or `--help` included (main.ts purges the calls that
+// never reach a verb). A purge failure never blocks the command.
 async function purgeExpired(deps: RegistryDeps): Promise<void> {
   try {
     await deps.store.purge(deps.now(), expiresAtOf);
@@ -62,7 +63,6 @@ async function settle<Args, Result>(
     if (isUsageError(args)) return { ...idle, outcome: usageOutcome(spec.name, args.usage) };
     const missing = missingCapabilities(spec.needs.capabilities, deps.browser);
     if (missing.length > 0) return { ...idle, outcome: unsupportedOutcome(deps.browser.backend, missing) };
-    await purgeExpired(deps);
     if (spec.needs.page === 'required') page = await watched.port.resolvePage(hintOf(raw));
     ctx = {
       browser: watched.port,
@@ -114,8 +114,8 @@ async function pageInfoOf(settled: Settled, status: Status): Promise<PageInfo | 
 }
 
 /**
- * Runs one verb under the registry rules (spec §5.2, §6.1): help, parse, capabilities, page, run, then the acted
- * rule. It never throws for a page, provider or input condition; it throws only when a command breaks `acts: never`,
+ * Runs one verb under the registry rules (spec §5.2, §6.1): purge, help, parse, capabilities, page, run, then the
+ * acted rule. It never throws for a page, provider or input condition; it throws only when a command breaks `acts: never`,
  * which the caller reports as a crash (exit 1, re-observe). `--help` is answered by `verbHelp`, the one help path:
  * the composition root asks it before building deps, and it is asked here again so `--help` never runs the verb.
  */
@@ -124,6 +124,7 @@ export async function runCommand<Args, Result>(
   argv: readonly string[],
   deps: RegistryDeps,
 ): Promise<CommandResult> {
+  await purgeExpired(deps);
   const help = verbHelp(spec, argv);
   if (help) return help;
   const settled = await settle(spec, argv, deps);

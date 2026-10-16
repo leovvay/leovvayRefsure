@@ -5,7 +5,7 @@ import type { AnyCommandSpec, CommandResult, RegistryDeps } from './cli';
 import { configOnce, keySet, resolvePaths } from './config';
 import type { RefsureConfig } from './config';
 import { FEATURES } from './features';
-import { createFileStore } from './local-state';
+import { createFileStore, expiresAtOf } from './local-state';
 import { newTrace, redactPatterns, renderEnvelope } from './output';
 import type { RunTrace } from './output';
 import { makeProviders } from './providers';
@@ -44,6 +44,18 @@ function emit(result: CommandResult): number {
   return result.exit;
 }
 
+/**
+ * Spec §8.7: every call purges expired entries. A verb run purges in the registry, where a failure is traced; help,
+ * `--version` and an unknown verb have no trace, so a failure here is silent. It never blocks the call.
+ */
+async function purgeQuietly(env: NodeJS.ProcessEnv): Promise<void> {
+  try {
+    await createFileStore(resolvePaths(env).state).purge(Date.now(), expiresAtOf);
+  } catch {
+    // Nothing to report it to; the next verb run purges and traces.
+  }
+}
+
 /** decide() and routeCheck(), composed from config, keys and providers on the first Decision asked. */
 function lazyDecide(parts: {
   config: () => RefsureConfig;
@@ -77,7 +89,10 @@ async function runVerb(
 ): Promise<CommandResult> {
   // Help needs no config, keys or browser, so a broken config cannot hide it.
   const help = verbHelp(spec, argv);
-  if (help) return help;
+  if (help) {
+    await purgeQuietly(env);
+    return help;
+  }
   const trace = newTrace();
   signal.addEventListener('abort', () => trace.notes.push('interrupted'), { once: true });
   const config = configOnce(env);
@@ -110,11 +125,12 @@ async function runVerb(
 
 async function main(argv: string[]): Promise<number> {
   const route = routeArgv(argv, FEATURES);
-  if (route.kind === 'print') {
+  if (route.kind !== 'command') {
+    await purgeQuietly(process.env);
+    if (route.kind === 'unknown') return emit(route.result);
     process.stdout.write(`${route.text}\n`);
     return route.exit;
   }
-  if (route.kind === 'unknown') return emit(route.result);
   const controller = new AbortController();
   abortOnSignals(controller);
   return emit(await runVerb(route.spec, route.argv, process.env, controller.signal));
