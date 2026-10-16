@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nightjar Screen · Faroles de sal — temporada 4</title>
+<style>
+body{margin:0;font-family:Helvetica, Arial, sans-serif;background:#141414;color:#f2f2f2;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#d0342c;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #d0342c;background:#d0342c;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#d0342c}
+.ov .row a{color:#d0342c;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c383">Nightjar Screen</a><nav><a href="#" id="c638">Inicio</a><a href="#" id="c472">Series</a><a href="#" id="c627">Películas</a><a href="#" id="c104">Mi lista</a></nav><form role="search"><input type="search" aria-label="Buscar" placeholder="Buscar"></form><a href="#" id="c949">Mi cuenta</a></header>
+<div class="wrap">
+<main><h1>Faroles de sal — temporada 4</h1><p>52 episodios · drama · un farero encuentra cartas que nunca se enviaron.</p><ul><li>Episodio 1 · La marea tranquila · 36 min</li><li>Episodio 2 · Barcos de papel · 52 min</li><li>Episodio 3 · Señal de niebla · 36 min</li></ul></main>
+<aside aria-label="Seguir viendo"><h3>Seguir viendo</h3><ul><li><a href="#" id="c817">El caso del huerto</a></li><li><a href="#" id="c349">El camino bajo</a></li><li><a href="#" id="c757">Puerto de cristal</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c753">Privacidad</a><a href="#" id="c328">Condiciones de uso</a><a href="#" id="c563">Contacto</a><a href="#" id="c978">Centro de ayuda</a><a href="#" id="c767">Accesibilidad</a><p>© 2026 Nightjar Screen. Todos los derechos reservados.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Opciones de privacidad">
+<h2>Sigue leyendo con cookies o con un plan</h2>
+<p>Nuestro periodismo se financia con anuncios. Permite las cookies publicitarias o elige un plan sin seguimiento.</p>
+<div class="row"><button type="button" id="c873">Cerrar</button>
+<button type="button" id="c417">Gestionar preferencias</button>
+<button type="button" id="c748">Aceptar todo</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

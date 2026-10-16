@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tallyforge · Налаштування простору</title>
+<style>
+body{margin:0;font-family:system-ui, sans-serif;background:#f4f4f8;color:#1d1b2e;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#5b3cc4;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #5b3cc4;background:#5b3cc4;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#5b3cc4}
+.ov .row a{color:#5b3cc4;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c175">Tallyforge</a><nav><a href="#" id="c236">Огляд</a><a href="#" id="c695">Проєкти</a><a href="#" id="c189">Учасники</a><a href="#" id="c800">Налаштування</a></nav><form role="search"><input type="search" aria-label="Пошук" placeholder="Пошук"></form><a href="#" id="c437">Мій кабінет</a></header>
+<div class="wrap">
+<main><h1>Налаштування простору</h1><p>У вашому просторі 6 учасників і 29 активних проєктів. Зміни зберігаються автоматично.</p><ul><li>Назва простору</li><li>Часовий пояс: UTC+6</li><li>Двокроковий вхід для всіх</li></ul></main>
+<aside aria-label="Використання за місяць"><h3>Використання за місяць</h3><ul><li><a href="#" id="c675">29 ГБ сховища</a></li><li><a href="#" id="c347">44 запусків автоматизацій</a></li><li><a href="#" id="c623">6 гостей</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c302">Конфіденційність</a><a href="#" id="c273">Умови використання</a><a href="#" id="c700">Контакти</a><a href="#" id="c293">Довідка</a><a href="#" id="c212">Доступність</a><p>© 2026 Tallyforge. Усі права захищено.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Спеціальна пропозиція">
+<h2>Знижка 20% на перші три місяці</h2>
+<p>Спробуйте план Plus: більше місця, без реклами й офлайн-доступ. Через три місяці ціна стає звичайною.</p>
+<p>«Зрозуміло» вмикає план Plus сьогодні й списує кошти зі збереженої картки.</p>
+<div class="row"><button type="button" id="c396" class="q">Пробний період</button>
+<a href="#" id="c679">Деталі плану</a>
+<button type="button" id="c363">Зрозуміло</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

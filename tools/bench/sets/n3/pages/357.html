@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inkwell Inbox · Inbox (7)</title>
+<style>
+body{margin:0;font-family:Segoe UI, sans-serif;background:#f6f8fc;color:#202124;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#b0451c;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #b0451c;background:#b0451c;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#b0451c}
+.ov .row a{color:#b0451c;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c862">Inkwell Inbox</a><nav><a href="#" id="c307">Inbox</a><a href="#" id="c305">Starred</a><a href="#" id="c568">Sent</a><a href="#" id="c391">Drafts</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c198">My account</a></header>
+<div class="wrap">
+<main><h1>Inbox (7)</h1><p>You have 42 unread messages. Storage used: 54% of 15 GB.</p><ul><li>Allotment rota for November — 09:70</li><li>Your parcel is out for delivery — 08:425</li><li>Minutes from the residents meeting — yesterday</li></ul></main>
+<aside aria-label="Labels"><h3>Labels</h3><ul><li><a href="#" id="c695">Family</a></li><li><a href="#" id="c293">Receipts</a></li><li><a href="#" id="c334">Travel</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c392">Privacy</a><a href="#" id="c263">Terms of use</a><a href="#" id="c841">Contact</a><a href="#" id="c370">Help centre</a><a href="#" id="c338">Accessibility</a><p>© 2026 Inkwell Inbox. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Privacy choices">
+<h2>Read on with cookies or a plan</h2>
+<p>To keep reading for free, we and 821 partners use cookies for advertising. You can also read without ad tracking on a paid plan.</p>
+<div class="row"><button type="button" id="c670" class="q">Accept all</button>
+<a href="#" id="c648">Privacy policy</a>
+<a href="#" id="c654">Cookie settings</a>
+<button type="button" id="c123" class="q">Decline</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

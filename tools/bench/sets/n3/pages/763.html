@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compass &amp; Kettle · Encuentra tu alojamiento</title>
+<style>
+body{margin:0;font-family:Verdana, sans-serif;background:#f2f8fb;color:#0e2a36;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#0b7a8c;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:0;right:0;bottom:0;border-top:3px solid #0b7a8c}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #0b7a8c;background:#0b7a8c;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#0b7a8c}
+.ov .row a{color:#0b7a8c;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c433">Compass &amp; Kettle</a><nav><a href="#" id="c773">Vuelos</a><a href="#" id="c878">Alojamientos</a><a href="#" id="c215">Trenes</a><a href="#" id="c781">Viajes</a></nav><form role="search"><input type="search" aria-label="Buscar" placeholder="Buscar"></form><a href="#" id="c770">Mi cuenta</a></header>
+<div class="wrap">
+<main><h1>Encuentra tu alojamiento</h1><p>Precios para 3 noches, dos huéspedes. Impuestos incluidos, cancelación gratuita.</p><ul><li>Apartamento con vistas al puerto – 15 € total</li><li>Pensión en el casco antiguo – 71 € total</li><li>Cabaña con sauna – 153 € total</li></ul></main>
+<aside aria-label="Vistos recientemente"><h3>Vistos recientemente</h3><ul><li><a href="#" id="c412">Hotel junto al lago, 4 estrellas</a></li><li><a href="#" id="c508">Tren nocturno, coche cama</a></li><li><a href="#" id="c836">Alquiler de bicis</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c555">Privacidad</a><a href="#" id="c936">Condiciones de uso</a><a href="#" id="c459">Contacto</a><a href="#" id="c989">Centro de ayuda</a><a href="#" id="c520">Accesibilidad</a><p>© 2026 Compass &amp; Kettle. Todos los derechos reservados.</p></footer>
+<section id="ov" class="ov" aria-label="Aviso de cookies">
+<button type="button" class="x" id="c999" aria-label="Cerrar el aviso">×</button><h2>Tu privacidad nos importa</h2>
+<p>Este sitio usa cookies. Algunas son necesarias; otras nos ayudan a entender cómo se usa.</p>
+<div class="row"><button type="button" id="c816" class="q">Gestionar preferencias</button>
+<a href="#" id="c150">Ver socios</a>
+<button type="button" id="c218">Aceptar todo</button></div>
+</section>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

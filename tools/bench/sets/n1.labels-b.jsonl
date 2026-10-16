@@ -1,0 +1,780 @@
+{"id": "n1-0001", "label": {"selector": "#k02y", "name": "Archive"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0002", "label": {"selector": "#erji", "name": "Reply “Thanks, will review”"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0003", "label": {"selector": "#rpsr", "name": "Forward"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0004", "label": {"selector": "#fzar", "name": "New message"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0005", "label": {"selector": "#x1w2", "name": "Napisz opinię"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0006", "label": {"selector": "#cuqj", "name": "Zapisz się do newslettera"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0007", "label": {"selector": "#hptf", "name": "Kup teraz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0008", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0009", "label": {"selector": "#gylz", "name": "Mark as helpful"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0010", "label": {"selector": "#e39c", "name": "Terms of use"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0011", "label": {"selector": "#vqj6", "name": "Start a new thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0012", "label": {"selector": "#y8ql", "name": "Alerts"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0013", "label": {"selector": "#prt0", "name": "Завантажити підтвердження адреси"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0014", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0015", "label": {"selector": "#vo3q", "name": "Зберегти й продовжити пізніше"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0016", "label": {"selector": "#tdyw", "name": "Ваше повне ім’я"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0017", "label": {"selector": "#pkvy", "name": "Salir"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0018", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0019", "label": {"selector": "#ntdl", "name": "Mover al archivo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0020", "label": {"selector": "#plvs", "name": "Nuevo pedido"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0021", "label": {"selector": "#kf5l", "name": "Polub post"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0022", "label": {"selector": "#nb33", "name": "Wycisz wątek"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0023", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0024", "label": {"selector": "#mpol", "name": "To mi pomogło"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0025", "label": {"selector": "#bqh3", "name": "Freeze card"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0026", "label": {"selector": "#piw6", "name": "Create a goal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0027", "label": {"selector": "#wjdi", "name": "Log out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0028", "label": {"selector": "#y6pn", "name": "Debit and credit cards"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0029", "label": {"selector": "#n67y", "name": "Delete key"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0030", "label": {"selector": "#dm8u", "name": "Turn on two-step sign-in"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0031", "label": {"selector": "#e5oh", "name": "Update preferences"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0032", "label": {"selector": "#qj33", "name": "Name of workspace"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0033", "label": {"selector": "#bkki", "name": "Email me similar jobs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0034", "label": {"selector": "#ka8o", "name": "Report this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0035", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0036", "label": {"selector": "#fhxm", "name": "Bookmark this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0037", "label": {"selector": "#y7gx", "name": "Starred"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0038", "label": {"selector": "#btr7", "name": "Forward"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0039", "label": {"selector": "#tdkj", "name": "Travel"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0040", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0041", "label": {"selector": "#dsxk", "name": "Correo enviado"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0042", "label": {"selector": "#kru1", "name": "No leído"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0043", "label": {"selector": "#b1gs", "name": "Posponer hasta mañana"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0044", "label": {"selector": "#gpb5", "name": "Descargar report.pdf"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0045", "label": {"selector": "#qhi8", "name": "Sí, me ayudó"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0046", "label": {"selector": "#xa28", "name": "Crear un token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0047", "label": {"selector": "#revp", "name": "Gestión de errores"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": 1}
+{"id": "n1-0048", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-01", "selector_matches": null}
+{"id": "n1-0049", "label": {"selector": "#k8m1", "name": "Book first available"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0050", "label": {"selector": "#pwda", "name": "Change time"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0051", "label": {"selector": "#t5nv", "name": "Urine test, 2 March"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0052", "label": {"selector": "#wdy5", "name": "My portal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0053", "label": {"selector": "#t95r", "name": "Geld überweisen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0054", "label": {"selector": "#jphg", "name": "Meine Konten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0055", "label": {"selector": "#pw7y", "name": "Datenschutzhinweis"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0056", "label": {"selector": "#wfsa", "name": "Abmelden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0057", "label": {"selector": "#teil", "name": "Servicios"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0058", "label": {"selector": "#hz18", "name": "Accesibilidad"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0059", "label": {"selector": "#gpq6", "name": "Nombre completo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0060", "label": {"selector": "#g8cc", "name": "Guardar y continuar más tarde"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0061", "label": {"selector": "#ed38", "name": "Me gusta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0062", "label": {"selector": "#yzso", "name": "Abrir un hilo nuevo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0063", "label": {"selector": "#mrw2", "name": "Silenciar hilo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0064", "label": {"selector": "#v23r", "name": "Me ha ayudado"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0065", "label": {"selector": "#g751", "name": "Postulación rápida con tu perfil"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0066", "label": {"selector": "#rqaj", "name": "Enviar oferta por correo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0067", "label": {"selector": "#p2qx", "name": "Empresas"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0068", "label": {"selector": "#xcv6", "name": "Enviarme empleos similares"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0069", "label": {"selector": "#vdh9", "name": "Send payment reminder"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0070", "label": {"selector": "#ax75", "name": "Sign out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0071", "label": {"selector": "#xqn0", "name": "Create order"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0072", "label": {"selector": "#vp97", "name": "Issue refund for 4417"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0073", "label": {"selector": "#bqw4", "name": "Редагувати сторінку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0074", "label": {"selector": "#sx94", "name": "Копіювати в буфер"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0075", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": null}
+{"id": "n1-0076", "label": {"selector": "#fcal", "name": "Так, допомогла"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0077", "label": {"selector": "#xc7u", "name": "Fahrzeugschein hochladen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0078", "label": {"selector": "#w5cz", "name": "Problem mit dieser Seite melden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0079", "label": {"selector": "#dtl0", "name": "Als Entwurf speichern"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0080", "label": {"selector": "#vtlu", "name": "Kfz-Kennzeichen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0081", "label": {"selector": "#w3za", "name": "Select this flight"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0082", "label": {"selector": "#r1ye", "name": "Car rental"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0083", "label": {"selector": "#a0xt", "name": "Add hotel to trip"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0084", "label": {"selector": "#h2h6", "name": "Book this option"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0085", "label": {"selector": "#be6e", "name": "Befehl kopieren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0086", "label": {"selector": "#z2fp", "name": "Hat geholfen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0087", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": null}
+{"id": "n1-0088", "label": {"selector": "#rt0s", "name": "Token generieren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0089", "label": {"selector": "#wb5b", "name": "Posponer hasta mañana"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0090", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": null}
+{"id": "n1-0091", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": null}
+{"id": "n1-0092", "label": {"selector": "#hj55", "name": "Buscar mensajes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0093", "label": {"selector": "#dyuv", "name": "Reply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0094", "label": {"selector": "#h7kb", "name": "Descaling with citric acid: how much?"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0095", "label": {"selector": "#dyhd", "name": "Ignore thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": 1}
+{"id": "n1-0096", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-02", "selector_matches": null}
+{"id": "n1-0097", "label": {"selector": "#jfoh", "name": "Edytuj stronę"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0098", "label": {"selector": "#xyyd", "name": "Wygeneruj token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0099", "label": {"selector": "#zaiz", "name": "Tak, pomogła"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0100", "label": {"selector": "#a04m", "name": "Nie, nie pomogła"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0101", "label": {"selector": "#rpk1", "name": "Oznacz jako nieprzeczytane"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0102", "label": {"selector": "#tt5t", "name": "Prześlij dalej"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0103", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": null}
+{"id": "n1-0104", "label": {"selector": "#aojh", "name": "Utwórz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0105", "label": {"selector": "#d4y8", "name": "Privacy and data"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0106", "label": {"selector": "#me6m", "name": "Company profile"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0107", "label": {"selector": "#vuwo", "name": "Save job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0108", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": null}
+{"id": "n1-0109", "label": {"selector": "#es4u", "name": "Інструкція для бек-офісу"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0110", "label": {"selector": "#n53y", "name": "Надіслати нагадування про оплату"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0111", "label": {"selector": "#wqb6", "name": "Створити замовлення"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0112", "label": {"selector": "#m7ow", "name": "Замовлення"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0113", "label": {"selector": "#nhtl", "name": "Wybierz ten lot"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0114", "label": {"selector": "#rrok", "name": "Bilety lotnicze"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0115", "label": {"selector": "#ht2f", "name": "Edytuj wyszukiwanie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0116", "label": {"selector": "#y506", "name": "Dodaj hotel do podróży"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0117", "label": {"selector": "#brmf", "name": "Añadir beneficiario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0118", "label": {"selector": "#vxlt", "name": "Avisos SMS de pagos grandes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0119", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": null}
+{"id": "n1-0120", "label": {"selector": "#rflw", "name": "Bloquear tarjeta temporalmente"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0121", "label": {"selector": "#rmgh", "name": "Diesen Flug wählen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0122", "label": {"selector": "#b3cr", "name": "Hotel zur Reise hinzufügen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0123", "label": {"selector": "#bmq6", "name": "Filter anwenden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0124", "label": {"selector": "#k16m", "name": "Diesen Flug reservieren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0125", "label": {"selector": "#miy1", "name": "Email this story"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0126", "label": {"selector": "#fb6x", "name": "Follow this story"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0127", "label": {"selector": "#y3aj", "name": "Add your comment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0128", "label": {"selector": "#r541", "name": "Map of the planned route"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0129", "label": {"selector": "#qoot", "name": "Seite bearbeiten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0130", "label": {"selector": "#vdte", "name": "Token erstellen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0131", "label": {"selector": "#qh0h", "name": "Ja, hilfreich"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0132", "label": {"selector": "#hi5n", "name": "Hat nicht geholfen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0133", "label": {"selector": "#jhnk", "name": "Apply now"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0134", "label": {"selector": "#e1kt", "name": "Email this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0135", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": null}
+{"id": "n1-0136", "label": {"selector": "#j1pm", "name": "Post a job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0137", "label": {"selector": "#m4fz", "name": "Generar token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0138", "label": {"selector": "#jpzw", "name": "No, no me ayudó"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0139", "label": {"selector": "#z7wb", "name": "Descargar zip"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0140", "label": {"selector": "#rca0", "name": "Sí, me ayudó"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0141", "label": {"selector": "#a3sm", "name": "Poproś o receptę na kontynuację"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0142", "label": {"selector": "#sauj", "name": "Wyloguj"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0143", "label": {"selector": "#sww7", "name": "Zmień termin"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0144", "label": {"selector": "#g1hw", "name": "Wiadomość do rejestracji"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-03", "selector_matches": 1}
+{"id": "n1-0145", "label": {"selector": "#z70v", "name": "Enviarme empleos similares"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0146", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0147", "label": {"selector": "#bfth", "name": "Enviar por email"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0148", "label": {"selector": "#yd8u", "name": "Denunciar esta oferta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0149", "label": {"selector": "#y1tg", "name": "Save preferences"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0150", "label": {"selector": "#vd1p", "name": "No, it did not"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0151", "label": {"selector": "#nuiy", "name": "Service status"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0152", "label": {"selector": "#a8p3", "name": "Create a token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0153", "label": {"selector": "#zk6v", "name": "Edit this page"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0154", "label": {"selector": "#pn0m", "name": "Motivo de la consulta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0155", "label": {"selector": "#f37x", "name": "Cerrar sesión"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0156", "label": {"selector": "#hivw", "name": "Cancelar cita"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0157", "label": {"selector": "#myhx", "name": "Mensaje a recepción"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0158", "label": {"selector": "#g2iz", "name": "Tägliche Zusammenfassung"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0159", "label": {"selector": "#tley", "name": "Workspace löschen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0160", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0161", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0162", "label": {"selector": "#vevh", "name": "Kontakt"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0163", "label": {"selector": "#c98d", "name": "Wyślij wniosek"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0164", "label": {"selector": "#x5na", "name": "Prześlij potwierdzenie adresu"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0165", "label": {"selector": "#nlqk", "name": "Imię i nazwisko"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0166", "label": {"selector": "#jf8u", "name": "Upload vehicle document"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0167", "label": {"selector": "#juud", "name": "Your full name"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0168", "label": {"selector": "#gwq9", "name": "Contact the council"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0169", "label": {"selector": "#f7h4", "name": "Who can apply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0170", "label": {"selector": "#tcg6", "name": "No, it did not"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0171", "label": {"selector": "#tw5d", "name": "Client libraries"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0172", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0173", "label": {"selector": "#jugp", "name": "Generate token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0174", "label": {"selector": "#rne1", "name": "Detalles de la tarifa"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0175", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0176", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0177", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0178", "label": {"selector": "#tdr7", "name": "Сплатити за дозвіл"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0179", "label": {"selector": "#ddu8", "name": "Реєстраційний номер"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0180", "label": {"selector": "#z5ep", "name": "Завантажити підтвердження адреси"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0181", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": null}
+{"id": "n1-0182", "label": {"selector": "#nf2e", "name": "Aplikuj teraz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0183", "label": {"selector": "#r5c3", "name": "Szukaj ofert"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0184", "label": {"selector": "#n4c7", "name": "Wyślij ofertę e-mailem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0185", "label": {"selector": "#jm2d", "name": "Oznacz ogłoszenie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0186", "label": {"selector": "#cyk8", "name": "Compose"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0187", "label": {"selector": "#sm3r", "name": "Reply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0188", "label": {"selector": "#s70d", "name": "Move to archive"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0189", "label": {"selector": "#hbsd", "name": "Reply “Thanks, will review”"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0190", "label": {"selector": "#h4gy", "name": "Zurück zum vorherigen Schritt"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0191", "label": {"selector": "#zezm", "name": "Vollständiger Name"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0192", "label": {"selector": "#pfvx", "name": "Gebühr bezahlen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0193", "label": {"selector": "#ztvy", "name": "Adressnachweis hinzufügen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-04", "selector_matches": 1}
+{"id": "n1-0194", "label": {"selector": "#qxsm", "name": "Follow thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0195", "label": {"selector": "#cb9b", "name": "Last page"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0196", "label": {"selector": "#tbey", "name": "Like this post"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0197", "label": {"selector": "#ykl5", "name": "Start a new thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0198", "label": {"selector": "#djmp", "name": "Nein, nicht hilfreich"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0199", "label": {"selector": "#bhjb", "name": "Zurück: Schnellstart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0200", "label": {"selector": "#fjlf", "name": "Änderungsprotokoll"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0201", "label": {"selector": "#vog3", "name": "Einrichten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0202", "label": {"selector": "#v10c", "name": "Eliminar clave"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0203", "label": {"selector": "#beej", "name": "Activar acceso en dos pasos"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0204", "label": {"selector": "#egai", "name": "Guardar preferencias"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0205", "label": {"selector": "#yc8f", "name": "Abandonar el espacio"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0206", "label": {"selector": "#azke", "name": "Buy now"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0207", "label": {"selector": "#a5a2", "name": "Add the set to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0208", "label": {"selector": "#w908", "name": "Subscribe to the newsletter"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0209", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": null}
+{"id": "n1-0210", "label": {"selector": "#fvba", "name": "Call the front desk"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0211", "label": {"selector": "#cpca", "name": "Book earliest slot"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0212", "label": {"selector": "#g1os", "name": "Order repeat medicine"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0213", "label": {"selector": "#fmnn", "name": "Cancel visit"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0214", "label": {"selector": "#x42w", "name": "Download statement"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0215", "label": {"selector": "#ky4u", "name": "Log out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0216", "label": {"selector": "#b74g", "name": "Temporarily lock card"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0217", "label": {"selector": "#xzv8", "name": "SMS alerts for large payments"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0218", "label": {"selector": "#vsgu", "name": "Última página"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0219", "label": {"selector": "#eh82", "name": "Equipo de moderación"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0220", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": null}
+{"id": "n1-0221", "label": {"selector": "#ro8x", "name": "Foros"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0222", "label": {"selector": "#sbz6", "name": "Alertas de precio para esta ruta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0223", "label": {"selector": "#mrv2", "name": "Mostrar resultados"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0224", "label": {"selector": "#k7sq", "name": "Ayuda"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0225", "label": {"selector": "#rs1v", "name": "Alquiler de coches"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0226", "label": {"selector": "#kq7s", "name": "Add to wishlist"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0227", "label": {"selector": "#er74", "name": "Merino base layer"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0228", "label": {"selector": "#tbyb", "name": "Add the set to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0229", "label": {"selector": "#qjer", "name": "Subscribe to the newsletter"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0230", "label": {"selector": "#nqn6", "name": "Pagar una factura"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0231", "label": {"selector": "#y42a", "name": "Mover dinero a la meta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0232", "label": {"selector": "#jyju", "name": "Avisos SMS de pagos grandes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0233", "label": {"selector": "#agfp", "name": "Añadir beneficiario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0234", "label": {"selector": "#z9ye", "name": "Als ungelesen markieren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0235", "label": {"selector": "#g5vl", "name": "Bis morgen zurückstellen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0236", "label": {"selector": "#q215", "name": "Neue Nachricht"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0237", "label": {"selector": "#sfu5", "name": "Allen Empfängern antworten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0238", "label": {"selector": "#pqgf", "name": "Szybka aplikacja z profilem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0239", "label": {"selector": "#vxe0", "name": "Wyślij ofertę e-mailem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0240", "label": {"selector": "#sa9b", "name": "Kopiuj link do oferty"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0241", "label": {"selector": "#pkep", "name": "Pracodawcy"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-05", "selector_matches": 1}
+{"id": "n1-0242", "label": {"selector": "#n5ol", "name": "Salir"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0243", "label": {"selector": "#xvr6", "name": "Cancelar pedido 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0244", "label": {"selector": "#erqo", "name": "Filtrar pedidos"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0245", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": null}
+{"id": "n1-0246", "label": {"selector": "#s63x", "name": "Vehicle registration number"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0247", "label": {"selector": "#qvej", "name": "Pay the permit fee"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0248", "label": {"selector": "#wuh0", "name": "Upload proof of address"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0249", "label": {"selector": "#qlw3", "name": "Send application"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0250", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": null}
+{"id": "n1-0251", "label": {"selector": "#vd7x", "name": "Подати заявку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0252", "label": {"selector": "#dga4", "name": "Пошук вакансій"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0253", "label": {"selector": "#z5qe", "name": "Зарплати"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0254", "label": {"selector": "#ffh2", "name": "Suscribirse"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0255", "label": {"selector": "#sx2w", "name": "Guardar artículo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0256", "label": {"selector": "#rqw5", "name": "Añade tu comentario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0257", "label": {"selector": "#eqdi", "name": "Mundo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0258", "label": {"selector": "#q51w", "name": "Cerrar sesión"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0259", "label": {"selector": "#nhlf", "name": "Llamar a recepción"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0260", "label": {"selector": "#bpzd", "name": "Uroanálisis (2 de marzo)"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0261", "label": {"selector": "#pvfs", "name": "Reservar la más próxima"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0262", "label": {"selector": "#xt13", "name": "Oznaczone gwiazdką"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0263", "label": {"selector": "#aju3", "name": "Utwórz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0264", "label": {"selector": "#w2eb", "name": "Odpowiedz wszystkim"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0265", "label": {"selector": "#quje", "name": "Archiwizuj"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0266", "label": {"selector": "#cxga", "name": "Kontakt"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0267", "label": {"selector": "#rvif", "name": "Kup teraz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0268", "label": {"selector": "#au4k", "name": "Dodaj zestaw do koszyka"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0269", "label": {"selector": "#fnw7", "name": "Oceń produkt"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0270", "label": {"selector": "#w3m7", "name": "Wiadomości sportowe"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0271", "label": {"selector": "#gs6u", "name": "Zostań subskrybentem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0272", "label": {"selector": "#nk25", "name": "Dodaj komentarz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0273", "label": {"selector": "#s74q", "name": "Zapisz na później"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0274", "label": {"selector": "#bv3i", "name": "Citar"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0275", "label": {"selector": "#fapt", "name": "Página siguiente"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0276", "label": {"selector": "#b9s3", "name": "Normas del foro"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0277", "label": {"selector": "#e2cs", "name": "Enlace a esta respuesta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0278", "label": {"selector": "#eyda", "name": "Reason for visit"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0279", "label": {"selector": "#cuq5", "name": "Reschedule"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0280", "label": {"selector": "#sebk", "name": "Log out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0281", "label": {"selector": "#g3rw", "name": "Request a repeat prescription"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0282", "label": {"selector": "#jml3", "name": "Sign out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0283", "label": {"selector": "#s3bb", "name": "Call the front desk"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0284", "label": {"selector": "#q1td", "name": "Cancel appointment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0285", "label": {"selector": "#t9dl", "name": "Order repeat medicine"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0286", "label": {"selector": "#mevi", "name": "Message reception"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0287", "label": {"selector": "#vpck", "name": "Test results"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0288", "label": {"selector": "#janr", "name": "Order repeat medicine"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0289", "label": {"selector": "#wu7y", "name": "Phone reception"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-06", "selector_matches": 1}
+{"id": "n1-0290", "label": {"selector": "#hkxf", "name": "Рахунки"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0291", "label": {"selector": "#y8ak", "name": "Завантажити виписку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0292", "label": {"selector": "#jvde", "name": "SMS про великі платежі"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0293", "label": {"selector": "#vz73", "name": "Повідомлення про конфіденційність"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0294", "label": {"selector": "#qkyr", "name": "Zapisz i dokończ później"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0295", "label": {"selector": "#f6ku", "name": "Prześlij dokument pojazdu"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0296", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": null}
+{"id": "n1-0297", "label": {"selector": "#vofk", "name": "Twoje imię i nazwisko"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0298", "label": {"selector": "#vaqi", "name": "Переслати"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0299", "label": {"selector": "#w8q4", "name": "Спам"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0300", "label": {"selector": "#j2pj", "name": "Відкласти до завтра"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0301", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": null}
+{"id": "n1-0302", "label": {"selector": "#dvro", "name": "Termin absagen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0303", "label": {"selector": "#ybkp", "name": "Grund des Besuchs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0304", "label": {"selector": "#w7xa", "name": "Folgerezept anfordern"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0305", "label": {"selector": "#cgx3", "name": "Patientenportal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0306", "label": {"selector": "#cjzf", "name": "Bestellung 4417 ansehen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0307", "label": {"selector": "#rbnl", "name": "Bestellung 4417 versenden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0308", "label": {"selector": "#bpzx", "name": "Zahlungserinnerung senden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0309", "label": {"selector": "#ap5t", "name": "Admin-Handbuch"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0310", "label": {"selector": "#q1an", "name": "Store settings"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0311", "label": {"selector": "#gmh1", "name": "Mark 4417 as shipped"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0312", "label": {"selector": "#ddth", "name": "View order 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0313", "label": {"selector": "#mlzi", "name": "Export CSV"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0314", "label": {"selector": "#zv8q", "name": "Career tips"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0315", "label": {"selector": "#r9gh", "name": "Post a job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0316", "label": {"selector": "#nthz", "name": "Create job alert"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0317", "label": {"selector": "#re5o", "name": "About the employer"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0318", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": null}
+{"id": "n1-0319", "label": {"selector": "#enib", "name": "Надсилати схожі вакансії"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0320", "label": {"selector": "#f77k", "name": "Поскаржитися на вакансію"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0321", "label": {"selector": "#p25s", "name": "Надіслати листом"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0322", "label": {"selector": "#dxvs", "name": "Забронювати цей варіант"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0323", "label": {"selector": "#f9tl", "name": "Готелі"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0324", "label": {"selector": "#end3", "name": "Додати готель до подорожі"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0325", "label": {"selector": "#qlfn", "name": "Стежити за цінами"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0326", "label": {"selector": "#zx37", "name": "Нова тема"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0327", "label": {"selector": "#zp8p", "name": "Стежити за темою"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0328", "label": {"selector": "#kit0", "name": "Написати відповідь"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0329", "label": {"selector": "#r3uz", "name": "Позначити як корисне"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0330", "label": {"selector": "#n6gv", "name": "My trips"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0331", "label": {"selector": "#y0lz", "name": "Book this option"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0332", "label": {"selector": "#c51w", "name": "Add hotel to trip"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0333", "label": {"selector": "#p6th", "name": "Reset all"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0334", "label": {"selector": "#aulh", "name": "Spam"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0335", "label": {"selector": "#wty3", "name": "Belege"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0336", "label": {"selector": "#goja", "name": "Allen Empfängern antworten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0337", "label": {"selector": "#moiu", "name": "Archivieren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-07", "selector_matches": 1}
+{"id": "n1-0338", "label": {"selector": "#px9w", "name": "New order"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0339", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0340", "label": {"selector": "#xco6", "name": "Archive selected"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0341", "label": {"selector": "#al39", "name": "Void order 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0342", "label": {"selector": "#wbqn", "name": "Наступна сторінка"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0343", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0344", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0345", "label": {"selector": "#m43d", "name": "Відповісти з цитатою"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0346", "label": {"selector": "#km9j", "name": "Щоденний дайджест"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0347", "label": {"selector": "#jcni", "name": "Учасники"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0348", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0349", "label": {"selector": "#auva", "name": "Вийти з цього простору"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0350", "label": {"selector": "#q0vf", "name": "Nowe zamówienie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0351", "label": {"selector": "#m9qw", "name": "Wyślij zamówienie 4417"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0352", "label": {"selector": "#da7s", "name": "Wyloguj się"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0353", "label": {"selector": "#mv7a", "name": "Drukuj listy przewozowe"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0354", "label": {"selector": "#b14x", "name": "Für später merken"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0355", "label": {"selector": "#b5wx", "name": "Kommentar schreiben"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0356", "label": {"selector": "#si7j", "name": "Korrekturen und Klarstellungen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0357", "label": {"selector": "#rvvz", "name": "Per E-Mail teilen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0358", "label": {"selector": "#vlp3", "name": "Post a comment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0359", "label": {"selector": "#cs4e", "name": "Corrections"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0360", "label": {"selector": "#rxuv", "name": "Subscribe"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0361", "label": {"selector": "#vwgi", "name": "Save for later"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0362", "label": {"selector": "#zube", "name": "Beide in den Warenkorb"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0363", "label": {"selector": "#g7zm", "name": "Bewertung schreiben"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0364", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0365", "label": {"selector": "#msa4", "name": "Jetzt kaufen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0366", "label": {"selector": "#m6vj", "name": "Yes, it helped"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0367", "label": {"selector": "#nwii", "name": "Community forum"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0368", "label": {"selector": "#wsbp", "name": "Generate token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0369", "label": {"selector": "#dpwe", "name": "Suggest an edit"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0370", "label": {"selector": "#noj9", "name": "Готелі в Порту"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0371", "label": {"selector": "#ferl", "name": "Сповіщати про ціни на цей маршрут"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0372", "label": {"selector": "#zt8v", "name": "Обрати цей тариф"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0373", "label": {"selector": "#xtdy", "name": "Забронювати цей варіант"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0374", "label": {"selector": "#ek5k", "name": "Надіслати нагадування про оплату"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0375", "label": {"selector": "#bx4q", "name": "Повернути кошти за 4417"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0376", "label": {"selector": "#s53b", "name": "Створити замовлення"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0377", "label": {"selector": "#jijd", "name": "Вихід"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0378", "label": {"selector": "#nj3w", "name": "Utwórz token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0379", "label": {"selector": "#gim2", "name": "Tak, pomogła"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0380", "label": {"selector": "#j72r", "name": "Edytuj stronę"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0381", "label": {"selector": "#dkh0", "name": "Nie, nie pomogła"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0382", "label": {"selector": "#fcfo", "name": "World"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0383", "label": {"selector": "#x1ee", "name": "Share by email"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0384", "label": {"selector": "#qrhq", "name": "Become a subscriber"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": 1}
+{"id": "n1-0385", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-08", "selector_matches": null}
+{"id": "n1-0386", "label": {"selector": "#f5s6", "name": "Subir justificante de domicilio"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0387", "label": {"selector": "#fjip", "name": "Guardar y continuar más tarde"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0388", "label": {"selector": "#bbo5", "name": "Matrícula del vehículo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0389", "label": {"selector": "#tgc8", "name": "Pagar la tasa"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0390", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0391", "label": {"selector": "#qj68", "name": "Share by email"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0392", "label": {"selector": "#h0o3", "name": "Post a comment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0393", "label": {"selector": "#r7p0", "name": "Get updates on this story"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0394", "label": {"selector": "#quvp", "name": "Gefällt mir"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0395", "label": {"selector": "#zhiz", "name": "Nutzungsbedingungen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0396", "label": {"selector": "#hygu", "name": "Foren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0397", "label": {"selector": "#n9mm", "name": "Thema beobachten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0398", "label": {"selector": "#vz8i", "name": "Написати коментар"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0399", "label": {"selector": "#a2av", "name": "Зберегти на потім"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0400", "label": {"selector": "#jalg", "name": "Отримувати оновлення теми"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0401", "label": {"selector": "#wl5v", "name": "Передплатити"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0402", "label": {"selector": "#xh8e", "name": "Створити нову тему"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0403", "label": {"selector": "#gb53", "name": "Поскаржитися"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0404", "label": {"selector": "#eoa2", "name": "Ігнорувати тему"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0405", "label": {"selector": "#j9mh", "name": "Позначити як корисне"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0406", "label": {"selector": "#z33o", "name": "Zarezerwuj tę opcję"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0407", "label": {"selector": "#s8b4", "name": "Dodaj nocleg"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0408", "label": {"selector": "#f47w", "name": "Alerty cenowe dla tej trasy"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0409", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0410", "label": {"selector": "#z4cs", "name": "Add to wishlist"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0411", "label": {"selector": "#jhuz", "name": "Write a review"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0412", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0413", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0414", "label": {"selector": "#yosr", "name": "Einkaufswagen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0415", "label": {"selector": "#qwd4", "name": "Bewertung schreiben"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0416", "label": {"selector": "#cjjz", "name": "Herren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0417", "label": {"selector": "#aae1", "name": "Zum Warenkorb hinzufügen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0418", "label": {"selector": "#wjeo", "name": "Enviar por correo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0419", "label": {"selector": "#zizo", "name": "Publicar un comentario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0420", "label": {"selector": "#vqwq", "name": "Cómo se financia el proyecto"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0421", "label": {"selector": "#sryo", "name": "Correcciones y aclaraciones"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0422", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0423", "label": {"selector": "#tfud", "name": "Neues Thema starten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0424", "label": {"selector": "#r1g8", "name": "Nutzungsbedingungen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0425", "label": {"selector": "#g84p", "name": "Thema beobachten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0426", "label": {"selector": "#x39k", "name": "Antrag absenden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0427", "label": {"selector": "#ynrc", "name": "Gebühr bezahlen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0428", "label": {"selector": "#qr7l", "name": "Speichern und später fortfahren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0429", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": null}
+{"id": "n1-0430", "label": {"selector": "#plub", "name": "Care instructions"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0431", "label": {"selector": "#j9bp", "name": "Add to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0432", "label": {"selector": "#jhf2", "name": "Returns policy"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0433", "label": {"selector": "#yso6", "name": "Add the set to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-09", "selector_matches": 1}
+{"id": "n1-0434", "label": {"selector": "#wcn9", "name": "Projects"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0435", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0436", "label": {"selector": "#qv8i", "name": "Revoke key"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0437", "label": {"selector": "#jxpp", "name": "Save changes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0438", "label": {"selector": "#fg02", "name": "Care instructions"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0439", "label": {"selector": "#nm8f", "name": "This is a gift"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0440", "label": {"selector": "#ysk6", "name": "Add the set to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0441", "label": {"selector": "#nqk7", "name": "Check delivery date"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0442", "label": {"selector": "#wm3p", "name": "Numer rejestracyjny pojazdu"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0443", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0444", "label": {"selector": "#farq", "name": "Dodaj potwierdzenie adresu"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0445", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0446", "label": {"selector": "#eyxy", "name": "Follow this story"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0447", "label": {"selector": "#v96j", "name": "Save for later"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0448", "label": {"selector": "#g6oi", "name": "Post a comment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0449", "label": {"selector": "#wd6l", "name": "Become a subscriber"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0450", "label": {"selector": "#bgy7", "name": "Udostępnij e-mailem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0451", "label": {"selector": "#xrph", "name": "Dodaj komentarz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0452", "label": {"selector": "#gbe8", "name": "Zostań subskrybentem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0453", "label": {"selector": "#ko8s", "name": "Obserwuj temat"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0454", "label": {"selector": "#sh7e", "name": "Save and continue later"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0455", "label": {"selector": "#bgy1", "name": "Full name"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0456", "label": {"selector": "#njcm", "name": "Upload proof of address"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0457", "label": {"selector": "#v94m", "name": "Pay the permit fee"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0458", "label": {"selector": "#hhws", "name": "Перенести"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0459", "label": {"selector": "#j0b3", "name": "Замовити повторний рецепт"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0460", "label": {"selector": "#xxan", "name": "Завершити сеанс"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0461", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0462", "label": {"selector": "#vlyk", "name": "Perfil de la empresa"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0463", "label": {"selector": "#xmps", "name": "Privacidad y datos"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0464", "label": {"selector": "#wp8k", "name": "Guardar empleo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0465", "label": {"selector": "#nbdk", "name": "Enviar oferta por correo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0466", "label": {"selector": "#h8bn", "name": "Компактний дощовик"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0467", "label": {"selector": "#vb0b", "name": "Для чоловіків"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0468", "label": {"selector": "#fgab", "name": "Підписатися на розсилку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0469", "label": {"selector": "#kavn", "name": "Купити одразу"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0470", "label": {"selector": "#s1a6", "name": "Dashboard"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0471", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0472", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": null}
+{"id": "n1-0473", "label": {"selector": "#xhxc", "name": "Save"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0474", "label": {"selector": "#wnw5", "name": "Add payee"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0475", "label": {"selector": "#g0b6", "name": "Log out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0476", "label": {"selector": "#v5i1", "name": "Cards"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0477", "label": {"selector": "#zrgz", "name": "Price list"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0478", "label": {"selector": "#jjf2", "name": "Transfer money"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0479", "label": {"selector": "#yapw", "name": "Move money to goal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0480", "label": {"selector": "#qn11", "name": "Exchange rates"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0481", "label": {"selector": "#ywak", "name": "Delete payee"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-10", "selector_matches": 1}
+{"id": "n1-0482", "label": {"selector": "#ghky", "name": "Cancel order 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0483", "label": {"selector": "#cb82", "name": "Mark 4417 as shipped"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0484", "label": {"selector": "#pxj1", "name": "Archive selected"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0485", "label": {"selector": "#p55y", "name": "Keyboard shortcuts"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0486", "label": {"selector": "#ytyf", "name": "Billing"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0487", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0488", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0489", "label": {"selector": "#k34u", "name": "Save changes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0490", "label": {"selector": "#azin", "name": "Opuść przestrzeń"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0491", "label": {"selector": "#c66l", "name": "Zaktualizuj preferencje"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0492", "label": {"selector": "#ry9k", "name": "Nowy klucz API"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0493", "label": {"selector": "#yfnd", "name": "Nazwa przestrzeni"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0494", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0495", "label": {"selector": "#splf", "name": "Додати отримувача"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0496", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0497", "label": {"selector": "#j4dl", "name": "Тимчасово заблокувати картку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0498", "label": {"selector": "#x9wv", "name": "Search mail"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0499", "label": {"selector": "#aqe6", "name": "Drafts"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0500", "label": {"selector": "#j0l1", "name": "Archive"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0501", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0502", "label": {"selector": "#jo6r", "name": "Перенести"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0503", "label": {"selector": "#fsfm", "name": "Замовити повторний рецепт"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0504", "label": {"selector": "#rohz", "name": "Записатися на найближчий час"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0505", "label": {"selector": "#yqz9", "name": "Вийти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0506", "label": {"selector": "#v2dq", "name": "Download statement"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0507", "label": {"selector": "#tevw", "name": "Help centre"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0508", "label": {"selector": "#f6tg", "name": "Temporarily lock card"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0509", "label": {"selector": "#apoo", "name": "Create a goal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0510", "label": {"selector": "#m6go", "name": "Mój portal"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0511", "label": {"selector": "#h1j1", "name": "Godziny otwarcia"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0512", "label": {"selector": "#bpep", "name": "Zamów te same leki"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0513", "label": {"selector": "#vg5m", "name": "Dojazd do przychodni"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0514", "label": {"selector": "#wbjk", "name": "Товари"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0515", "label": {"selector": "#bubv", "name": "Оформити повернення за 4417"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0516", "label": {"selector": "#ceuy", "name": "Перемістити в архів"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0517", "label": {"selector": "#di6j", "name": "Вийти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0518", "label": {"selector": "#q6qe", "name": "Kursy walut"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0519", "label": {"selector": "#xuxf", "name": "Wyloguj"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0520", "label": {"selector": "#phzw", "name": "Skasuj odbiorcę"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0521", "label": {"selector": "#g49m", "name": "Karty"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0522", "label": {"selector": "#b6sw", "name": "Search jobs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0523", "label": {"selector": "#qv0d", "name": "Report this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0524", "label": {"selector": "#wozr", "name": "One-click apply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0525", "label": {"selector": "#ffc1", "name": "Email me similar jobs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0526", "label": {"selector": "#jebr", "name": "This is a gift"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0527", "label": {"selector": "#kuwf", "name": "Subscribe to the newsletter"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0528", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": null}
+{"id": "n1-0529", "label": {"selector": "#e4lq", "name": "Add the set to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-11", "selector_matches": 1}
+{"id": "n1-0530", "label": {"selector": "#wppl", "name": "Корисно"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0531", "label": {"selector": "#so0l", "name": "Створити токен"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0532", "label": {"selector": "#pv3r", "name": "Запропонувати правку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0533", "label": {"selector": "#creq", "name": "Ні, не допомогла"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0534", "label": {"selector": "#waif", "name": "Wybierz ten lot"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0535", "label": {"selector": "#g53d", "name": "Alerty cenowe dla tej trasy"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0536", "label": {"selector": "#y89t", "name": "Zarezerwuj tę opcję"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0537", "label": {"selector": "#x60a", "name": "Dodaj hotel do podróży"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0538", "label": {"selector": "#cyr0", "name": "Usuń klucz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0539", "label": {"selector": "#k8jl", "name": "Eksportuj wszystkie dane"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0540", "label": {"selector": "#k7af", "name": "Wysyłaj codzienne podsumowanie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0541", "label": {"selector": "#z8gf", "name": "Nazwa przestrzeni roboczej"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0542", "label": {"selector": "#yttg", "name": "Medikament nachbestellen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0543", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": null}
+{"id": "n1-0544", "label": {"selector": "#jfs8", "name": "Grund des Besuchs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0545", "label": {"selector": "#wns2", "name": "Abmelden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0546", "label": {"selector": "#wolj", "name": "Job merken"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0547", "label": {"selector": "#h5ec", "name": "Stelle melden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0548", "label": {"selector": "#tfzl", "name": "Per Mail senden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0549", "label": {"selector": "#v7zt", "name": "Gehälter"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0550", "label": {"selector": "#prf9", "name": "Cerrar sesión"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0551", "label": {"selector": "#jrbb", "name": "Cancelar cita"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0552", "label": {"selector": "#zxzg", "name": "Mensajes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0553", "label": {"selector": "#smev", "name": "Escribir a recepción"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0554", "label": {"selector": "#phi2", "name": "Zahlungserinnerung senden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0555", "label": {"selector": "#tkoq", "name": "Kunden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0556", "label": {"selector": "#ew7o", "name": "Admin-Handbuch"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0557", "label": {"selector": "#plk6", "name": "Als CSV herunterladen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0558", "label": {"selector": "#ggio", "name": "Descaling with citric acid: how much?"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0559", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": null}
+{"id": "n1-0560", "label": {"selector": "#ax12", "name": "Forum rules"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0561", "label": {"selector": "#m9tq", "name": "Search threads"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0562", "label": {"selector": "#aysn", "name": "Get price alerts for this route"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0563", "label": {"selector": "#a2li", "name": "Add a stay"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0564", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": null}
+{"id": "n1-0565", "label": {"selector": "#vqsa", "name": "Clear filters"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0566", "label": {"selector": "#bq3v", "name": "Vorschau von report.pdf"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0567", "label": {"selector": "#kocj", "name": "Nachricht weiterleiten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0568", "label": {"selector": "#f6sq", "name": "E-Mails durchsuchen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0569", "label": {"selector": "#cynw", "name": "In den Papierkorb"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0570", "label": {"selector": "#hxse", "name": "Поділитися поштою"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0571", "label": {"selector": "#fj4a", "name": "Передплатити"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0572", "label": {"selector": "#nxjd", "name": "Стежити за темою"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0573", "label": {"selector": "#t5pw", "name": "Увійти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0574", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": null}
+{"id": "n1-0575", "label": {"selector": "#n33n", "name": "Yes, it helped"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0576", "label": {"selector": "#kliu", "name": "Create a token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0577", "label": {"selector": "#cx7d", "name": "Suggest an edit"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-12", "selector_matches": 1}
+{"id": "n1-0578", "label": {"selector": "#ygc8", "name": "Save changes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0579", "label": {"selector": "#hz22", "name": "Dashboard"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0580", "label": {"selector": "#gqcf", "name": "Leave workspace"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0581", "label": {"selector": "#hd8f", "name": "Turn on two-step sign-in"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0582", "label": {"selector": "#bd13", "name": "Powód wizyty"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0583", "label": {"selector": "#k57g", "name": "Prawa pacjenta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0584", "label": {"selector": "#cd3c", "name": "Napisz do rejestracji"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0585", "label": {"selector": "#sshl", "name": "Przełóż"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0586", "label": {"selector": "#m9ax", "name": "Archiwizuj zaznaczone"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0587", "label": {"selector": "#v3oj", "name": "Anuluj zamówienie 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0588", "label": {"selector": "#jnty", "name": "Zamówienia"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0589", "label": {"selector": "#gudh", "name": "Wyloguj się"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0590", "label": {"selector": "#dh2g", "name": "Архівувати"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0591", "label": {"selector": "#s152", "name": "Переглянути report.pdf"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0592", "label": {"selector": "#zzq1", "name": "Відповісти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0593", "label": {"selector": "#tbzq", "name": "Спам"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0594", "label": {"selector": "#cni5", "name": "Ver fecha de entrega"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0595", "label": {"selector": "#pqj3", "name": "Comprar ya"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0596", "label": {"selector": "#dj1f", "name": "Cómo lavarla"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0597", "label": {"selector": "#dn72", "name": "Añadir el pack al carrito"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0598", "label": {"selector": "#y7zr", "name": "Previous step"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0599", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": null}
+{"id": "n1-0600", "label": {"selector": "#gi3n", "name": "Add proof of address"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0601", "label": {"selector": "#rlur", "name": "Full name"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0602", "label": {"selector": "#yjcl", "name": "Give feedback on this page"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0603", "label": {"selector": "#qpjn", "name": "Accessibility"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0604", "label": {"selector": "#nziy", "name": "Vehicle registration number"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0605", "label": {"selector": "#cy73", "name": "Upload vehicle document"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0606", "label": {"selector": "#wyuo", "name": "Mute thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0607", "label": {"selector": "#ampf", "name": "Reply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0608", "label": {"selector": "#zzsr", "name": "Start a new thread"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0609", "label": {"selector": "#cqrx", "name": "Mark as helpful"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0610", "label": {"selector": "#vmfl", "name": "Umsätze ansehen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0611", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": null}
+{"id": "n1-0612", "label": {"selector": "#me3r", "name": "Karte vorübergehend sperren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0613", "label": {"selector": "#qy5y", "name": "Geld aufs Ziel buchen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0614", "label": {"selector": "#ga0r", "name": "Tarifdetails"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0615", "label": {"selector": "#fyx0", "name": "Hotel zur Reise hinzufügen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0616", "label": {"selector": "#xktd", "name": "Preisalarm für diese Strecke"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0617", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": null}
+{"id": "n1-0618", "label": {"selector": "#tmrt", "name": "Cancel order 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0619", "label": {"selector": "#pfx1", "name": "Sign out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0620", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": null}
+{"id": "n1-0621", "label": {"selector": "#kexf", "name": "Move to archive"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0622", "label": {"selector": "#dhi6", "name": "Comprar ahora"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0623", "label": {"selector": "#r3nz", "name": "Valorar este producto"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0624", "label": {"selector": "#n7mz", "name": "Suscribirse al boletín"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0625", "label": {"selector": "#cc91", "name": "Añadir ambos al carrito"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-13", "selector_matches": 1}
+{"id": "n1-0626", "label": {"selector": "#hq47", "name": "Facturación"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0627", "label": {"selector": "#ec8k", "name": "Descargar una exportación"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0628", "label": {"selector": "#qlch", "name": "Estado del sistema"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0629", "label": {"selector": "#rww0", "name": "Dónde has iniciado sesión"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0630", "label": {"selector": "#e6k6", "name": "Cómo se financia el proyecto"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0631", "label": {"selector": "#wuug", "name": "Hazte suscriptor"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0632", "label": {"selector": "#sg7l", "name": "Añade tu comentario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0633", "label": {"selector": "#g47c", "name": "Mundo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0634", "label": {"selector": "#algw", "name": "Book earliest slot"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0635", "label": {"selector": "#s1h8", "name": "Log out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0636", "label": {"selector": "#q6cu", "name": "Change time"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0637", "label": {"selector": "#z2a9", "name": "Urine test, 2 March"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0638", "label": {"selector": "#c3f6", "name": "Utwórz alert"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0639", "label": {"selector": "#s5mc", "name": "Wyślij ofertę e-mailem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0640", "label": {"selector": "#ghhi", "name": "Zgłoś ofertę"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0641", "label": {"selector": "#gfh0", "name": "Escribir una opinión"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0642", "label": {"selector": "#pw7d", "name": "Recibir correos"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0643", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": null}
+{"id": "n1-0644", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": null}
+{"id": "n1-0645", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": null}
+{"id": "n1-0646", "label": {"selector": "#gfh1", "name": "Helpful"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0647", "label": {"selector": "#n0je", "name": "No, it did not"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0648", "label": {"selector": "#a1q9", "name": "Tokens"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0649", "label": {"selector": "#zyal", "name": "Ostatnia strona"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0650", "label": {"selector": "#vc26", "name": "Załóż nowy wątek"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0651", "label": {"selector": "#gtc7", "name": "Wycisz wątek"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0652", "label": {"selector": "#grqf", "name": "Odpowiedz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0653", "label": {"selector": "#vnno", "name": "Niepomocna"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0654", "label": {"selector": "#klag", "name": "Kopiuj polecenie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0655", "label": {"selector": "#vwuc", "name": "Wygeneruj token"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0656", "label": {"selector": "#q99d", "name": "Tak, pomogła"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0657", "label": {"selector": "#mib9", "name": "Help centre"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0658", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": null}
+{"id": "n1-0659", "label": {"selector": "#aqai", "name": "My accounts"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0660", "label": {"selector": "#aqmo", "name": "New recipient"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0661", "label": {"selector": "#j3g7", "name": "Термобілизна з мериносу"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0662", "label": {"selector": "#g9bp", "name": "Додати обидва в кошик"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0663", "label": {"selector": "#cy00", "name": "Підписатися на розсилку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0664", "label": {"selector": "#hbbk", "name": "Додати в кошик"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0665", "label": {"selector": "#hy2b", "name": "SMS bei großen Zahlungen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0666", "label": {"selector": "#a7ty", "name": "Ausloggen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0667", "label": {"selector": "#n277", "name": "Devisenkurse"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0668", "label": {"selector": "#bj5e", "name": "Karte vorübergehend sperren"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0669", "label": {"selector": "#fe8o", "name": "Otrzymuj aktualizacje tematu"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0670", "label": {"selector": "#pxh4", "name": "Wyślij e-mailem"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0671", "label": {"selector": "#j01g", "name": "Tech"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": 1}
+{"id": "n1-0672", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-14", "selector_matches": null}
+{"id": "n1-0673", "label": {"selector": "#p1qg", "name": "Mitglieder"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0674", "label": {"selector": "#yxmg", "name": "Speichern"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0675", "label": {"selector": "#z2my", "name": "Systemstatus"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0676", "label": {"selector": "#x387", "name": "Aktive Sitzungen ansehen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0677", "label": {"selector": "#kezf", "name": "Stelle per E-Mail senden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0678", "label": {"selector": "#wyuk", "name": "Schnellbewerbung mit Profil"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0679", "label": {"selector": "#k16u", "name": "Stelle melden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0680", "label": {"selector": "#pf96", "name": "Gehaltsspanne ansehen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0681", "label": {"selector": "#t3ds", "name": "Marcar como no leído"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0682", "label": {"selector": "#d86r", "name": "Responder a todos"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0683", "label": {"selector": "#r6k2", "name": "Correo enviado"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0684", "label": {"selector": "#msfg", "name": "Buscar correo"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0685", "label": {"selector": "#viyj", "name": "Utwórz"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0686", "label": {"selector": "#y07l", "name": "Przenieś do archiwum"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0687", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0688", "label": {"selector": "#bstn", "name": "Zwolnij miejsce"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0689", "label": {"selector": "#wpch", "name": "Reports"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0690", "label": {"selector": "#v6ve", "name": "Export CSV"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0691", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0692", "label": {"selector": "#negm", "name": "Back office manual"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0693", "label": {"selector": "#e4nw", "name": "Upload vehicle document"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0694", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0695", "label": {"selector": "#kbcq", "name": "Permit fees"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0696", "label": {"selector": "#taqr", "name": "Vehicle registration number"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0697", "label": {"selector": "#p99u", "name": "Aviso de privacidad"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0698", "label": {"selector": "#an3z", "name": "Borrar destinatario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0699", "label": {"selector": "#ddca", "name": "Mover dinero a la meta"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0700", "label": {"selector": "#p78e", "name": "Avisos SMS de pagos grandes"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0701", "label": {"selector": "#qx2i", "name": "Transfer money"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0702", "label": {"selector": "#asa1", "name": "Freeze card"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0703", "label": {"selector": "#w70e", "name": "Sign out"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0704", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0705", "label": {"selector": "#zn1c", "name": "Написати відгук"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0706", "label": {"selector": "#wu6o", "name": "Підписатися на розсилку"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0707", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0708", "label": {"selector": "#ns4c", "name": "Мериносовий лонгслів"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0709", "label": {"selector": "#k7he", "name": "Kursy walut"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0710", "label": {"selector": "#x5mc", "name": "Nowy odbiorca"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0711", "label": {"selector": "#fqce", "name": "Karty debetowe i kredytowe"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0712", "label": {"selector": "#q9af", "name": "Opłaty i prowizje"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0713", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0714", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": null}
+{"id": "n1-0715", "label": {"selector": "#fsda", "name": "Añadir permiso de circulación"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0716", "label": {"selector": "#mfrm", "name": "Guardar y continuar más tarde"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0717", "label": {"selector": "#nemy", "name": "Schnellbewerbung mit Profil"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0718", "label": {"selector": "#sib5", "name": "Frontend Engineer (Checkout)"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0719", "label": {"selector": "#xz72", "name": "Stelle melden"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0720", "label": {"selector": "#f7a9", "name": "Gehälter"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-15", "selector_matches": 1}
+{"id": "n1-0721", "label": {"selector": "#svow", "name": "Authentication"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0722", "label": {"selector": "#joo5", "name": "Edit this page"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0723", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": null}
+{"id": "n1-0724", "label": {"selector": "#sjca", "name": "Not helpful"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0725", "label": {"selector": "#w811", "name": "Estado del sistema"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0726", "label": {"selector": "#ys6w", "name": "Eliminar clave"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0727", "label": {"selector": "#phh9", "name": "Registro de auditoría"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0728", "label": {"selector": "#jd7m", "name": "Resumen diario"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0729", "label": {"selector": "#hl6m", "name": "Cancel order 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0730", "label": {"selector": "#tqe0", "name": "Customers"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0731", "label": {"selector": "#r0xg", "name": "Archive selected"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0732", "label": {"selector": "#qg9u", "name": "Mark 4417 as shipped"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0733", "label": {"selector": "#hcq2", "name": "Nowe posty"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0734", "label": {"selector": "#bg6u", "name": "Szukaj na forum"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0735", "label": {"selector": "#gzhj", "name": "Nowy temat"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0736", "label": {"selector": "#no3w", "name": "Ignoruj wątek"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0737", "label": {"selector": "#ytk7", "name": "Snooze"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0738", "label": {"selector": "#gsye", "name": "Reply"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0739", "label": {"selector": "#emrt", "name": "Compose"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0740", "label": {"selector": "#neza", "name": "Archive"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0741", "label": {"selector": "#nbdz", "name": "Follow this story"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0742", "label": {"selector": "#kba6", "name": "Subscribe"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0743", "label": {"selector": "#b379", "name": "Post a comment"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0744", "label": {"selector": "#qi69", "name": "Save for later"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0745", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": null}
+{"id": "n1-0746", "label": {"selector": "#sjv2", "name": "Додати готель до подорожі"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0747", "label": {"selector": "#ymrm", "name": "Стежити за цінами"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0748", "label": {"selector": "#vmgv", "name": "Обрати цей рейс"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0749", "label": {"selector": "#c788", "name": "Email me similar jobs"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0750", "label": {"selector": "#sgw4", "name": "Bookmark this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0751", "label": {"selector": "#cri4", "name": "Email this job"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0752", "label": {"selector": "#w7kw", "name": "Flag this listing"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0753", "label": {"selector": "#egdb", "name": "Utwórz zamówienie"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0754", "label": {"selector": "#f7r9", "name": "Zamówienia"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0755", "label": {"selector": "#bmrf", "name": "Wyślij przypomnienie o płatności"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0756", "label": {"selector": "#bvxu", "name": "Anuluj zamówienie 4418"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0757", "label": {"selector": "#ydgx", "name": "Per E-Mail teilen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0758", "label": {"selector": "#gswz", "name": "Sportnachrichten"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0759", "label": {"selector": "#jbrp", "name": "Nachrichten suchen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0760", "label": {"selector": "#ho6g", "name": "Korrekturen"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0761", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": null}
+{"id": "n1-0762", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": null}
+{"id": "n1-0763", "label": {"selector": "#ajcd", "name": "Results"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0764", "label": {"selector": "#b366", "name": "Reason for visit"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0765", "label": {"selector": "#yqxo", "name": "Зберегти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0766", "label": {"selector": "#pjle", "name": "Щоденний дайджест"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0767", "label": {"selector": "#rea6", "name": "Остаточно видалити простір"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0768", "label": {"selector": "#pqgc", "name": "Увімкнути двоетапний вхід"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-16", "selector_matches": 1}
+{"id": "n1-0769", "label": {"selector": "#cp9n", "name": "Відкликати ключ"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0770", "label": {"selector": "#ydni", "name": "Зберегти"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0771", "label": {"selector": "#vc1t", "name": "Створити ключ"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0772", "label": {"selector": "#fe0t", "name": "Увімкнути двоетапний вхід"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0773", "label": {"selector": "#kz3r", "name": "This is a gift"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0774", "label": {"selector": "#ax05", "name": "Add both to cart"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0775", "label": {"selector": "#j3dn", "name": "Get our emails"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0776", "label": {"selector": "#vc7b", "name": "Add to basket"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0777", "label": {"selector": "#kr8t", "name": "Select this flight"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0778", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": null}
+{"id": "n1-0779", "label": {"selector": "#xkkg", "name": "Edit search"}, "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": 1}
+{"id": "n1-0780", "label": "none", "labeler": "gemini-3.8-flash-high", "via": "agy", "batch": "batch-17", "selector_matches": null}

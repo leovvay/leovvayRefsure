@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pinecone SDK Guide · Retry policies</title>
+<style>
+body{margin:0;font-family:ui-monospace, Menlo, monospace;background:#fbfbfd;color:#1b1f24;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#0a66c2;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #0a66c2;background:#0a66c2;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#0a66c2}
+.ov .row a{color:#0a66c2;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c816">Pinecone SDK Guide</a><nav><a href="#" id="c251">Guides</a><a href="#" id="c848">API reference</a><a href="#" id="c291">Changelog</a><a href="#" id="c197">Community</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c786">My account</a></header>
+<div class="wrap">
+<main><h1>Retry policies</h1><p>A request is retried at most 6 times with exponential backoff starting at 1600 ms. Idempotent methods only.</p><ul><li>Configure the backoff ceiling</li><li>Handle rate-limit responses</li><li>Log every attempt (since v6.55)</li></ul></main>
+<aside aria-label="On this page"><h3>On this page</h3><ul><li><a href="#" id="c802">Defaults</a></li><li><a href="#" id="c426">Examples</a></li><li><a href="#" id="c650">Limits</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c525">Privacy</a><a href="#" id="c298">Terms of use</a><a href="#" id="c101">Contact</a><a href="#" id="c646">Help centre</a><a href="#" id="c257">Accessibility</a><p>© 2026 Pinecone SDK Guide. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Special offer">
+<h2>20% off your first three months</h2>
+<p>Members get early access, free delivery and priority support. Offer ends Sunday.</p>
+<div class="row"><button type="button" id="c395">Upgrade now</button>
+<button type="button" id="c427">Maybe later</button>
+<button type="button" id="c506">Start free trial</button>
+<a href="#" id="c882">See plan details</a></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

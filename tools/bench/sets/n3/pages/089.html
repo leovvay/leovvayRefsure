@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fernhollow Outfitters · Trail jackets for wet autumns</title>
+<style>
+body{margin:0;font-family:system-ui, sans-serif;background:#f7f5f0;color:#22201c;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#2f6b4f;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #2f6b4f;background:#2f6b4f;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#2f6b4f}
+.ov .row a{color:#2f6b4f;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c373">Fernhollow Outfitters</a><nav><a href="#" id="c140">New in</a><a href="#" id="c908">Women</a><a href="#" id="c900">Men</a><a href="#" id="c435">Sale</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c161">My account</a></header>
+<div class="wrap">
+<main><h1>Trail jackets for wet autumns</h1><p>Seam-sealed shells, packable layers and boots that dry overnight. Free returns within 6 days.</p><ul><li>Ridgeline shell jacket — €43</li><li>Packable down vest — €56</li><li>Waxed canvas cap — €6</li></ul></main>
+<aside aria-label="Popular this week"><h3>Popular this week</h3><ul><li><a href="#" id="c786">Merino base layers</a></li><li><a href="#" id="c579">Rain trousers</a></li><li><a href="#" id="c141">Trekking poles</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c799">Privacy</a><a href="#" id="c532">Terms of use</a><a href="#" id="c627">Contact</a><a href="#" id="c157">Help centre</a><a href="#" id="c619">Accessibility</a><p>© 2026 Fernhollow Outfitters. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Newsletter">
+<h2>Get the Sunday letter</h2>
+<p>Short, useful, no spam: our picks of the week, every Sunday morning.</p>
+<p>Choosing “Next” adds you to the mailing list straight away.</p>
+<input type="email" aria-label="Email address" autocomplete="off"><div class="row"><a href="#" id="c622">Privacy notice</a>
+<button type="button" id="c235">Next</button>
+<button type="button" id="c333">Subscribe</button>
+<button type="button" id="c494">Sign me up</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

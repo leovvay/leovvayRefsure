@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oven &amp; Orchard · Plum and almond traybake</title>
+<style>
+body{margin:0;font-family:Georgia, serif;background:#fffaf3;color:#2d2416;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#b5651d;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr 240px;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #b5651d;background:#b5651d;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#b5651d}
+.ov .row a{color:#b5651d;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c418">Oven &amp; Orchard</a><nav><a href="#" id="c603">Recipes</a><a href="#" id="c610">Seasonal</a><a href="#" id="c778">Baking</a><a href="#" id="c595">Quick dinners</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c404">My account</a></header>
+<div class="wrap">
+<main><h1>Plum and almond traybake</h1><p>Serves 7. Prep 51 minutes, bake 19 minutes. Use ripe plums so the juice runs into the sponge.</p><ul><li>200 g ground almonds</li><li>7 ripe plums, halved</li><li>150 g soft brown sugar</li></ul></main>
+<aside aria-label="You might also like"><h3>You might also like</h3><ul><li><a href="#" id="c410">Pear and ginger loaf</a></li><li><a href="#" id="c221">Apple crumble bars</a></li><li><a href="#" id="c316">Quince jelly</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c170">Privacy</a><a href="#" id="c669">Terms of use</a><a href="#" id="c302">Contact</a><a href="#" id="c994">Help centre</a><a href="#" id="c403">Accessibility</a><p>© 2026 Oven &amp; Orchard. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Privacy choices">
+<h2>Read on with cookies or a plan</h2>
+<p>To keep reading for free, we and 331 partners use cookies for advertising. You can also read without ad tracking on a paid plan.</p>
+<p>“OK” accepts all cookies, including advertising and cross-site tracking.</p>
+<div class="row"><button type="button" id="c319">Accept all</button>
+<a href="#" id="c270">Cookie settings</a>
+<button type="button" id="c640" class="q">Manage preferences</button>
+<button type="button" id="c454" class="q">OK</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

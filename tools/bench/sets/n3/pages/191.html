@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cobblestone Climbing · This week at the studio</title>
+<style>
+body{margin:0;font-family:Futura, Arial, sans-serif;background:#f4f7f7;color:#102326;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#c2185b;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #c2185b;background:#c2185b;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#c2185b}
+.ov .row a{color:#c2185b;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c944">Cobblestone Climbing</a><nav><a href="#" id="c268">Classes</a><a href="#" id="c932">Timetable</a><a href="#" id="c237">Memberships</a><a href="#" id="c535">Studios</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c498">My account</a></header>
+<div class="wrap">
+<main><h1>This week at the studio</h1><p>8 classes left on your pass. Booking opens 17 days ahead; cancel up to 46 hours before.</p><ul><li>Mon 07:00 · Mobility flow · 8 spots</li><li>Wed 18:30 · Strength basics · 17 spots</li><li>Sat 10:00 · Bouldering intro · 46 spots</li></ul></main>
+<aside aria-label="Your bookings"><h3>Your bookings</h3><ul><li><a href="#" id="c465">Tuesday spin, 19:00</a></li><li><a href="#" id="c802">Thursday yoga, 07:30</a></li><li><a href="#" id="c886">Sunday open gym</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c444">Privacy</a><a href="#" id="c970">Terms of use</a><a href="#" id="c153">Contact</a><a href="#" id="c728">Help centre</a><a href="#" id="c559">Accessibility</a><p>© 2026 Cobblestone Climbing. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Get the app">
+<h2>Cobblestone Climbing is better in the app</h2>
+<p>Faster loading, offline access and a widget for your home screen. Rated 4.8 by readers.</p>
+<p>“Got it” downloads the app installer and turns on notifications.</p>
+<div class="row"><button type="button" id="c226">Open in the app</button>
+<button type="button" id="c158">No thanks</button>
+<button type="button" id="c486">Got it</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

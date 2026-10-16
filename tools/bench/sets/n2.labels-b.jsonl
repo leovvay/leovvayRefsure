@@ -1,0 +1,600 @@
+{"id":"n2-001","label":{"selector":"#c42","name":"Confirm and send"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-002","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-003","label":{"selector":"#c54","name":"Pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-004","label":{"selector":"#c90","name":"Show all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-005","label":{"selector":"#c62","name":"Pay now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-006","label":{"selector":"#c70","name":"Post reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-007","label":{"selector":"#c88","name":"Можете телефонувати мені з пропозиціями"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-008","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-009","label":{"selector":"#c67","name":"Avisarme cuando alguien me responda"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-010","label":{"selector":"#c86","name":"Reject optional cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-011","label":{"selector":"#c86","name":"Personalised ads"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-012","label":{"selector":"#c14","name":"Save changes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-013","label":{"selector":"#c42","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-014","label":{"selector":"#c23","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-015","label":{"selector":"#c71","name":"Renombrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-016","label":{"selector":"#c43","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-017","label":{"selector":"#c58","name":"У закладки"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-018","label":{"selector":"#c27","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-019","label":{"selector":"#c92","name":"Choose"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-020","label":{"selector":"#c43","name":"Cancel room"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-021","label":{"selector":"#c60","name":"Zu Kontakten hinzufügen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-022","label":{"selector":"#c90","name":"Можете телефонувати мені з пропозиціями"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-023","label":{"selector":"#c51","name":"Zezwalam na użycie moich zanonimizowanych danych do badań"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-024","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-025","label":{"selector":"#c40","name":"Give 5.00 once"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-026","label":{"selector":"#c26","name":"Einschalten"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-027","label":{"selector":"#c82","name":"Use for automatic payments"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-028","label":{"selector":"#c79","name":"Permito usar mis datos anonimizados para investigación"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-029","label":{"selector":"#c37","name":"Перейменувати папку"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-030","label":{"selector":"#c37","name":"Personalisierte Werbung"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-031","label":{"selector":"#c80","name":"See who has access"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-032","label":{"selector":"#c18","name":"Стерти"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-033","label":{"selector":"#c13","name":"Renombrar carpeta"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-034","label":{"selector":"#c39","name":"Delete all photos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-035","label":{"selector":"#c88","name":"Переглянути квитанцію"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-036","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-037","label":{"selector":"#c49","name":"Consultar el estado"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-038","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-039","label":{"selector":"#c32","name":"Внести 5,00 один раз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-040","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-041","label":{"selector":"#c84","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-042","label":{"selector":"#c34","name":"Unieważnij token"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-043","label":{"selector":"#c31","name":"Очистити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-044","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":null}
+{"id":"n2-045","label":{"selector":"#c53","name":"Withdraw"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-046","label":{"selector":"#c79","name":"Top up 20.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-047","label":{"selector":"#c57","name":"Я погоджуюся з новими умовами"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-048","label":{"selector":"#c40","name":"Akceptuję nowy regulamin"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-049","label":{"selector":"#c31","name":"Create a passkey"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-050","label":{"selector":"#c76","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n2-051","label":{"selector":"#c83","name":"Kup teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-052","label":{"selector":"#c81","name":"Zezwalam na użycie moich zanonimizowanych danych do badań"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-053","label":{"selector":"#c17","name":"Eliminar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-054","label":{"selector":"#c22","name":"Turn on"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-055","label":{"selector":"#c42","name":"Für später merken"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-056","label":{"selector":"#c42","name":"Eliminar conversación"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-057","label":{"selector":"#c60","name":"Correos promocionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-058","label":{"selector":"#c68","name":"Вийти на всіх інших пристроях"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-059","label":{"selector":"#c32","name":"Withdraw"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-060","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-061","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-062","label":{"selector":"#c57","name":"Generate new backup codes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-063","label":{"selector":"#c49","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-064","label":{"selector":"#c47","name":"Read article"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-065","label":{"selector":"#c47","name":"Odrzuć opcjonalne pliki cookie"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-066","label":{"selector":"#c21","name":"Save for later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-067","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-068","label":{"selector":"#c99","name":"Відкликати заяву"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-069","label":{"selector":"#c16","name":"Seguir"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-070","label":{"selector":"#c21","name":"Vaciar papelera"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-071","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-072","label":{"selector":"#c58","name":"Renombrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-073","label":{"selector":"#c66","name":"Entfernen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-074","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-075","label":{"selector":"#c42","name":"Reset password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-076","label":{"selector":"#c60","name":"Vaciar papelera"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-077","label":{"selector":"#c68","name":"Перейменувати папку"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-078","label":{"selector":"#c86","name":"I allow my anonymised data to be used for research"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-079","label":{"selector":"#c14","name":"Create a passkey"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-080","label":{"selector":"#c72","name":"Allow"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-081","label":{"selector":"#c81","name":"Renew"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-082","label":{"selector":"#c52","name":"Upgrade to Premium"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-083","label":{"selector":"#c90","name":"Erase device remotely"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-084","label":{"selector":"#c16","name":"Reset password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-085","label":{"selector":"#c96","name":"Give 10.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-086","label":{"selector":"#c45","name":"Verlängern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-087","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-088","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-089","label":{"selector":"#c65","name":"Angebote per Telefon"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-090","label":{"selector":"#c74","name":"Empty"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-091","label":{"selector":"#c54","name":"Utwórz klucz dostępu"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-092","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-093","label":{"selector":"#c90","name":"Projekt löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-094","label":{"selector":"#c85","name":"Додати до контактів"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-095","label":{"selector":"#c83","name":"Zustimmen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-096","label":{"selector":"#c50","name":"Änderungen speichern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-097","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-098","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n2-099","label":{"selector":"#c59","name":"Personalisierte Werbung"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-100","label":{"selector":"#c44","name":"Підтвердити й надіслати"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":1}
+{"id":"n2-101","label":{"selector":"#c21","name":"Mitglieder"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-102","label":{"selector":"#c68","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-103","label":{"selector":"#c58","name":"Delete album"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-104","label":{"selector":"#c27","name":"Passwort zurücksetzen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-105","label":{"selector":"#c41","name":"Cancel this booking"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-106","label":{"selector":"#c66","name":"Rechazar cookies opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-107","label":{"selector":"#c60","name":"Підтвердити й надіслати"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-108","label":{"selector":"#c94","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-109","label":{"selector":"#c27","name":"Udostępniaj dane partnerom"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-110","label":{"selector":"#c77","name":"Usuń album"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-111","label":{"selector":"#c46","name":"Top up 20.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-112","label":{"selector":"#c67","name":"Place order and pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-113","label":{"selector":"#c87","name":"Увімкнути двоетапну перевірку"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-114","label":{"selector":"#c97","name":"Очистити кошик"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-115","label":{"selector":"#c97","name":"Add to contacts"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-116","label":{"selector":"#c78","name":"Turn on two-step verification"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-117","label":{"selector":"#c12","name":"Renew for one year"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-118","label":{"selector":"#c48","name":"Ver precios"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-119","label":{"selector":"#c85","name":"Delete project"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-120","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":null}
+{"id":"n2-121","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":null}
+{"id":"n2-122","label":{"selector":"#c73","name":"Powiadamiaj, gdy ktoś mi odpowie"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-123","label":{"selector":"#c87","name":"Delete account permanently"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-124","label":{"selector":"#c66","name":"Читати статтю"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-125","label":{"selector":"#c67","name":"Cancel room"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-126","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":null}
+{"id":"n2-127","label":{"selector":"#c73","name":"Allow"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-128","label":{"selector":"#c58","name":"Zobacz całą aktywność"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-129","label":{"selector":"#c48","name":"Upgrade to Premium"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-130","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":null}
+{"id":"n2-131","label":{"selector":"#c38","name":"Acepto las nuevas condiciones"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-132","label":{"selector":"#c55","name":"Увімкнути"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-133","label":{"selector":"#c15","name":"Withdraw application"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-134","label":{"selector":"#c74","name":"See who has access"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-135","label":{"selector":"#c64","name":"Delete all photos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-136","label":{"selector":"#c51","name":"Eliminar todas las fotos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-137","label":{"selector":"#c20","name":"Wycofaj wniosek"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-138","label":{"selector":"#c90","name":"20,00 aufladen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-139","label":{"selector":"#c44","name":"Antrag zurückziehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-140","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":null}
+{"id":"n2-141","label":{"selector":"#c41","name":"Delete conversation"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-142","label":{"selector":"#c41","name":"You may call me with offers"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-143","label":{"selector":"#c38","name":"Unsubscribe"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-144","label":{"selector":"#c15","name":"Änderungen speichern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-145","label":{"selector":"#c35","name":"Change password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-146","label":{"selector":"#c96","name":"Zamów i zapłać"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-147","label":{"selector":"#c57","name":"Renew"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-148","label":{"selector":"#c14","name":"Diese Buchung stornieren"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-149","label":{"selector":"#c93","name":"Regenerar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-150","label":{"selector":"#c21","name":"Cancel this booking"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-03","selector_matches":1}
+{"id":"n2-151","label":{"selector":"#c52","name":"Agree"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-152","label":{"selector":"#c52","name":"Erase device remotely"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-153","label":{"selector":"#c44","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-154","label":{"selector":"#c12","name":"Revoke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-155","label":{"selector":"#c45","name":"Delete account permanently"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-156","label":{"selector":"#c89","name":"Zurückziehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-157","label":{"selector":"#c54","name":"Delete account permanently"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-158","label":{"selector":"#c89","name":"Turn on"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-159","label":{"selector":"#c42","name":"Увійти"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-160","label":{"selector":"#c58","name":"Follow"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-161","label":{"selector":"#c41","name":"I agree to the new terms"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-162","label":{"selector":"#c87","name":"Activar la verificación en dos pasos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-163","label":{"selector":"#c95","name":"I agree to the new terms"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-164","label":{"selector":"#c38","name":"Usuń rozmowę"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-165","label":{"selector":"#c85","name":"Переглянути ціни"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-166","label":{"selector":"#c97","name":"Sehen, wer Zugriff hat"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-167","label":{"selector":"#c16","name":"Save changes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-168","label":{"selector":"#c41","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-169","label":{"selector":"#c43","name":"Zmień hasło"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-170","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-171","label":{"selector":"#c66","name":"Renew for one year"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-172","label":{"selector":"#c33","name":"Restablecer contraseña"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-173","label":{"selector":"#c44","name":"Place order and pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-174","label":{"selector":"#c97","name":"Купити зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-175","label":{"selector":"#c95","name":"Cancel this booking"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-176","label":{"selector":"#c68","name":"Read article"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-177","label":{"selector":"#c16","name":"Beleg"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-178","label":{"selector":"#c45","name":"Kaufen und bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-179","label":{"selector":"#c53","name":"Auswählen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-180","label":{"selector":"#c27","name":"Album löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-181","label":{"selector":"#c79","name":"Unterhaltung löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-182","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-183","label":{"selector":"#c80","name":"Пропозиції телефоном"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-184","label":{"selector":"#c63","name":"Give 10.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-185","label":{"selector":"#c85","name":"Anuluj pokój"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-186","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-187","label":{"selector":"#c81","name":"Персоналізована реклама"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-188","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-189","label":{"selector":"#c92","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-190","label":{"selector":"#c94","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-191","label":{"selector":"#c83","name":"Status der Anfrage prüfen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-192","label":{"selector":"#c29","name":"Revoke token"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-193","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-194","label":{"selector":"#c62","name":"Potwierdź i wyślij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-195","label":{"selector":"#c18","name":"Rename folder"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-196","label":{"selector":"#c20","name":"Permito usar mis datos anonimizados para investigación"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-197","label":{"selector":"#c97","name":"Rechnungen automatisch bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-198","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n2-199","label":{"selector":"#c18","name":"Generate new backup codes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-200","label":{"selector":"#c72","name":"Dodaj do kontaktów"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":1}
+{"id":"n2-201","label":{"selector":"#c65","name":"Generate new backup codes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-202","label":{"selector":"#c54","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-203","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-204","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-205","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-206","label":{"selector":"#c21","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-207","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-208","label":{"selector":"#c65","name":"Reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-209","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-210","label":{"selector":"#c64","name":"Vaciar papelera"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-211","label":{"selector":"#c10","name":"Renew"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-212","label":{"selector":"#c85","name":"Деталі ціни"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-213","label":{"selector":"#c51","name":"Зберегти зміни"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-214","label":{"selector":"#c27","name":"Bestätigen und senden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-215","label":{"selector":"#c54","name":"Generar nuevos códigos de respaldo"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-216","label":{"selector":"#c64","name":"Create a passkey"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-217","label":{"selector":"#c51","name":"Anmelden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-218","label":{"selector":"#c32","name":"Verlängern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-219","label":{"selector":"#c270","name":"View receipt"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":0}
+{"id":"n2-220","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-221","label":{"selector":"#c34","name":"Exigir restablecer la contraseña"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-222","label":{"selector":"#c52","name":"Pay bills automatically"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-223","label":{"selector":"#c96","name":"Renovar un año"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-224","label":{"selector":"#c58","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-225","label":{"selector":"#c17","name":"Neue Backup-Codes erzeugen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-226","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-227","label":{"selector":"#c79","name":"Видалити проєкт"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-228","label":{"selector":"#c55","name":"Usuń projekt"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-229","label":{"selector":"#c86","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-230","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-231","label":{"selector":"#c90","name":"Delete all photos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-232","label":{"selector":"#c93","name":"Продовжити на рік"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-233","label":{"selector":"#c39","name":"Share usage data with partners"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-234","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-235","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-236","label":{"selector":"#c78","name":"Unsubscribe"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-237","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-238","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n2-239","label":{"selector":"#c29","name":"Personalisierte Werbung"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-240","label":{"selector":"#c95","name":"Створити ключ доступу"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-241","label":{"selector":"#c97","name":"Sign out"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-242","label":{"selector":"#c21","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-243","label":{"selector":"#c308","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":0}
+{"id":"n2-244","label":{"selector":"#c40","name":"Utwórz klucz dostępu"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-245","label":{"selector":"#c50","name":"Kaufen und bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-246","label":{"selector":"#c38","name":"Eliminar proyecto"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-247","label":{"selector":"#c778","name":"Check request status"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":0}
+{"id":"n2-248","label":{"selector":"#c49","name":"Passwort-Reset erzwingen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-249","label":{"selector":"#c20","name":"Regenerate"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-250","label":{"selector":"#c16","name":"Confirm and send"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n2-251","label":{"selector":"#c26","name":"Give 5.00 once"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-252","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-253","label":{"selector":"#c78","name":"Вимагати скидання пароля"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-254","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-255","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-256","label":{"selector":"#c79","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-257","label":{"selector":"#c36","name":"Recargar 20,00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-258","label":{"selector":"#c33","name":"Udostępniaj dane partnerom"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-259","label":{"selector":"#c59","name":"Restablecer contraseña"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-260","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-261","label":{"selector":"#c19","name":"Wpłać jednorazowo 5,00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-262","label":{"selector":"#c95","name":"How refunds work"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-263","label":{"selector":"#c50","name":"Use for automatic payments"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-264","label":{"selector":"#c73","name":"Створити нові резервні коди"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-265","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-266","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-267","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-268","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-269","label":{"selector":"#c67","name":"Rechnungen automatisch bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-270","label":{"selector":"#c82","name":"Ver toda la actividad"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-271","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-272","label":{"selector":"#c91","name":"Przejdź na Premium"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-273","label":{"selector":"#c97","name":"Змінити пароль"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-274","label":{"selector":"#c11","name":"Use for automatic payments"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-275","label":{"selector":"#c34","name":"Renew"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-276","label":{"selector":"#c41","name":"Приєднатися"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-277","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-278","label":{"selector":"#c80","name":"Add to contacts"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-279","label":{"selector":"#c82","name":"Aceptar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-280","label":{"selector":"#c26","name":"Änderungen speichern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-281","label":{"selector":"#c16","name":"Activar la verificación en dos pasos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-282","label":{"selector":"#c98","name":"Withdraw application"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-283","label":{"selector":"#c25","name":"Auf Premium upgraden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-284","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n2-285","label":{"selector":"#c97","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-286","label":{"selector":"#c40","name":"Members"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-287","label":{"selector":"#c53","name":"Wymaż urządzenie zdalnie"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-288","label":{"selector":"#c61","name":"Withdraw"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-289","label":{"selector":"#c68","name":"Перейти на Преміум"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-290","label":{"selector":"#c99","name":"Utwórz klucz dostępu"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-291","label":{"selector":"#c60","name":"Upgrade to Premium"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-292","label":{"selector":"#c58","name":"Post reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-293","label":{"selector":"#c81","name":"Jak działają zwroty pieniędzy"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-294","label":{"selector":"#c47","name":"Promotional emails"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-295","label":{"selector":"#c64","name":"Kaufen und bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-296","label":{"selector":"#c93","name":"Verlängern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-297","label":{"selector":"#c36","name":"Correos promocionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-298","label":{"selector":"#c87","name":"Skonfiguruj"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-299","label":{"selector":"#c64","name":"Anuluj pokój"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-300","label":{"selector":"#c79","name":"Crear una llave de acceso"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n2-301","label":{"selector":"#c75","name":"Save changes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-302","label":{"selector":"#c21","name":"Personalisierte Werbung"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-303","label":{"selector":"#c40","name":"Generar nuevos códigos de respaldo"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-304","label":{"selector":"#c95","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-305","label":{"selector":"#c47","name":"Odnów"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-306","label":{"selector":"#c49","name":"Rename"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-307","label":{"selector":"#c46","name":"Generate new backup codes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-308","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-309","label":{"selector":"#c82","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-310","label":{"selector":"#c15","name":"Potwierdź i wyślij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-311","label":{"selector":"#c11","name":"You may call me with offers"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-312","label":{"selector":"#c51","name":"Bestätigung in zwei Schritten aktivieren"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-313","label":{"selector":"#c85","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-314","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-315","label":{"selector":"#c50","name":"Перейти на Преміум"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-316","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-317","label":{"selector":"#c14","name":"Donar 5,00 una vez"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-318","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-319","label":{"selector":"#c59","name":"Використовувати для реклами"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-320","label":{"selector":"#c63","name":"Zu Kontakten hinzufügen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-321","label":{"selector":"#c57","name":"Allow"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-322","label":{"selector":"#c25","name":"Activar la verificación en dos pasos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-323","label":{"selector":"#c17","name":"Bestätigung in zwei Schritten aktivieren"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-324","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-325","label":{"selector":"#c36","name":"Pay bills automatically"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-326","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-327","label":{"selector":"#c97","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-328","label":{"selector":"#c83","name":"E-maile promocyjne"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-329","label":{"selector":"#c80","name":"How refunds work"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-330","label":{"selector":"#c63","name":"Delete all photos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-331","label":{"selector":"#c46","name":"Resetuj hasło"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-332","label":{"selector":"#c45","name":"Eliminar proyecto"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-333","label":{"selector":"#c63","name":"Eliminar perfil"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-334","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-335","label":{"selector":"#c38","name":"Alle Fotos löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-336","label":{"selector":"#c66","name":"Share usage data with partners"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-337","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-338","label":{"selector":"#c19","name":"Join"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-339","label":{"selector":"#c38","name":"Einmalig 5,00 geben"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-340","label":{"selector":"#c81","name":"Cancel this booking"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-341","label":{"selector":"#c43","name":"Ungefähren Standort verwenden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-342","label":{"selector":"#c15","name":"Beleg ansehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-343","label":{"selector":"#c31","name":"Personalised ads"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-344","label":{"selector":"#c44","name":"Place order and pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-345","label":{"selector":"#c67","name":"Iniciar sesión"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-346","label":{"selector":"#c20","name":"Require a password reset"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-347","label":{"selector":"#c38","name":"Erase device remotely"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-348","label":{"selector":"#c58","name":"Зберегти на потім"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-349","label":{"selector":"#c75","name":"Як працює повернення коштів"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n2-350","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n2-351","label":{"selector":"#c61","name":"Give 10.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-352","label":{"selector":"#c23","name":"Eliminar la cuenta para siempre"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-353","label":{"selector":"#c34","name":"Mostrar todo"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-354","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n2-355","label":{"selector":"#c66","name":"Gerät aus der Ferne löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-356","label":{"selector":"#c84","name":"Compartir datos de uso con socios"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-357","label":{"selector":"#c91","name":"Сплатити зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-358","label":{"selector":"#c94","name":"Поповнити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-359","label":{"selector":"#c21","name":"Personalisierte Werbung"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-360","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n2-361","label":{"selector":"#c39","name":"Odnów na rok"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-362","label":{"selector":"#c41","name":"Members"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-363","label":{"selector":"#c36","name":"Reset password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-364","label":{"selector":"#c78","name":"Учасники"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-365","label":{"selector":"#c17","name":"Passwort ändern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-366","label":{"selector":"#c78","name":"Dodaj do kontaktów"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-367","label":{"selector":"#c85","name":"Reject optional cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-368","label":{"selector":"#c23","name":"Udostępniaj dane partnerom"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-369","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n2-370","label":{"selector":"#c48","name":"How returns work"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-371","label":{"selector":"#c36","name":""},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-372","label":{"selector":"#c88","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-373","label":{"selector":"#c17","name":""},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-374","label":{"selector":"#c93","name":"E-maile promocyjne"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-375","label":{"selector":"#c95","name":"Anuluj tę rezerwację"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-376","label":{"selector":"#c33","name":"Post reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-377","label":{"selector":"#c28","name":"Usar para pagos automáticos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-378","label":{"selector":"#c81","name":"Використовувати точну геолокацію"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-379","label":{"selector":"#c59","name":"Buy now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-380","label":{"selector":"#c41","name":"Permitir"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-381","label":{"selector":"#c37","name":"Стерти"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-382","label":{"selector":"#c19","name":"Eliminar la cuenta para siempre"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-383","label":{"selector":"#c57","name":""},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-384","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n2-385","label":{"selector":"#c62","name":"Check request status"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-386","label":{"selector":"#c75","name":"Створити нові резервні коди"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-387","label":{"selector":"#c58","name":"Follow"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-388","label":{"selector":"#c55","name":"Save"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-389","label":{"selector":"#c55","name":"Um ein Jahr verlängern"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-390","label":{"selector":"#c46","name":"Set up"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-391","label":{"selector":"#c77","name":"Spersonalizowane reklamy"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-392","label":{"selector":"#c46","name":""},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-393","label":{"selector":"#c30","name":"Delete project"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-394","label":{"selector":"#c14","name":"Gerät aus der Ferne löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-395","label":{"selector":"#c68","name":"Продовжити на рік"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-396","label":{"selector":"#c24","name":"Pay now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-397","label":{"selector":"#c90","name":"Status"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-398","label":{"selector":"#c73","name":"Anuncios personalizados"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-399","label":{"selector":"#c40","name":"Pasar a Premium"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-400","label":{"selector":"#c18","name":"Revoke token"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n2-401","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-402","label":{"selector":"#c34","name":"Give 5.00 once"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-403","label":{"selector":"#c30","name":"Можете телефонувати мені з пропозиціями"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-404","label":{"selector":"#c53","name":"Reject optional cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-405","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-406","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-407","label":{"selector":"#c70","name":"View all activity"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-408","label":{"selector":"#c99","name":"Скасувати номер"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-409","label":{"selector":"#c11","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-410","label":{"selector":"#c11","name":"Zaloguj się"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-411","label":{"selector":"#c17","name":"Realizar pedido y pagar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-412","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-413","label":{"selector":"#c70","name":"Abmelden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-414","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-415","label":{"selector":"#c18","name":"You may call me with offers"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-416","label":{"selector":"#c86","name":"Зберегти зміни"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-417","label":{"selector":"#c96","name":"Read article"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-418","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-419","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-420","label":{"selector":"#c56","name":"Turn on two-step verification"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-421","label":{"selector":"#c65","name":"Turn on"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-422","label":{"selector":"#c16","name":"Ver precios"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-423","label":{"selector":"#c30","name":"Rechazar cookies opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-424","label":{"selector":"#c97","name":"Sign out of all other devices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-425","label":{"selector":"#c68","name":"Start a 14-day trial"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-426","label":{"selector":"#c36","name":"Darse de baja"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-427","label":{"selector":"#c91","name":"Usar ubicación precisa"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-428","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-429","label":{"selector":"#c70","name":"Akceptuję nowy regulamin"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-430","label":{"selector":"#c33","name":"Alle Aktivitäten ansehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-431","label":{"selector":"#c52","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-432","label":{"selector":"#c48","name":"Give 5.00 once"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-433","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-434","label":{"selector":"#c79","name":"I agree to the new terms"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-435","label":{"selector":"#c69","name":"Utwórz klucz dostępu"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-436","label":{"selector":"#c57","name":"Choose"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-437","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-438","label":{"selector":"#c96","name":"See who has access"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-439","label":{"selector":"#c10","name":"Guardar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-440","label":{"selector":"#c24","name":"Alle Fotos löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-441","label":{"selector":"#c72","name":"Generar nuevos códigos de respaldo"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-442","label":{"selector":"#c81","name":"Zamów i zapłać"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-443","label":{"selector":"#c14","name":"Сплатити зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-444","label":{"selector":"#c50","name":"Usuń album"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-445","label":{"selector":"#c57","name":"Widerrufen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-446","label":{"selector":"#c26","name":"Eliminar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-447","label":{"selector":"#c83","name":"Erase device remotely"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-448","label":{"selector":"#c32","name":"Передавати дані партнерам"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-449","label":{"selector":"#c63","name":"Alle Aktivitäten ansehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n2-450","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n2-451","label":{"selector":"#c37","name":"Withdraw consent"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-452","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-453","label":{"selector":"#c96","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-454","label":{"selector":"#c97","name":"Видалити всі фото"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-455","label":{"selector":"#c88","name":"Учасники"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-456","label":{"selector":"#c92","name":"Pay now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-457","label":{"selector":"#c16","name":"Зберегти на потім"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-458","label":{"selector":"#c33","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-459","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-460","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-461","label":{"selector":"#c11","name":"Unieważnij token"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-462","label":{"selector":"#c13","name":"Дозволяю використовувати мої знеособлені дані для досліджень"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-463","label":{"selector":"#c80","name":"Pay now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-464","label":{"selector":"#c31","name":"Delete profile"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-465","label":{"selector":"#c74","name":"Zobacz potwierdzenie"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-466","label":{"selector":"#c82","name":"Borrar el dispositivo a distancia"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-467","label":{"selector":"#c76","name":"Show all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-468","label":{"selector":"#c56","name":"Revoke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-469","label":{"selector":"#c55","name":"Revoke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-470","label":{"selector":"#c51","name":"Unsubscribe"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-471","label":{"selector":"#c23","name":"Reset password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-472","label":{"selector":"#c68","name":"Choose"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-473","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-474","label":{"selector":"#c93","name":"I agree to the new terms"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-475","label":{"selector":"#c53","name":"Participar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-476","label":{"selector":"#c64","name":"Bookmark"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-477","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-478","label":{"selector":"#c68","name":"Regenerar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-479","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-480","label":{"selector":"#c82","name":"View receipt"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-481","label":{"selector":"#c96","name":"Antwort veröffentlichen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-482","label":{"selector":"#c91","name":"Use for automatic payments"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-483","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-484","label":{"selector":"#c43","name":"Borrar el dispositivo a distancia"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-485","label":{"selector":"#c60","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-486","label":{"selector":"#c53","name":"Зберегти"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-487","label":{"selector":"#c70","name":"Włącz weryfikację dwuetapową"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-488","label":{"selector":"#c98","name":"Eliminar la cuenta para siempre"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-489","label":{"selector":"#c25","name":"Top up 20.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-490","label":{"selector":"#c75","name":"View all activity"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-491","label":{"selector":"#c14","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-492","label":{"selector":"#c60","name":"Revoke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-493","label":{"selector":"#c65","name":"Post reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-494","label":{"selector":"#c82","name":"Dodaj do kontaktów"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-495","label":{"selector":"#c74","name":"Сплатити зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-496","label":{"selector":"#c17","name":"Usar ubicación precisa"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-497","label":{"selector":"#c26","name":"See prices"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-498","label":{"selector":"#c49","name":"Agree"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-499","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n2-500","label":{"selector":"#c13","name":"Відкликати заяву"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n2-501","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-502","label":{"selector":"#c58","name":"Share usage data with partners"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-503","label":{"selector":"#c86","name":"Reject optional cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-504","label":{"selector":"#c39","name":"Вийти"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-505","label":{"selector":"#c17","name":"Akceptuję nowy regulamin"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-506","label":{"selector":"#c66","name":"Passkey erstellen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-507","label":{"selector":"#c94","name":"Use for automatic payments"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-508","label":{"selector":"#c28","name":"Give 5.00 once"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-509","label":{"selector":"#c43","name":"Use for ads"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-510","label":{"selector":"#c31","name":"Borrar el dispositivo a distancia"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-511","label":{"selector":"#c90","name":"Passwort-Reset erzwingen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-512","label":{"selector":"#c43","name":"Generate new backup codes"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-513","label":{"selector":"#c11","name":"Opróżnij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-514","label":{"selector":"#c68","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-515","label":{"selector":"#c14","name":"Correos promocionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-516","label":{"selector":"#c87","name":"Czytaj artykuł"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-517","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-518","label":{"selector":"#c27","name":"Für automatische Zahlungen nutzen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-519","label":{"selector":"#c68","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-520","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-521","label":{"selector":"#c36","name":"Use for ads"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-522","label":{"selector":"#c52","name":"Doładuj 20,00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-523","label":{"selector":"#c96","name":"Jetzt bezahlen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-524","label":{"selector":"#c93","name":"Delete"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-525","label":{"selector":"#c24","name":"Дозволяю використовувати мої знеособлені дані для досліджень"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-526","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-527","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-528","label":{"selector":"#c84","name":"I allow my anonymised data to be used for research"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-529","label":{"selector":"#c83","name":"Use for ads"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-530","label":{"selector":"#c73","name":"Reject optional cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-531","label":{"selector":"#c25","name":"Bookmark"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-532","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-533","label":{"selector":"#c12","name":"Як працює повернення коштів"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-534","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-535","label":{"selector":"#c62","name":"Видалити проєкт"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-536","label":{"selector":"#c18","name":"Revoke token"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-537","label":{"selector":"#c90","name":"Place order and pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-538","label":{"selector":"#c10","name":"Aceptar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-539","label":{"selector":"#c81","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-540","label":{"selector":"#c89","name":"Passkey erstellen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-541","label":{"selector":"#c65","name":"Choose"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-542","label":{"selector":"#c65","name":"Erase device remotely"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-543","label":{"selector":"#c26","name":"Unterhaltung löschen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-544","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n2-545","label":{"selector":"#c93","name":"Turn on two-step verification"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-546","label":{"selector":"#c81","name":"Ofertas por teléfono"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-547","label":{"selector":"#c87","name":"Sehen, wer Zugriff hat"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-548","label":{"selector":"#c95","name":"Remove"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-549","label":{"selector":"#c37","name":"Turn on"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-550","label":{"selector":"#c38","name":"Delete all photos"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n2-551","label":{"selector":"#c95","name":"Delete conversation"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-552","label":{"selector":"#c29","name":"Rename"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-553","label":{"selector":"#c84","name":"Realizar pedido y pagar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-554","label":{"selector":"#c16","name":"Я погоджуюся з новими умовами"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-555","label":{"selector":"#c53","name":"Rename"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-556","label":{"selector":"#c92","name":"Darse de baja"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-557","label":{"selector":"#c98","name":"Alert me when someone replies to me"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-558","label":{"selector":"#c87","name":"Post reply"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-559","label":{"selector":"#c30","name":"Pay now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-560","label":{"selector":"#c10","name":"Empty trash"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-561","label":{"selector":"#c34","name":"Змінити пароль"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-562","label":{"selector":"#c68","name":"Wymuś reset hasła"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-563","label":{"selector":"#c61","name":"Usuń"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-564","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n2-565","label":{"selector":"#c55","name":"Zapłać teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-566","label":{"selector":"#c32","name":"Usuń projekt"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-567","label":{"selector":"#c83","name":"Promotional emails"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-568","label":{"selector":"#c33","name":"Use precise location"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-569","label":{"selector":"#c62","name":"Переглянути квитанцію"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-570","label":{"selector":"#c72","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-571","label":{"selector":"#c34","name":"Log in"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-572","label":{"selector":"#c66","name":"Entfernen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-573","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n2-574","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n2-575","label":{"selector":"#c37","name":"Join"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-576","label":{"selector":"#c24","name":"Delete conversation"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-577","label":{"selector":"#c42","name":"Rename folder"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-578","label":{"selector":"#c70","name":"Eliminar la cuenta para siempre"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-579","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n2-580","label":{"selector":"#c46","name":"Możecie dzwonić do mnie z ofertami"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-581","label":{"selector":"#c38","name":"I allow my anonymised data to be used for research"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-582","label":{"selector":"#c79","name":"Створити ключ доступу"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-583","label":{"selector":"#c95","name":"Delete album"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-584","label":{"selector":"#c91","name":"Usuń"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-585","label":{"selector":"#c73","name":"Zobacz ceny"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-586","label":{"selector":"#c21","name":"Зберегти зміни"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-587","label":{"selector":"#c72","name":"Відкликати"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-588","label":{"selector":"#c94","name":"Choose"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-589","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n2-590","label":{"selector":"#c81","name":"Top up 20.00"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-591","label":{"selector":"#c13","name":"Переглянути всю активність"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-592","label":{"selector":"#c14","name":"Pay"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-593","label":{"selector":"#c76","name":"Sign out"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-594","label":{"selector":"#c46","name":"Delete profile"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-595","label":{"selector":"#c77","name":"Change password"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-596","label":{"selector":"#c37","name":"Promotional emails"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-597","label":{"selector":"#c81","name":"Alle Aktivitäten ansehen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-598","label":{"selector":"#c61","name":"Status"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-599","label":{"selector":"#c16","name":"Realizar pedido y pagar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n2-600","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}

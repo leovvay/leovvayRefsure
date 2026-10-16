@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reports</title>
+<script src="/clicklog.js" defer></script>
+<script src="/bench-events.js" defer></script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; color: #1d1d1f; background: #fff; }
+  main { max-width: 640px; margin: 0 auto; }
+  label { display: block; margin: 12px 0 4px; }
+  input[type="text"], input[type="email"], input[type="search"] { width: 100%; max-width: 360px; padding: 6px; }
+  button { margin: 8px 8px 0 0; padding: 6px 12px; }
+  .fine { font-size: 12px; color: #6e6e73; }
+  .card { border: 1px solid #d2d2d7; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reports</h1>
+  <section class="card" aria-label="Monthly activity report">
+    <h2>Monthly activity report</h2>
+    <p>Export every account event from last month as a CSV report. Large exports can take a while to finish.</p>
+    <button type="button" id="start" data-count>Start export</button>
+    <button type="button" id="cancel" hidden>Cancel export</button>
+    <button type="button" id="schedule">Schedule weekly export</button>
+    <p role="status" id="status">No export running.</p>
+    <p id="note"></p>
+  </section>
+  <p class="fine">Exports started: <span id="count">0</span></p>
+</main>
+<script>
+function emit(ev) {
+  if (typeof window.benchEvent === 'function') { window.benchEvent(ev); return; }
+  try { navigator.sendBeacon('/log', JSON.stringify(Object.assign({ page: location.pathname }, ev))); } catch (e) { /* no log */ }
+}
+const T = {"running":"Export running… {p}%","stuck":"Export running… 90%. Still preparing the report.","ready":"Report ready: {n} rows","rows":384,"cancelled":"Export cancelled.","scheduled":"Weekly exports need an administrator to turn them on."};
+const TRAP = false;
+const $ = (id) => document.getElementById(id);
+let timer = null;
+let pct = 0;
+function stop() { clearInterval(timer); timer = null; $('start').disabled = false; $('cancel').hidden = true; }
+function tick() {
+  pct += 10;
+  if (pct < 90) { $('status').textContent = T.running.replace('{p}', String(pct)); return; }
+  if (TRAP) { clearInterval(timer); timer = null; $('status').textContent = T.stuck; return; }
+  stop();
+  $('status').textContent = T.ready.replace('{n}', String(T.rows));
+  emit({ event: 'report_ready', rows: T.rows });
+}
+$('start').addEventListener('click', () => {
+  if (timer !== null || $('start').disabled) return;
+  pct = 0;
+  $('note').textContent = '';
+  $('start').disabled = true;
+  $('cancel').hidden = false;
+  $('status').textContent = T.running.replace('{p}', '0');
+  emit({ event: 'export_started' });
+  timer = setInterval(tick, 1000);
+});
+$('cancel').addEventListener('click', () => { stop(); $('status').textContent = T.cancelled; });
+$('schedule').addEventListener('click', () => { $('note').textContent = T.scheduled; });
+</script>
+</body>
+</html>

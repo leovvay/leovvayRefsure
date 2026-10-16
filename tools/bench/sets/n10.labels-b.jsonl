@@ -1,0 +1,90 @@
+{"id":"n10-001","label":{"selector":"#c45","name":"Deposit refund approved"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-002","label":{"selector":"#c34","name":"Release"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-003","label":{"selector":"#c22","name":"Зробити основною"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-004","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-005","label":{"selector":"#c35","name":"Revoke"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-006","label":{"selector":"#c46","name":"Remove"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-007","label":{"selector":"#c50","name":"Delete rule"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-008","label":{"selector":"#c10","name":"Pay"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-009","label":{"selector":"#c27","name":"Überweisen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-010","label":{"selector":"#c41","name":"Replace salary account"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-011","label":{"selector":"#c33","name":"Cambiar cuenta de cobro"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-012","label":{"selector":"#c40","name":"Einreichen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-013","label":{"selector":"#c44","name":"Freeze"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-014","label":{"selector":"#c11","name":"Freeze"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-015","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-016","label":{"selector":"#c17","name":"Turn off autopay"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-017","label":{"selector":"#c33","name":"Appeal"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-018","label":{"selector":"#c32","name":"Призупинити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-019","label":{"selector":"#c35","name":"Suspend"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-020","label":{"selector":"#c12","name":"Call"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-021","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-022","label":{"selector":"#c19","name":"Notfallkontakt ändern"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-023","label":{"selector":"#c34","name":"Edit"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-024","label":{"selector":"#c25","name":"Deliver here"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-025","label":{"selector":"#c31","name":"Message"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-026","label":{"selector":"#c33","name":"Обрати"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-027","label":{"selector":"#c35","name":"Zmień adres do korespondencji"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-028","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-029","label":{"selector":"#c16","name":"Follow"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-030","label":{"selector":"#c35","name":"Approve"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"01"}
+{"id":"n10-031","label":{"selector":"#c40","name":"Not now"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-032","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-033","label":{"selector":"#c39","name":"Skip for now"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-034","label":{"selector":"#c16","name":"Ahora no"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-035","label":{"selector":"#c57","name":"Закрити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-036","label":{"selector":"#c26","name":"billing@saltmarsh.example.test"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-037","label":{"selector":"#c37","name":"Don't save"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-038","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-039","label":{"selector":"#c29","name":"Nicht jetzt"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-040","label":{"selector":"#c20","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-041","label":{"selector":"#c42","name":"Cuenta ES78 2413 5524 0418 1436 8022"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-042","label":{"selector":"#c32","name":"No thanks"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-043","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-044","label":{"selector":"#c14","name":"Nie teraz"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-045","label":{"selector":"#c47","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-046","label":{"selector":"#c18","name":"Card 4957 6330 1957 8957"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-047","label":{"selector":"#c40","name":"Не зараз"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-048","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-049","label":{"selector":"#c32","name":"Cerrar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-050","label":{"selector":"#c40","name":"+44 7700 914584"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-051","label":{"selector":"#c28","name":"+380 67 335 77 01"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-052","label":{"selector":"#c14","name":"Maybe later"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-053","label":{"selector":"#c23","name":"Keep home delivery to 14 Larch Row"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-054","label":{"selector":"#c35","name":"Закрити опитування"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-055","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-056","label":{"selector":"#c12","name":"Später"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-057","label":{"selector":"#c28","name":"Continue to seats"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-058","label":{"selector":"#c23","name":"Not now"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-059","label":{"selector":"#c50","name":"Dismiss"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-060","label":{"selector":"#c60","name":"Review later"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"02"}
+{"id":"n10-061","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-062","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-063","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-064","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-065","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-066","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-067","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-068","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-069","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-070","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-071","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-072","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-073","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-074","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-075","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-076","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-077","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-078","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-079","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-080","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-081","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-082","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-083","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-084","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-085","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-086","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-087","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-088","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-089","label":"false","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}
+{"id":"n10-090","label":"true","labeler":"gemini-3.8-flash-high","via":"agy","batch":"03"}

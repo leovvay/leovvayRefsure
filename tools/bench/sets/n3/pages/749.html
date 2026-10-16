@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stockroom Console · Zamówienia</title>
+<style>
+body{margin:0;font-family:system-ui, sans-serif;background:#f3f4f6;color:#111827;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#0f766e;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #0f766e;background:#0f766e;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#0f766e}
+.ov .row a{color:#0f766e;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c373">Stockroom Console</a><nav><a href="#" id="c295">Zamówienia</a><a href="#" id="c518">Klienci</a><a href="#" id="c324">Magazyn</a><a href="#" id="c751">Raporty</a></nav><form role="search"><input type="search" aria-label="Szukaj" placeholder="Szukaj"></form><a href="#" id="c484">Moje konto</a></header>
+<div class="wrap">
+<main><h1>Zamówienia</h1><p>Wyświetlono 4 z 2352 zamówień · filtr: czeka na wysyłkę</p><ul><li>#52441 · 3 produkty · czeka na wysyłkę</li><li>#52442 · 1 produkt · czeka na płatność</li><li>#52443 · 5 produktów · spakowane</li></ul></main>
+<aside aria-label="Filtry"><h3>Filtry</h3><ul><li><a href="#" id="c715">Status</a></li><li><a href="#" id="c527">Zakres dat</a></li><li><a href="#" id="c999">Magazyn</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c181">Prywatność</a><a href="#" id="c586">Regulamin</a><a href="#" id="c698">Kontakt</a><a href="#" id="c211">Centrum pomocy</a><a href="#" id="c126">Dostępność</a><p>© 2026 Stockroom Console. Wszelkie prawa zastrzeżone.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Oferta specjalna">
+<h2>25% taniej przez pierwsze trzy miesiące</h2>
+<p>Członkowie mają wcześniejszy dostęp, darmową dostawę i priorytetowe wsparcie. Oferta do niedzieli.</p>
+<div class="row"><a href="#" id="c387">Szczegóły planu</a>
+<button type="button" id="c619">Odbierz rabat</button>
+<button type="button" id="c926" class="q">Przeglądaj dalej</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

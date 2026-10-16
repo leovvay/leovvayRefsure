@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slate &amp; Quill Academy · Statistiques 101 · Semaine 4</title>
+<style>
+body{margin:0;font-family:Trebuchet MS, sans-serif;background:#f7f9f4;color:#1e2a1a;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#4d7c0f;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr 240px;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:0;right:0;bottom:0;border-top:3px solid #4d7c0f}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #4d7c0f;background:#4d7c0f;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#4d7c0f}
+.ov .row a{color:#4d7c0f;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c122">Slate &amp; Quill Academy</a><nav><a href="#" id="c936">Mes cours</a><a href="#" id="c137">Catalogue</a><a href="#" id="c975">Agenda</a><a href="#" id="c584">Notes</a></nav><form role="search"><input type="search" aria-label="Rechercher" placeholder="Rechercher"></form><a href="#" id="c539">Mon compte</a></header>
+<div class="wrap">
+<main><h1>Statistiques 101 · Semaine 4</h1><p>Cette semaine : échantillonnage et intervalles de confiance. Le quiz ouvre vendredi, 11 questions, 44 minutes.</p><ul><li>Cours : pourquoi les échantillons varient</li><li>Exercice : estimer une moyenne</li><li>Discussion : les sondages dans la presse</li></ul></main>
+<aside aria-label="Échéances"><h3>Échéances</h3><ul><li><a href="#" id="c645">Quiz 4 — vendredi</a></li><li><a href="#" id="c718">Brouillon de dissertation — dans 11 jours</a></li><li><a href="#" id="c238">Relecture croisée — semaine prochaine</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c377">Confidentialité</a><a href="#" id="c117">Conditions d'utilisation</a><a href="#" id="c909">Contact</a><a href="#" id="c116">Centre d'aide</a><a href="#" id="c187">Accessibilité</a><p>© 2026 Slate &amp; Quill Academy. Tous droits réservés.</p></footer>
+<section id="ov" class="ov" aria-label="Bandeau cookies">
+<h2>Votre vie privée compte</h2>
+<p>Ce site utilise des cookies. Certains sont nécessaires ; d’autres nous aident à comprendre l’usage des pages.</p>
+<p>« Ça me va » vaut accord pour tous les cookies, y compris la publicité et le pistage.</p>
+<div class="row"><button type="button" id="c846" class="q">Tout accepter</button>
+<button type="button" id="c611">Ça me va</button>
+<a href="#" id="c697">Politique de confidentialité</a></div>
+</section>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

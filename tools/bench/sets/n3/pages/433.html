@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inkwell Inbox · Recibidos (6)</title>
+<style>
+body{margin:0;font-family:Segoe UI, sans-serif;background:#f6f8fc;color:#202124;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#b0451c;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #b0451c;background:#b0451c;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#b0451c}
+.ov .row a{color:#b0451c;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c504">Inkwell Inbox</a><nav><a href="#" id="c497">Recibidos</a><a href="#" id="c320">Destacados</a><a href="#" id="c279">Enviados</a><a href="#" id="c559">Borradores</a></nav><form role="search"><input type="search" aria-label="Buscar" placeholder="Buscar"></form><a href="#" id="c588">Mi cuenta</a></header>
+<div class="wrap">
+<main><h1>Recibidos (6)</h1><p>Tienes 22 mensajes sin leer. Almacenamiento: 41 % de 15 GB.</p><ul><li>Turnos del huerto en noviembre — 09:60</li><li>Tu paquete está en reparto — 08:225</li><li>Acta de la reunión de vecinos — ayer</li></ul></main>
+<aside aria-label="Etiquetas"><h3>Etiquetas</h3><ul><li><a href="#" id="c980">Familia</a></li><li><a href="#" id="c108">Recibos</a></li><li><a href="#" id="c864">Viajes</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c923">Privacidad</a><a href="#" id="c384">Condiciones de uso</a><a href="#" id="c963">Contacto</a><a href="#" id="c636">Centro de ayuda</a><a href="#" id="c973">Accesibilidad</a><p>© 2026 Inkwell Inbox. Todos los derechos reservados.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Boletín">
+<h2>Recibe la carta del domingo</h2>
+<p>Breve, útil y sin spam: nuestra selección de la semana, cada domingo.</p>
+<p>«Siguiente» suscribe el correo de tu cuenta a la carta semanal.</p>
+<input type="email" aria-label="Correo electrónico" autocomplete="off"><div class="row"><a href="#" id="c685">Aviso de privacidad</a>
+<button type="button" id="c309" class="q">Apúntame</button>
+<button type="button" id="c599" class="q">Siguiente</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riverbend Civic Office · Apply for a residents parking permit</title>
+<style>
+body{margin:0;font-family:Arial, sans-serif;background:#ffffff;color:#0b0c0c;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#1d70b8;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #1d70b8;background:#1d70b8;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#1d70b8}
+.ov .row a{color:#1d70b8;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c640">Riverbend Civic Office</a><nav><a href="#" id="c855">Services</a><a href="#" id="c993">Waste and recycling</a><a href="#" id="c347">Parking</a><a href="#" id="c832">Council tax</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c543">My account</a></header>
+<div class="wrap">
+<main><h1>Apply for a residents parking permit</h1><p>You need your vehicle registration and proof of address dated within the last 2 months. A permit costs €27 a year.</p><ul><li>Check you are eligible</li><li>Prepare your documents</li><li>Fill in the application (about 59 minutes)</li></ul></main>
+
+</div>
+<footer><a href="#" id="c799">Privacy</a><a href="#" id="c937">Terms of use</a><a href="#" id="c780">Contact</a><a href="#" id="c902">Help centre</a><a href="#" id="c497">Accessibility</a><p>© 2026 Riverbend Civic Office. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Feedback">
+<button type="button" class="x" id="c154" aria-label="Close">×</button><h2>Help us improve Riverbend Civic Office</h2>
+<p>We are redesigning this page and would like your opinion. The survey has 6 questions.</p>
+<div class="row"><a href="#" id="c343">How we use your answers</a>
+<button type="button" id="c843">Take the survey</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

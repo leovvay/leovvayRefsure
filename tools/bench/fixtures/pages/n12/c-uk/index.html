@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Звіти</title>
+<script src="/clicklog.js" defer></script>
+<script src="/bench-events.js" defer></script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; color: #1d1d1f; background: #fff; }
+  main { max-width: 640px; margin: 0 auto; }
+  label { display: block; margin: 12px 0 4px; }
+  input[type="text"], input[type="email"], input[type="search"] { width: 100%; max-width: 360px; padding: 6px; }
+  button { margin: 8px 8px 0 0; padding: 6px 12px; }
+  .fine { font-size: 12px; color: #6e6e73; }
+  .card { border: 1px solid #d2d2d7; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Звіти</h1>
+  <section class="card" aria-label="Щомісячний звіт активності">
+    <h2>Щомісячний звіт активності</h2>
+    <p>Експортуйте всі події облікового запису за минулий місяць у звіт CSV. Великий експорт може тривати довго.</p>
+    <button type="button" id="start" data-count>Почати експорт</button>
+    <button type="button" id="cancel" hidden>Скасувати експорт</button>
+    <button type="button" id="schedule">Запланувати щотижневий експорт</button>
+    <p role="status" id="status">Експорт не запущено.</p>
+    <p id="note"></p>
+  </section>
+  <p class="fine">Запущено експортів: <span id="count">0</span></p>
+</main>
+<script>
+function emit(ev) {
+  if (typeof window.benchEvent === 'function') { window.benchEvent(ev); return; }
+  try { navigator.sendBeacon('/log', JSON.stringify(Object.assign({ page: location.pathname }, ev))); } catch (e) { /* no log */ }
+}
+const T = {"running":"Експорт триває… {p}%","stuck":"Експорт триває… 90%. Звіт ще готується.","ready":"Звіт готовий: {n} рядків","rows":216,"cancelled":"Експорт скасовано.","scheduled":"Щотижневий експорт має увімкнути адміністратор."};
+const TRAP = false;
+const $ = (id) => document.getElementById(id);
+let timer = null;
+let pct = 0;
+function stop() { clearInterval(timer); timer = null; $('start').disabled = false; $('cancel').hidden = true; }
+function tick() {
+  pct += 10;
+  if (pct < 90) { $('status').textContent = T.running.replace('{p}', String(pct)); return; }
+  if (TRAP) { clearInterval(timer); timer = null; $('status').textContent = T.stuck; return; }
+  stop();
+  $('status').textContent = T.ready.replace('{n}', String(T.rows));
+  emit({ event: 'report_ready', rows: T.rows });
+}
+$('start').addEventListener('click', () => {
+  if (timer !== null || $('start').disabled) return;
+  pct = 0;
+  $('note').textContent = '';
+  $('start').disabled = true;
+  $('cancel').hidden = false;
+  $('status').textContent = T.running.replace('{p}', '0');
+  emit({ event: 'export_started' });
+  timer = setInterval(tick, 1000);
+});
+$('cancel').addEventListener('click', () => { stop(); $('status').textContent = T.cancelled; });
+$('schedule').addEventListener('click', () => { $('note').textContent = T.scheduled; });
+</script>
+</body>
+</html>

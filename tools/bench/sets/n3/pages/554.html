@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thymewell Recipes · Pflaumen-Mandel-Blechkuchen</title>
+<style>
+body{margin:0;font-family:Georgia, serif;background:#fffaf3;color:#2d2416;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#b5651d;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr 240px;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #b5651d;background:#b5651d;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#b5651d}
+.ov .row a{color:#b5651d;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c203">Thymewell Recipes</a><nav><a href="#" id="c239">Rezepte</a><a href="#" id="c167">Saisonal</a><a href="#" id="c345">Backen</a><a href="#" id="c829">Schnelle Gerichte</a></nav><form role="search"><input type="search" aria-label="Suche" placeholder="Suche"></form><a href="#" id="c107">Mein Konto</a></header>
+<div class="wrap">
+<main><h1>Pflaumen-Mandel-Blechkuchen</h1><p>Für 5 Personen. Vorbereitung 23 Minuten, Backzeit 88 Minuten. Reife Pflaumen verwenden.</p><ul><li>200 g gemahlene Mandeln</li><li>5 reife Pflaumen, halbiert</li><li>150 g brauner Zucker</li></ul></main>
+<aside aria-label="Das könnte Ihnen gefallen"><h3>Das könnte Ihnen gefallen</h3><ul><li><a href="#" id="c498">Birnen-Ingwer-Kuchen</a></li><li><a href="#" id="c619">Apfel-Streusel-Schnitten</a></li><li><a href="#" id="c879">Quittengelee</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c701">Datenschutz</a><a href="#" id="c899">Nutzungsbedingungen</a><a href="#" id="c944">Kontakt</a><a href="#" id="c643">Hilfe</a><a href="#" id="c842">Barrierefreiheit</a><p>© 2026 Thymewell Recipes. Alle Rechte vorbehalten.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="App">
+<h2>Thymewell Recipes ist in der App besser</h2>
+<p>Öffnen Sie diese Seite in unserer App, um sie zu speichern und Updates zu erhalten.</p>
+<p>„OK“ lädt das App-Installationsprogramm und schaltet Mitteilungen ein.</p>
+<div class="row"><button type="button" id="c891">In der App öffnen</button>
+<button type="button" id="c698">Auf der Website bleiben</button>
+<button type="button" id="c743">OK</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

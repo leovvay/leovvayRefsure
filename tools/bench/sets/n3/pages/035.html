@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quillstone Goods · Kurtki na deszczową jesień</title>
+<style>
+body{margin:0;font-family:system-ui, sans-serif;background:#f7f5f0;color:#22201c;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#2f6b4f;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #2f6b4f;background:#2f6b4f;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#2f6b4f}
+.ov .row a{color:#2f6b4f;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c675">Quillstone Goods</a><nav><a href="#" id="c456">Nowości</a><a href="#" id="c930">Damskie</a><a href="#" id="c719">Męskie</a><a href="#" id="c533">Wyprzedaż</a></nav><form role="search"><input type="search" aria-label="Szukaj" placeholder="Szukaj"></form><a href="#" id="c420">Moje konto</a></header>
+<div class="wrap">
+<main><h1>Kurtki na deszczową jesień</h1><p>Klejone szwy, lekkie warstwy i buty, które schną przez noc. Zwrot w ciągu 8 dni.</p><ul><li>Kurtka Ridgeline – 49 zł</li><li>Kamizelka puchowa – 75 zł</li><li>Woskowana czapka – 8 zł</li></ul></main>
+<aside aria-label="Popularne w tym tygodniu"><h3>Popularne w tym tygodniu</h3><ul><li><a href="#" id="c670">Bielizna z merynosa</a></li><li><a href="#" id="c687">Spodnie przeciwdeszczowe</a></li><li><a href="#" id="c934">Kije trekkingowe</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c753">Prywatność</a><a href="#" id="c541">Regulamin</a><a href="#" id="c677">Kontakt</a><a href="#" id="c532">Centrum pomocy</a><a href="#" id="c683">Dostępność</a><p>© 2026 Quillstone Goods. Wszelkie prawa zastrzeżone.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Zgoda na cookies">
+<h2>Zanim przejdziesz dalej</h2>
+<p>My i nasi partnerzy (896) zapisujemy informacje na twoim urządzeniu, aby dopasować reklamy.</p>
+<p>„Brzmi dobrze” oznacza zgodę na wszystkie pliki cookies, także reklamowe.</p>
+<div class="row"><button type="button" id="c769">Brzmi dobrze</button>
+<button type="button" id="c875">Akceptuj wszystkie</button>
+<a href="#" id="c444">Ustawienia cookies</a></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

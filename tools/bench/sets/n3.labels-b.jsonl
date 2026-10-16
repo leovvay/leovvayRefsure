@@ -1,0 +1,780 @@
+{"id":"n3-001","label":{"selector":"#c294","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-002","label":{"selector":"#c898","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-003","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-004","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-005","label":{"selector":"#c684","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-006","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-007","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-008","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-009","label":{"selector":"#c926","name":"Verstanden"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-010","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-011","label":{"selector":"#c207","name":"Close"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-012","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-013","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-014","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-015","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-016","label":{"selector":"#c178","name":"Nie teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-017","label":{"selector":"#c194","name":"Non merci"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-018","label":{"selector":"#c231","name":"Rester sur le site"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-019","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-020","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-021","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-022","label":{"selector":"#c594","name":"Schließen"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-023","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-024","label":{"selector":"#c210","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-025","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-026","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-027","label":{"selector":"#c904","name":"OK"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-028","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-029","label":{"selector":"#c749","name":"Reject non-essential"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-030","label":{"selector":"#c764","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-031","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-032","label":{"selector":"#c324","name":"Відхилити необовʼязкові"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-033","label":{"selector":"#c835","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-034","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-035","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-036","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-037","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-038","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-039","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-040","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-041","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-042","label":{"selector":"#c489","name":"Keep my current plan"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-043","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-044","label":{"selector":"#c972","name":"Ні, дякую"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-045","label":{"selector":"#c233","name":"Fermer le message"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-046","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-047","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-048","label":{"selector":"#c145","name":"Cookies essentiels seulement"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-049","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-050","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-051","label":{"selector":"#c154","name":"Continue"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-052","label":{"selector":"#c971","name":"Seguir en el navegador"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-053","label":{"selector":"#c338","name":"Мене це не цікавить"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-054","label":{"selector":"#c671","name":"Fermer"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-055","label":{"selector":"#c601","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-056","label":{"selector":"#c945","name":"Tylko niezbędne"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-057","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-058","label":{"selector":"#c163","name":"No thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-059","label":{"selector":"#c902","name":"Rechazar"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-060","label":{"selector":"#c927","name":"Cerrar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-061","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-062","label":{"selector":"#c383","name":"Fermer"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-063","label":{"selector":"#c691","name":"Optionale ablehnen"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-064","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-065","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-066","label":{"selector":"#c517","name":"Nie, dziękuję"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-067","label":{"selector":"#c556","name":"Cerrar el aviso"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-068","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-069","label":{"selector":"#c490","name":"Cerrar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-070","label":{"selector":"#c908","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-071","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-072","label":{"selector":"#c203","name":"Decline"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-073","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-074","label":{"selector":"#c681","name":"Not now"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-075","label":{"selector":"#c720","name":"Schließen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-076","label":{"selector":"#c221","name":"Zamknij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-077","label":{"selector":"#c965","name":"Відхилити пропозицію"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-078","label":{"selector":"#c240","name":"No, thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-079","label":{"selector":"#c560","name":"Continuer la lecture"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-080","label":{"selector":"#c591","name":"Plus tard"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-081","label":{"selector":"#c213","name":"Nur Erforderliche"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-082","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-083","label":{"selector":"#c350","name":"Quedarme en la web"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-084","label":{"selector":"#c267","name":"No thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-085","label":{"selector":"#c705","name":"Keep browsing"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-086","label":{"selector":"#c287","name":"Залишитися на сайті"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-087","label":{"selector":"#c635","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-088","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-089","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-090","label":{"selector":"#c413","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-091","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-092","label":{"selector":"#c780","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-093","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-094","label":{"selector":"#c603","name":"Пізніше"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-095","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-096","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-097","label":{"selector":"#c970","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-098","label":{"selector":"#c105","name":"Odrzuć"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-099","label":{"selector":"#c711","name":"Auf der Website bleiben"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-100","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-101","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-102","label":{"selector":"#c474","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-103","label":{"selector":"#c745","name":"Got it"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-104","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-105","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-106","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-107","label":{"selector":"#c663","name":"Close this message"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-108","label":{"selector":"#c574","name":"Keep my current plan"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-109","label":{"selector":"#c961","name":"OK"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-110","label":{"selector":"#c828","name":"Non merci"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-111","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-112","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-113","label":{"selector":"#c481","name":"Got it"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-114","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-115","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-116","label":{"selector":"#c443","name":"Continue in the browser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-117","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-118","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-119","label":{"selector":"#c402","name":"Rechazar las opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-120","label":{"selector":"#c286","name":"Reject all"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-121","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-122","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-123","label":{"selector":"#c422","name":"Hinweis schließen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-124","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-125","label":{"selector":"#c983","name":"Rechazar todo"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-126","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-127","label":{"selector":"#c857","name":"Non merci"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-128","label":{"selector":"#c222","name":"Відхилити пропозицію"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-129","label":{"selector":"#c804","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-130","label":{"selector":"#c655","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-131","label":{"selector":"#c259","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-132","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-133","label":{"selector":"#c926","name":"Закрити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-134","label":{"selector":"#c463","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-135","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-136","label":{"selector":"#c166","name":"Залишитися на сайті"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-137","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-138","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-139","label":{"selector":"#c524","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-140","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-141","label":{"selector":"#c685","name":"Prefiero no"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-142","label":{"selector":"#c966","name":"Non merci"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-143","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-144","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-145","label":{"selector":"#c206","name":"Później"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-146","label":{"selector":"#c344","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-147","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-148","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-149","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-150","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-151","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-152","label":{"selector":"#c418","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-153","label":{"selector":"#c155","name":"Odrzuć"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-154","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-155","label":{"selector":"#c964","name":"OK"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-156","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-157","label":{"selector":"#c705","name":"I'd rather not"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-158","label":{"selector":"#c482","name":"Más tarde"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-159","label":{"selector":"#c420","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-160","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-161","label":{"selector":"#c617","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-162","label":{"selector":"#c466","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-163","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-164","label":{"selector":"#c960","name":"Continue without accepting"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-165","label":{"selector":"#c291","name":"Schließen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-166","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-167","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-168","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-169","label":{"selector":"#c675","name":"Kontynuuj"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-170","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-171","label":{"selector":"#c479","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-172","label":{"selector":"#c304","name":"Не зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-173","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-174","label":{"selector":"#c314","name":"Más tarde"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-175","label":{"selector":"#c778","name":"Cerrar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-176","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-177","label":{"selector":"#c935","name":"Continue in the browser"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-178","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-179","label":{"selector":"#c470","name":"Cerrar el aviso"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-180","label":{"selector":"#c352","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-181","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-182","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-183","label":{"selector":"#c429","name":"Закрити повідомлення"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-184","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-185","label":{"selector":"#c272","name":"Rechazar las opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-186","label":{"selector":"#c168","name":"Rechazar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-187","label":{"selector":"#c987","name":"Не зараз"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-188","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-189","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-190","label":{"selector":"#c699","name":"Reject"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-191","label":{"selector":"#c158","name":"No thanks"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-192","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-193","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-194","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-195","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-196","label":{"selector":"#c157","name":"Später"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-197","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-198","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-199","label":{"selector":"#c313","name":"OK"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-200","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-201","label":{"selector":"#c754","name":"Necessary cookies only"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-202","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-203","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-204","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-205","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-206","label":{"selector":"#c694","name":"Close"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-207","label":{"selector":"#c108","name":"Alle ablehnen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-208","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-209","label":{"selector":"#c790","name":"Solo lo imprescindible"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-210","label":{"selector":"#c926","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-211","label":{"selector":"#c787","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-212","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-213","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-214","label":{"selector":"#c434","name":"Wolę nie"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-215","label":{"selector":"#c639","name":"Decline"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-216","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-217","label":{"selector":"#c868","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-218","label":{"selector":"#c811","name":"Zamknij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-219","label":{"selector":"#c785","name":"OK"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-220","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-221","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-222","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-223","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-224","label":{"selector":"#c608","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-225","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-226","label":{"selector":"#c445","name":"Más tarde"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-227","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-228","label":{"selector":"#c884","name":"Закрити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-229","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-230","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-231","label":{"selector":"#c412","name":"No, thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-232","label":{"selector":"#c949","name":"Necessary cookies only"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-233","label":{"selector":"#c542","name":"Plus tard"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-234","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-235","label":{"selector":"#c609","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-236","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-237","label":{"selector":"#c513","name":"Fermer"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-238","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-239","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-240","label":{"selector":"#c207","name":"Tylko niezbędne"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-241","label":{"selector":"#c689","name":"Nie, dziękuję"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-242","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-243","label":{"selector":"#c734","name":"No, thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-244","label":{"selector":"#c298","name":"Відхилити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-245","label":{"selector":"#c758","name":"Reject"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-246","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-247","label":{"selector":"#c274","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-248","label":{"selector":"#c775","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-249","label":{"selector":"#c242","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-250","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-251","label":{"selector":"#c726","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-252","label":{"selector":"#c971","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-253","label":{"selector":"#c473","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-254","label":{"selector":"#c661","name":"Закрити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-255","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-256","label":{"selector":"#c575","name":"No, thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-257","label":{"selector":"#c908","name":"Necessary cookies only"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-258","label":{"selector":"#c979","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-259","label":{"selector":"#c238","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-260","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-261","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-262","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-263","label":{"selector":"#c722","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-264","label":{"selector":"#c630","name":"Non merci"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-265","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-266","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-267","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-268","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-269","label":{"selector":"#c268","name":"Ablehnen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-270","label":{"selector":"#c571","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-271","label":{"selector":"#c830","name":"Odrzuć"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-272","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-273","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-274","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-275","label":{"selector":"#c761","name":"Más tarde"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-276","label":{"selector":"#c820","name":"Продовжити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-277","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-278","label":{"selector":"#c706","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-279","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-280","label":{"selector":"#c952","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-281","label":{"selector":"#c776","name":"Decline"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-282","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-283","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-284","label":{"selector":"#c290","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-285","label":{"selector":"#c968","name":"Necessary cookies only"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-286","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-287","label":{"selector":"#c911","name":"OK"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-288","label":{"selector":"#c648","name":"Fermer"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-289","label":{"selector":"#c722","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-290","label":{"selector":"#c802","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-291","label":{"selector":"#c966","name":"Później"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-292","label":{"selector":"#c427","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-293","label":{"selector":"#c652","name":"Im Browser weiter"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-294","label":{"selector":"#c283","name":"Fermer"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-295","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-296","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-297","label":{"selector":"#c387","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-298","label":{"selector":"#c560","name":"Non merci"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-299","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-300","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-301","label":{"selector":"#c763","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-302","label":{"selector":"#c521","name":"Закрити повідомлення"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-303","label":{"selector":"#c468","name":"Not now"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-304","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-305","label":{"selector":"#c711","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-306","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-307","label":{"selector":"#c281","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-308","label":{"selector":"#c905","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-309","label":{"selector":"#c180","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-310","label":{"selector":"#c256","name":"Nie teraz"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-311","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-312","label":{"selector":"#c562","name":"Odrzuć opcjonalne"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-313","label":{"selector":"#c152","name":"Зрозуміло"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-314","label":{"selector":"#c486","name":"Decline"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-315","label":{"selector":"#c274","name":"Reject"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-316","label":{"selector":"#c675","name":"Відхилити все"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-317","label":{"selector":"#c154","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-318","label":{"selector":"#c420","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-319","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-320","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-321","label":{"selector":"#c170","name":"Відхилити все"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-322","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-323","label":{"selector":"#c817","name":"Odrzuć wszystkie"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-324","label":{"selector":"#c505","name":"Beim aktuellen Tarif bleiben"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-325","label":{"selector":"#c710","name":"Nie, dziękuję"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-326","label":{"selector":"#c640","name":"No, thanks"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-327","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-328","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-329","label":{"selector":"#c189","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-330","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-331","label":{"selector":"#c129","name":"Plus tard"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-332","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-333","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-334","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-335","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-336","label":{"selector":"#c873","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-337","label":{"selector":"#c594","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-338","label":{"selector":"#c501","name":"No, thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-339","label":{"selector":"#c880","name":"Continuer la lecture"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-340","label":{"selector":"#c338","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-341","label":{"selector":"#c850","name":"Odrzuć"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-342","label":{"selector":"#c383","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-343","label":{"selector":"#c499","name":"Cerrar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-344","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-345","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-346","label":{"selector":"#c514","name":"OK"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-347","label":{"selector":"#c656","name":"Continue without accepting"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-348","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-349","label":{"selector":"#c901","name":"Ablehnen"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-350","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-351","label":{"selector":"#c182","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-352","label":{"selector":"#c781","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-353","label":{"selector":"#c845","name":"Później"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-354","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-355","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-356","label":{"selector":"#c830","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-357","label":{"selector":"#c123","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-358","label":{"selector":"#c240","name":"Alle ablehnen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-359","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-360","label":{"selector":"#c890","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-361","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-362","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-363","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-364","label":{"selector":"#c903","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-365","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-366","label":{"selector":"#c582","name":"Później"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-367","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-368","label":{"selector":"#c837","name":"Not now"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-369","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-370","label":{"selector":"#c978","name":"Continuer"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-371","label":{"selector":"#c169","name":"Rester sur le site"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-372","label":{"selector":"#c690","name":"Fermer"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-373","label":{"selector":"#c225","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-374","label":{"selector":"#c742","name":"Continue"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-375","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-376","label":{"selector":"#c539","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-377","label":{"selector":"#c440","name":"Ні, дякую"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-378","label":{"selector":"#c926","name":"Pas intéressé"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-379","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-380","label":{"selector":"#c133","name":"Fortfahren"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-381","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-382","label":{"selector":"#c866","name":"Entendido"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-383","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-384","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-385","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-386","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-387","label":{"selector":"#c778","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-388","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-389","label":{"selector":"#c615","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-390","label":{"selector":"#c416","name":"Decline"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-391","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-392","label":{"selector":"#c902","name":"Rechazar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-393","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-394","label":{"selector":"#c866","name":"Nie teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-395","label":{"selector":"#c149","name":"Повернутися до сторінки"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-396","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-397","label":{"selector":"#c422","name":"Tout refuser"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-398","label":{"selector":"#c613","name":"Más tarde"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-399","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-02","selector_matches":null}
+{"id":"n3-400","label":{"selector":"#c855","name":"Ahora no"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-401","label":{"selector":"#c809","name":"No, thanks"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-402","label":{"selector":"#c697","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-403","label":{"selector":"#c806","name":"Nein danke"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-404","label":{"selector":"#c913","name":"Keep reading"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-405","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-406","label":{"selector":"#c792","name":"OK"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-407","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-408","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-409","label":{"selector":"#c621","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-410","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-411","label":{"selector":"#c441","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-412","label":{"selector":"#c371","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-413","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-414","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-415","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-416","label":{"selector":"#c543","name":"Reject non-essential"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-417","label":{"selector":"#c388","name":"Continue"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-418","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-419","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-420","label":{"selector":"#c941","name":"Keep my current plan"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-421","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-422","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-423","label":{"selector":"#c156","name":"Close this message"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-424","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-425","label":{"selector":"#c707","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-426","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-427","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-428","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-429","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-430","label":{"selector":"#c671","name":"Got it"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-431","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-432","label":{"selector":"#c192","name":"Stay on the website"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-433","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-434","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-435","label":{"selector":"#c559","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-436","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-437","label":{"selector":"#c773","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-438","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-439","label":{"selector":"#c572","name":"Później"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-440","label":{"selector":"#c510","name":"Закрити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-441","label":{"selector":"#c373","name":"Пізніше"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-442","label":{"selector":"#c162","name":"No, thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-443","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-444","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-445","label":{"selector":"#c928","name":"Później"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-446","label":{"selector":"#c216","name":"Ні, дякую"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-447","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-448","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-449","label":{"selector":"#c229","name":"Nie, dziękuję"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-450","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-451","label":{"selector":"#c219","name":"Refuser"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-452","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-453","label":{"selector":"#c635","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-454","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-455","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-456","label":{"selector":"#c535","name":"Close this message"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-457","label":{"selector":"#c548","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-458","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-459","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-460","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-461","label":{"selector":"#c954","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-462","label":{"selector":"#c968","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-463","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-464","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-465","label":{"selector":"#c774","name":"Ablehnen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-466","label":{"selector":"#c420","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-01","selector_matches":1}
+{"id":"n3-467","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-468","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-469","label":{"selector":"#c607","name":"Kontynuuj"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-470","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-471","label":{"selector":"#c235","name":"Non merci"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-472","label":{"selector":"#c632","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-473","label":{"selector":"#c764","name":"Rechazar todo"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-474","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-475","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-476","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-477","label":{"selector":"#c566","name":"Не зараз"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-478","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-479","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-480","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-481","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-482","label":{"selector":"#c435","name":"Odrzuć opcjonalne"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-483","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-484","label":{"selector":"#c823","name":"Rechazar las opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-485","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-486","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-487","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-488","label":{"selector":"#c318","name":"Continuer dans le navigateur"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-489","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-490","label":{"selector":"#c667","name":"Ablehnen"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-491","label":{"selector":"#c822","name":"Back to the page"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-492","label":{"selector":"#c833","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-493","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-494","label":{"selector":"#c923","name":"No thanks"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-495","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-496","label":{"selector":"#c409","name":"Back to the page"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-497","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-498","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-499","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-500","label":{"selector":"#c386","name":"Je préfère ne pas répondre"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-501","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-502","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-503","label":{"selector":"#c191","name":"Rechazar las opcionales"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-504","label":{"selector":"#c254","name":"Закрити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-505","label":{"selector":"#c383","name":"Continue"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-506","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-507","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-508","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-509","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-510","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-511","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-512","label":{"selector":"#c942","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-513","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-514","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-515","label":{"selector":"#c300","name":"Kontynuuj"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-516","label":{"selector":"#c156","name":"Ні, дякую"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-517","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-518","label":{"selector":"#c358","name":"Zamknij"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-519","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-520","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-521","label":{"selector":"#c297","name":"Maybe later"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-522","label":{"selector":"#c567","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-523","label":{"selector":"#c429","name":"Пізніше"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-524","label":{"selector":"#c821","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-525","label":{"selector":"#c496","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-526","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-527","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-528","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-529","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-530","label":{"selector":"#c794","name":"Відхилити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-531","label":{"selector":"#c383","name":"Close"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-532","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-533","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-534","label":{"selector":"#c284","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-535","label":{"selector":"#c810","name":"Schließen"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-536","label":{"selector":"#c422","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-537","label":{"selector":"#c825","name":"Відхилити"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-538","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-539","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-540","label":{"selector":"#c714","name":"No, thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-541","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-542","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-543","label":{"selector":"#c696","name":"Відхилити пропозицію"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-544","label":{"selector":"#c784","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-545","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-546","label":{"selector":"#c350","name":"Refuser les cookies facultatifs"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-547","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-548","label":{"selector":"#c100","name":"Cerrar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-549","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-550","label":{"selector":"#c621","name":"Залишити поточний план"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-551","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-552","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-553","label":{"selector":"#c669","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-554","label":{"selector":"#c698","name":"Auf der Website bleiben"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-555","label":{"selector":"#c359","name":"Not now"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-556","label":{"selector":"#c309","name":"Odrzuć opcjonalne"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-557","label":{"selector":"#c374","name":"No, gracias"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-558","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-559","label":{"selector":"#c377","name":"Retour à la page"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-560","label":{"selector":"#c886","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-561","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-562","label":{"selector":"#c386","name":"Not interested"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-563","label":{"selector":"#c405","name":"Compris"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-564","label":{"selector":"#c456","name":"Nie teraz"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-565","label":{"selector":"#c322","name":"Закрити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-566","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-567","label":{"selector":"#c540","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-568","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-569","label":{"selector":"#c747","name":"Зрозуміло"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-570","label":{"selector":"#c238","name":"Close this message"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-571","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-572","label":{"selector":"#c428","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-573","label":{"selector":"#c174","name":"Ні, дякую"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-574","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-575","label":{"selector":"#c585","name":"Zamknij komunikat"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-576","label":{"selector":"#c738","name":"Refuser les cookies facultatifs"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-577","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-578","label":{"selector":"#c148","name":"Use essential cookies only"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-579","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-580","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-581","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-582","label":{"selector":"#c759","name":"Reject non-essential"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-583","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-584","label":{"selector":"#c595","name":"No, gracias"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-585","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-586","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-587","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-588","label":{"selector":"#c771","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-589","label":{"selector":"#c628","name":"Schließen"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-590","label":{"selector":"#c848","name":"Reject"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-591","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-592","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-593","label":{"selector":"#c118","name":"Пізніше"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-594","label":{"selector":"#c631","name":"Nur Erforderliche"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-595","label":{"selector":"#c773","name":"Got it"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-596","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-597","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-598","label":{"selector":"#c460","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-599","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-600","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-601","label":{"selector":"#c884","name":"Refuser"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-602","label":{"selector":"#c459","name":"Лише необхідні"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-603","label":{"selector":"#c194","name":"Відхилити необовʼязкові"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-604","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-605","label":{"selector":"#c988","name":"Не зараз"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-606","label":{"selector":"#c723","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-607","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-608","label":{"selector":"#c403","name":"Ні, дякую"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-609","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-610","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-611","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-612","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-613","label":{"selector":"#c469","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-614","label":{"selector":"#c526","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-615","label":{"selector":"#c732","name":"Залишити поточний план"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-616","label":{"selector":"#c743","name":"Ні, дякую"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-617","label":{"selector":"#c106","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-618","label":{"selector":"#c222","name":"Pas maintenant"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-619","label":{"selector":"#c875","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-620","label":{"selector":"#c705","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-621","label":{"selector":"#c545","name":"Non merci"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-622","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-623","label":{"selector":"#c335","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-624","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-625","label":{"selector":"#c973","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-626","label":{"selector":"#c302","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-627","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-628","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-629","label":{"selector":"#c905","name":"Nein danke"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-630","label":{"selector":"#c758","name":"Continue"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-631","label":{"selector":"#c911","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-632","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-633","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-634","label":{"selector":"#c806","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-635","label":{"selector":"#c992","name":"Decline"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-636","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-637","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-638","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-639","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-640","label":{"selector":"#c227","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-641","label":{"selector":"#c326","name":"Reject"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-642","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-643","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-644","label":{"selector":"#c120","name":"Use essential cookies only"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-645","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-646","label":{"selector":"#c656","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-647","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-648","label":{"selector":"#c415","name":"Keep browsing"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-649","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-650","label":{"selector":"#c702","name":"Reject all"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-651","label":{"selector":"#c986","name":"Не зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-652","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-653","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-654","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-655","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-656","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-657","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-658","label":{"selector":"#c675","name":"Тільки обовʼязкові файли cookie"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-659","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-660","label":{"selector":"#c407","name":"Usar solo cookies esenciales"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-661","label":{"selector":"#c244","name":"Закрити"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-662","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-663","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-664","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-665","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-666","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-667","label":{"selector":"#c476","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-668","label":{"selector":"#c960","name":"Зрозуміло"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-669","label":{"selector":"#c548","name":"Nie, dziękuję"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-670","label":{"selector":"#c378","name":"Close"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-671","label":{"selector":"#c295","name":"No, thanks"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-672","label":{"selector":"#c307","name":"Nie teraz"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-673","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-674","label":{"selector":"#c294","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-675","label":{"selector":"#c493","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-676","label":{"selector":"#c724","name":"Nicht jetzt"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-677","label":{"selector":"#c599","name":"Закрити повідомлення"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-678","label":{"selector":"#c372","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-679","label":{"selector":"#c973","name":"No, gracias"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-680","label":{"selector":"#c944","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-681","label":{"selector":"#c945","name":"Rechazar todo"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-682","label":{"selector":"#c305","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-683","label":{"selector":"#c577","name":"Ablehnen"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-684","label":{"selector":"#c833","name":"Vale"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-685","label":{"selector":"#c165","name":"Más tarde"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-686","label":{"selector":"#c550","name":"Close this message"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-687","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-04","selector_matches":null}
+{"id":"n3-688","label":{"selector":"#c385","name":"Zamknij"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-689","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-690","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-691","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-692","label":{"selector":"#c428","name":"Continue"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-693","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-694","label":{"selector":"#c752","name":"Lieber nicht"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":1}
+{"id":"n3-695","label":{"selector":"#c138","name":"Maybe later"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-696","label":{"selector":"#c594","name":"Weiter stöbern"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-697","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-698","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":null}
+{"id":"n3-699","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-700","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":null}
+{"id":"n3-701","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-702","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-703","label":{"selector":"#c303","name":"Później"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-704","label":{"selector":"#c856","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-11","selector_matches":1}
+{"id":"n3-705","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-706","label":{"selector":"#c306","name":"No, gracias"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-707","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-708","label":{"selector":"#c259","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-709","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-710","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-711","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-712","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-713","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-714","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":null}
+{"id":"n3-715","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-716","label":{"selector":"#c907","name":"Продовжити"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-717","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-718","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-719","label":{"selector":"#c704","name":"Decline"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-720","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-721","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-722","label":{"selector":"#c525","name":"Не зараз"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-723","label":{"selector":"#c987","name":"Close"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-724","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":null}
+{"id":"n3-725","label":{"selector":"#c697","name":"OK"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-726","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":null}
+{"id":"n3-727","label":{"selector":"#c578","name":"Reject"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-05","selector_matches":1}
+{"id":"n3-728","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-729","label":{"selector":"#c111","name":"Cerrar"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-730","label":{"selector":"#c997","name":"Nein danke"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-731","label":{"selector":"#c619","name":"Optionale ablehnen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-732","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-733","label":{"selector":"#c150","name":"Plus tard"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-734","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":null}
+{"id":"n3-735","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-736","label":{"selector":"#c405","name":"Cerrar"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-737","label":{"selector":"#c173","name":"Гаразд"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-738","label":{"selector":"#c886","name":"Odrzuć"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":1}
+{"id":"n3-739","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":null}
+{"id":"n3-740","label":{"selector":"#c927","name":"Pas maintenant"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-14","selector_matches":1}
+{"id":"n3-741","label":{"selector":"#c762","name":"Continuer la lecture"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":1}
+{"id":"n3-742","label":{"selector":"#c958","name":"Close"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-743","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-744","label":{"selector":"#c582","name":"Продовжити без згоди"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-745","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":null}
+{"id":"n3-746","label":{"selector":"#c911","name":"Odrzuć"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":1}
+{"id":"n3-747","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-748","label":{"selector":"#c903","name":"Nur notwendige Cookies"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-749","label":{"selector":"#c926","name":"Przeglądaj dalej"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-750","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-751","label":{"selector":"#c820","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-752","label":{"selector":"#c646","name":"Zamknij"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-753","label":{"selector":"#c538","name":"Зрозуміло"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":1}
+{"id":"n3-754","label":{"selector":"#c450","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-755","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-756","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-757","label":{"selector":"#c772","name":"Schließen"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-07","selector_matches":1}
+{"id":"n3-758","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-759","label":{"selector":"#c808","name":"Odrzuć"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-06","selector_matches":1}
+{"id":"n3-760","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-761","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-09","selector_matches":null}
+{"id":"n3-762","label":{"selector":"#c962","name":"Schließen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-763","label":{"selector":"#c999","name":"×"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-764","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-765","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-766","label":{"selector":"#c906","name":"×"},"ambiguous":true,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":1}
+{"id":"n3-767","label":{"selector":"#c998","name":"Продовжити без згоди"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","selector_matches":1}
+{"id":"n3-768","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-13","selector_matches":null}
+{"id":"n3-769","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-770","label":{"selector":"#c567","name":"Später"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}
+{"id":"n3-771","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","selector_matches":null}
+{"id":"n3-772","label":{"selector":"#c208","name":"Ahora no"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","selector_matches":1}
+{"id":"n3-773","label":{"selector":"#c602","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-10","selector_matches":1}
+{"id":"n3-774","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","selector_matches":null}
+{"id":"n3-775","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-08","selector_matches":null}
+{"id":"n3-776","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-15","selector_matches":null}
+{"id":"n3-777","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":null}
+{"id":"n3-778","label":"none","ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":null}
+{"id":"n3-779","label":{"selector":"#c816","name":"No thanks"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-16","selector_matches":1}
+{"id":"n3-780","label":{"selector":"#c548","name":"Odrzuć ofertę"},"ambiguous":false,"labeler":"google/gemini-3.1-pro-preview","via":"openrouter","batch":"batch-12","selector_matches":1}

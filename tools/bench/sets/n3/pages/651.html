@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quillstone Goods · Куртки для дощової осені</title>
+<style>
+body{margin:0;font-family:system-ui, sans-serif;background:#f7f5f0;color:#22201c;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#2f6b4f;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:0;right:0;bottom:0;border-top:3px solid #2f6b4f}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #2f6b4f;background:#2f6b4f;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#2f6b4f}
+.ov .row a{color:#2f6b4f;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c229">Quillstone Goods</a><nav><a href="#" id="c711">Новинки</a><a href="#" id="c197">Жінкам</a><a href="#" id="c402">Чоловікам</a><a href="#" id="c966">Розпродаж</a></nav><form role="search"><input type="search" aria-label="Пошук" placeholder="Пошук"></form><a href="#" id="c484">Мій кабінет</a></header>
+<div class="wrap">
+<main><h1>Куртки для дощової осені</h1><p>Мембранні куртки, легкі утеплювачі та черевики, що висихають за ніч. Повернення протягом 7 днів.</p><ul><li>Куртка Ridgeline — 44 грн</li><li>Пуховий жилет — 72 грн</li><li>Вощена кепка — 7 грн</li></ul></main>
+<aside aria-label="Популярне цього тижня"><h3>Популярне цього тижня</h3><ul><li><a href="#" id="c707">Термобілизна з мериносу</a></li><li><a href="#" id="c238">Дощові штани</a></li><li><a href="#" id="c667">Трекінгові палиці</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c727">Конфіденційність</a><a href="#" id="c473">Умови використання</a><a href="#" id="c283">Контакти</a><a href="#" id="c275">Довідка</a><a href="#" id="c335">Доступність</a><p>© 2026 Quillstone Goods. Усі права захищено.</p></footer>
+<section id="ov" class="ov" aria-label="Повідомлення про файли cookie">
+<h2>Ми цінуємо вашу приватність</h2>
+<p>Ми використовуємо файли cookie, щоб сайт працював, а з вашого дозволу — для статистики й реклами.</p>
+<p>«Зрозуміло» означає згоду на всі файли cookie, зокрема рекламні.</p>
+<div class="row"><button type="button" id="c986">Не зараз</button>
+<button type="button" id="c426">Зрозуміло</button>
+<button type="button" id="c965">Керувати параметрами</button>
+<button type="button" id="c760">Прийняти все</button></div>
+</section>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

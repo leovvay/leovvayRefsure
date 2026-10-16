@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harrowgate Mutual · Guten Morgen</title>
+<style>
+body{margin:0;font-family:Inter, Arial, sans-serif;background:#eef2f6;color:#14202e;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#1d4e89;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #1d4e89;background:#1d4e89;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#1d4e89}
+.ov .row a{color:#1d4e89;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c650">Harrowgate Mutual</a><nav><a href="#" id="c409">Konten</a><a href="#" id="c195">Zahlungen</a><a href="#" id="c187">Karten</a><a href="#" id="c845">Sparen</a></nav><form role="search"><input type="search" aria-label="Suche" placeholder="Suche"></form><a href="#" id="c511">Mein Konto</a></header>
+<div class="wrap">
+<main><h1>Guten Morgen</h1><p>Girokonto mit Endung 713: verfügbarer Saldo 31.700 €.</p><ul><li>Kartenzahlung, Lebensmittel – 7,40 €</li><li>Übertrag aufs Sparkonto – 13,00 €</li><li>Gehaltseingang – 310,00 €</li></ul></main>
+<aside aria-label="Schnellzugriff"><h3>Schnellzugriff</h3><ul><li><a href="#" id="c620">Karte sperren</a></li><li><a href="#" id="c635">Kontoauszug laden</a></li><li><a href="#" id="c608">Dauerauftrag anlegen</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c853">Datenschutz</a><a href="#" id="c890">Nutzungsbedingungen</a><a href="#" id="c256">Kontakt</a><a href="#" id="c241">Hilfe</a><a href="#" id="c900">Barrierefreiheit</a><p>© 2026 Harrowgate Mutual. Alle Rechte vorbehalten.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Newsletter">
+<h2>Der Sonntagsbrief</h2>
+<p>Kurz, nützlich, ohne Spam: unsere Auswahl der Woche, jeden Sonntagmorgen.</p>
+<p>„Weiter“ meldet die E-Mail-Adresse Ihres Kontos für den Wochenbrief an.</p>
+<input type="email" aria-label="E-Mail-Adresse" autocomplete="off"><div class="row"><a href="#" id="c445">Datenschutzhinweis</a>
+<button type="button" id="c878" class="q">Ich will ihn haben</button>
+<button type="button" id="c655" class="q">Weiter</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

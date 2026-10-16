@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Довідковий центр</title>
+<script src="/clicklog.js" defer></script>
+<script src="/bench-events.js" defer></script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; color: #1d1d1f; background: #fff; }
+  main { max-width: 640px; margin: 0 auto; }
+  label { display: block; margin: 12px 0 4px; }
+  input[type="text"], input[type="email"], input[type="search"] { width: 100%; max-width: 360px; padding: 6px; }
+  button { margin: 8px 8px 0 0; padding: 6px 12px; }
+  .fine { font-size: 12px; color: #6e6e73; }
+  .card { border: 1px solid #d2d2d7; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+  [role="dialog"] { position: fixed; left: 0; right: 0; bottom: 0; background: #222; color: #fff; padding: 16px 24px; }
+  [role="dialog"] p { margin: 0 0 8px; }
+  ul.list { padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Довідковий центр</h1>
+  <p>Інструкції про оплату, облікові записи та звіти.</p>
+  <form aria-label="Пошук у довідці" id="search">
+    <label for="q">Пошук статей довідки</label>
+    <input type="search" id="q" name="q" autocomplete="off">
+    <button type="submit">Шукати</button>
+  </form>
+  <div id="results"></div>
+  <h2>Популярні статті</h2>
+  <ul class="list">
+    <li>Створити рахунок із пропозиції</li>
+    <li>Змінити пароль</li>
+    <li>Експорт щомісячного звіту активності</li>
+  </ul>
+</main>
+<div role="dialog" aria-label="Згода на файли cookie" id="banner">
+  <p>Ми використовуємо файли cookie, щоб ви залишалися в системі, і щоб розуміти, як користуються довідкою.</p>
+  <button type="button">Прийняти все</button>
+  <button type="button">Відхилити все</button>
+  <button type="button">Налаштування</button>
+</div>
+<script>
+function emit(ev) {
+  if (typeof window.benchEvent === 'function') { window.benchEvent(ev); return; }
+  try { navigator.sendBeacon('/log', JSON.stringify(Object.assign({ page: location.pathname }, ev))); } catch (e) { /* no log */ }
+}
+const ARTICLES = ["Створити рахунок із пропозиції","Надіслати рахунок електронною поштою","Як нумерується рахунок","Позначити рахунок як оплачений","Повторюваний рахунок за розкладом","Завантажити рахунки у PDF","Виправлення рахунку","Змінити пароль","Додати учасника команди","Експорт щомісячного звіту активності","Налаштувати часовий пояс","Підключити банківську виписку","Закрити розрахунковий період","Двоетапний вхід"];
+function resultText(n, q) {
+  const m10 = n % 10, m100 = n % 100;
+  const w = (m10 === 1 && m100 !== 11) ? 'результат' : (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) ? 'результати' : 'результатів';
+  if (n === 0) return 'Немає результатів за запитом «' + q + '»';
+  return 'Знайдено ' + n + ' ' + w + ' за запитом «' + q + '»';
+}
+document.getElementById('banner').addEventListener('click', (e) => {
+  if (e.target.closest('button')) document.getElementById('banner').remove();
+});
+document.getElementById('search').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = String(new FormData(e.target).get('q') || '').trim();
+  const needle = q.toLocaleLowerCase('uk');
+  const hits = needle ? ARTICLES.filter((a) => a.toLocaleLowerCase('uk').includes(needle)) : [];
+  const status = document.createElement('p');
+  status.setAttribute('role', 'status');
+  status.textContent = resultText(hits.length, q);
+  const list = document.createElement('ul');
+  list.className = 'list';
+  for (const h of hits) { const li = document.createElement('li'); li.textContent = h; list.appendChild(li); }
+  document.getElementById('results').replaceChildren(status, list);
+  emit({ event: 'search', q, results: hits.length });
+});
+</script>
+</body>
+</html>

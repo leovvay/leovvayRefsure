@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foxglove Play · Saltwater Lanterns — season 4</title>
+<style>
+body{margin:0;font-family:Helvetica, Arial, sans-serif;background:#141414;color:#f2f2f2;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#d0342c;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+main ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}main li{border:1px solid rgba(127,127,127,.3);padding:12px;border-radius:8px}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #d0342c;background:#d0342c;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#d0342c}
+.ov .row a{color:#d0342c;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c880">Foxglove Play</a><nav><a href="#" id="c877">Home</a><a href="#" id="c355">Series</a><a href="#" id="c341">Films</a><a href="#" id="c495">My list</a></nav><form role="search"><input type="search" aria-label="Search" placeholder="Search"></form><a href="#" id="c246">My account</a></header>
+<div class="wrap">
+<main><h1>Saltwater Lanterns — season 4</h1><p>38 episodes · drama · a lighthouse keeper finds letters that were never sent.</p><ul><li>Episode 1 · The quiet tide · 40 min</li><li>Episode 2 · Paper boats · 38 min</li><li>Episode 3 · Fog signal · 40 min</li></ul></main>
+<aside aria-label="Continue watching"><h3>Continue watching</h3><ul><li><a href="#" id="c146">The orchard case</a></li><li><a href="#" id="c951">Low road north</a></li><li><a href="#" id="c727">Glass harbour</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c620">Privacy</a><a href="#" id="c805">Terms of use</a><a href="#" id="c413">Contact</a><a href="#" id="c801">Help centre</a><a href="#" id="c683">Accessibility</a><p>© 2026 Foxglove Play. All rights reserved.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Special offer">
+<button type="button" class="x" id="c732" aria-label="Close">×</button><h2>20% off your first three months</h2>
+<p>Try the Plus plan: more storage, no ads and offline access. The price returns to normal after three months.</p>
+<p>With “Next” the offer is applied and your plan changes from the next bill.</p>
+<div class="row"><button type="button" id="c103" class="q">Start free trial</button>
+<button type="button" id="c155">Upgrade now</button>
+<button type="button" id="c281" class="q">Claim my discount</button>
+<button type="button" id="c776">Decline</button>
+<button type="button" id="c849">Next</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

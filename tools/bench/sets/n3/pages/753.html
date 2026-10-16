@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lanternfish Reference · Політики повторних спроб</title>
+<style>
+body{margin:0;font-family:ui-monospace, Menlo, monospace;background:#fbfbfd;color:#1b1f24;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#0a66c2;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:220px 1fr;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+aside{order:-1}
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:0;right:0;bottom:0;border-top:3px solid #0a66c2}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #0a66c2;background:#0a66c2;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#0a66c2}
+.ov .row a{color:#0a66c2;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c104">Lanternfish Reference</a><nav><a href="#" id="c225">Посібники</a><a href="#" id="c373">Довідник API</a><a href="#" id="c722">Зміни</a><a href="#" id="c802">Спільнота</a></nav><form role="search"><input type="search" aria-label="Пошук" placeholder="Пошук"></form><a href="#" id="c732">Мій кабінет</a></header>
+<div class="wrap">
+<main><h1>Політики повторних спроб</h1><p>Запит повторюється не більше 2 разів з експоненційною затримкою від 1100 мс. Лише ідемпотентні методи.</p><ul><li>Налаштуйте стелю затримки</li><li>Обробляйте відповіді про ліміт</li><li>Журнал кожної спроби (з v2.21)</li></ul></main>
+<aside aria-label="На цій сторінці"><h3>На цій сторінці</h3><ul><li><a href="#" id="c274">Типові значення</a></li><li><a href="#" id="c682">Приклади</a></li><li><a href="#" id="c888">Обмеження</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c692">Конфіденційність</a><a href="#" id="c690">Умови використання</a><a href="#" id="c973">Контакти</a><a href="#" id="c880">Довідка</a><a href="#" id="c832">Доступність</a><p>© 2026 Lanternfish Reference. Усі права захищено.</p></footer>
+<section id="ov" class="ov" aria-label="Повідомлення про файли cookie">
+<h2>Ми цінуємо вашу приватність</h2>
+<p>Ми використовуємо файли cookie, щоб сайт працював, а з вашого дозволу — для статистики й реклами.</p>
+<p>«Зрозуміло» залишає лише необхідні файли cookie й закриває це повідомлення.</p>
+<div class="row"><button type="button" id="c538" class="q">Зрозуміло</button>
+<a href="#" id="c753">Наші партнери</a>
+<button type="button" id="c498" class="q">Прийняти все</button></div>
+</section>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allotment Commons · Kette springt auf dem kleinsten Ritzel</title>
+<style>
+body{margin:0;font-family:Tahoma, sans-serif;background:#f5f6f7;color:#1f2328;line-height:1.5}
+header{display:flex;gap:18px;align-items:center;padding:12px 24px;border-bottom:1px solid rgba(127,127,127,.3)}
+header .brand{font-weight:700;color:#c4581b;text-decoration:none;margin-right:auto}
+nav a,footer a,aside a{color:inherit;margin-right:14px;text-decoration:none}
+header input{padding:6px 8px;border:1px solid rgba(127,127,127,.5);border-radius:4px}
+.wrap{display:grid;grid-template-columns:1fr 240px;gap:28px;max-width:1080px;margin:0 auto;padding:24px}
+
+footer{border-top:1px solid rgba(127,127,127,.3);padding:16px 24px;font-size:.85rem;opacity:.85}
+.ov{font-family:system-ui,sans-serif;background:#fff;color:#1b1b1b;padding:18px 22px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:10}
+.ov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,90vw);border-radius:10px}.veil{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9}
+.ov h2{margin:0 0 8px;font-size:1.15rem}.ov p{margin:0 0 10px;font-size:.95rem}.ov .x{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer}
+.ov .row button,.ov .row a{display:inline-block;margin:4px 8px 4px 0;padding:8px 14px;font:inherit;border-radius:6px}
+.ov .row button{border:1px solid #c4581b;background:#c4581b;color:#fff;cursor:pointer}.ov .row button.q{background:#fff;color:#c4581b}
+.ov .row a{color:#c4581b;padding-left:0}.ov input{display:block;width:100%;box-sizing:border-box;padding:8px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#" id="c195">Allotment Commons</a><nav><a href="#" id="c131">Neueste</a><a href="#" id="c728">Kategorien</a><a href="#" id="c813">Top</a><a href="#" id="c272">Mitglieder</a></nav><form role="search"><input type="search" aria-label="Suche" placeholder="Suche"></form><a href="#" id="c828">Mein Konto</a></header>
+<div class="wrap">
+<main><h1>Kette springt auf dem kleinsten Ritzel</h1><p>Erstellt vor 5 Tagen · 41 Antworten · 71 Aufrufe</p><ul><li>Zuerst die B-Schraube prüfen</li><li>Kette verschlissen? Mit Lehre messen</li><li>Bei mir war das Schaltauge verbogen</li></ul></main>
+<aside aria-label="Forenregeln"><h3>Forenregeln</h3><ul><li><a href="#" id="c578">Freundlich bleiben</a></li><li><a href="#" id="c407">Erst suchen, dann posten</a></li><li><a href="#" id="c880">Keine Verkaufsthreads</a></li></ul></aside>
+</div>
+<footer><a href="#" id="c418">Datenschutz</a><a href="#" id="c397">Nutzungsbedingungen</a><a href="#" id="c913">Kontakt</a><a href="#" id="c337">Hilfe</a><a href="#" id="c404">Barrierefreiheit</a><p>© 2026 Allotment Commons. Alle Rechte vorbehalten.</p></footer>
+<div class="veil"></div>
+<div id="ov" class="ov" role="dialog" aria-modal="true" aria-label="Cookie-Einwilligung">
+<h2>Bevor Sie fortfahren</h2>
+<p>Wir und unsere 368 Partner speichern Informationen auf Ihrem Gerät, um Werbung zu personalisieren.</p>
+<div class="row"><button type="button" id="c726">Alle akzeptieren</button>
+<button type="button" id="c144" class="q">Einstellungen verwalten</button>
+<button type="button" id="c903" class="q">Nur notwendige Cookies</button></div>
+</div>
+<script>
+(function(){var ov=document.getElementById('ov');ov.addEventListener('click',function(e){var c=e.target.closest('button,a');if(!c)return;e.preventDefault();
+document.body.setAttribute('data-clicked',(c.getAttribute('aria-label')||c.textContent).trim());ov.remove();var v=document.querySelector('.veil');if(v)v.remove();});})();
+</script>
+</body>
+</html>
