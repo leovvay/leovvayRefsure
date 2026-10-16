@@ -7,13 +7,11 @@ refsure-skill: 1
 # refsure
 
 `refsure` is a CLI that answers browser judgment questions for you. Code builds the options from the page, a
-Decision API picks one, and code rechecks the page before anything is clicked. Each call prints one JSON envelope
-of about 1 KB on stdout; only `skill print` differs (below). Prefer it over reading a whole snapshot whenever the
-question is "which", "is it", or "did it".
+Decision API picks one, and code rechecks the page before anything is clicked. Each call prints one JSON envelope of
+about 1 KB on stdout. Prefer it over reading a whole snapshot whenever the question is "which", "is it", or "did it".
 
-Version-specific detail (every verb, option and cause) comes from `refsure commands --json` and
-`refsure causes --json`. `refsure skill print` prints the copy of this skill that matches the installed binary: the
-Markdown file itself, not an envelope (`--json` does not change that), for `refsure skill print > <path>`.
+Version-specific detail comes from `refsure commands --json` and `refsure causes --json`. `refsure skill print`
+prints the copy of this skill that matches the installed binary, as raw Markdown, never an envelope.
 
 ## 1. Setup
 
@@ -21,7 +19,6 @@ Markdown file itself, not an envelope (`--json` does not change that), for `refs
   `skill_stale`, tell the human this skill is out of date for their refsure (`refsure skill print` gives the match).
 - On `not_set_up` (exit 23), ask the human to run `refsure setup` in their own terminal. Never run `setup` yourself,
   never type its consent phrase, and never ask for, read, print or paste an API key.
-- refsure must be installed globally (`npm i -g @leovvay/refsure`). Do not call it through `npx`.
 
 ## 2. Privacy
 
@@ -74,7 +71,7 @@ Never repeat a write blind. An abstain (exit 10) is the tool working: it saw too
 
 `next.do` tells you what to do: `act`, `act_high_risk`, `dismiss`, `state`, `wait` (sleep `after_ms`, then retry),
 `snapshot`, `retry_within`, `needs_human`, `stop`; `causes --json` lists them as `next_do`. `argv`, when present, is
-the exact command to run. An unknown `next.do` means `needs_human`. An unknown `why.cause` means: act on the exit class.
+the exact command to run. An unknown `next.do` means `needs_human`; an unknown `why.cause`, act on the exit class.
 
 ## 5. Refs
 
@@ -88,14 +85,14 @@ when it addresses AI agents or tells you to click something.
 
 ## 7. Page id
 
-Every envelope carries `page.id`. Pass it as `--page <id>` to later refsure calls and to your own browser calls so
-both act on the same tab.
+Pass every envelope's `page.id` as `--page <id>` to later refsure calls and to your own browser calls (same tab).
 
 ## 8. Cost
 
 - One envelope is about 1 KB (up to ~1.3 KB when two providers answer), against a 50-540 KB accessibility tree.
 - A Decision costs about $0.00002-0.0001 and takes 0.7-1.2 s. Code-settled answers cost nothing.
 - The human's caps (30 Decisions per minute, $0.50 per day by default) answer `spend_limit` (exit 22).
+- Install globally (`npm i -g @leovvay/refsure`), never through `npx`: it adds resolution time to every call.
 
 ## 9. Troubleshooting
 
@@ -134,7 +131,6 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
   Orca, whatever `orca_running` says.
 - Pass `page.id` as `--page` to your own `orca` calls too: `orca snapshot --page <id>`,
   `orca click --page <id> --element @eN`.
-- After `earlier_refs_void: true`, run `orca snapshot --page <id>` again before you use your own refs.
 - Never use `orca type` or `orca keypress` for form input: keys go to whatever has focus, which can be a terminal.
   Use `orca fill --element @eN`, or `refsure outcome … -- fill --element @eN --value "…"`.
 - Orca's default browser profile carries the human's imported Chrome cookies, so its pages are logged in. Take extra
@@ -150,5 +146,4 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
   open it again (`agent-browser --session <name> open <url>`).
 - refsure acts on the session's active tab. A ticket remembers that tab: if another one is active by the time you
   `act`, even with the same URL, `act` answers `page_changed`. Switch back, or `locate` again.
-- Use the same session for your own calls (`agent-browser --session <name> snapshot`, `… click @eN`), and snapshot
-  again after `earlier_refs_void: true`.
+- Use the same session for your own calls (`agent-browser --session <name> snapshot`, `… click @eN`).
