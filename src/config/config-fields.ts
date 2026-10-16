@@ -76,13 +76,24 @@ export function checkGatewayUrl(where: string, url: string): void {
   throw new ConfigError('gateway_insecure', `${where} must be https, or http on localhost`);
 }
 
-export function readGateway(value: unknown): GatewayConfig | null {
+/**
+ * The file's `gateway` object (spec §7.1). Its URL is `gateway.url`, else `REFSURE_GATEWAY_URL` (`envUrl`): the file's
+ * own URL wins. Paths, models and headers come only from the file.
+ */
+export function readGateway(value: unknown, envUrl?: string): GatewayConfig | null {
   if (value === null) return null;
-  if (!isRecord(value)) invalid('gateway must be null or an object with a "url"');
+  if (!isRecord(value)) invalid('gateway must be null or an object');
   onlyFields('gateway', value, GATEWAY_FIELDS);
-  if (typeof value.url !== 'string') invalid('gateway.url must be a string');
-  checkGatewayUrl('gateway.url', value.url);
-  const gateway: GatewayConfig = { url: value.url };
+  let url: string;
+  if (value.url === undefined && envUrl !== undefined) {
+    checkGatewayUrl('REFSURE_GATEWAY_URL', envUrl);
+    url = envUrl;
+  } else {
+    if (typeof value.url !== 'string') invalid('gateway.url must be a string, or set REFSURE_GATEWAY_URL');
+    checkGatewayUrl('gateway.url', value.url);
+    url = value.url;
+  }
+  const gateway: GatewayConfig = { url };
   for (const field of GATEWAY_TEXT_FIELDS) {
     const text = value[field];
     if (text === undefined) continue;

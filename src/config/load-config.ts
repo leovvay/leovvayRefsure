@@ -21,9 +21,15 @@ function defaultKeys(): RefsureConfig['keys'] {
   };
 }
 
+/** `REFSURE_GATEWAY_URL`, trimmed; unset or blank reads as none. */
+function envGatewayUrl(env: NodeJS.ProcessEnv): string | undefined {
+  return env.REFSURE_GATEWAY_URL?.trim() || undefined;
+}
+
+// With no `gateway` object in the file, the env URL alone names a gateway that routes nothing: no path is named.
 function envGateway(env: NodeJS.ProcessEnv): GatewayConfig | null {
-  const url = env.REFSURE_GATEWAY_URL?.trim();
-  if (!url) return null;
+  const url = envGatewayUrl(env);
+  if (url === undefined) return null;
   checkGatewayUrl('REFSURE_GATEWAY_URL', url);
   return { url };
 }
@@ -86,7 +92,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): RefsureConfig {
   onlyFields('config', file, TOP_FIELDS);
   return {
     keys: readKeys(file.keys),
-    gateway: file.gateway === undefined ? envGateway(env) : readGateway(file.gateway),
+    gateway: file.gateway === undefined ? envGateway(env) : readGateway(file.gateway, envGatewayUrl(env)),
     allowOrigins: file.allowOrigins === undefined ? [] : readOrigins('allowOrigins', file.allowOrigins),
     denyOrigins: file.denyOrigins === undefined ? [] : readOrigins('denyOrigins', file.denyOrigins),
     piiMasks: file.piiMasks === undefined ? true : readBoolean('piiMasks', file.piiMasks),

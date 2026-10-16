@@ -118,7 +118,7 @@ refsure needs at least one Decision provider key. Which verbs each provider unlo
 |---|---|
 | `REFSURE_OPENROUTER_KEY` | Jev via OpenRouter (`https://openrouter.ai/api/v1/systemone`, model `jev-1.13`) |
 | `REFSURE_OPENAI_KEY` | OpenAI Decisions (`https://api.openai.com/v1/decisions`, model `gpt-6-luna`, public beta) |
-| `REFSURE_GATEWAY_URL` + `REFSURE_GATEWAY_KEY` | your own gateway (see [Custom gateway](#custom-gateway)) |
+| `REFSURE_GATEWAY_URL` + `REFSURE_GATEWAY_KEY` | your own gateway; the config file still names its paths and models (see [Custom gateway](#custom-gateway)) |
 
 `OPENROUTER_API_KEY` and `OPENAI_API_KEY` are **never read** unless your config file names them, for example
 `{"env": "OPENROUTER_API_KEY"}`. A key you exported for another tool is not silently reused.
@@ -176,8 +176,9 @@ Orca's default profile are refused with `origin_denied`), and `limits`.
 
 ### Custom gateway
 
-`REFSURE_GATEWAY_URL` (or `gateway.url`) points refsure at your own proxy. refsure ships **no default paths, models
-or headers** for a gateway, so spell them out:
+`REFSURE_GATEWAY_URL` (or `gateway.url`, which wins when both are set) points refsure at your own proxy. The URL
+alone routes nothing: refsure ships **no default paths, models or headers** for a gateway, so the config file's
+`gateway` object must spell them out, with or without its own `url`:
 
 ```json
 {
@@ -193,6 +194,7 @@ or headers** for a gateway, so spell them out:
 }
 ```
 
+- Leave out `"url"` to take it from `REFSURE_GATEWAY_URL`; then the env variable must be set.
 - A provider goes through the gateway only when both its path and its model are named (`jevPath` + `jevModel`,
   `openaiPath` + `openaiModel`). It then uses the gateway key.
 - HTTPS is required, except on a loopback host: `localhost` and `*.localhost`, `127.0.0.0/8` and `::1`.
