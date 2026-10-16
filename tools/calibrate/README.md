@@ -255,7 +255,12 @@ is the honest sample size.
   lines match several identical elements, so the twin rule stops them, and one matched a button the page had
   faded out (gold none).
 - **Not replayed:** vision_outcome (an outcome needs the act between two reads; 47 of 59 items are visual-only).
-  Outcome keeps its step 1 entry.
+  Outcome keeps its step 1 entry, fitted on converted lines.
+- **outcome on Orca lines.** refsure's benchmark measured outcome on Orca-native captures (`tools/bench`, set N5:
+  each step's before and after pages read through refsure's Orca adapter in an isolated profile and built into the
+  input `outcome` sends). There Jev's yes ≥ 0.93 row holds at a precision target of 0.95 only, not at 0.99. So
+  outcome has no row at P=0.99 on Orca lines, the phase 7 proof (spec §12), and it blocks 1.0; its step 1 entry
+  still ships for 0.x.
 
 Open for the owner:
 - **Dismiss.** Counting every pick, the pooled row is 0.97, and live it abstains on a plain cookie wall ("Reject
