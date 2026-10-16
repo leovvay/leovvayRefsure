@@ -435,10 +435,21 @@ Reads committed ledgers only; needs no key and sends nothing (`--pii-egress` bui
 | step | command | writes |
 |---|---|---|
 | key windows (7.3) | `secrets run <KEY_NAME> -- node spend.mjs snapshot --results <dir> --phase P4 --at before` (and `--at after`) | `<results>/key-spend.jsonl`; reads the bench key's own spend (free, read-only) |
-| spend cross-check (7.3) | `node spend.mjs crosscheck --results <dir> --out <analysis>/spend-crosscheck.json [--gateway-spend <rows.json>] [--p0-window <json>]` | per phase and arm: calls, priced sums, reported `usage.cost`; tag split, key windows, OpenRouter, Claude; `explain[]` lists every gap above 2% or unchecked part |
+| spend cross-check (7.3) | `node spend.mjs crosscheck --results <dir> --out <analysis>/spend-crosscheck.json [--gateway-spend <rows.json>] [--p0-window <json>]` | per phase and arm: calls, priced sums, reported `usage.cost`; tag split, `gatewayUnmatched` (export rows no arm's tags match) and `gatewayTotal` (every export row), key windows (a phase whose gateway arms have rows but no snapshot reads unread), OpenRouter, Claude; `explain[]` lists every gap above 2% or unchecked part |
 | readings (5, 4.4, 9.1) | `node render.mjs --results <dir> --out <analysis> --plan <plan.json> [--agent-readings <json>] [--pii-egress] [--resamples 2000]` | `tables.md`, `summary.json` (with the options, so checks can rerun it) |
 | interim (7.1, P4a) | add `--interim` | `<analysis>/interim/`, P4 rows with `slice: interim` only, titles marked interim |
 | checks (9.2) | `node checks.mjs --analysis <analysis> --freeze <table> --manifest <json> --golden <dir>` | `checks.json`; exit 1 on any failure, including any missing input (T15) |
+
+`tables.md` follows 9.1's sections, one anchored table per reading. Beside Q14's cost cells, section 9 prints `#spend`
+(analyze/spend-table.ts), the whole `spend-crosscheck.json`: ledger calls, rows and priced and reported dollars per
+phase and arm, a ledger total per arm and over every arm, the gateway tag split with the unmatched and grand-total
+rows, each phase's key window (`unread` when no snapshot was taken), the P0 window when given, OpenRouter's
+`usage.cost` beside its ledger, Claude's dollars, and the explain lines; reported dollars print `-` for an arm whose
+usage carries no cost. Section 10 prints `#t17` (analyze/t17.ts): T17's two readings of 3.1's rho pool (every arm and
+combo, or single arms only) and of X7 (equal digests counted once within and across sets, or across sets only).
+Every other table prints the first; `#t17` reads the tables that print a three-way reading again under each second
+reading and lists every cell whose reading word changes, and per site the cells whose bound or n_eff moves with the
+word unchanged and the largest deff lower or danger upper move.
 
 Plan file (outside the repo when it names private set files):
 `{"sets": {"N1": "<frozen file>", ...}, "aliases": {"<ledger set id>": "F1", ...}, "metaFill": {"S4": {"from": "<file>", "fields": ["mask_changes_gold"]}}, "directArms": ["jev_or"], "ownerScopeRuled": false}`.
@@ -477,6 +488,8 @@ sha256). The check fails until every pair exists and is byte-equal.
 
 Readings that are approximations, stated in the tables: a re-read below the R1 row cannot see a sent twin the model
 leaned to at low confidence (counted acted: stricter); combo R2 refits one shared row over the parts' stored leans
-(fallback's first part takes precedence); T6/T3/flag sensitivity is read per candidate's step-1 status; a combo's
-dollars are its parts' `usd_priced` (the answered attempt), not strictly attempt 1.
+(fallback's first part takes precedence); T6/T3/flag sensitivity is read per candidate's step-1 status.
+
+A combo's dollars (Q14) are exact, not an approximation: the sum of each asked part's attempt-1 price, read from that part's own single-arm row by its row
+key, as a single arm is priced; the combo row's `usd_priced` is not read (it is null on an asked part that refused).
 

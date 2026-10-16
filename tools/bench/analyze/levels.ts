@@ -101,12 +101,18 @@ export function e2eTables(results: string, missing: string[]): Table[] {
   ];
 }
 
-/** Q16 (6.5): `agent-readings.json` of agent/score.ts, copied as key/value rows; missing = listed. */
-export function agentTable(path: string | null, missing: string[]): Table {
+/**
+ * Q16 (6.5): `agent-readings.json` of agent/score.ts, copied as key/value rows; missing = listed. Without readings,
+ * P8 has not run while the owner's gate file `<results>/P8/G0` is absent (p8/run.sh refuses until it exists); A8
+ * item 1 fixes Q16's text for that case. The readings stay a listed missing input (T15), with that reason.
+ */
+export function agentTable(path: string | null, missing: string[], results: string): Table {
   const title = 'Agent level (Q16)';
   if (path === null || !existsSync(path)) {
-    missing.push('agent readings (agent/score.ts agent-readings.json; render --agent-readings)');
-    return { anchor: 'agent', section: 8, source: 'P8', title, columns: ['reading'], rows: [['inconclusive (missing agent readings)']], notes: [] };
+    const g0Closed = !existsSync(join(results, 'P8', 'G0')) && !existsSync(join(results, 'p8', 'G0'));
+    missing.push(g0Closed ? 'agent readings (P8 not run: G0 closed; PROTOCOL 9.5 A8 item 1)' : 'agent readings (agent/score.ts agent-readings.json; render --agent-readings)');
+    return { anchor: 'agent', section: 8, source: 'P8', title, columns: ['reading'],
+      rows: [[g0Closed ? 'inconclusive (P8 not run: G0 closed)' : 'inconclusive (missing agent readings)']], notes: [] };
   }
   const rows: Cell[][] = [];
   const walk = (prefix: string, v: unknown) => {

@@ -1,11 +1,11 @@
 import { DOCTOR_PING_ITEM } from '../lib/ablate';
 import { E95, E99, bootstrapDraws, clopperPearson, drawAt, foldOf, holm } from '../lib/stats';
 import {
-  CANDIDATE, R2_TARGETS, canonSet, r2Coverage, RISK_CLASSES, SENSITIVITY_FLAGS, SITES, actAt, cellUnits, classOf, coverageOf, dangerRule, familyBlocked,
-  fmtMs, mcnemarPairs, missWrite, pairUnits, pairedDiff, pairedPercentile, precisionRule, r2Cell, readAt, summarize,
+  CANDIDATE, FIRST_READING, R2_TARGETS, canonSet, r2Coverage, RISK_CLASSES, SENSITIVITY_FLAGS, SITES, actAt, cellUnits, classOf, coverageOf, dangerRule,
+  familyBlocked, fmtMs, mcnemarPairs, missWrite, pairUnits, pairedDiff, pairedPercentile, precisionRule, r2Cell, readAt, summarize,
   timingCell, wrongRateOf,
 } from './readings';
-import type { Bound, CellUnits, Danger, Gates, Meta, Plan, Site, TimingRow, Unit } from './readings';
+import type { Bound, CellUnits, Danger, Gates, Meta, Plan, Reading, Site, TimingRow, Unit } from './readings';
 
 /*
   Section 5's rules over the readings: 5.5 default arm per site and the production combos (Q1, Q2), 5.6 rows, rule M
@@ -114,10 +114,15 @@ export function ruleText(b: Bound): string {
   return b.verdict;
 }
 
-/** The rules' shared reads: cells, rho pools, failure shares, timing rows; every missing input is recorded. */
+const R2_DRAWS = new WeakMap<Inputs, Map<string, number[]>>();
+
+/**
+ * The rules' shared reads: cells, rho pools, failure shares, timing rows; every missing input is recorded. `reading`
+ * (T17) picks the reading of 3.1's rho pool and of X7 that the cells and pools read; every table prints the first.
+ */
 export class Ctx {
   readonly missing = new Set<string>();
-  constructor(readonly i: Inputs) {}
+  constructor(readonly i: Inputs, readonly reading: Reading = FIRST_READING) {}
 
   miss(what: string): string {
     this.missing.add(what);
@@ -127,7 +132,7 @@ export class Ctx {
   /** One cell of an arm or combo at a site over sets (X3: pixel rows only when asked). */
   cell(arm: string, site: string, sets: readonly string[], pixel = false): CellUnits {
     const source = this.i.units.some((u) => u.arm === arm) ? this.i.units : this.i.combos;
-    return cellUnits(source, { arm, site, sets, pixel });
+    return cellUnits(source, { arm, site, sets, pixel, x7: this.reading.x7 });
   }
 
   private readonly pools = new Map<string, Unit[]>();
@@ -135,15 +140,21 @@ export class Ctx {
   /**
    * Every arm and set of a site (the 3.1 rho pool): text, masks-on rows (the rows cells read), without dismiss rows
    * whose after reading is unknown (2.7). One array per site, so the pooled rho is estimated once per site and
-   * indicator (A6).
+   * indicator (A6). The first reading pools every arm and combo; the second (T17) the single arms only.
    */
   pool(site: string): Unit[] {
     let pool = this.pools.get(site);
     if (pool === undefined) {
-      pool = [...this.i.units, ...this.i.combos].filter((u) => u.site === site && !u.visualOnly && !u.familyBad && u.masks && !u.settleOpen);
+      const arms = this.reading.rhoPool === 'single arms' ? this.i.units : [...this.i.units, ...this.i.combos];
+      pool = arms.filter((u) => u.site === site && !u.visualOnly && !u.familyBad && u.masks && !u.settleOpen);
       this.pools.set(site, pool);
     }
     return pool;
+  }
+
+  /** R2 coverage bootstrap draws (r2Cell `draws`), one map per inputs: every Ctx over them, a T17 reread too, shares it. */
+  get r2Draws(): Map<string, number[]> {
+    return R2_DRAWS.get(this.i) ?? R2_DRAWS.set(this.i, new Map()).get(this.i)!;
   }
 
   timingOf(arm: string, site: string): TimingRow[] {
@@ -402,7 +413,7 @@ export function siteRow(ctx: Ctx, site: Site, arm: string, sets: readonly string
   const share = cand ? ctx.failShare(cand.timing, site) : arm.startsWith('bench:') ? ctx.comboShare(arm, site) : ctx.failShare(arm, site);
   const timing = timingFor(ctx, site, arm);
   const t = timing.length > 0 ? timingCell(timing, { fallback: arm === 'fallback', resamples: ctx.i.resamples }) : null;
-  const r2 = opts.r2 ? R2_TARGETS.map((P) => r2Cell(units, P, site, { pool, floor: floorOf(site), resamples: ctx.i.resamples })) : [];
+  const r2 = opts.r2 ? R2_TARGETS.map((P) => r2Cell(units, P, site, { pool, floor: floorOf(site), resamples: ctx.i.resamples, draws: ctx.r2Draws })) : [];
   const usd = usdPer1000(units).usd;
   // Dismiss before settle (Terms): a vetoed pick counts as acted; a dismiss wrong act is its dangerous act.
   const before = site === 'dismiss' ? `${units.filter((u) => u.dangerousBefore).length} wrong of ${units.filter((u) => u.actedBefore).length} acted` : null;
@@ -1192,7 +1203,7 @@ export function sliceTable(ctx: Ctx): Table {
 }
 
 /** Q14 and 9.1 item 9: $ per 1,000 Decisions (attempt 1, unit rows) and per settled answer, per site and arm or combo. */
-export function costTable(ctx: Ctx, crosscheck: Record<string, unknown> | null): Table {
+export function costTable(ctx: Ctx, crosscheck: object | null): Table {
   const rows: Cell[][] = [];
   for (const site of SITES) for (const arm of armsAt(ctx, site)) {
     const units = ctx.cell(arm, site, VERDICT_POOL[site]).units;
@@ -1202,6 +1213,6 @@ export function costTable(ctx: Ctx, crosscheck: Record<string, unknown> | null):
     rows.push([site, arm, units.length, r4(c.usd), r4(c.usd / 1000 / cov), c.unpriced]);
   }
   const notes = ['Priced on attempt 1 of the p0/r1 (candidate sites) or r1 rows: the 7.2 table x that attempt\'s usage; the direct Jev arm reads its own usage.cost; a combo sums the parts it asked.'];
-  notes.push(crosscheck === null ? ctx.miss('spend-crosscheck.json (spend.ts)') : `cross-check (7.3): ${JSON.stringify(crosscheck)}`);
+  notes.push(crosscheck === null ? ctx.miss('spend-crosscheck.json (spend.ts)') : 'Spend per phase and arm and the 7.3 cross-check: see the spend table (#spend).');
   return { anchor: 'q14', section: 9, title: 'Cost (Q14): $ per 1,000 Decisions and per settled answer, verdict cells', columns: ['site', 'arm or combo', 'items', '$ / 1,000 Decisions', '$ / settled answer', 'unpriced rows'], rows, notes };
 }

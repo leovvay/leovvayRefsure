@@ -6,9 +6,13 @@ import { armRuntime, prepare } from '../lib/ask';
 import { isCandidateSite, readItems } from '../lib/items';
 import type { QualityRow } from '../lib/ledger';
 import { agentTable, e2eTables, firstExisting, slowGateway } from './levels';
-import { canonSet as canonSetOf, comboRows, comboUnit, isUnitRow, phaseRows, readGates, readMeta, readPlan, timingRows, toUnit } from './readings';
+import {
+  canonSet as canonSetOf, comboRows, comboUnit, isUnitRow, phaseRows, readGates, readMeta, readPlan, timingRows, toUnit, usdAttempt1,
+} from './readings';
 import type { ItemFacts, Plan } from './readings';
+import type { CrossCheck } from '../spend';
 import { analyze } from './report';
+import { t17Table } from './t17';
 import type { Cell, DriftBodies, Inputs, Report, Table } from './verdict';
 import { helpExit } from '../lib/help';
 
@@ -25,7 +29,8 @@ import { helpExit } from '../lib/help';
   Sections 7 and 8: Q15 from the P7 ledger `<results>/e2e/cli/runs*.jsonl`, read on the A6 item 5 re-grade with the
   recorded grade beside it (analyze/regrade.ts; the ledger is never edited); Q16 from agent/score.ts's
   `agent-readings.json` (`--agent-readings`, else `<out>/agent-readings.json`, else `<results>/P8/scored/agent-readings.json`,
-  where p8/run.sh's score step writes it and A6 keeps it, else `<results>/P8/agent-readings.json`).
+  where p8/run.sh's score step writes it and A6 keeps it, else `<results>/P8/agent-readings.json`); with none and no
+  `<results>/P8/G0` (P8 not run, A8 item 1), Q16 reads `inconclusive (P8 not run: G0 closed)`.
 
   Exit 0 written; 64 bad usage. Missing inputs do not stop the render: their cells read `inconclusive (missing
   <input>)` and are listed at the top; analyze/checks.ts fails on them.
@@ -52,9 +57,18 @@ export function loadInputs(results: string, plan: Plan, opts: { interim: boolean
   }));
   const combos = comboRows(results);
   // A combo row does not carry visual_only, origin, lang, condition or masks: its single-arm unit rows of the same item do.
-  const facts = new Map<string, ItemFacts>(p4all.filter((r) => isUnitRow(r)).map((r) => toUnit(r, plan))
+  const single = p4all.filter((r) => isUnitRow(r)).map((r) => toUnit(r, plan));
+  const facts = new Map<string, ItemFacts>(single
     .map((u) => [u.key, { visualOnly: u.visualOnly, origin: u.origin, lang: u.lang, condition: u.condition, masks: u.masks }]));
-  const comboUnits = combos.rows.map((row) => comboUnit(row, plan, facts.get(`${canonSetOf(row.set, plan)}:${row.item}`)));
+  // Each asked part is priced from its own row's attempt 1 (Q14), joined by the part's row_key; a dismiss part's pick
+  // carries the 2.7 veto of its single-arm unit of the same item.
+  const direct = plan.directArms ?? ['jev_or'];
+  const usd1 = new Map(p4all.map((r) => [r.row_key, usdAttempt1(r, direct.includes(r.arm))]));
+  const vetoed = new Map(single.map((u) => [`${u.arm}\0${u.key}`, u.vetoed]));
+  const comboUnits = combos.rows.map((row) => {
+    const key = `${canonSetOf(row.set, plan)}:${row.item}`;
+    return comboUnit(row, plan, facts.get(key), { usd1: (rowKey) => usd1.get(rowKey), vetoed: (arm) => vetoed.get(`${arm}\0${key}`) });
+  });
   const comboNoFacts = combos.rows.filter((row) => !facts.has(`${canonSetOf(row.set, plan)}:${row.item}`)).length;
   const timing = timingRows(phaseRows<QualityRow & { mode?: string }>(results, 'P6') as never, plan);
   return {
@@ -196,13 +210,16 @@ export function build(o: RenderOptions): { report: Report; md: (generated: strin
   const plan = readPlan(o.plan);
   const inputs = loadInputs(o.results, plan, { interim: o.interim, resamples: o.resamples });
   const crossPath = o.crosscheck ?? join(o.outBase, 'spend-crosscheck.json');
-  const crosscheck = existsSync(crossPath) ? (JSON.parse(readFileSync(crossPath, 'utf8')) as Record<string, unknown>) : null;
-  const report = analyze(inputs, { egress: o.pii ? piiEgress(plan) : null, crosscheck: crosscheck === null ? null : { summary: crosscheck.summary ?? crosscheck } });
+  const crosscheck = existsSync(crossPath) ? (JSON.parse(readFileSync(crossPath, 'utf8')) as Partial<CrossCheck>) : null;
+  const report = analyze(inputs, { egress: o.pii ? piiEgress(plan) : null, crosscheck });
   const extraMissing: string[] = [];
   if ((inputs.comboNoFacts ?? 0) > 0) extraMissing.push(`single-arm unit rows (item facts) for ${inputs.comboNoFacts} combo unit rows`);
   const agentPath = firstExisting(o.agentReadings, join(o.outBase, 'agent-readings.json'),
     join(o.results, 'P8', 'scored', 'agent-readings.json'), join(o.results, 'P8', 'agent-readings.json'));
-  report.tables.push(...e2eTables(o.results, extraMissing), agentTable(agentPath, extraMissing), threatsTable(o.results, inputs), reproductionTable(o.results));
+  // T17 (8): the reading tables again under the second reading of 3.1's rho pool and of X7, beside the threats realised.
+  const t17 = t17Table(inputs, report.tables);
+  report.tables.push(...e2eTables(o.results, extraMissing), agentTable(agentPath, extraMissing, o.results), threatsTable(o.results, inputs), t17,
+    reproductionTable(o.results));
   const slow = slowGateway(o.results);
   report.tables.find((t) => t.anchor === 'q13')?.notes.push(slow === null ? 'P6 end-RTT check (4.5): not recorded (P6/phase.jsonl)'
     : `P6 end-RTT check (4.5): ${slow ? 'slow_gateway: the end RTT was above 1.5x the P0 baseline; read every cell with that note' : 'within 1.5x of P0'}`);

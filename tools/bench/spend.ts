@@ -13,7 +13,9 @@ import { helpExit } from './lib/help';
   attempt and every HTTP request, priced with the 7.2 table) against (a) the gateway's spend rows split by each arm's
   tag header and the bench key's own spend over each phase window, (b) OpenRouter `usage.cost` sums on the direct
   arm, (c) Claude `total_cost_usd` (`agent_usd`, Claude rows) from the P8 agent ledger. The gateway rows are also
-  counted per arm against the ledger's call counts. A gap above 2% is listed for the report to explain.
+  counted per arm against the ledger's call counts, and the rows no arm's tags match and the export's grand total are
+  written beside. A gap above 2% is listed for the report to explain, and so is each phase whose gateway arms have
+  ledger rows but no key-spend snapshot (its key window reads unread).
 
     spend snapshot --results <dir> --phase <P> --at before|after
         reads the bench key's own spend (arms file `keyInfoPath`, read-only, free) into <results>/key-spend.jsonl;
@@ -28,7 +30,7 @@ import { helpExit } from './lib/help';
 
 const USAGE = 'usage: spend snapshot --results <dir> --phase <P> --at before|after | spend crosscheck --results <dir> --out <json> [--gateway-spend <json>] [--p0-window <json>]';
 
-interface Sum { calls: number; rows: number; priced: number; unpriced: number; reported: number }
+export interface Sum { calls: number; rows: number; priced: number; unpriced: number; reported: number }
 
 const empty = (): Sum => ({ calls: 0, rows: 0, priced: 0, unpriced: 0, reported: 0 });
 
@@ -114,11 +116,19 @@ function gap(a: number, b: number): number | null {
   return b > 0 ? Math.abs(a - b) / b : null;
 }
 
-/** Gateway spend rows credited per arm through each arm's tag header value: dollars and row (call) counts. */
-function gatewaySplit(arms: ArmsFile, path: string | undefined): Record<string, { spend: number; rows: number }> | null {
+/** Gateway spend: dollars and row (call) counts. */
+export interface Spent { spend: number; rows: number }
+
+/**
+ * Gateway spend rows credited per arm through each arm's tag header value, the rows no arm's tags match, and every
+ * row of the export (dollars and row (call) counts).
+ */
+function gatewaySplit(arms: ArmsFile, path: string | undefined): { perArm: Record<string, Spent>; unmatched: Spent; total: Spent } | null {
   if (path === undefined) return null;
   const rows = JSON.parse(readFileSync(path, 'utf8')) as { tags?: unknown; request_tags?: unknown; tag?: unknown; spend?: unknown }[];
-  const out: Record<string, { spend: number; rows: number }> = {};
+  const spent = (list: typeof rows): Spent => ({ spend: list.reduce((a, r) => a + (typeof r.spend === 'number' ? r.spend : 0), 0), rows: list.length });
+  const perArm: Record<string, Spent> = {};
+  const matched = new Set<(typeof rows)[number]>();
   for (const arm of arms.arms.filter((a) => a.via === 'gateway')) {
     // The tag header is a comma list (`refsure-bench,arm:<id>`) that the gateway stores split, so a row is the arm's
     // when it carries every tag of the list; the first tag alone is shared by every arm.
@@ -129,9 +139,10 @@ function gatewaySplit(arms: ArmsFile, path: string | undefined): Record<string, 
       const tags = list.map(String);
       return values.every((v) => tags.some((t) => t === v || t.endsWith(`:${v}`)));
     });
-    out[arm.id] = { spend: mine.reduce((a, r) => a + (typeof r.spend === 'number' ? r.spend : 0), 0), rows: mine.length };
+    for (const r of mine) matched.add(r);
+    perArm[arm.id] = spent(mine);
   }
-  return out;
+  return { perArm, unmatched: spent(rows.filter((r) => !matched.has(r))), total: spent(rows) };
 }
 
 /**
@@ -152,7 +163,23 @@ function agentDollars(results: string): { runs: number; usd: number; unreported:
   return { runs: claude.length, usd: priced.reduce((a, r) => a + (r.agent_usd as number), 0), unreported: claude.length - priced.length };
 }
 
-export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: string, p0Window?: string): Record<string, unknown> {
+/** `spend-crosscheck.json` (7.3) as `crosscheck` writes it; analyze/spend-table.ts renders it. */
+export interface CrossCheck {
+  perPhase: Record<string, Record<string, Sum>>;
+  perArm: Record<string, { calls: number; priced: number; unpriced: number; reported: number }>;
+  gatewayTagSplit: Record<string, { measured: number; priced: number; gap: number | null; gatewayRows: number; ledgerCalls: number; callGap: number | null }> | null;
+  /** Gateway rows no arm's tags match, and every row of the export. */
+  gatewayUnmatched: Spent | null; gatewayTotal: Spent | null;
+  /** Per phase; `snapshot: false` when the phase's gateway arms have ledger rows but key-spend.jsonl holds no snapshot. */
+  keyWindows: Record<string, { measured: number | null; priced: number; gap: number | null; snapshot?: false }>;
+  p0Window: Record<string, { measuredPerCall: number | null; pricedPerCall: number | null; gap: number | null }> | null;
+  openRouter: { arm: string; usageCost: number }[];
+  claude: { runs: number; usd: number; unreported: number } | null;
+  summary: { arms: Record<string, { calls: number; priced: number }>; gapsToExplain: number };
+  explain: string[];
+}
+
+export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: string, p0Window?: string): CrossCheck {
   const ledgers = ledgerTotals(results, arms);
   const perArm: Record<string, { calls: number; priced: number; unpriced: number; reported: number }> = {};
   for (const byArm of Object.values(ledgers)) for (const [arm, s] of Object.entries(byArm)) {
@@ -162,7 +189,7 @@ export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: strin
   }
   const explain: string[] = [];
   const split = gatewaySplit(arms, gatewaySpend);
-  const tagRows = split === null ? null : Object.fromEntries(Object.entries(split).map(([arm, m]) => {
+  const tagRows = split === null ? null : Object.fromEntries(Object.entries(split.perArm).map(([arm, m]) => {
     const priced = perArm[arm]?.priced ?? 0;
     const calls = perArm[arm]?.calls ?? 0;
     const g = gap(priced, m.spend);
@@ -173,8 +200,16 @@ export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: strin
   }));
   const windows = keyWindows(results);
   const gatewayArms = new Set(arms.arms.filter((a) => a.via === 'gateway').map((a) => a.id));
-  const keyRows = Object.fromEntries(Object.entries(windows).map(([phase, measured]) => {
+  // Every phase with a snapshot, and every phase whose gateway arms sent calls but have no snapshot in
+  // key-spend.jsonl: that window is unread, and listed.
+  const sent = Object.keys(ledgers).filter((phase) => Object.entries(ledgers[phase]!).some(([arm, s]) => gatewayArms.has(arm) && s.calls > 0));
+  const keyRows: CrossCheck['keyWindows'] = Object.fromEntries([...new Set([...Object.keys(windows), ...sent])].sort().map((phase) => {
     const priced = Object.entries(ledgers[phase] ?? {}).filter(([arm]) => gatewayArms.has(arm)).reduce((a, [, s]) => a + s.priced, 0);
+    if (!(phase in windows)) {
+      explain.push(`key window ${phase}: unread (no snapshot)`);
+      return [phase, { measured: null, priced, gap: null, snapshot: false }];
+    }
+    const measured = windows[phase] ?? null;
     const g = measured === null ? null : gap(priced, measured);
     if (g === null || g > 0.02) explain.push(`key window ${phase}: priced ${priced.toFixed(4)} vs measured ${measured === null ? 'unread' : measured.toFixed(4)}`);
     return [phase, { measured, priced, gap: g }];
@@ -194,7 +229,8 @@ export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: strin
   if (agents === null) explain.push('no agent ledger (P8/agents.jsonl): Claude dollars unchecked');
   else if (agents.unreported > 0) explain.push(`Claude runs without a reported total_cost_usd: ${agents.unreported} of ${agents.runs}`);
   return {
-    perPhase: ledgers, perArm, gatewayTagSplit: tagRows, keyWindows: keyRows, p0Window: windowRows, openRouter: direct, claude: agents,
+    perPhase: ledgers, perArm, gatewayTagSplit: tagRows, gatewayUnmatched: split?.unmatched ?? null, gatewayTotal: split?.total ?? null,
+    keyWindows: keyRows, p0Window: windowRows, openRouter: direct, claude: agents,
     summary: { arms: Object.fromEntries(Object.entries(perArm).map(([a, s]) => [a, { calls: s.calls, priced: Math.round(s.priced * 1e6) / 1e6 }])), gapsToExplain: explain.length },
     explain,
   };
@@ -219,7 +255,7 @@ async function main(): Promise<void> {
     const v = flags(rest, ['results', 'out', 'gateway-spend', 'p0-window'], USAGE);
     const report = crosscheck(need(v, 'results', USAGE), arms, opt(v, 'gateway-spend'), opt(v, 'p0-window'));
     writeFileSync(need(v, 'out', USAGE), `${JSON.stringify(report, null, 2)}\n`);
-    process.stdout.write(`${need(v, 'out', USAGE)}: ${(report.explain as string[]).length} gaps or unchecked parts to explain\n`);
+    process.stdout.write(`${need(v, 'out', USAGE)}: ${report.explain.length} gaps or unchecked parts to explain\n`);
     return;
   }
   process.stderr.write(`${USAGE}\n`);

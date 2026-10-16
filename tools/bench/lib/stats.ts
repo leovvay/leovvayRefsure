@@ -127,11 +127,17 @@ export function pickRho(cell: { events: number; groups: readonly (readonly numbe
   return 0.1;
 }
 
-/** Kish: deff = max(1, 1 + (m - 1) rho), m = mean units per group; n_eff = floor(n / deff), x_eff = ceil(x / deff). */
+/**
+ * Kish: deff = max(1, 1 + (m - 1) rho), m = mean units per group; n_eff = floor(n / deff), x_eff = ceil(x / deff).
+ * With g groups and deff > 1, v / deff is computed as v g / (g + (n - g) rho), the same quotient in a form that is
+ * exact at rho = 1 (n_eff = g): there n / deff in doubles can land just below the integer (176.99999999999997 for
+ * 209 acted in 177 groups), and the floor would drop a unit the protocol's real quotient keeps (3.1).
+ */
 export function kish(n: number, x: number, groupCount: number, rho: number): { deff: number; m: number; nEff: number; xEff: number } {
   const m = groupCount > 0 ? n / groupCount : 1;
   const deff = Math.max(1, 1 + (m - 1) * rho);
-  return { deff, m, nEff: Math.floor(n / deff), xEff: Math.ceil(x / deff) };
+  const over = (v: number) => (groupCount > 0 && deff > 1 ? (v * groupCount) / (groupCount + (n - groupCount) * rho) : v / deff);
+  return { deff, m, nEff: Math.floor(over(n)), xEff: Math.ceil(over(x)) };
 }
 
 export type Verdict3 = 'pass' | 'fail' | 'inconclusive';

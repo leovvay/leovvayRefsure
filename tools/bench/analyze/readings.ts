@@ -116,8 +116,12 @@ export function plainRows<T>(dir: string): T[] {
   return out;
 }
 
-/** One act a unit offers at any row up to `score`: a caller index (or `true`) and its precedence among parts. */
-export interface Offer { score: number; pick: string; prio: number }
+/**
+ * One act a unit offers at any row up to `score`: a caller index (or `true`) and its precedence among parts. `vetoed`
+ * (combo dismiss offers, 2.7): the pick's own control is vetoed, so the offer still wins precedence at a row but acts
+ * on nothing (pick first, then veto).
+ */
+export interface Offer { score: number; pick: string; prio: number; vetoed?: boolean }
 
 /** One item's draw in one cell (3.1, 5.1): its `p0`/`r1` (candidate sites) or `r1` row, read as the Terms say. */
 export interface Unit {
@@ -142,7 +146,10 @@ export interface Unit {
   failure: boolean; familyBad: boolean; visualOnly: boolean; masks: boolean; flags: string[];
   /** Attempt-1 priced dollars (Q14); null when attempt 1 answered without a priceable usage. */
   usd1: number | null; digest: string | null; threshold: number | null;
-  /** Combos: which part settled (`first`/`second`), null when none did. */
+  /**
+   * Combos: `second` when a fallback asked its second part (the first abstained, 5.5), whatever that part answered;
+   * else `first` when the combo answered; null otherwise.
+   */
   branch?: string | null;
   /** The row's order and repeat (Q12, T29); `slice` = `interim` for a P4a row, else `final`. */
   order?: string; repeat?: string; slice?: string;
@@ -260,25 +267,40 @@ export const X7_ORDER = ['F1', 'P2', 'V', 'S1', 'S2', 'S3', 'S4', 'N1', 'N2', 'N
 export interface CellUnits { units: Unit[]; family: number; x7: number; total: number }
 
 /**
- * Units of one cell: the unit rows of `arm` at `site` over `sets` (canonical ids), `family_ok` false rows set aside
- * (2.2), visual-only rows only when `pixel` (X3), and X7 duplicates by digest dropped across sets. Masks-off rows
- * never enter a cell: quality rows send `piiMasks` true (2.2), and the masks-off half of S4 and N10 is read by Q11
- * alone (3.2: S4 is primary on its masks-on half).
+ * T17 (8): two rule texts admit two readings, and both are computed and shown. Every table reads the first;
+ * analyze/t17.ts recomputes the readings under the second. `rhoPool` (3.1, clusters (arm, set, group) by A6 item 1):
+ * "pooled over every arm and set of that site" holds every arm and combo, or the single arms of section 2 only.
+ * `x7` (3.4): "when sets are pooled, rows with an equal approved-request digest at p0/r1 are counted once" counts
+ * equal digests once within a set and across sets, or across sets only.
  */
-export function cellUnits(all: readonly Unit[], q: { arm: string; site: string; sets: readonly string[]; pixel?: boolean }): CellUnits {
+export interface Reading { rhoPool: 'arms and combos' | 'single arms'; x7: 'within and across sets' | 'across sets only' }
+
+/** The reading every table prints. */
+export const FIRST_READING: Reading = { rhoPool: 'arms and combos', x7: 'within and across sets' };
+
+/**
+ * Units of one cell: the unit rows of `arm` at `site` over `sets` (canonical ids), `family_ok` false rows set aside
+ * (2.2), visual-only rows only when `pixel` (X3), and X7 duplicates by digest dropped when sets are pooled (`x7`:
+ * a digest already kept, or under the second reading one kept from an earlier set only). Masks-off rows never enter
+ * a cell: quality rows send `piiMasks` true (2.2), and the masks-off half of S4 and N10 is read by Q11 alone (3.2: S4
+ * is primary on its masks-on half).
+ */
+export function cellUnits(all: readonly Unit[], q: { arm: string; site: string; sets: readonly string[]; pixel?: boolean; x7?: Reading['x7'] }): CellUnits {
   const inSets = new Set(q.sets);
   const picked = all.filter((u) => u.arm === q.arm && u.site === q.site && inSets.has(u.set) && u.masks && u.visualOnly === (q.pixel ?? false));
   const rank = (set: string) => { const i = X7_ORDER.indexOf(set); return i < 0 ? X7_ORDER.length : i; };
   const ordered = [...picked].sort((a, b) => rank(a.set) - rank(b.set) || a.key.localeCompare(b.key));
-  const seen = new Set<string>();
+  // digest -> the set of the first row kept with it
+  const seen = new Map<string, string>();
   const units: Unit[] = [];
   let family = 0;
   let x7 = 0;
   for (const u of ordered) {
     if (u.familyBad) { family += 1; continue; }
     if (u.digest !== null && q.sets.length > 1) {
-      if (seen.has(u.digest)) { x7 += 1; continue; }
-      seen.add(u.digest);
+      const first = seen.get(u.digest);
+      if (first !== undefined && (q.x7 !== 'across sets only' || first !== u.set)) { x7 += 1; continue; }
+      if (first === undefined) seen.set(u.digest, u.set);
     }
     units.push(u);
   }
@@ -304,11 +326,12 @@ export function judge(u: Pick<Unit, 'site' | 'gold' | 'alt'>, pick: string | nul
  * The unit re-read at another row `t` (a Choice row or a Noul yes edge): the highest-precedence offer with score
  * >= t. A vetoed dismiss pick and a known sent twin offer nothing. A low-confidence lean on a sent twin is not
  * known as a twin (the row keeps only the R1 cause), so a re-read below the R1 row may count it acted: stricter.
+ * A combo's vetoed offer is picked at t like any other, then vetoed: no act, and no lower-precedence part acts.
  */
 export function actAt(u: Unit, t: number): { acted: boolean; correct: boolean; dangerous: boolean } {
   let best: Offer | null = null;
   for (const offer of u.offers) if (offer.score >= t && (best === null || offer.prio > best.prio)) best = offer;
-  return judge(u, best?.pick ?? null);
+  return judge(u, best === null || best.vetoed === true ? null : best.pick);
 }
 
 /** The unit as read at `t`, or unchanged when `t` is undefined (R1). */
@@ -493,13 +516,14 @@ export function startRow(site: string, cls = 'none'): number {
 /**
  * The lowest offered score t at which training precision >= P with >= 30 acted training items; Infinity when no t
  * qualifies (the fold acts on nothing). Incremental over offers sorted by score, highest first, so a part with
- * higher precedence (fallback's first part) replaces a lower one once t falls below its score.
+ * higher precedence (fallback's first part) replaces a lower one once t falls below its score. A vetoed offer
+ * (actAt) replaces it too and then counts as neither acted nor right.
  */
 export function fitLowest(train: readonly Unit[], P: number, minActed = 30): number {
   const events: { score: number; u: number; offer: Offer }[] = [];
   train.forEach((u, i) => { for (const offer of u.offers) events.push({ score: offer.score, u: i, offer }); });
   events.sort((a, b) => b.score - a.score);
-  const state = new Map<number, { prio: number; correct: boolean }>();
+  const state = new Map<number, { prio: number; acts: boolean; correct: boolean }>();
   let acted = 0;
   let right = 0;
   let best = Number.POSITIVE_INFINITY;
@@ -507,11 +531,13 @@ export function fitLowest(train: readonly Unit[], P: number, minActed = 30): num
     const e = events[i]!;
     const now = state.get(e.u);
     if (now === undefined || e.offer.prio > now.prio) {
-      const correct = judge(train[e.u]!, e.offer.pick).correct;
-      if (now === undefined) acted += 1;
-      else if (now.correct) right -= 1;
+      const acts = e.offer.vetoed !== true;
+      const correct = acts && judge(train[e.u]!, e.offer.pick).correct;
+      if (now?.acts === true) acted -= 1;
+      if (now?.correct === true) right -= 1;
+      if (acts) acted += 1;
       if (correct) right += 1;
-      state.set(e.u, { prio: e.offer.prio, correct });
+      state.set(e.u, { prio: e.offer.prio, acts, correct });
     }
     const last = i === events.length - 1 || events[i + 1]!.score < e.score;
     if (last && acted >= minActed && right / acted >= P) best = e.score;
@@ -605,12 +631,21 @@ export interface R2Cell {
 /**
  * R2 at target P. The coverage interval is a 2,000-resample group bootstrap with the whole fold refit inside each
  * resample (T7). `rows` prints the mean of the five fold rows per class (a candidate, never adopted; null when a
- * fold acts on nothing in that class, counted in `infiniteFolds`).
+ * fold acts on nothing in that class, counted in `infiniteFolds`). `draws` keeps those coverage draws by P, site,
+ * resamples and the units' arm and key: they read the units' offers only, never rho, so a T17 reread of the same
+ * cell reuses them.
  */
-export function r2Cell(units: readonly Unit[], P: number, site: string, opts: { pool?: readonly Unit[]; resamples?: number; floor: number }): R2Cell {
+export function r2Cell(units: readonly Unit[], P: number, site: string,
+  opts: { pool?: readonly Unit[]; resamples?: number; floor: number; draws?: Map<string, number[]> }): R2Cell {
   const { held, folds } = crossFit(units, P, site);
   const precision = precisionRule(held, P, opts.floor, { pool: opts.pool, resamples: opts.resamples });
-  const draws = bootstrapDraws(units, (u) => u.group, (rows) => r2Coverage(rows, P, site), { resamples: opts.resamples ?? 2000 });
+  const resamples = opts.resamples ?? 2000;
+  const key = `${P}\0${site}\0${resamples}\0${units.map((u) => `${u.arm}\0${u.key}`).join('\0')}`;
+  let draws = opts.draws?.get(key);
+  if (draws === undefined) {
+    draws = bootstrapDraws(units, (u) => u.group, (rows) => r2Coverage(rows, P, site), { resamples });
+    opts.draws?.set(key, draws);
+  }
   const rows: Record<string, number | null> = {};
   let infiniteFolds = 0;
   for (const cls of folds[0]?.keys() ?? []) {
@@ -822,8 +857,11 @@ export { BENCH_SEED, anovaIcc };
 
 /* ---------- Combos (2.4) ---------- */
 
-/** One part of a combo row as combos.ts writes it: the stored single-arm row's R1 read and whether the combo asked it. */
-export interface ComboPart { arm: string; provider: string; asked: boolean; family_ok: boolean | null; r1: QualityRow['r1'] }
+/**
+ * One part of a combo row as combos.ts writes it: the stored single-arm row's key and R1 read, and whether the combo
+ * asked it.
+ */
+export interface ComboPart { arm: string; provider: string; row_key: string | null; asked: boolean; family_ok: boolean | null; r1: QualityRow['r1'] }
 
 /** One offline combo row as combos.ts writes it (`<results>/<phase>/combos/<shape>/<set>.jsonl`). */
 export interface ComboRow {
@@ -854,11 +892,20 @@ function partOffer(row: ComboRow, part: ComboPart): { pick: string; score: numbe
 export type ItemFacts = Pick<Unit, 'visualOnly' | 'origin' | 'lang' | 'condition' | 'masks'>;
 
 /**
+ * What each part's own single-arm row says (undefined when the row is not there): its attempt-1 dollars by the
+ * part's `row_key` (usdAttempt1, Q14), and the 2.7 veto of its pick, from its single-arm unit of the same item.
+ */
+export interface PartFacts {
+  usd1: (rowKey: string) => number | null | undefined;
+  vetoed: (arm: string) => boolean | null | undefined;
+}
+
+/**
  * A combo unit row (`p0`/`r1` or `fixed`/`r1`, not dropped) as a unit; offers follow the shape at one shared row
  * (5.3). `like` = the item's facts from a single-arm unit row of the same key; without it the combo row reads as a
- * native text row with masks on (the caller lists such rows).
+ * native text row with masks on (the caller lists such rows). `parts` prices and vetoes each part from its own row.
  */
-export function comboUnit(row: ComboRow, plan: Plan, like?: ItemFacts): Unit {
+export function comboUnit(row: ComboRow, plan: Plan, like: ItemFacts | undefined, parts: PartFacts): Unit {
   const asRow = {
     row_key: row.combo_key, arm: comboArm(row), site: row.site, set: row.set, item: row.item, group: row.group, order: row.order,
     repeat: row.repeat, variant: 'shipped', gold: row.gold ?? '', alt: row.alt ?? [], risk: row.risk, r1: row.verdict,
@@ -869,15 +916,24 @@ export function comboUnit(row: ComboRow, plan: Plan, like?: ItemFacts): Unit {
   } as unknown as QualityRow;
   const u = toUnit(asRow, plan);
   const leans = row.parts.map((p) => partOffer(row, p));
+  // 2.7, Terms (A1): the veto belongs to the picked control, so a dismiss offer carries the veto of its own part's
+  // single-arm row (an agree offer: of either part, both lean to the same control). The combo row's own settle was
+  // replayed on its R1 pick only; at another shared R2 row the combo can settle on a different, unvetoed control.
+  const vetoed = (i: number) => u.site === 'dismiss' && parts.vetoed(row.parts[i]!.arm) === true;
   let offers: Offer[] = [];
   if (row.kind === 'agree' && leans.every((l) => l !== null) && new Set(leans.map((l) => l!.pick)).size === 1) {
-    offers = [{ score: Math.min(...leans.map((l) => l!.score)), pick: leans[0]!.pick, prio: 1 }];
+    offers = [{ score: Math.min(...leans.map((l) => l!.score)), pick: leans[0]!.pick, prio: 1, vetoed: row.parts.some((_, i) => vetoed(i)) }];
   } else if (row.kind === 'fallback') {
-    offers = leans.flatMap((l, i) => (l === null ? [] : [{ score: l.score, pick: l.pick, prio: leans.length - i }]));
+    offers = leans.flatMap((l, i) => (l === null ? [] : [{ score: l.score, pick: l.pick, prio: leans.length - i, vetoed: vetoed(i) }]));
   }
+  // Q14 (5.7, A1), 2.4: the sum of the parts asked, each priced on attempt 1 from its own single-arm row as a single
+  // arm is. The row's stored `usd_priced` is not read: its writer leaves it null on an asked part that refused.
+  const asked = row.parts.filter((p) => p.asked).map((p) => (p.row_key === null ? null : parts.usd1(p.row_key) ?? null));
+  const usd1 = asked.length === 0 || asked.some((v) => v === null) ? null : asked.reduce<number>((s, v) => s + v!, 0);
   const answered = row.verdict?.verdict === 'answer';
-  return { ...u, offers: u.site === 'dismiss' && u.vetoed === true ? [] : offers, pick: null, score: null,
-    usd1: row.usd_priced, branch: !answered ? null : row.kind === 'fallback' && row.parts[1]?.asked ? 'second' : 'first',
+  return { ...u, offers, pick: null, score: null, usd1,
+    // 5.6 Q5/D4, 5.5: the fallback's OpenAI branch is every item on which it asked its second part, answered or not.
+    branch: row.kind === 'fallback' && row.parts[1]?.asked ? 'second' : answered ? 'first' : null,
     answered: row.verdict !== null, partArms: row.parts.map((p) => p.arm) };
 }
 
