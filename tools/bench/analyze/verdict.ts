@@ -5,7 +5,7 @@ import {
   fmtMs, mcnemarPairs, missWrite, pairUnits, pairedDiff, pairedPercentile, precisionRule, r2Cell, readAt, summarize,
   timingCell, wrongRateOf,
 } from './readings';
-import type { Bound, CellUnits, Danger, Gates, Meta, Plan, R2Cell, Site, TimingRow, Unit } from './readings';
+import type { Bound, CellUnits, Danger, Gates, Meta, Plan, Site, TimingRow, Unit } from './readings';
 
 /*
   Section 5's rules over the readings: 5.5 default arm per site and the production combos (Q1, Q2), 5.6 rows, rule M
@@ -35,10 +35,18 @@ export interface Inputs {
   recheck: Unit[]; interimUnits: Unit[];
   /** P5 rows as units with their variant and repeat (ablation, drift, descriptor re-ask). */
   p5: (Unit & { variant: string; repeat: string; order: string; raw: Record<string, unknown> })[];
+  /** 2.5: the drift body listings run.ts writes beside the P5 ledgers (items whose bodies differ from the prior's). */
+  driftBodies?: DriftBodies[];
   combos: Unit[]; comboDropped: number; gates: Gates | null;
   /** Combo unit rows without a single-arm unit row of the same item (their item facts defaulted; listed as missing). */
   comboNoFacts?: number;
   timing: TimingRow[]; timingDefects: number;
+}
+
+/** One `<results>/P5/drift-bodies.<set>.json` (run.ts `driftListing`: lib/drift.ts checks whose result is not `same`). */
+export interface DriftBodies {
+  file: string;
+  listing: { set?: string; arm?: string; counts?: Record<string, number>; listed?: { item: string; result: string; first_diff: number | null }[] };
 }
 
 /** The held-out verdict pool per site (5.5, 3.6). */
@@ -180,6 +188,15 @@ export function blockOf(ctx: Ctx, id: string, site: string, cell: CellUnits, set
   if (cell.units.length === 0) return ctx.miss(`P4 rows of ${id} at ${site} on ${sets.join('+')}`);
   if (familyBlocked(cell)) return `inconclusive (family: ${cell.family} of ${cell.total} rows)`;
   return settleOpenText(cell.units);
+}
+
+/**
+ * The rows every reading but Q11 reads (2.2, 3.2, A6 item 2): masks-on rows (the masks-off half of S4 and N10 is Q11's
+ * alone) and no `family_ok` false row. Cells get it from `cellUnits`; the tables that read units directly (Q9, Q10,
+ * Q12 and T29, the slices) apply it here.
+ */
+export function readable(u: Unit): boolean {
+  return u.masks && !u.familyBad;
 }
 
 /** 2.7: a dismiss cell with acted rows whose settle has no inputs has no after reading; null when it has one. */
@@ -718,7 +735,8 @@ function byItem(units: readonly Unit[]): Map<string, Unit[]> {
   return m;
 }
 
-interface T29 { pairs: number; same: number | null; diff: number; lower: number; upper: number; drift: boolean }
+/** `open` = dismiss rows of the compared items without settle inputs: their after answer is unknown (2.7), so no reading. */
+interface T29 { pairs: number; same: number | null; diff: number; lower: number; upper: number; drift: boolean; open: number }
 const T29_CACHE = new WeakMap<Ctx, Map<string, T29>>();
 
 /**
@@ -730,34 +748,42 @@ export function t29(ctx: Ctx, arm: string, site: string): T29 {
   const cache = T29_CACHE.get(ctx) ?? T29_CACHE.set(ctx, new Map()).get(ctx)!;
   const hit = cache.get(`${arm}\0${site}`);
   if (hit) return hit;
-  const recheck = ctx.i.recheck.filter((u) => u.arm === arm && u.site === site);
-  const interim = new Map(ctx.i.interimUnits.filter((u) => u.arm === arm && u.site === site && u.repeat === 'r1' && (u.order === 'p0' || u.order === 'fixed')).map((u) => [u.key, u]));
+  const mine = (u: Unit) => readable(u) && u.arm === arm && u.site === site;
+  const recheck = ctx.i.recheck.filter(mine);
+  const interimRows = ctx.i.interimUnits.filter((u) => mine(u) && (u.order === 'p0' || u.order === 'fixed'));
+  const interim = new Map(interimRows.filter((u) => u.repeat === 'r1').map((u) => [u.key, u]));
   const pairsR = recheck.filter((u) => interim.has(u.key)).map((u) => ({ key: u.key, group: u.group, a: interim.get(u.key)!, b: u }));
   const same = pairsR.length === 0 ? null : pairsR.filter((p) => answerOf(p.a) === answerOf(p.b)).length / pairsR.length;
-  const repeats = byItem(ctx.i.interimUnits.filter((u) => u.arm === arm && u.site === site && (u.order === 'p0' || u.order === 'fixed')));
+  const repeats = byItem(interimRows);
+  const open = pairsR.reduce((a, p) => a + (p.b.settleOpen ? 1 : 0) + (repeats.get(`${arm}\0${site}\0${p.key}`) ?? []).filter((u) => u.settleOpen).length, 0);
   const recs = pairsR.map((p) => {
     const reps = repeats.get(`${arm}\0${site}\0${p.key}`) ?? [];
     return { group: p.group, rec: answerOf(p.a) === answerOf(p.b) ? 1 : 0, within: reps.length >= 2 && new Set(reps.map(answerOf)).size === 1 ? 1 : 0 };
   });
   const diffOf = (rs: readonly { rec: number; within: number }[]) => rs.length === 0 ? Number.NaN : rs.reduce((a, r) => a + r.rec - r.within, 0) / rs.length;
   const draws = bootstrapDraws(recs, (r) => r.group, diffOf, { resamples: ctx.i.resamples });
-  const out: T29 = { pairs: pairsR.length, same, diff: diffOf(recs), lower: drawAt(draws, 0.025), upper: drawAt(draws, 0.975), drift: false };
-  out.drift = recs.length > 0 && out.diff < 0 && out.upper < 0;
+  const out: T29 = { pairs: pairsR.length, same, diff: diffOf(recs), lower: drawAt(draws, 0.025), upper: drawAt(draws, 0.975), drift: false, open };
+  out.drift = open === 0 && recs.length > 0 && out.diff < 0 && out.upper < 0;
   cache.set(`${arm}\0${site}`, out);
   return out;
 }
 
-/** ` drift` (T29) for a printed cell that pools P4a (`slice: interim`) and final P4 rows of an (arm, site) that drifted. */
+/**
+ * ` drift` (T29) for a printed cell that pools P4a (`slice: interim`) and final P4 rows of an (arm, site) that drifted;
+ * ` drift unknown (no settle inputs)` when the recheck compares dismiss rows whose after answer is unknown (2.7).
+ */
 export function driftMark(ctx: Ctx, arm: string, site: string, units: readonly Unit[]): string {
   const slices = new Set(units.map((u) => u.slice ?? 'final'));
-  return slices.has('interim') && slices.has('final') && t29(ctx, arm, site).drift ? ' drift' : '';
+  if (!slices.has('interim') || !slices.has('final')) return '';
+  const t = t29(ctx, arm, site);
+  return t.open > 0 ? ' drift unknown (no settle inputs)' : t.drift ? ' drift' : '';
 }
 
 /** Q12 and T29: one-answer share and acted flip rate per (arm, site); the recheck agreement against P4a beside. */
 export function stabilityTable(ctx: Ctx): Table {
   const rows: Cell[][] = [];
   const cells = new Map<string, Unit[][]>();
-  for (const [k, list] of byItem(ctx.i.allUnits)) {
+  for (const [k, list] of byItem(ctx.i.allUnits.filter(readable))) {
     const [arm, site] = k.split('\0');
     cells.set(`${arm}\0${site}`, [...(cells.get(`${arm}\0${site}`) ?? []), list]);
   }
@@ -774,10 +800,14 @@ export function stabilityTable(ctx: Ctx): Table {
       if (pairs > 0) flips.push(differ / pairs);
     }
     const t = t29(ctx, arm, site);
-    rows.push([arm, site, items.length, r4(one), r4(flips.length === 0 ? Number.NaN : flips.reduce((a, b) => a + b, 0) / flips.length), flips.length,
-      t.same === null ? null : `${r4(t.same)} (${t.pairs})`, t.pairs === 0 ? null : `${r4(t.diff)} [${r4(t.lower)}, ${r4(t.upper)}]${t.drift ? ' drift' : ''}`]);
+    // 2.7, A6 item 2: answers compared after the dismiss veto, so rows without settle inputs leave the cell without a reading.
+    const open = site === 'dismiss' ? settleOpenText(items.flat()) : null;
+    const tOpen = t.open > 0 ? `inconclusive (no settle inputs: ${t.open} acted rows)` : null;
+    rows.push([arm, site, items.length, open ?? r4(one), open ?? r4(flips.length === 0 ? Number.NaN : flips.reduce((a, b) => a + b, 0) / flips.length), open ?? flips.length,
+      t.same === null ? null : tOpen ?? `${r4(t.same)} (${t.pairs})`, t.pairs === 0 ? null : tOpen ?? `${r4(t.diff)} [${r4(t.lower)}, ${r4(t.upper)}]${t.drift ? ' drift' : ''}`]);
   }
   notes.push('Answers are compared by caller index; the flip rate is computed per item, then averaged over items with a pair of acted rows.');
+  notes.push('Masks-on rows only (2.2; the masks-off half of S4 and N10 is read by Q11 alone). Dismiss answers are read after the veto replay, so a dismiss cell holding acted rows without settle inputs prints `inconclusive (no settle inputs)` (2.7, A6 item 2).');
   notes.push('T29 drift: the recheck same-answer share is printed beside; a cell pooling P4a and P4 rows carries `drift` when it is lower than the within-run r1-r3 agreement and the paired CI excludes 0 (see the drift column of the recheck table).');
   return { anchor: 'q12', section: 6, title: 'Stability (Q12) and the P4a recheck (T29)', columns: ['arm', 'site', 'items', 'one-answer share', 'acted flip rate', 'items with acted pairs', 'recheck same-answer share (n)', 'recheck - within-run agreement [CI]'], rows, notes };
 }
@@ -786,8 +816,8 @@ export function stabilityTable(ctx: Ctx): Table {
 export function routeTable(ctx: Ctx): Table {
   const rows: Cell[][] = [];
   for (const site of SITES) {
-    const gw = new Map(ctx.i.units.filter((u) => u.arm === 'jev_gw' && u.site === site && u.digest !== null).map((u) => [u.digest!, u]));
-    const pairs = ctx.i.units.filter((u) => u.arm === 'jev_or' && u.site === site && u.digest !== null && gw.has(u.digest!)).map((u) => ({ a: gw.get(u.digest!)!, b: u }));
+    const gw = new Map(ctx.i.units.filter((u) => readable(u) && u.arm === 'jev_gw' && u.site === site && u.digest !== null).map((u) => [u.digest!, u]));
+    const pairs = ctx.i.units.filter((u) => readable(u) && u.arm === 'jev_or' && u.site === site && u.digest !== null && gw.has(u.digest!)).map((u) => ({ a: gw.get(u.digest!)!, b: u }));
     if (pairs.length === 0) { rows.push([site, 0, null, null, ctx.miss(`jev_gw and jev_or rows with equal digests at ${site}`), null, null]); continue; }
     const same = pairs.filter((p) => (p.a.pick ?? 'none') === (p.b.pick ?? 'none')).length / pairs.length;
     const deltas = pairs.filter((p) => p.a.score !== null && p.b.score !== null).map((p) => Math.abs(p.a.score! - p.b.score!)).sort((x, y) => x - y);
@@ -801,7 +831,8 @@ export function routeTable(ctx: Ctx): Table {
       ci ? `${r4(ci.estimate)} [${r4(ci.lower)}, ${r4(ci.upper)}]` : ctx.miss(`P6 M1 rows of jev_gw or jev_or at ${site}`), ci ? r4(ci.p) : null]);
   }
   return { anchor: 'q9', section: 6, title: 'Jev route (Q9): jev_gw vs jev_or', columns: ['site', 'pairs', 'same chosen key share', 'median |delta confidence|', 'reading', 'p50 T_ask jev_or - jev_gw [CI]', 'bootstrap p'], rows,
-    notes: ['Only jev_gw enters verdicts; jev_or answers the route and default-config questions.'] };
+    notes: ['Only jev_gw enters verdicts; jev_or answers the route and default-config questions.',
+      'Masks-on rows only (2.2; Q11 alone reads the masks-off half). Q9 compares the chosen key and confidence before any settle, so dismiss rows without settle inputs stay in (2.7: the before reading is unchanged, A6 item 2).'] };
 }
 
 /** Q11: masks on vs off on paired items (N10, S4). */
@@ -874,7 +905,7 @@ export function ablationTable(ctx: Ctx): Table[] {
   const ab = ctx.i.p5.filter((u) => (VARIANTS as readonly string[]).includes(u.variant) && u.repeat === 'r1')
     .map((u) => ({ ...u, p: pTrue(u.raw), kind: kindOf(ctx, u) }));
   if (ab.length === 0) {
-    return [{ anchor: 'q7', section: 4, title: 'Wording ablation (Q7, Q8)', columns: ['reading'], rows: [[ctx.miss('P5 ablation rows')]], notes: [] }];
+    return [{ anchor: 'q7', section: 4, title: 'Wording ablation (Q7, Q8)', columns: ['reading'], rows: [[ctx.miss('P5 ablation rows')]], notes: [] }, driftTable(ctx)];
   }
   const rows: Cell[][] = [];
   const diffs: Cell[][] = [];
@@ -916,7 +947,7 @@ export function ablationTable(ctx: Ctx): Table[] {
     const cp = clopperPearson(x, held.length, 0.025);
     selection.push([arm, best, `${x}/${held.length}`, `[${r4(cp.lower)}, ${r4(cp.upper)}]`]);
   }
-  const drift = driftRows(ctx);
+  const drift = driftTable(ctx);
   return [
     { anchor: 'q7', section: 4, title: 'Wording ablation (Q7, Q8): every cell x kind', columns: ['arm', 'variant', 'kind', 'gold-true n', 'gold-false n', 'yes_edge', 'false_yes', 'mean p(true) | true', 'mean p(true) | false'], rows,
       notes: ['Minimum detectable effect: a held-out kind x gold cell holds ~15 items, so only a yes_edge difference of ~0.35 or more is detectable; ~0.2 on all items. Smaller effects are "not shown", never "no effect".'] },
@@ -933,29 +964,77 @@ function foldOfDev(group: string): boolean {
   return foldOf(group) < 5;
 }
 
+/** Fresh or prior statuses that carry a reading (2.5 drift): an answer, or an answer that failed validation (a null answer). */
+const DRIFT_READ = new Set(['ok', 'invalid']);
+
+/** The prior's answer key of a p(true) (`main`'s presence read, kept by drift-prior.ts): `true` at >= 0.5, else `false`. */
+function leanKey(p: number | null): string | null {
+  return p === null ? null : p >= 0.5 ? 'true' : 'false';
+}
+
+/** Why one drift repeat cannot be compared, else null: no fresh reading (2.2 family, a terminal failure) or no prior reading. */
+function driftBlock(u: P5Unit, prior: { found?: unknown; status?: unknown } | undefined): string | null {
+  const status = String(u.raw.status ?? 'none');
+  if (u.familyBad) return `${u.repeat} family_ok false`;
+  if (!DRIFT_READ.has(status)) return `${u.repeat} fresh ${status}`;
+  if (prior?.found !== true) return `${u.repeat} no prior answer`;
+  if (!DRIFT_READ.has(String(prior.status))) return `${u.repeat} prior ${String(prior.status)}`;
+  return null;
+}
+
 /**
- * 2.5 drift since the prior run: P5 rows of variant `drift` (byte-identical P1 bodies re-asked on `oa_primary`, 3
- * repeats) each carry the prior stored answer as `prior: {p_true}`; an item drifts when any repeat's p(true) differs
- * by > 0.01. Bodies that differ are listed by the runner and left out here.
+ * 2.5 drift since the prior run. P5 rows of variant `drift` (byte-identical P1 bodies re-asked on `oa_primary`, 3
+ * repeats) each carry the prior's stored answer of the same repeat as `prior` (lib/drift.ts `priorOf`). A repeat is
+ * compared when both rows carry a reading (status `ok`, or `invalid` read as a null answer); a fresh terminal failure
+ * (timeout, transport, HTTP, refusal, egress refusal) or a `family_ok` false row (2.2), or a prior without a reading,
+ * is not comparable. An item drifts when, on any compared repeat, its answer key differs from the prior's (an answer
+ * against a null answer differs) or both p(true) are numbers and differ by more than 0.01; items with no compared
+ * repeat are excluded and listed with their reasons. drift = drifted / compared items with its exact (CP) 95% interval.
+ * Items whose bodies differ from the prior's are never asked: run.ts lists them in `P5/drift-bodies.<set>.json`, read
+ * here and printed beside, out of the reading.
  */
-function driftRows(ctx: Ctx): Table {
+export function driftTable(ctx: Ctx): Table {
   const rows = ctx.i.p5.filter((u) => u.variant === 'drift');
-  const byItem = new Map<string, { group: string; drift: boolean; missing: boolean }>();
-  for (const u of rows) {
-    const prior = (u.raw.prior as { p_true?: unknown } | undefined)?.p_true;
-    const p = pTrue(u.raw);
-    const rec = byItem.get(u.key) ?? { group: u.group, drift: false, missing: false };
-    if (typeof prior !== 'number' || p === null) rec.missing = true;
-    else if (Math.abs(p - prior) > 0.01) rec.drift = true;
-    byItem.set(u.key, rec);
+  const byItem = new Map<string, { item: string; compared: number; drift: boolean; blocked: string[] }>();
+  for (const u of [...rows].sort((a, b) => a.key.localeCompare(b.key) || String(a.repeat).localeCompare(String(b.repeat)))) {
+    const id = `${u.arm}\0${u.key}`;
+    const rec = byItem.get(id) ?? { item: u.key, compared: 0, drift: false, blocked: [] };
+    byItem.set(id, rec);
+    const prior = u.raw.prior as { found?: unknown; status?: unknown; p_true?: unknown; answer?: unknown } | undefined;
+    const block = driftBlock(u, prior);
+    if (block !== null) { rec.blocked.push(block); continue; }
+    // An `invalid` row is a reading with a null answer (no key, no p(true)), as the prior stores one.
+    const p = u.raw.status === 'ok' ? pTrue(u.raw) : null;
+    const priorP = typeof prior!.p_true === 'number' ? prior!.p_true : null;
+    const priorKey = typeof prior!.answer === 'string' ? prior!.answer : null;
+    rec.compared += 1;
+    // > 0.01 on the real difference: the 1e-9 keeps a float residue (0.96 - 0.95) from reading as more than 0.01.
+    if (leanKey(p) !== priorKey || (p !== null && priorP !== null && Math.abs(p - priorP) > 0.01 + 1e-9)) rec.drift = true;
   }
-  const recs = [...byItem.values()].filter((r) => !r.missing);
-  const x = recs.filter((r) => r.drift).length;
-  const cp = clopperPearson(x, recs.length, 0.025);
-  const reading: Cell[] = recs.length === 0 ? [ctx.miss('P5 drift rows with prior p(true)'), null, null, null]
-    : [`${x}/${recs.length}`, r4(x / recs.length), `[${r4(cp.lower)}, ${r4(cp.upper)}]`, byItem.size - recs.length];
-  return { anchor: 'q7-drift', section: 4, title: 'Drift since the prior run (P1 byte-identical re-ask on oa_primary)', columns: ['drifted items', 'drift', 'exact CI', 'items without a prior answer'],
-    rows: [reading], notes: ['The route factor (gateway vs direct) is inconclusive by design: OpenAI is reachable only through the gateway.'] };
+  const recs = [...byItem.values()];
+  const read = recs.filter((r) => r.compared > 0);
+  const excluded = recs.filter((r) => r.compared === 0);
+  const x = read.filter((r) => r.drift).length;
+  const cp = clopperPearson(x, read.length, 0.025);
+  const bodies = ctx.i.driftBodies ?? [];
+  const setOf = (b: DriftBodies) => (b.listing.set === undefined ? b.file : canonSet(b.listing.set, ctx.i.plan));
+  const listed = bodies.flatMap((b) => (b.listing.listed ?? []).map((l) => ({ ...l, set: setOf(b) })));
+  const bodyCell = bodies.length === 0
+    ? (rows.length === 0 ? 'no listing (P5 drift not run)' : ctx.miss('P5 drift body listing (P5/drift-bodies.<set>.json)'))
+    : `${listed.length} (${bodies.map((b) => `${setOf(b)}: ${Object.entries(b.listing.counts ?? {}).map(([k, v]) => `${k} ${v}`).join(', ')}`).join('; ')})`;
+  const reading: Cell[] = rows.length === 0 ? [ctx.miss('P5 drift rows (variant drift on oa_primary)'), null, null, 0, 0, 0, 0, bodyCell]
+    : [`${x}/${read.length}`, r4(x / read.length), `[${r4(cp.lower)}, ${r4(cp.upper)}]`, read.length, read.reduce((a, r) => a + r.compared, 0),
+      read.filter((r) => r.blocked.length > 0).length, excluded.length, bodyCell];
+  const notes = [
+    'Per repeat, vs the prior stored answer of the same repeat: the answer key (p(true) >= 0.5 reads true, as the prior stored it) differs, an answer against a null answer differs, or both p(true) differ by > 0.01.',
+    'Not comparable: a fresh terminal failure (timeout, transport, HTTP, refusal, egress refusal), a family_ok false row (2.2), or a prior repeat without a reading; the item is compared on its remaining repeats.',
+    ...excluded.map((r) => `excluded (no comparable repeat): ${r.item} (${r.blocked.join('; ')})`),
+    ...listed.map((l) => `body differs, left out: ${l.set}:${l.item} (${l.result}${l.first_diff === null ? '' : `, first differing byte ${l.first_diff}`})`),
+    'The route factor (gateway vs direct) is inconclusive by design: OpenAI is reachable only through the gateway.',
+  ];
+  return { anchor: 'q7-drift', section: 4, title: 'Drift since the prior run (P1 byte-identical re-ask on oa_primary)',
+    columns: ['drifted items', 'drift', 'exact CI', 'items compared', 'repeats compared', 'items compared on fewer repeats', 'items excluded (no comparable repeat)', 'bodies differ (left out)'],
+    rows: [reading], notes };
 }
 
 /** Q6 (2.6, 5.7): v1 vs fresh descriptor lines per site and provider (majority of 3 rows), and drift of the descriptor re-ask. */
@@ -1092,7 +1171,7 @@ export function sliceTable(ctx: Ctx): Table {
     ['template', (u) => String(ctx.i.meta.get(u.key)?.template ?? 'unknown')],
   ];
   for (const site of SITES) for (const arm of armsAt(ctx, site)) {
-    const units = [...ctx.i.units, ...ctx.i.combos].filter((u) => u.arm === arm && u.site === site && !u.visualOnly && !u.familyBad);
+    const units = [...ctx.i.units, ...ctx.i.combos].filter((u) => u.arm === arm && u.site === site && !u.visualOnly && readable(u));
     for (const [dim, of] of dims) {
       const values = [...new Set(units.map(of))].sort();
       if (values.length < 2) continue;
@@ -1100,13 +1179,16 @@ export function sliceTable(ctx: Ctx): Table {
         const sl = units.filter((u) => of(u) === v);
         if (sl.length < 30) continue;
         const s = summarize(sl);
-        rows.push([site, `${arm}${driftMark(ctx, arm, site, sl)}`, dim, v, s.items, s.acted, s.wrong, r4(s.coverage), r4(s.precision)]);
+        // 2.7, A6 item 2: acted dismiss rows without settle inputs have no after reading, so no after column is read.
+        const open = site === 'dismiss' ? settleOpenText(sl) : null;
+        rows.push([site, `${arm}${driftMark(ctx, arm, site, sl)}`, dim, v, s.items, open ?? s.acted, open ?? s.wrong, open ?? r4(s.coverage), open ?? r4(s.precision)]);
       }
     }
   }
   return { anchor: 'slices', section: 2, title: 'Slices by language, origin and template (3.3, T4; >= 30 items, every set pooled, descriptive)', columns: ['site', 'arm or combo', 'slice', 'value', 'items', 'acted', 'wrong', 'coverage', 'precision'], rows,
     notes: ['Page-state and outcome are reported per origin (stored vs native) and pooled; verdicts read the native held-out pool only.',
-      '`drift` (T29) marks a slice that pools P4a and final P4 rows of an arm and site whose recheck drifted (Q12 table).'] };
+      '`drift` (T29) marks a slice that pools P4a and final P4 rows of an arm and site whose recheck drifted (Q12 table).',
+      'Masks-on rows only (2.2; the masks-off half of S4 and N10 is read by Q11 alone). A dismiss slice holding acted rows without settle inputs prints `inconclusive (no settle inputs)` in its acted, wrong, coverage and precision columns, as the site cells do (2.7, A6 item 2).'] };
 }
 
 /** Q14 and 9.1 item 9: $ per 1,000 Decisions (attempt 1, unit rows) and per settled answer, per site and arm or combo. */

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { flags, need, num, opt } from '../../calibrate/lib/args';
 import { readArmsFile } from '../lib/arms';
@@ -9,7 +9,7 @@ import { agentTable, e2eTables, firstExisting, slowGateway } from './levels';
 import { canonSet as canonSetOf, comboRows, comboUnit, isUnitRow, phaseRows, readGates, readMeta, readPlan, timingRows, toUnit } from './readings';
 import type { ItemFacts, Plan } from './readings';
 import { analyze } from './report';
-import type { Cell, Inputs, Report, Table } from './verdict';
+import type { Cell, DriftBodies, Inputs, Report, Table } from './verdict';
 import { helpExit } from '../lib/help';
 
 /*
@@ -22,7 +22,8 @@ import { helpExit } from '../lib/help';
     render --results <dir> --out <analysis dir> [--plan <plan.json>] [--interim] [--crosscheck <json>]
            [--agent-readings <agent-readings.json>] [--pii-egress] [--resamples 2000]
 
-  Sections 7 and 8: Q15 from the P7 ledger `<results>/e2e/cli/runs*.jsonl`; Q16 from agent/score.ts's
+  Sections 7 and 8: Q15 from the P7 ledger `<results>/e2e/cli/runs*.jsonl`, read on the A6 item 5 re-grade with the
+  recorded grade beside it (analyze/regrade.ts; the ledger is never edited); Q16 from agent/score.ts's
   `agent-readings.json` (`--agent-readings`, else `<out>/agent-readings.json`, else `<results>/P8/scored/agent-readings.json`,
   where p8/run.sh's score step writes it and A6 keeps it, else `<results>/P8/agent-readings.json`).
 
@@ -31,6 +32,14 @@ import { helpExit } from '../lib/help';
 */
 
 const USAGE = 'usage: render --results <dir> --out <dir> [--plan <plan.json>] [--interim] [--crosscheck <json>] [--agent-readings <json>] [--pii-egress] [--resamples 2000]';
+
+/** The 2.5 drift body listings run.ts writes beside the P5 ledgers (`<results>/P5/drift-bodies.<set>.json`), by file name. */
+export function readDriftBodies(results: string): DriftBodies[] {
+  const dir = join(results, 'P5');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((f) => /^drift-bodies\..+\.json$/.test(f)).sort()
+    .map((f) => ({ file: f, listing: JSON.parse(readFileSync(join(dir, f), 'utf8')) as DriftBodies['listing'] }));
+}
 
 /** Every input the rules read, from the results dir. `interim` keeps P4a rows only. */
 export function loadInputs(results: string, plan: Plan, opts: { interim: boolean; resamples: number }): Inputs {
@@ -53,7 +62,7 @@ export function loadInputs(results: string, plan: Plan, opts: { interim: boolean
     allUnits: shipped.map((r) => toUnit(r, plan)),
     recheck: p4.filter((r) => r.variant === 'recheck').map((r) => toUnit(r, plan)),
     interimUnits: p4.filter((r) => r.slice === 'interim' && r.variant === 'shipped').map((r) => toUnit(r, plan)),
-    p5, combos: comboUnits, comboDropped: combos.dropped, comboNoFacts, gates: readGates(results),
+    p5, driftBodies: readDriftBodies(results), combos: comboUnits, comboDropped: combos.dropped, comboNoFacts, gates: readGates(results),
     timing: timing.rows, timingDefects: timing.defects,
   };
 }

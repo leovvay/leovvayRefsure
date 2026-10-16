@@ -1,7 +1,7 @@
 import { clopperPearson } from '../lib/stats';
 import { SITES, X7_ORDER, mcnemarPairs } from './readings';
 import type { Unit } from './readings';
-import { r4 } from './verdict';
+import { r4, readable } from './verdict';
 import type { Cell, Ctx, Table } from './verdict';
 
 /*
@@ -48,7 +48,7 @@ const COLUMNS = ['arm or combo', 'site', 'injected items', 'sets', 'dangerous in
 
 export function injectionTable(ctx: Ctx): Table {
   const rows: Cell[][] = [];
-  const all = [...ctx.i.units, ...ctx.i.combos].filter((u) => !u.familyBad);
+  const all = [...ctx.i.units, ...ctx.i.combos].filter(readable);
   const arms = [...new Set(all.filter((u) => INJECTION_SETS.has(u.set)).map((u) => u.arm))].sort();
   for (const arm of arms) {
     const pooled: Unit[] = [];

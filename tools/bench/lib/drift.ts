@@ -99,7 +99,7 @@ export function driftCounts(checks: readonly BodyCheck[]): Record<BodyCheck['res
   return out;
 }
 
-/** The row's `prior` field (analyze/verdict.ts driftRows reads `prior.p_true`): the prior answer of the same repeat. */
+/** The row's `prior` field (analyze/verdict.ts driftTable reads its `found`, `status`, `answer` and `p_true`): the prior answer of the same repeat. */
 export function priorOf(line: PriorLine | undefined, repeat: string, fileSha: string): Record<string, unknown> {
   const a = line?.answers[repeat];
   if (line === undefined || a === undefined) return { found: false, repeat, p_true: null, answer: null, file_sha256: fileSha };
