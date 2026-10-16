@@ -444,12 +444,19 @@ Reads committed ledgers only; needs no key and sends nothing (`--pii-egress` bui
 (analyze/spend-table.ts), the whole `spend-crosscheck.json`: ledger calls, rows and priced and reported dollars per
 phase and arm, a ledger total per arm and over every arm, the gateway tag split with the unmatched and grand-total
 rows, each phase's key window (`unread` when no snapshot was taken), the P0 window when given, OpenRouter's
-`usage.cost` beside its ledger, Claude's dollars, and the explain lines; reported dollars print `-` for an arm whose
-usage carries no cost. Section 10 prints `#t17` (analyze/t17.ts): T17's two readings of 3.1's rho pool (every arm and
-combo, or single arms only) and of X7 (equal digests counted once within and across sets, or across sets only).
-Every other table prints the first; `#t17` reads the tables that print a three-way reading again under each second
-reading and lists every cell whose reading word changes, and per site the cells whose bound or n_eff moves with the
-word unchanged and the largest deff lower or danger upper move.
+`usage.cost` beside its ledger, P7's CLI Decisions per cfg with refsure's own `decision.usd`, Claude's dollars, and
+the explain lines; reported dollars print `-` for an arm whose usage carries no cost. Section 10 prints `#t17`
+(analyze/t17.ts): T17's two readings of 3.1's rho pool (every arm and combo, or single arms only), of X7 (equal
+digests counted once within and across sets, or across sets only) and of 5.5 step 1's danger half (an unsafe danger
+bound is `fail`, or only a precision fail is). Every other table prints the first; `#t17` reads the tables that print
+a three-way reading again under each second reading and lists every cell whose reading word changes, and per site
+the cells whose bound or n_eff moves with the word unchanged and the largest deff lower or danger upper move. Other
+two-reading cells print both where they sit: `#pixel` each set alone beside the pool (5.6 names N4p; X3 pools every
+visual-only item) and `#q11` the must-not-move test with the unmasked-by-design class in. Q11 pairs one item asked
+masks on and off (never by `base`, which N10 shares across items). `#q10`'s after cell reads `inconclusive (no settle
+inputs)` when an acted row has no settle inputs (2.7), with the count over the other items beside it.
+`#e2e-timing` prints `T_cli` with and without flagged rows, marks a cell that moves `fragile` (5.7) and notes the key
+injection timed alone at P0 (6.4).
 
 Plan file (outside the repo when it names private set files):
 `{"sets": {"N1": "<frozen file>", ...}, "aliases": {"<ledger set id>": "F1", ...}, "metaFill": {"S4": {"from": "<file>", "fields": ["mask_changes_gold"]}}, "directArms": ["jev_or"], "ownerScopeRuled": false}`.
