@@ -1,0 +1,41 @@
+name: release
+
+# From 0.2, a pushed version tag publishes to npm with provenance, over OIDC (npm trusted publishing): no npm token
+# is stored anywhere. 0.1.0 is published by hand. Before the first run, the npm package must name this repository
+# and this workflow file as its trusted publisher.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The scrub gate reads `git log --all`.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships npm 10.
+      - run: npm install -g npm@^11.5.1
+      - run: npm ci --ignore-scripts
+      - name: The tag names package.json's version
+        run: |
+          want="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$want" ]; then
+            echo "tag $GITHUB_REF_NAME does not name package.json's version ($want)"
+            exit 1
+          fi
+      # `prepublishOnly` runs typecheck, build and the scrub gate before anything is uploaded, as on a hand publish.
+      - run: npm publish --provenance --access public
+        env:
+          REFSURE_SCRUB_PATTERNS: ${{ secrets.REFSURE_SCRUB_PATTERNS }}
+          REFSURE_SCRUB_ALLOW: ${{ secrets.REFSURE_SCRUB_ALLOW }}

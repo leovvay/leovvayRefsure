@@ -234,6 +234,10 @@ before every `npm publish`. That is why the repository has no `.npmrc` with `ign
 `prepublishOnly` too, so installs pass `--ignore-scripts` on the command line instead. If CI reports a hit in your
 change, the maintainer will tell you which line to change.
 
+0.1.0 is published by hand. From 0.2, a release is a pushed `v<version>` tag that names `package.json`'s version:
+`.github/workflows/release.yml` checks the tag and runs `npm publish --provenance` over OIDC (npm trusted publishing,
+no stored token), and `prepublishOnly` runs the gate there with the same secrets.
+
 ## Style
 
 - TypeScript with `strict`, `noUncheckedIndexedAccess` and `verbatimModuleSyntax`; `moduleResolution: "bundler"`,
