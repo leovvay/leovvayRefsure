@@ -14,7 +14,7 @@ import { helpExit } from './lib/help';
   tag header and the bench key's own spend over each phase window, (b) OpenRouter `usage.cost` sums on the direct
   arm, (c) Claude `total_cost_usd` (`agent_usd`, Claude rows) from the P8 agent ledger. The gateway rows are also
   counted per arm against the ledger's call counts, and the rows no arm's tags match and the export's grand total are
-  written beside. A gap above 2% is listed for the report to explain, and so is each phase whose gateway arms have
+  written beside. P7's CLI Decisions are summed per cfg from refsure's own `decision.usd`. A gap above 2% is listed for the report to explain, and so is each phase whose gateway arms have
   ledger rows but no key-spend snapshot (its key window reads unread).
 
     spend snapshot --results <dir> --phase <P> --at before|after
@@ -163,6 +163,27 @@ function agentDollars(results: string): { runs: number; usd: number; unreported:
   return { runs: claude.length, usd: priced.reduce((a, r) => a + (r.agent_usd as number), 0), unreported: claude.length - priced.length };
 }
 
+/**
+ * P7's CLI Decisions (`<results>/e2e/cli/runs*.jsonl`, every command row of every file: a void run spent too), per
+ * cfg: Decisions, refsure's own `decision.usd` summed, and parts that report no usd (OpenAI parts). The ledger has no
+ * arm or token usage, so P7 is not priced with the 7.2 table; its gateway calls carry no arm tag.
+ */
+function cliDecisions(results: string): Record<string, { decisions: number; reported: number; unreportedParts: number }> | null {
+  const files = ledgerFiles(results, 'e2e', 'cli', 'runs');
+  if (files.length === 0) return null;
+  const out: Record<string, { decisions: number; reported: number; unreportedParts: number }> = {};
+  for (const file of files) for (const row of readRows<{ kind?: string; cfg?: string; envelope?: { decision?: { usd?: unknown; parts?: { usd?: unknown }[] } | null } | null }>(file)) {
+    const d = row.envelope?.decision;
+    if (row.kind !== 'command' || typeof row.cfg !== 'string' || d === null || typeof d !== 'object') continue;
+    const t = out[row.cfg] ?? { decisions: 0, reported: 0, unreportedParts: 0 };
+    t.decisions += 1;
+    if (typeof d.usd === 'number') t.reported += d.usd;
+    t.unreportedParts += (d.parts ?? []).filter((p) => typeof p.usd !== 'number').length;
+    out[row.cfg] = t;
+  }
+  return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
+}
+
 /** `spend-crosscheck.json` (7.3) as `crosscheck` writes it; analyze/spend-table.ts renders it. */
 export interface CrossCheck {
   perPhase: Record<string, Record<string, Sum>>;
@@ -175,6 +196,8 @@ export interface CrossCheck {
   p0Window: Record<string, { measuredPerCall: number | null; pricedPerCall: number | null; gap: number | null }> | null;
   openRouter: { arm: string; usageCost: number }[];
   claude: { runs: number; usd: number; unreported: number } | null;
+  /** P7's CLI Decisions per cfg, from refsure's own `decision.usd` (cliDecisions). */
+  p7: Record<string, { decisions: number; reported: number; unreportedParts: number }> | null;
   summary: { arms: Record<string, { calls: number; priced: number }>; gapsToExplain: number };
   explain: string[];
 }
@@ -224,13 +247,15 @@ export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: strin
   }));
   const direct = arms.arms.filter((a) => a.via === 'direct').map((a) => ({ arm: a.id, usageCost: perArm[a.id]?.reported ?? 0 }));
   const agents = agentDollars(results);
+  const p7 = cliDecisions(results);
+  if (p7 !== null) explain.push('P7: priced by refsure\'s own decision.usd only (OpenAI parts report none); its gateway calls carry no arm tag, and Jev calls sent to OpenRouter are in no gateway row');
   if (split === null && windowRows === null) explain.push('no gateway spend rows and no P0 window: the per-arm split is unchecked');
   if (Object.keys(windows).length === 0) explain.push('no key-spend snapshots: the phase windows are unchecked (or /key/info unreadable, per P0)');
   if (agents === null) explain.push('no agent ledger (P8/agents.jsonl): Claude dollars unchecked');
   else if (agents.unreported > 0) explain.push(`Claude runs without a reported total_cost_usd: ${agents.unreported} of ${agents.runs}`);
   return {
     perPhase: ledgers, perArm, gatewayTagSplit: tagRows, gatewayUnmatched: split?.unmatched ?? null, gatewayTotal: split?.total ?? null,
-    keyWindows: keyRows, p0Window: windowRows, openRouter: direct, claude: agents,
+    keyWindows: keyRows, p0Window: windowRows, openRouter: direct, claude: agents, p7,
     summary: { arms: Object.fromEntries(Object.entries(perArm).map(([a, s]) => [a, { calls: s.calls, priced: Math.round(s.priced * 1e6) / 1e6 }])), gapsToExplain: explain.length },
     explain,
   };

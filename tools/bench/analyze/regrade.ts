@@ -12,6 +12,7 @@ export interface P7Row {
   outcome?: string | null; false_claim?: boolean | null; reasons?: string[]; step_grades?: { n: number; grade: string; why: string }[];
   measures?: { wrong_clicks?: number; wrong_presses?: number; repeated_writes?: number; line_checks?: { ok?: string }[] };
   step?: number; argv?: string[] | null; t_cli?: number | null; skipped?: string | null; exit?: number | null; signal?: string | null;
+  flags?: string[];
   envelope?: P7Envelope | null;
 }
 

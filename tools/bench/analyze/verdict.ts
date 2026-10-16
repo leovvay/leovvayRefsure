@@ -849,32 +849,40 @@ export function routeTable(ctx: Ctx): Table {
 /** Q11: masks on vs off on paired items (N10, S4). */
 export function piiTable(ctx: Ctx, egress: { checked: number; hits: string[]; unlisted?: string[] } | null): Table {
   const rows: Cell[][] = [];
-  // A pair shares its item's `base` (S4: `pii-001~masks-on` / `~masks-off`), else the id without its mask suffix.
+  // A pair is one item asked masks on and off: its id without the mask suffix (`n10-001~masks-on` / `~masks-off`;
+  // 3.6: N10 90 + S4 29 pairs). N10's `base` is a template shared by several items, so it never keys a pair.
   const bareId = (item: string) => item.replace(/[-_:.~](masks-?)?(on|off)$/i, '');
   const metaOf = (u: Unit) => ctx.i.meta.get(u.key) ?? ctx.i.meta.get(`${u.set}:${bareId(u.item)}`);
-  const baseOf = (u: Unit) => { const b = metaOf(u)?.base; return typeof b === 'string' ? b : bareId(u.item); };
-  const pairKey = (u: Unit) => `${u.arm}\0${u.set}:${baseOf(u)}`;
+  const pairKey = (u: Unit) => `${u.arm}\0${u.set}:${bareId(u.item)}`;
   const sets = ['N10', 'S4'];
   for (const arm of [...new Set(ctx.i.units.filter((u) => sets.includes(u.set)).map((u) => u.arm))].sort()) {
     const units = ctx.i.units.filter((u) => u.arm === arm && sets.includes(u.set) && !u.familyBad);
     const on = new Map(units.filter((u) => u.masks).map((u) => [pairKey(u), u]));
     const pairs = units.filter((u) => !u.masks && on.has(pairKey(u))).map((u) => ({ key: u.key, group: u.group, a: on.get(pairKey(u))!, b: u }));
     const moves = (p: { a: Unit }) => metaOf(p.a)?.mask_changes_gold;
-    if (pairs.length === 0 || pairs.every((p) => moves(p) === undefined)) { rows.push([arm, pairs.length, null, null, null, null, ctx.miss(`masks on/off pairs with mask metadata for ${arm}`)]); continue; }
+    if (pairs.length === 0 || pairs.every((p) => moves(p) === undefined)) { rows.push([arm, pairs.length, null, null, null, null, null, ctx.miss(`masks on/off pairs with mask metadata for ${arm}`)]); continue; }
     const keep = pairs.filter((p) => moves(p) === false && metaOf(p.a)?.mask_class !== 'unmasked');
     const unmasked = pairs.filter((p) => metaOf(p.a)?.mask_class === 'unmasked');
     const removed = pairs.filter((p) => moves(p) === true);
-    const mc = mcnemarPairs(keep, (u) => u.acted && u.correct);
-    const changed = keep.filter((p) => answerOf(p.a) !== answerOf(p.b)).length;
-    const cp = clopperPearson(changed, keep.length, 0.025);
+    // T17: 5.7's "the 75 must-not-move items" counts N10's unmasked-by-design class, which 3.5 reports separately.
+    // The printed columns leave it out; the last column reads the same test with it in.
+    const read = (ps: typeof pairs) => {
+      const mc = mcnemarPairs(ps, (u) => u.acted && u.correct);
+      const changed = ps.filter((p) => answerOf(p.a) !== answerOf(p.b)).length;
+      const cp = clopperPearson(changed, ps.length, 0.025);
+      return { mc: `${r4(mc.p)} (${mc.b}/${mc.c})`, changed: `${changed} [${r4(cp.lower)}, ${r4(cp.upper)}]` };
+    };
+    const first = read(keep);
+    const second = read([...keep, ...unmasked]);
     const rightAbstain = removed.filter((p) => !p.a.acted).length;
-    rows.push([arm, keep.length, `${r4(mc.p)} (${mc.b}/${mc.c})`, `${changed} [${r4(cp.lower)}, ${r4(cp.upper)}]`,
-      `${rightAbstain} / ${removed.length}`, `${unmasked.length} unmasked-by-design pairs, ${unmasked.filter((p) => answerOf(p.a) !== answerOf(p.b)).length} changed`, null]);
+    rows.push([arm, keep.length, first.mc, first.changed, `${rightAbstain} / ${removed.length}`,
+      `${unmasked.length} unmasked-by-design pairs, ${unmasked.filter((p) => answerOf(p.a) !== answerOf(p.b)).length} changed`,
+      `${keep.length + unmasked.length} pairs: ${second.mc}; changes ${second.changed}`, null]);
   }
   const notes = [egress === null ? ctx.miss('egress byte check (render --pii-egress)')
     : `egress byte check: ${egress.checked} approved masks-on requests, ${egress.hits.length} holding a masked source string${egress.hits.length > 0 ? ` (defect: ${egress.hits.join(', ')})` : ''}${(egress.unlisted ?? []).length > 0 ? `; ${egress.unlisted!.join('; ')}` : ''}`];
   return { anchor: 'q11', section: 6, title: 'PII masks (Q11): masks on vs off', columns: ['arm', 'must-not-move pairs', 'McNemar correct on vs off p (b/c)', 'answer changes [exact CI]',
-    'right abstain on evidence-removal items', 'unmasked by design', 'note'], rows, notes };
+    'right abstain on evidence-removal items', 'unmasked by design', 'T17: must-not-move with unmasked by design', 'note'], rows, notes };
 }
 
 /** p(true) of an ablation row (2.5): a Noul's score; for `K`, `probabilities.true`, else confidence or 1 - confidence. */

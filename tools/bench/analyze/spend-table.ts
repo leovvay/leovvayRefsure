@@ -76,6 +76,11 @@ export function spendTable(cc: Partial<CrossCheck> | null, miss: (what: string) 
   for (const [arm, w] of Object.entries(cc.p0Window ?? {})) {
     rows.push(row('P0 window (7.3 a)', 'P0', arm, { 'priced $': sig4(w.pricedPerCall), 'measured $': sig4(w.measuredPerCall), gap: sig4(w.gap), note: 'per call' }));
   }
+  // P7's CLI Decisions per cfg: refsure's own decision.usd (no token usage in that ledger, so no priced $).
+  for (const [cfg, d] of Object.entries(cc.p7 ?? {})) {
+    rows.push(row('P7 CLI decision.usd', 'P7', cfg, { 'ledger calls': d.decisions, 'reported $': reported(d.reported),
+      note: d.unreportedParts > 0 ? `parts without a reported usd: ${d.unreportedParts}` : null }));
+  }
   // (b) OpenRouter usage.cost on each direct arm, beside its ledger; (c) Claude total_cost_usd from the P8 agent ledger.
   for (const o of cc.openRouter ?? []) {
     rows.push(row('OpenRouter usage.cost (7.3 b)', 'all', o.arm, { 'ledger calls': perArm[o.arm]?.calls ?? null, 'priced $': r4(perArm[o.arm]?.priced ?? null),

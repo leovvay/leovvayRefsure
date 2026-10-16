@@ -60,8 +60,12 @@ export function e2eTables(results: string, missing: string[]): Table[] {
     const runIds = new Set(scored.map((r) => r.run_id));
     const cmds = commands.filter((r) => runIds.has(r.run_id));
     for (const verb of [...new Set(cmds.map((r) => r.argv?.[0] ?? '?'))].sort()) {
-      const t = cmds.filter((r) => (r.argv?.[0] ?? '?') === verb).map((r) => r.t_cli!);
-      timing.push([cfg, backend, verb, t.length, fmtMs(nearestRank(t, 0.5)), fmtMs(nearestRank(t, 0.95))]);
+      const mineVerb = cmds.filter((r) => (r.argv?.[0] ?? '?') === verb);
+      const t = mineVerb.map((r) => r.t_cli!);
+      // 7.3 Load and T13: the same reading without rows flagged `high_load` or `slow_gateway`.
+      const clean = mineVerb.filter((r) => (r.flags ?? []).length === 0).map((r) => r.t_cli!);
+      timing.push([cfg, backend, verb, t.length, fmtMs(nearestRank(t, 0.5)), fmtMs(nearestRank(t, 0.95)),
+        clean.length, clean.length === 0 ? null : fmtMs(nearestRank(clean, 0.5)), clean.length === 0 ? null : fmtMs(nearestRank(clean, 0.95))]);
     }
   }
   // A6 item 5: the recorded grade and the re-grade side by side, per scenario, cfg and backend, for the scenarios it names.
@@ -96,8 +100,9 @@ export function e2eTables(results: string, missing: string[]): Table[] {
       notes: ['Read on the A6 item 5 re-grade; E06, E18 and E31 are printed with their recorded grade in the re-grade table.'] },
     { anchor: 'e2e-regrade', section: 7, source: 'P7', title: 'End-to-end CLI: recorded grade and A6 item 5 re-grade side by side', columns: ['scenario', 'cfg', 'backend', 'scored runs', 'recorded', 'recorded false claims', 're-grade', 're-graded false claims', 're-graded runs', 'rule'],
       rows: side, notes: regradeNotes },
-    { anchor: 'e2e-timing', section: 7, source: 'P7', title: 'End-to-end CLI: T_cli per verb (nearest rank, ok and non-ok rows alike)', columns: ['cfg', 'backend', 'verb', 'commands', 'p50', 'p95'], rows: timing,
-      notes: ['T_cli includes the key injection; its cost measured alone is in `e2e/injection.jsonl`.'] },
+    { anchor: 'e2e-timing', section: 7, source: 'P7', title: 'End-to-end CLI: T_cli per verb (nearest rank, ok and non-ok rows alike)', columns: ['cfg', 'backend', 'verb', 'commands', 'p50', 'p95', 'commands without flagged rows', 'p50 without flagged', 'p95 without flagged'], rows: timing,
+      notes: ['T_cli includes the key injection; its cost measured alone is in `e2e/injection.jsonl`.',
+        'Without flagged rows: commands sent with no `high_load` or `slow_gateway` flag (7.3 Load, T13), a sensitivity reading.'] },
   ];
 }
 
