@@ -73,8 +73,8 @@ Never repeat a write blind. An abstain (exit 10) is the tool working: it saw too
 `acted: true` means a click or fill was dispatched; the exit is then only 0 or 30.
 
 `next.do` tells you what to do: `act`, `act_high_risk`, `dismiss`, `state`, `wait` (sleep `after_ms`, then retry),
-`snapshot`, `retry_within`, `needs_human`, `stop`. `argv`, when present, is the exact command to run. An unknown
-`next.do` means `needs_human`. An unknown `why.cause` means: act on the exit class.
+`snapshot`, `retry_within`, `needs_human`, `stop`; `causes --json` lists them as `next_do`. `argv`, when present, is
+the exact command to run. An unknown `next.do` means `needs_human`. An unknown `why.cause` means: act on the exit class.
 
 ## 5. Refs
 

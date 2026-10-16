@@ -336,7 +336,7 @@ Global options, accepted by every command:
 | `triage` | never | List console errors, failed requests (status ≥400 or 0) and the load error, optionally since a mark |
 | `forget` | never | Clear this page's marks and tickets, or every page's with --all |
 | `commands` | never | Describe every command: options, page and capability needs, Decision sites, whether it acts |
-| `causes` | never | List every why.cause with its status and exit code |
+| `causes` | never | List every why.cause with its status and exit code, and every next.do |
 | `skill` | never | Print the agent skill (SKILL.md) bundled with this version, as the file itself, not an envelope |
 
 `Acts` is what a command may do in the page: `never`; `ticket`, only through a claimed single-use ticket after a
@@ -654,12 +654,14 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `usage` | `usage` | 64 | The command line was not valid; nothing was done. |
 
 `next.do` is one of `act`, `act_high_risk`, `dismiss`, `state`, `wait` (with `after_ms`), `snapshot`,
-`retry_within`, `needs_human` or `stop`. `argv[0]` is always `refsure` or `orca`.
+`retry_within`, `needs_human` or `stop`; `causes --json` lists the installed version's values as `next_do`. `argv[0]` is
+always `refsure` or `orca`.
 
 **Compatibility.** `refsure` in the envelope is the schema major. Within a major, fields are only added, never renamed
 or retyped, and no status or cause moves between exit classes. `why.cause` and `next.do` are open sets: new values
-arrive in minor releases and appear in `causes --json`. Treat an unknown cause by its exit class, and an unknown
-`next.do` as `needs_human`. A major bump keeps `--envelope <previous major>` for one minor release.
+arrive in minor releases and appear in `causes --json` (as `causes` and `next_do`). Treat an unknown cause by its exit
+class, and an unknown `next.do` as `needs_human`. A major bump keeps `--envelope <previous major>` for one minor
+release.
 
 ## Safety model and honest limits
 
