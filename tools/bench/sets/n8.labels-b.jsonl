@@ -1,0 +1,300 @@
+{"id":"n8-001","label":{"value":"new","text":"Спочатку нові"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":16,"on_page":true}
+{"id":"n8-002","label":{"value":"solo-m","text":"Solo · 1 user · monthly"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":6,"on_page":true}
+{"id":"n8-003","label":{"value":"HU","text":"Węgry"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":5,"on_page":true}
+{"id":"n8-004","label":{"value":"TRY","text":"Türkische Lira"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":2,"on_page":true}
+{"id":"n8-005","label":{"value":"bug","text":"Щось не працює"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":24,"on_page":true}
+{"id":"n8-006","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":18,"on_page":null}
+{"id":"n8-007","label":{"value":"biz-m","text":"Бізнес · до 50 користувачів · щомісяця"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":7,"on_page":true}
+{"id":"n8-008","label":{"value":"el","text":"Грецька"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":13,"on_page":true}
+{"id":"n8-009","label":{"value":"MX","text":"Meksyk"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":24,"on_page":true}
+{"id":"n8-010","label":{"value":"ML","text":"Малі"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":25,"on_page":true}
+{"id":"n8-011","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":23,"on_page":null}
+{"id":"n8-012","label":{"value":"za","text":"Назва: від Я до А"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":12,"on_page":true}
+{"id":"n8-013","label":{"value":"admin","text":"Administrator"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":9,"on_page":true}
+{"id":"n8-014","label":{"value":"IE","text":"Irland"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":18,"on_page":true}
+{"id":"n8-015","label":{"value":"team-y","text":"Team · bis 10 Nutzer · jährlich"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":16,"on_page":true}
+{"id":"n8-016","label":{"value":"hu","text":"Ungarisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":21,"on_page":true}
+{"id":"n8-017","label":{"value":"AUD","text":"Австралійський долар"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":13,"on_page":true}
+{"id":"n8-018","label":{"value":"team-y","text":"Zespół · do 10 użytkowników · rocznie"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":4,"on_page":true}
+{"id":"n8-019","label":{"value":"fi","text":"Finnisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":5,"on_page":true}
+{"id":"n8-020","label":{"value":"NOK","text":"Norwegian krone"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":18,"on_page":true}
+{"id":"n8-021","label":{"value":"divorced","text":"Divorciado/a"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":22,"on_page":true}
+{"id":"n8-022","label":{"value":"TR","text":"Türkei"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":1,"on_page":true}
+{"id":"n8-023","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":10,"on_page":null}
+{"id":"n8-024","label":{"value":"widowed","text":"Wdowiec / wdowa"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":2,"on_page":true}
+{"id":"n8-025","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":1,"on_page":null}
+{"id":"n8-026","label":{"value":"JPY","text":"Yen japonés"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":3,"on_page":true}
+{"id":"n8-027","label":{"value":"sl","text":"Slowenisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":24,"on_page":true}
+{"id":"n8-028","label":{"value":"IE","text":"Irland"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":16,"on_page":true}
+{"id":"n8-029","label":{"value":"transfer","text":"Bank transfer"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":3,"on_page":true}
+{"id":"n8-030","label":{"value":"price-asc","text":"Price: low to high"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":22,"on_page":true}
+{"id":"n8-031","label":{"value":"biz-y","text":"Firma · do 50 użytkowników · rocznie"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":24,"on_page":true}
+{"id":"n8-032","label":{"value":"2.10","text":"2.10.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":15,"on_page":true}
+{"id":"n8-033","label":{"value":"LV","text":"Latvia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":3,"on_page":true}
+{"id":"n8-034","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":24,"on_page":null}
+{"id":"n8-035","label":{"value":"prem","text":"Ekonomiczna premium"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":8,"on_page":true}
+{"id":"n8-036","label":{"value":"CAD","text":"Dolar kanadyjski"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":2,"on_page":true}
+{"id":"n8-037","label":{"value":"America/Denver","text":"(UTC-07:00) Денвер"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":7,"on_page":true}
+{"id":"n8-038","label":{"value":"tr","text":"Turco"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":25,"on_page":true}
+{"id":"n8-039","label":{"value":"returns","text":"Rücksendungen und Erstattungen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":20,"on_page":true}
+{"id":"n8-040","label":{"value":"price-desc","text":"Precio: de mayor a menor"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":11,"on_page":true}
+{"id":"n8-041","label":{"value":"500","text":"500 g"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":20,"on_page":true}
+{"id":"n8-042","label":{"value":"low","text":"Baja"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":5,"on_page":true}
+{"id":"n8-043","label":{"value":"id","text":"Personalausweis"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":1,"on_page":true}
+{"id":"n8-044","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":17,"on_page":null}
+{"id":"n8-045","label":{"value":"BE","text":"Belgium"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":9,"on_page":true}
+{"id":"n8-046","label":{"value":"bug","text":"Coś nie działa"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":10,"on_page":true}
+{"id":"n8-047","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":9,"on_page":null}
+{"id":"n8-048","label":{"value":"NO","text":"Noruega"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":25,"on_page":true}
+{"id":"n8-049","label":{"value":"normal","text":"Звичайний"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":15,"on_page":true}
+{"id":"n8-050","label":{"value":"Europe/Kyiv","text":"(UTC+02:00) Kyjiw"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":13,"on_page":true}
+{"id":"n8-051","label":{"value":"Australia/Sydney","text":"(UTC+10:00) Sydney"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":15,"on_page":true}
+{"id":"n8-052","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":19,"on_page":null}
+{"id":"n8-053","label":{"value":"fi","text":"Finnish"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":14,"on_page":true}
+{"id":"n8-054","label":{"value":"15:30","text":"15:30"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":18,"on_page":true}
+{"id":"n8-055","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":18,"on_page":null}
+{"id":"n8-056","label":{"value":"3a","text":"3 дорослих"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":13,"on_page":true}
+{"id":"n8-057","label":{"value":"fr","text":"Французька"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":25,"on_page":true}
+{"id":"n8-058","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":20,"on_page":null}
+{"id":"n8-059","label":{"value":"en-GB","text":"Englisch (Vereinigtes Königreich)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":6,"on_page":true}
+{"id":"n8-060","label":{"value":"15:00","text":"15:00"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":23,"on_page":true}
+{"id":"n8-061","label":{"value":"old","text":"Älteste zuerst"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":5,"on_page":true}
+{"id":"n8-062","label":{"value":"da","text":"Danés"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":4,"on_page":true}
+{"id":"n8-063","label":{"value":"never","text":"Never"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":11,"on_page":true}
+{"id":"n8-064","label":{"value":"UAH","text":"Ukrainian hryvnia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":19,"on_page":true}
+{"id":"n8-065","label":{"value":"FI","text":"Фінляндія"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":13,"on_page":true}
+{"id":"n8-066","label":{"value":"biz-m","text":"Business · up to 50 users · monthly"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":11,"on_page":true}
+{"id":"n8-067","label":{"value":"BR","text":"Brazil"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":14,"on_page":true}
+{"id":"n8-068","label":{"value":"CZ","text":"Chequia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":12,"on_page":true}
+{"id":"n8-069","label":{"value":"married","text":"Married"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":17,"on_page":true}
+{"id":"n8-070","label":{"value":"sl","text":"Словенська"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":18,"on_page":true}
+{"id":"n8-071","label":{"value":"RON","text":"Lej rumuński"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":8,"on_page":true}
+{"id":"n8-072","label":{"value":"team-y","text":"Equipo · hasta 10 usuarios · anual"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":19,"on_page":true}
+{"id":"n8-073","label":{"value":"DKK","text":"Korona duńska"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":15,"on_page":true}
+{"id":"n8-074","label":{"value":"passport","text":"Закордонний паспорт"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":24,"on_page":true}
+{"id":"n8-075","label":{"value":"instal","text":"Monthly instalments"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":20,"on_page":true}
+{"id":"n8-076","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":21,"on_page":null}
+{"id":"n8-077","label":{"value":"MT","text":"Malta"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":9,"on_page":true}
+{"id":"n8-078","label":{"value":"RO","text":"Rumanía"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":6,"on_page":true}
+{"id":"n8-079","label":{"value":"bus","text":"Бізнес"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":19,"on_page":true}
+{"id":"n8-080","label":{"value":"25","text":"25 na stronę"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":11,"on_page":true}
+{"id":"n8-081","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":22,"on_page":null}
+{"id":"n8-082","label":{"value":"NL","text":"Нідерланди"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":19,"on_page":true}
+{"id":"n8-083","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":7,"on_page":null}
+{"id":"n8-084","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":8,"on_page":null}
+{"id":"n8-085","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":4,"on_page":null}
+{"id":"n8-086","label":{"value":"500","text":"500 g"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":23,"on_page":true}
+{"id":"n8-087","label":{"value":"biz-m","text":"Business · bis 50 Nutzer · monatlich"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":2,"on_page":true}
+{"id":"n8-088","label":{"value":"same","text":"Kurier am selben Tag"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":22,"on_page":true}
+{"id":"n8-089","label":{"value":"normal","text":"Normal"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":12,"on_page":true}
+{"id":"n8-090","label":{"value":"2a2c","text":"2 Erwachsene, 2 Kinder"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":17,"on_page":true}
+{"id":"n8-091","label":{"value":"CHF","text":"Schweizer Franken"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":7,"on_page":true}
+{"id":"n8-092","label":{"value":"PL","text":"Polen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":17,"on_page":true}
+{"id":"n8-093","label":{"value":"HU","text":"Węgry"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":3,"on_page":true}
+{"id":"n8-094","label":{"value":"price-asc","text":"Cena: od najniższej"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":16,"on_page":true}
+{"id":"n8-095","label":{"value":"2a","text":"2 adults"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":3,"on_page":true}
+{"id":"n8-096","label":{"value":"USD","text":"US-Dollar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":8,"on_page":true}
+{"id":"n8-097","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":19,"on_page":null}
+{"id":"n8-098","label":{"value":"10","text":"10 na stronę"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":19,"on_page":true}
+{"id":"n8-099","label":{"value":"UA","text":"Ukraina"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":23,"on_page":true}
+{"id":"n8-100","label":{"value":"1a","text":"1 adult"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":16,"on_page":true}
+{"id":"n8-101","label":{"value":"250","text":"250 g"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":25,"on_page":true}
+{"id":"n8-102","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":2,"on_page":null}
+{"id":"n8-103","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":11,"on_page":null}
+{"id":"n8-104","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":23,"on_page":null}
+{"id":"n8-105","label":{"value":"ro","text":"Rumuński"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":9,"on_page":true}
+{"id":"n8-106","label":{"value":"birth","text":"Свідоцтво про народження"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":23,"on_page":true}
+{"id":"n8-107","label":{"value":"MT","text":"Мальта"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":1,"on_page":true}
+{"id":"n8-108","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":17,"on_page":null}
+{"id":"n8-109","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":7,"on_page":null}
+{"id":"n8-110","label":{"value":"100","text":"100 g"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":6,"on_page":true}
+{"id":"n8-111","label":{"value":"commenter","text":"Comentarista"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":14,"on_page":true}
+{"id":"n8-112","label":{"value":"AUD","text":"Australian dollar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":2,"on_page":true}
+{"id":"n8-113","label":{"value":"IE","text":"Irlanda"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":6,"on_page":true}
+{"id":"n8-114","label":{"value":"std","text":"Standard meal"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":6,"on_page":true}
+{"id":"n8-115","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":20,"on_page":null}
+{"id":"n8-116","label":{"value":"GR","text":"Греція"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":22,"on_page":true}
+{"id":"n8-117","label":{"value":"solo-y","text":"Solo · 1 user · yearly"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":20,"on_page":true}
+{"id":"n8-118","label":{"value":"instal","text":"Raty miesięczne"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":16,"on_page":true}
+{"id":"n8-119","label":{"value":"25","text":"25 por página"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":15,"on_page":true}
+{"id":"n8-120","label":{"value":"owner","text":"Właściciel"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":24,"on_page":true}
+{"id":"n8-121","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":3,"on_page":null}
+{"id":"n8-122","label":{"value":"same","text":"Kurier am selben Tag"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":7,"on_page":true}
+{"id":"n8-123","label":{"value":"urgent","text":"Dringend – Dienst ausgefallen"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":11,"on_page":true}
+{"id":"n8-124","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":21,"on_page":null}
+{"id":"n8-125","label":{"value":"kosher","text":"Kosher"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":21,"on_page":true}
+{"id":"n8-126","label":{"value":"50","text":"50 per page"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":6,"on_page":true}
+{"id":"n8-127","label":{"value":"JPY","text":"Японська єна"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":11,"on_page":true}
+{"id":"n8-128","label":{"value":"25","text":"25 pro Seite"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":25,"on_page":true}
+{"id":"n8-129","label":{"value":"CZK","text":"Чеська крона"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":19,"on_page":true}
+{"id":"n8-130","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":19,"on_page":null}
+{"id":"n8-131","label":{"value":"IS","text":"Islandia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":21,"on_page":true}
+{"id":"n8-132","label":{"value":"ML","text":"Mali"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":15,"on_page":true}
+{"id":"n8-133","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":13,"on_page":null}
+{"id":"n8-134","label":{"value":"16:30","text":"16:30"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":10,"on_page":true}
+{"id":"n8-135","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":9,"on_page":null}
+{"id":"n8-136","label":{"value":"18:30","text":"18:30"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":15,"on_page":true}
+{"id":"n8-137","label":{"value":"uk","text":"Ukraiński"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":13,"on_page":true}
+{"id":"n8-138","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":21,"on_page":null}
+{"id":"n8-139","label":{"value":"pt-BR","text":"Portuguese (Brazil)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":9,"on_page":true}
+{"id":"n8-140","label":{"value":"biweekly","text":"Cada dos semanas"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":18,"on_page":true}
+{"id":"n8-141","label":{"value":"bug","text":"Etwas funktioniert nicht"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":15,"on_page":true}
+{"id":"n8-142","label":{"value":"price-asc","text":"Precio: de menor a mayor"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":4,"on_page":true}
+{"id":"n8-143","label":{"value":"child","text":"Menú infantil"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":24,"on_page":true}
+{"id":"n8-144","label":{"value":"AUD","text":"Australischer Dollar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":5,"on_page":true}
+{"id":"n8-145","label":{"value":"AT","text":"Австрія"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":9,"on_page":true}
+{"id":"n8-146","label":{"value":"PLN","text":"Esloti polaco"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":5,"on_page":true}
+{"id":"n8-147","label":{"value":"CA","text":"Kanada"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":20,"on_page":true}
+{"id":"n8-148","label":{"value":"bus","text":"Business"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":11,"on_page":true}
+{"id":"n8-149","label":{"value":"IQ","text":"Irak"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":7,"on_page":true}
+{"id":"n8-150","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":16,"on_page":null}
+{"id":"n8-151","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":14,"on_page":null}
+{"id":"n8-152","label":{"value":"en-GB","text":"English (UK)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":10,"on_page":true}
+{"id":"n8-153","label":{"value":"SK","text":"Eslovaquia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":10,"on_page":true}
+{"id":"n8-154","label":{"value":"LV","text":"Łotwa"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":3,"on_page":true}
+{"id":"n8-155","label":{"value":"1000","text":"1 кг"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":19,"on_page":true}
+{"id":"n8-156","label":{"value":"DE","text":"Alemania"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":15,"on_page":true}
+{"id":"n8-157","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":4,"on_page":null}
+{"id":"n8-158","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":2,"on_page":null}
+{"id":"n8-159","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":5,"on_page":null}
+{"id":"n8-160","label":{"value":"halal","text":"Halal"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":9,"on_page":true}
+{"id":"n8-161","label":{"value":"3.2","text":"3.2.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":21,"on_page":true}
+{"id":"n8-162","label":{"value":"3a","text":"3 adultos"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":8,"on_page":true}
+{"id":"n8-163","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":18,"on_page":null}
+{"id":"n8-164","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":1,"on_page":null}
+{"id":"n8-165","label":{"value":"transfer","text":"Überweisung"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":4,"on_page":true}
+{"id":"n8-166","label":{"value":"500","text":"500 г"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":2,"on_page":true}
+{"id":"n8-167","label":{"value":"de","text":"Niemiecki"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":19,"on_page":true}
+{"id":"n8-168","label":{"value":"locker","text":"Paczkomat"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":24,"on_page":true}
+{"id":"n8-169","label":{"value":"SE","text":"Szwecja"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":3,"on_page":true}
+{"id":"n8-170","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":22,"on_page":null}
+{"id":"n8-171","label":{"value":"CAD","text":"Канадський долар"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":25,"on_page":true}
+{"id":"n8-172","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":17,"on_page":null}
+{"id":"n8-173","label":{"value":"billing","text":"Abrechnungsverwalter"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":22,"on_page":true}
+{"id":"n8-174","label":{"value":"returns","text":"Devoluciones y reembolsos"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":23,"on_page":true}
+{"id":"n8-175","label":{"value":"same","text":"Same-day courier"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":4,"on_page":true}
+{"id":"n8-176","label":{"value":"10","text":"10 per page"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":11,"on_page":true}
+{"id":"n8-177","label":{"value":"normal","text":"Звичайний"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":6,"on_page":true}
+{"id":"n8-178","label":{"value":"15:00","text":"15:00"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":22,"on_page":true}
+{"id":"n8-179","label":{"value":"2a","text":"2 dorosłych"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":6,"on_page":true}
+{"id":"n8-180","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":25,"on_page":null}
+{"id":"n8-181","label":{"value":"GE","text":"Gruzja"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":1,"on_page":true}
+{"id":"n8-182","label":{"value":"PT","text":"Portugalia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":2,"on_page":true}
+{"id":"n8-183","label":{"value":"IT","text":"Włochy"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":12,"on_page":true}
+{"id":"n8-184","label":{"value":"rp","text":"Aufenthaltstitel"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":8,"on_page":true}
+{"id":"n8-185","label":{"value":"cs","text":"Tschechisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":25,"on_page":true}
+{"id":"n8-186","label":{"value":"NOK","text":"Corona noruega"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":10,"on_page":true}
+{"id":"n8-187","label":{"value":"bug","text":"Something is not working"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":1,"on_page":true}
+{"id":"n8-188","label":{"value":"en-US","text":"Англійська (США)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":18,"on_page":true}
+{"id":"n8-189","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":20,"on_page":null}
+{"id":"n8-190","label":{"value":"bug","text":"Coś nie działa"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":8,"on_page":true}
+{"id":"n8-191","label":{"value":"sv","text":"Swedish"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":1,"on_page":true}
+{"id":"n8-192","label":{"value":"08:00","text":"8:00 AM"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":25,"on_page":true}
+{"id":"n8-193","label":{"value":"single","text":"Single (never married)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":12,"on_page":true}
+{"id":"n8-194","label":{"value":"3.12","text":"3.12.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":25,"on_page":true}
+{"id":"n8-195","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":20,"on_page":null}
+{"id":"n8-196","label":{"value":"tr","text":"Turecki"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":6,"on_page":true}
+{"id":"n8-197","label":{"value":"EE","text":"Estonia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":8,"on_page":true}
+{"id":"n8-198","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":10,"on_page":null}
+{"id":"n8-199","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":18,"on_page":null}
+{"id":"n8-200","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":6,"on_page":null}
+{"id":"n8-201","label":{"value":"locker","text":"Taquilla de paquetes"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":17,"on_page":true}
+{"id":"n8-202","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":7,"on_page":null}
+{"id":"n8-203","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":5,"on_page":null}
+{"id":"n8-204","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":12,"on_page":null}
+{"id":"n8-205","label":{"value":"pt-PT","text":"Portugués (Portugal)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":2,"on_page":true}
+{"id":"n8-206","label":{"value":"EUR","text":"Euro"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":23,"on_page":true}
+{"id":"n8-207","label":{"value":"AL","text":"Albania"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":12,"on_page":true}
+{"id":"n8-208","label":{"value":"DM","text":"Домініка"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":3,"on_page":true}
+{"id":"n8-209","label":{"value":"2a","text":"2 дорослих"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":1,"on_page":true}
+{"id":"n8-210","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":12,"on_page":null}
+{"id":"n8-211","label":{"value":"tr","text":"Turkish"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":2,"on_page":true}
+{"id":"n8-212","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":13,"on_page":null}
+{"id":"n8-213","label":{"value":"USD","text":"US dollar"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":7,"on_page":true}
+{"id":"n8-214","label":{"value":"SI","text":"Slowenien"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":23,"on_page":true}
+{"id":"n8-215","label":{"value":"NOK","text":"Korona norweska"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":4,"on_page":true}
+{"id":"n8-216","label":{"value":"JP","text":"Японія"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":18,"on_page":true}
+{"id":"n8-217","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":9,"on_page":null}
+{"id":"n8-218","label":{"value":"instal","text":"Pago a plazos"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":17,"on_page":true}
+{"id":"n8-219","label":{"value":"pl","text":"Polaco"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":10,"on_page":true}
+{"id":"n8-220","label":{"value":"ko","text":"Корейська"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":3,"on_page":true}
+{"id":"n8-221","label":{"value":"HR","text":"Kroatien"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":14,"on_page":true}
+{"id":"n8-222","label":{"value":"2000","text":"2 kg"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":7,"on_page":true}
+{"id":"n8-223","label":{"value":"ES","text":"Spain"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":20,"on_page":true}
+{"id":"n8-224","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":16,"on_page":null}
+{"id":"n8-225","label":{"value":"NE","text":"Niger"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":18,"on_page":true}
+{"id":"n8-226","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":5,"on_page":null}
+{"id":"n8-227","label":{"value":"store","text":"Recogida en tienda"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":1,"on_page":true}
+{"id":"n8-228","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":24,"on_page":null}
+{"id":"n8-229","label":{"value":"HUF","text":"Hungarian forint"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":17,"on_page":true}
+{"id":"n8-230","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":14,"on_page":null}
+{"id":"n8-231","label":{"value":"Australia/Sydney","text":"(UTC+10:00) Sydney"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":14,"on_page":true}
+{"id":"n8-232","label":{"value":"pt-BR","text":"Portugués (Brasil)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":14,"on_page":true}
+{"id":"n8-233","label":{"value":"old","text":"Od najstarszych"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":5,"on_page":true}
+{"id":"n8-234","label":{"value":"AL","text":"Albanien"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":21,"on_page":true}
+{"id":"n8-235","label":{"value":"3.12","text":"3.12.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":20,"on_page":true}
+{"id":"n8-236","label":{"value":"RON","text":"Rumänischer Leu"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":11,"on_page":true}
+{"id":"n8-237","label":{"value":"10:30","text":"10:30"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":21,"on_page":true}
+{"id":"n8-238","label":{"value":"100","text":"100 por página"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":12,"on_page":true}
+{"id":"n8-239","label":{"value":"kosher","text":"Kosher"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":5,"on_page":true}
+{"id":"n8-240","label":{"value":"hu","text":"Ungarisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":22,"on_page":true}
+{"id":"n8-241","label":{"value":"pt-BR","text":"Portugalski (Brazylia)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":14,"on_page":true}
+{"id":"n8-242","label":{"value":"billing","text":"Facturación y pagos"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":9,"on_page":true}
+{"id":"n8-243","label":{"value":"biz-m","text":"Бізнес · до 50 користувачів · щомісяця"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":17,"on_page":true}
+{"id":"n8-244","label":{"value":"it","text":"Італійська"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":9,"on_page":true}
+{"id":"n8-245","label":{"value":"solo-y","text":"Solo · 1 usuario · anual"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":12,"on_page":true}
+{"id":"n8-246","label":{"value":"birth","text":"Akt urodzenia"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":24,"on_page":true}
+{"id":"n8-247","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":4,"on_page":null}
+{"id":"n8-248","label":{"value":"pt-BR","text":"Португальська (Бразилія)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":10,"on_page":true}
+{"id":"n8-249","label":{"value":"Europe/Lisbon","text":"(UTC) Lizbona"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":6,"on_page":true}
+{"id":"n8-250","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":16,"on_page":null}
+{"id":"n8-251","label":{"value":"MDL","text":"Leu moldavo"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":10,"on_page":true}
+{"id":"n8-252","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":21,"on_page":null}
+{"id":"n8-253","label":{"value":"sk","text":"Słowacki"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":2,"on_page":true}
+{"id":"n8-254","label":{"value":"std","text":"Звичайна доставка (3–5 робочих днів)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":11,"on_page":true}
+{"id":"n8-255","label":{"value":"pt-PT","text":"Portugiesisch (Portugal)"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":4,"on_page":true}
+{"id":"n8-256","label":{"value":"3.12","text":"3.12.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":17,"on_page":true}
+{"id":"n8-257","label":{"value":"Asia/Dhaka","text":"(UTC+06:00) Dhaka"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":13,"on_page":true}
+{"id":"n8-258","label":{"value":"transfer","text":"Überweisung"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":12,"on_page":true}
+{"id":"n8-259","label":{"value":"billing","text":"Billing and payments"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":17,"on_page":true}
+{"id":"n8-260","label":{"value":"eco","text":"Ekonomiczna"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":3,"on_page":true}
+{"id":"n8-261","label":{"value":"HR","text":"Kroatien"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":24,"on_page":true}
+{"id":"n8-262","label":{"value":"quarterly","text":"Alle drei Monate"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":25,"on_page":true}
+{"id":"n8-263","label":{"value":"az","text":"Name: A bis Z"},"ambiguous":true,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":10,"on_page":true}
+{"id":"n8-264","label":{"value":"Asia/Kabul","text":"(UTC+04:30) Кабул"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":21,"on_page":true}
+{"id":"n8-265","label":{"value":"DK","text":"Denmark"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":1,"on_page":true}
+{"id":"n8-266","label":{"value":"SI","text":"Словенія"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":14,"on_page":true}
+{"id":"n8-267","label":{"value":"child","text":"Posiłek dziecięcy"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":4,"on_page":true}
+{"id":"n8-268","label":{"value":"ro","text":"Rumano"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":15,"on_page":true}
+{"id":"n8-269","label":{"value":"SEK","text":"Korona szwedzka"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":13,"on_page":true}
+{"id":"n8-270","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":7,"on_page":null}
+{"id":"n8-271","label":{"value":"rating","text":"Najwyżej oceniane"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":8,"on_page":true}
+{"id":"n8-272","label":{"value":"sk","text":"Slowakisch"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":13,"on_page":true}
+{"id":"n8-273","label":{"value":"instal","text":"Оплата частинами"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":8,"on_page":true}
+{"id":"n8-274","label":{"value":"sk","text":"Slovak"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":14,"on_page":true}
+{"id":"n8-275","label":{"value":"AL","text":"Albania"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":16,"on_page":true}
+{"id":"n8-276","label":{"value":"UAH","text":"Hrywna ukraińska"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":15,"on_page":true}
+{"id":"n8-277","label":{"value":"old","text":"Спочатку старі"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":10,"on_page":true}
+{"id":"n8-278","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":23,"on_page":null}
+{"id":"n8-279","label":{"value":"never","text":"Nunca"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":5,"on_page":true}
+{"id":"n8-280","label":{"value":"nl","text":"Neerlandés"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-08","position":23,"on_page":true}
+{"id":"n8-281","label":{"value":"owner","text":"Власник"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":22,"on_page":true}
+{"id":"n8-282","label":{"value":"RO","text":"Rumanía"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":8,"on_page":true}
+{"id":"n8-283","label":{"value":"2a1c","text":"2 adultos, 1 niño"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":12,"on_page":true}
+{"id":"n8-284","label":{"value":"high","text":"High"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":7,"on_page":true}
+{"id":"n8-285","label":{"value":"Australia/Sydney","text":"(UTC+10:00) Sídney"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-09","position":14,"on_page":true}
+{"id":"n8-286","label":{"value":"kosher","text":"Кошерне"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":21,"on_page":true}
+{"id":"n8-287","label":{"value":"SEK","text":"Corona sueca"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-04","position":4,"on_page":true}
+{"id":"n8-288","label":{"value":"returns","text":"Повернення й відшкодування"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-02","position":13,"on_page":true}
+{"id":"n8-289","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-07","position":20,"on_page":null}
+{"id":"n8-290","label":{"value":"2.10","text":"2.10.x"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":1,"on_page":true}
+{"id":"n8-291","label":{"value":"it","text":"Італійська"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":3,"on_page":true}
+{"id":"n8-292","label":{"value":"LT","text":"Литва"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":8,"on_page":true}
+{"id":"n8-293","label":{"value":"25","text":"25 на сторінці"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":23,"on_page":true}
+{"id":"n8-294","label":{"value":"never","text":"Ніколи"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-05","position":22,"on_page":true}
+{"id":"n8-295","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-03","position":22,"on_page":null}
+{"id":"n8-296","label":{"value":"1000","text":"1 kg"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-12","position":16,"on_page":true}
+{"id":"n8-297","label":{"value":"2000","text":"2 kg"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-10","position":16,"on_page":true}
+{"id":"n8-298","label":{"value":"std","text":"Standardmenü"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-06","position":15,"on_page":true}
+{"id":"n8-299","label":"none","ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-01","position":11,"on_page":null}
+{"id":"n8-300","label":{"value":"de","text":"German"},"ambiguous":false,"labeler":"gemini-3.8-flash-high","via":"agy","batch":"batch-11","position":19,"on_page":true}
