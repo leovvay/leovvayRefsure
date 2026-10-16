@@ -1,4 +1,5 @@
 import type { CalibrationEntry, SiteId } from '../../../src/questions';
+import type { MasksReading } from './masks-reading';
 import type { ThresholdFit } from './threshold-fit';
 
 /** One site's fit: every edge fitted, the rows the method gives, what they do on the runs, and what ships. */
@@ -27,6 +28,8 @@ export interface SiteFit {
   wilsonLow: number | null;
   /** Per set the runs came from: answered runs, acted answers at the rows, and how many were right. */
   bySet: Record<string, { runs: number; acted: number; correct: number }>;
+  /** PII masks on against off, on the pages asked in both modes, at the rows refsure acts on; when there are any. */
+  maskModes?: MasksReading;
   /** `measured`, or why the site keeps its declared maturity. */
   why: string;
 }

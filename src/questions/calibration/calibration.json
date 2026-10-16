@@ -372,7 +372,7 @@
         "rows": 0.8
       },
       "why": "no score reaches 0.99",
-      "date": "2026-10-15",
+      "date": "2026-10-16",
       "pooled": {
         "sets": [
           {
@@ -423,7 +423,7 @@
         "precision": null,
         "wilsonLow": null,
         "why": "no score reaches 0.99",
-        "date": "2026-10-15"
+        "date": "2026-10-16"
       },
       "native": {
         "sets": [
@@ -477,7 +477,7 @@
           "wilsonLow": 0.9894,
           "why": "rows on pages whose text carries the answer only; not shipped without an owner ruling on that scope"
         },
-        "date": "2026-10-15"
+        "date": "2026-10-16"
       },
       "replaced": {
         "threshold": 0.8,
@@ -564,6 +564,50 @@
         "n": 324,
         "date": "2026-10-15"
       }
+    }
+  ],
+  "masks": [
+    {
+      "site": "page-state",
+      "wordingHash": "8225b2a040b86017369f6104372698b3f64ea09f3f5f7c2aa3c81c49007d9a60",
+      "lineFormat": 1,
+      "modelFamily": "jev-1.13",
+      "provider": "jev",
+      "setSha256": "9cfb2d48715d6b039afe32ba1eac1f6f0c773ad08313cd2c5aa5c14c5c8737af",
+      "sets": [
+        {
+          "set": "pii_masks.jsonl",
+          "sha256": "9cfb2d48715d6b039afe32ba1eac1f6f0c773ad08313cd2c5aa5c14c5c8737af"
+        }
+      ],
+      "pages": 29,
+      "agree": 28,
+      "rows": 0.8,
+      "rowsFrom": "declared",
+      "on": {
+        "calls": 174,
+        "right": 173,
+        "acted": 144,
+        "correct": 144,
+        "coverage": 0.8276,
+        "precision": 1,
+        "wilsonLow": 0.974
+      },
+      "off": {
+        "calls": 174,
+        "right": 168,
+        "acted": 144,
+        "correct": 144,
+        "coverage": 0.8276,
+        "precision": 1,
+        "wilsonLow": 0.974
+      },
+      "orders": 6,
+      "replays": 2,
+      "model": "jev-1.13-20260917",
+      "route": "openrouter.ai",
+      "method": "pages asked with PII masks on and off, each mode read at the rows refsure acts on (the entry's when measured, else the declared rows): a Choice pick other than none at its row, or a Noul's yes edge; a page agrees when its most frequent answer is the same in both modes, a tie agreeing with nothing",
+      "date": "2026-10-16"
     }
   ]
 }

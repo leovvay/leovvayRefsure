@@ -2,6 +2,8 @@ import { KNOWN_FAMILIES, SITES } from '../../../src/questions';
 import type { CalibrationEntry, SiteId } from '../../../src/questions';
 import type { FitOptions } from './fit-options';
 import type { HeldRecord } from './held-record';
+import type { MasksReading } from './masks-reading';
+import type { MasksRecord } from './masks-record';
 import type { NativeProvenance } from './native-provenance';
 import { pooledSha256 } from './native-summary';
 import { type EntrySummary, fittedOf, ordersOf } from './record-parts';
@@ -12,7 +14,8 @@ import type { SiteFit } from './site-fit';
 
 /*
   What fit.ts writes into calibration.json for one site: a `measured` entry when the pooled fit ships a row, else
-  a held record that keeps the evidence and the reading on file while the site keeps its declared rows.
+  a held record that keeps the evidence and the reading on file while the site keeps its declared rows; and, when
+  its runs asked pages with PII masks on and off, the masks' own record.
 */
 
 const SOURCES = {
@@ -25,6 +28,7 @@ const METHODS = {
   cumulative: 'lowest confidence below 1.0 at which the acted answers at or above it, pooled over every replay, reach the target precision, with at least min-points of them',
 } as const;
 const ROWS = 'each row max(fitted, starting row), non-decreasing along the risk order; a risk label gets its own row only with min-items pages and at least one wrong answer';
+const MASKS = 'pages asked with PII masks on and off, each mode read at the rows refsure acts on (the entry\'s when measured, else the declared rows): a Choice pick other than none at its row, or a Noul\'s yes edge; a page agrees when its most frequent answer is the same in both modes, a tie agreeing with nothing';
 
 export interface RecordContext {
   opts: FitOptions;
@@ -50,8 +54,9 @@ export function sameKey(record: Pick<CalibrationEntry, 'site' | 'provider' | 'mo
     && record.lineFormat === 1 && record.wordingHash === SITES[site].wording.hash;
 }
 
-/** The set names a shipped entry or held record says it was fitted on. */
-export function setsOf(record: ShippedEntry | HeldRecord): string[] {
+/** The set names a shipped entry, held record or masks record says it was fitted on. */
+export function setsOf(record: ShippedEntry | HeldRecord | MasksRecord): string[] {
+  if ('agree' in record) return record.sets.map((set) => set.set);
   if ('pooled' in record) return [...record.pooled.sets, ...(record.native?.sets ?? [])].map((set) => set.set);
   const own = record.provenance.set.split(',').map((name) => name.trim()).filter((name) => name !== '');
   return [...own, ...(record.provenance.native?.sets ?? []).map((set) => set.set)];
@@ -84,5 +89,21 @@ export function heldFor(
     provider: 'jev', ships: { maturity: policy.maturity, rows: policy.threshold.jev as CalibrationEntry['threshold'] },
     why: fit.why, date: ctx.date, pooled, ...(extra.native === undefined ? {} : { native: extra.native }),
     ...(extra.replaced === undefined ? {} : { replaced: extra.replaced }),
+  };
+}
+
+/** The masks' own record: on against off for this key, with the sets that asked both modes and their hashes. */
+export function masksFor(site: SiteId, reading: MasksReading, metas: readonly SetMeta[], ctx: RecordContext): MasksRecord {
+  const sets = reading.sets.map((name) => {
+    const meta = metas.find((candidate) => candidate.set === name);
+    if (meta === undefined) throw new Error(`${site}: PII mask runs from ${name || 'no set'} have no --metas file`);
+    return meta;
+  });
+  return {
+    site, wordingHash: SITES[site].wording.hash, lineFormat: 1, modelFamily: KNOWN_FAMILIES.jev, provider: 'jev',
+    setSha256: pooledSha256(sets), sets: sets.map((meta) => ({ set: meta.set, sha256: meta.sha256 })),
+    pages: reading.pages, agree: reading.agree, rows: reading.rows, rowsFrom: reading.rowsFrom,
+    on: reading.on, off: reading.off, orders: reading.orders, replays: ctx.replays, model: ctx.model, route: ctx.route,
+    method: MASKS, date: ctx.date,
   };
 }

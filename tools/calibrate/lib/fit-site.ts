@@ -6,6 +6,7 @@ import type { FitOptions } from './fit-options';
 import { fitLowerCumulative, fitUpperCumulative } from './cumulative';
 import { fitLower, fitUpper } from './isotonic';
 import { pageKey } from './item-page';
+import { maskModes } from './mask-modes';
 import type { Point } from './point';
 import type { RunRow } from './run-row';
 import type { SiteFit } from './site-fit';
@@ -182,14 +183,18 @@ export function fitSite(site: SiteId, rows: readonly RunRow[], opts: FitOptions)
       })();
   const correct = fit.acted.filter((point) => point.positive).length;
   const held = fit.rows === null ? undefined : HELD[opts.native === true ? 'native' : 'converted'][site]?.(JSON.stringify(fit.rows));
+  const threshold = fit.rows !== null && held === undefined ? fit.rows : null;
+  // The masks are read at the rows refsure acts on: the ones that ship, else the site's declared rows.
+  const maskReading = maskModes(usable, threshold ?? known.policy.threshold.jev as SiteFit['starting'],
+    threshold === null ? 'declared' : 'measured', site === 'outcome' || site === 'presence');
   return {
-    ...base, fits: fit.fits, starting: fit.starting, rows: fit.rows,
-    threshold: fit.rows !== null && held === undefined ? fit.rows : null,
+    ...base, fits: fit.fits, starting: fit.starting, rows: fit.rows, threshold,
     acted: fit.acted.length, correct,
     coverage: fit.rows === null || usable.length === 0 ? null : round4(fit.acted.length / usable.length),
     precision: fit.acted.length === 0 ? null : round4(correct / fit.acted.length),
     wilsonLow: wilsonLow(correct, fit.acted.length),
     bySet: bySet(usable, fit.acted),
+    ...(maskReading === undefined ? {} : { maskModes: maskReading }),
     why: fit.rows !== null && held !== undefined ? held : fit.why,
   };
 }

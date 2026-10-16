@@ -3,11 +3,12 @@ import { familyOf, KNOWN_FAMILIES, SITES } from '../../src/questions';
 import type { SiteId } from '../../src/questions';
 import { flags, list, need, num, opt } from './lib/args';
 import type { FitOptions } from './lib/fit-options';
-import { entryFor, heldFor, sameKey, setsOf } from './lib/fit-records';
+import { entryFor, heldFor, masksFor, sameKey, setsOf } from './lib/fit-records';
 import type { RecordContext } from './lib/fit-records';
 import { fitSite } from './lib/fit-site';
 import type { HeldRecord } from './lib/held-record';
 import { readJsonl } from './lib/jsonl';
+import type { MasksRecord } from './lib/masks-record';
 import { nativeSummary, textOnlyOf } from './lib/native-summary';
 import { type EntrySummary, summaryOf } from './lib/record-parts';
 import type { RunRow } from './lib/run-row';
@@ -28,13 +29,15 @@ import type { ShippedEntry } from './lib/shipped-entry';
   - The --metas of a site and its answered runs name the same sets: a set with a meta but no answered run, or runs
     from a set with no meta, is refused, so a record never claims a set's evidence it did not fit.
   - --floor names the entries already shipped: their rows are starting rows, so nothing ships looser.
+  - A site whose runs asked pages with PII masks on and off also gets the masks' own record under `masks`: the two
+    modes on those pages, at the rows refsure acts on (spec §7.3). refsure reads only `entries`.
 
     fit --runs <a.jsonl,b.jsonl> --metas <a.meta.json,b.meta.json> [--write <calibration.json>] [--floor <calibration.json>]
         [--target 0.99] [--min-points 10] [--min-items 10] [--method isotonic|cumulative] [--route host] [--source text]
 */
 
 const USAGE = 'usage: fit --runs <a.jsonl,b.jsonl> --metas <a.meta.json,b.meta.json> [--write <calibration.json>] [--floor <calibration.json>] [--target 0.99] [--min-points 10] [--min-items 10] [--method isotonic|cumulative] [--route host] [--source text]';
-type Shipped = { version: number; entries: ShippedEntry[]; held?: HeldRecord[] };
+type Shipped = { version: number; entries: ShippedEntry[]; held?: HeldRecord[]; masks?: MasksRecord[] };
 type Replay = { file: string; rows: RunRow[]; native: boolean };
 
 const values = flags(process.argv.slice(2), ['runs', 'metas', 'write', 'floor', 'target', 'min-points', 'min-items', 'method', 'route', 'source'], USAGE);
@@ -79,6 +82,7 @@ const ok = (row: RunRow) => row.status === 'ok';
 const brief = (fit: ReturnType<typeof fitSite>) => ({ rows: fit.rows, acted: fit.acted, correct: fit.correct, why: fit.why });
 const fresh: ShippedEntry[] = [];
 const held: HeldRecord[] = [];
+const masks: MasksRecord[] = [];
 const refit = new Set<SiteId>();
 for (const [site, replays] of bySite) {
   const sets = metas.filter((meta) => meta.site === site);
@@ -102,8 +106,10 @@ for (const [site, replays] of bySite) {
     throw new Error(`${site}: --runs holds answered calls from ${names.join(', ')} with no --metas file; pass its meta`);
   }
   if (writeFile !== undefined) {
-    const recorded = [...writeFile.entries, ...(writeFile.held ?? []), ...(floorFile?.entries ?? []), ...(floorFile?.held ?? [])]
-      .filter((record) => sameKey(record, site)).flatMap(setsOf);
+    const recorded = [
+      ...writeFile.entries, ...(writeFile.held ?? []), ...(writeFile.masks ?? []),
+      ...(floorFile?.entries ?? []), ...(floorFile?.held ?? []), ...(floorFile?.masks ?? []),
+    ].filter((record) => sameKey(record, site)).flatMap(setsOf);
     const missing = [...new Set(recorded)].filter((name) => !sets.some((meta) => meta.set === name));
     if (missing.length > 0) {
       throw new Error(`${site}: calibration.json holds evidence from ${missing.join(', ')}; pass its runs and meta, so the fit reads every labelled call for this key`);
@@ -133,6 +139,10 @@ for (const [site, replays] of bySite) {
   })}\n`);
   refit.add(site);
   const ctx: RecordContext = { opts, replays: replayCount, model: models[0]!, route, date, ...(source === undefined ? {} : { source }) };
+  if (fit.maskModes !== undefined) {
+    const maskReplays = Math.max(1, ...fit.maskModes.sets.map((set) => filesPerSet.get(set) ?? 0));
+    masks.push(masksFor(site, fit.maskModes, sets, { ...ctx, replays: maskReplays }));
+  }
   const nativeMetas = sets.filter((meta) => meta.native !== undefined);
   const nativeReading = !hasNative ? undefined
     : nativeSummary(nativeFit ?? fit, nativeRows.filter(ok), nativeMetas, { ...ctx, ...(textOnly === undefined ? {} : { textOnly }) });
@@ -155,11 +165,14 @@ for (const [site, replays] of bySite) {
 }
 
 if (writePath !== undefined && writeFile !== undefined) {
-  const keep = (record: ShippedEntry | HeldRecord) => ![...refit].some((site) => sameKey(record, site));
+  const keep = (record: ShippedEntry | HeldRecord | MasksRecord) => ![...refit].some((site) => sameKey(record, site));
   const order = Object.keys(SITES);
   const bySiteOrder = (a: { site: string }, b: { site: string }) => order.indexOf(a.site) - order.indexOf(b.site);
   const entries = [...writeFile.entries.filter(keep), ...fresh].sort(bySiteOrder);
   const heldAll = [...(writeFile.held ?? []).filter(keep), ...held].sort(bySiteOrder);
-  writeFileSync(writePath, `${JSON.stringify({ version: 1, entries, ...(heldAll.length === 0 ? {} : { held: heldAll }) }, null, 2)}\n`);
-  process.stderr.write(`wrote ${entries.length} entries and ${heldAll.length} held sites to ${writePath} (${fresh.length + held.length} fitted now)\n`);
+  const masksAll = [...(writeFile.masks ?? []).filter(keep), ...masks].sort(bySiteOrder);
+  const out = { version: 1, entries, ...(heldAll.length === 0 ? {} : { held: heldAll }), ...(masksAll.length === 0 ? {} : { masks: masksAll }) };
+  writeFileSync(writePath, `${JSON.stringify(out, null, 2)}\n`);
+  process.stderr.write(`wrote ${entries.length} entries, ${heldAll.length} held sites and ${masksAll.length} masks records to ${writePath} `
+    + `(${fresh.length + held.length} fitted now)\n`);
 }

@@ -121,12 +121,18 @@ candidate sits.
   it. The rows never decrease along the risk order (see Results). A Noul's "no" edge only ever tightens.
 - Items are distinct pages: a page-state page asked with PII masks on and off counts once, and `masks` counts the
   pages asked in each mode.
+- **PII masks.** When a site's runs ask pages with masks on and off, the fit also reads the two modes on those
+  pages alone, at the rows refsure acts on (the entry's when the site ships one, else its declared rows): per mode,
+  the calls, how many were right, and how many acted and were right, with coverage, precision and the Wilson 95 %
+  lower bound; and how many pages give the same most frequent answer in both modes (a tie agrees with nothing).
 - **What is written.** A site whose pooled fit ships a row gets a `measured` entry; `provenance.native` holds the
   Orca-native reading, and `provenance.native.textOnly` the same fit without the visual-only calls (a reading,
   never what ships). A site with no row, or held for an owner ruling (dismiss), gets a record under `held` in
   `calibration.json`: what refsure uses instead (its declared maturity and rows), why, the pooled reading, the
-  native one, and the entry it replaced. refsure reads only `entries`; `lib/calibration-provenance.ts` and
-  `lib/held-record.ts` type the rest.
+  native one, and the entry it replaced. The masks reading goes under `masks`, a record of its own per key with
+  its sets and their sha256, model, route and date, so the masks have their own calibration row (spec §7.3) whether
+  the site ships or is held. refsure reads only `entries`; `lib/calibration-provenance.ts`, `lib/held-record.ts`
+  and `lib/masks-record.ts` type the rest.
 
 ## Results, 2026-10-15 (Jev `jev-1.13-20260917` via openrouter.ai)
 
@@ -226,6 +232,7 @@ is the honest sample size.
 | page-state | 210 | 1785 | held: inherited 0.8 | no row: no score below 1.0 reaches 0.99 | | |
 | presence | 108 | 648 | held: inherited yes ≥ 0.85, no ≤ 0.15 | no row: no yes edge reaches 0.99 | | |
 | dismiss | 109 | 831 | held: inherited 0.6, close/reject lexicon | 244, 244 at the fit's 0.97 | 29.4 % | 0.985 |
+| PII masks (on vs off) | 29 | 348 | own record under `masks`; masks stay on | on 144, 144; off 144, 144 at page state's 0.8 | 82.8 % each | 0.974 each |
 
 - **find.** No risk label has 10 pages with a wrong answer among them (read 7 pages, write 10 with none wrong,
   irreversible 6, money 4, auth 3, consent 2), so each reads the all-points fit, 0.61 (above the one wrong pick, at
@@ -235,8 +242,10 @@ is the honest sample size.
 - **page-state.** On all its evidence no score below 1.0 reaches 0.99. At the declared 0.8: step 1 is 899 right of
   909 acted (the open question above), the native text pages 357 of 357 (42 pages, 36 acted), and the visual-only
   pages 131 of 275, with 76 wrong at 1.0, every one `expected` on a page whose gold (an error or blocked page) is
-  drawn only in pixels. The text-only reading stays in `held[].native.textOnly`. PII masks on and off agree on 28
-  of 29 pages; masks on were right on 173 of 174 calls, off on 168.
+  drawn only in pixels. The text-only reading stays in `held[].native.textOnly`.
+- **PII masks** (pii_masks, page state's declared 0.8, its own record under `masks`). Masks on and off give the
+  same most frequent answer on 28 of 29 pages. Masks on were right on 173 of 174 calls, off on 168; every call
+  acted on at 0.8 was right in both modes (144 of 144 each), so the masks cost no acted answer and stay on.
 - **presence.** Text pages: 126 of 126 at 0.92 (at the declared 0.85, presence_false had one false present, at
   0.86). Visual-only pages: 18 false presents of 36 acted at both 0.85 and 0.92, such as a toast faded to opacity
   0 that the text still carries. wait-for keeps its inherited 0.85 band.
