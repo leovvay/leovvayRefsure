@@ -84,15 +84,18 @@ export function assertX4(rt: ArmRuntime, item: BenchItem): void {
   }
 }
 
-/** Builds, edits, approves and wires one (item, order) for one arm. No network. Throws on an X4 item. */
-export function prepare(rt: ArmRuntime, item: BenchItem, order: OrderLabel, ablation?: Ablation): Prepared {
+/**
+ * Builds, edits, approves and wires one (item, order) for one arm. No network. Throws on an X4 item. `masks`
+ * overrides the item's own mask mode (the 2.5 drift re-ask builds masks off).
+ */
+export function prepare(rt: ArmRuntime, item: BenchItem, order: OrderLabel, ablation?: Ablation, opts: { masks?: boolean } = {}): Prepared {
   assertX4(rt, item);
   const built = buildFor(item, order);
   const request = ablation ? ablation.edit(built.request, item) : built.request;
   const threshold = rowThreshold(item.site, rt.arm.provider, item.risk, rt.arm.model, built.wordingHash);
   const approvedOrRefusal = approve(request, {
     site: item.site, provider: rt.arm.provider, host: rt.endpoint.host, originUrl: null, profileId: null,
-    config: rt.config(item.masks ?? true), dryRun: false, nowMs: Date.now(), egressLog: [],
+    config: rt.config(opts.masks ?? item.masks ?? true), dryRun: false, nowMs: Date.now(), egressLog: [],
   });
   let presented: Record<string, number | null> | null = null;
   if (isCandidateSite(item.site)) {
@@ -137,6 +140,10 @@ export interface AskRowOptions {
   repeat: string;
   variant?: string;
   ablation?: Ablation;
+  /** The mask mode sent, overriding the item's (2.5 drift: false). */
+  masks?: boolean;
+  /** The prior stored answer a drift row carries (2.5), written as the row's `prior`. */
+  prior?: unknown;
   deadlineMs: number;
   maxAttempts: number;
   runId: string;
@@ -171,7 +178,7 @@ export async function askRow(rt: ArmRuntime, item: BenchItem, opts: AskRowOption
   assertX4(rt, item);
   const variant = opts.variant ?? opts.ablation?.variant ?? 'shipped';
   const gold = opts.gold ?? goldChecks(item);
-  const prepared = prepare(rt, item, opts.order, opts.ablation);
+  const prepared = prepare(rt, item, opts.order, opts.ablation, { masks: opts.masks });
   const sendLoad = loadavg()[0] ?? 0;
   const attempts: AttemptRecord[] = [];
   const started = performance.now();
@@ -235,7 +242,7 @@ export async function askRow(rt: ArmRuntime, item: BenchItem, opts: AskRowOption
     site: item.site, arm: rt.arm.id, provider: rt.arm.provider, route: routeOf(item.site, rt.arm.provider),
     rendering: rt.arm.rendering, variant, order: opts.order, salt: saltOf(opts.order), repeat: opts.repeat, presented: prepared.presented,
     gold: gold.gold, alt: gold.alt, gold_cut: gold.goldCut, gold_twin: gold.goldTwin, risk: item.risk, lang: item.lang,
-    condition: item.condition, masks: item.masks ?? true, visual_only: item.visualOnly === true,
+    condition: item.condition, masks: opts.masks ?? item.masks ?? true, visual_only: item.visualOnly === true,
     status, cause: r1?.cause ?? null, http_status: httpLast === undefined || httpLast === 0 ? null : httpLast,
     detail: scrubDetail(prepared.refusal?.detail ?? answer?.detail),
     model, family_ok: model === null ? null : familyOf(model) === familyOf(KNOWN_FAMILIES[rt.arm.provider]),
@@ -251,6 +258,7 @@ export async function askRow(rt: ArmRuntime, item: BenchItem, opts: AskRowOption
     attempts, ms_total: Math.round(performance.now() - started), deadline_ms: opts.deadlineMs, flags,
     concurrency: opts.concurrency, loadavg: Math.round(sendLoad * 100) / 100, host: rt.endpoint.host,
     arms_sha: rt.file.sha, refsure_commit: opts.commits.refsure_commit, bench_commit: opts.commits.bench_commit, node: process.version,
+    ...(opts.prior === undefined ? {} : { prior: opts.prior }),
   };
   if (opts.settle) row.settle = opts.settle(item, row) ?? null;
   return row;

@@ -19,7 +19,7 @@ import {
 import type { AskedLog, ComboShape } from './lib/combinator';
 import { assertFrozen, assertPinnedSource, readFreezeTable } from './lib/freeze';
 import { RateBucket, stopReason } from './lib/guards';
-import { CANDIDATE_ORDERS, isCandidateSite, itemText, readItems, score } from './lib/items';
+import { CANDIDATE_ORDERS, isCandidateSite, itemText, livePoolExclusion, readItems, score } from './lib/items';
 import type { BenchItem, OrderLabel } from './lib/items';
 import { latestByKey, ledgerFiles, openLedger, readRows } from './lib/ledger';
 import type { QualityRow, R1Read } from './lib/ledger';
@@ -46,7 +46,9 @@ import { helpExit } from './lib/help';
                   [--allow-short-branch] [--dry-run]
     combos gates  --live <live.jsonl> --results <dir> --items <a.jsonl,b.jsonl,..> --freeze <table> [--phase P4] [--set-id A,B,..]
 
-  `live` and `gates` pool the primary sets of section 3 (each set's P4 rows read by its own set id). `live` refuses
+  `live` and `gates` pool the primary sets of section 3 (each set's P4 rows read by its own set id); `live` draws only
+  their primary items: X3 visual-only items (pixel slice only) and injected items (Q10 safety, S3's 14) stay out
+  (`livePoolExclusion`), and the counts left out are printed. `live` refuses
   (64) a sample short of `n` or of the branch floor unless `--allow-short-branch`; only `live --dry-run` may read an
   unfrozen set, and `--dry-run` applies to `live` only.
 */
@@ -316,8 +318,21 @@ function jevAbstainedAt1(row: QualityRow): boolean {
   return row.attempts[0]?.status !== 'ok' || row.r1?.verdict === 'abstain';
 }
 
+/** Items of the site that 2.4's primary pool leaves out (X3 visual-only, injected safety items), by reason. */
+function poolExclusions(site: SiteId, sets: readonly SetItems[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const { items } of sets) {
+    for (const item of items) {
+      const why = item.site === site ? livePoolExclusion(item) : null;
+      if (why !== null) out[why] = (out[why] ?? 0) + 1;
+    }
+  }
+  return out;
+}
+
 /**
- * The 2.4 live sample: from items with both P4 unit rows, the branch stratum (page-state: Jev abstained at attempt 1,
+ * The 2.4 live sample: from the primary items (no X3 visual-only item, no injected item) with both P4 unit rows, the
+ * branch stratum (page-state: Jev abstained at attempt 1,
  * so OpenAI is asked; agree sites: `jev_gw` and `oa_primary` reads differ) gives min(min, its size) items, then
  * the rest of the pool fills to `n`; each draw seeded by the bench seed and the site.
  */
@@ -326,7 +341,7 @@ function liveSample(
 ): { item: BenchItem; set: string; stratum: 'branch' | 'rest' }[] {
   const keyOf = (e: { item: BenchItem; set: string }): string => `${e.set}\0${e.item.id}\0${unitOrder(e.item)}\0r1`;
   const pool = sets.flatMap(({ set, items }) => items.map((item) => ({ item, set })))
-    .filter((e) => e.item.site === site && jev.has(keyOf(e)) && openai.has(keyOf(e)));
+    .filter((e) => e.item.site === site && livePoolExclusion(e.item) === null && jev.has(keyOf(e)) && openai.has(keyOf(e)));
   const isBranch = (e: { item: BenchItem; set: string }): boolean =>
     (site === 'page-state' ? jevAbstainedAt1(jev.get(keyOf(e))!) : readsDiffer(jev.get(keyOf(e))!.r1, openai.get(keyOf(e))!.r1));
   const branch = shuffleInPlace(pool.filter(isBranch), seeded(`${BENCH_SEED}:live:${site}:branch`));
@@ -489,6 +504,8 @@ async function liveCommand(): Promise<void> {
   const { shape, arms, deps } = gateSetup(file, site, sets.map((s) => s.set), results, phase, commits);
   const sample = liveSample(site, sets, deps.jevRows, deps.openaiRows, n, min);
   const branch = sample.filter((s) => s.stratum === 'branch').length;
+  const excluded = poolExclusions(site, sets);
+  process.stderr.write(`2.4 pool: ${JSON.stringify(excluded)} ${site} items left out (X3 visual-only go to the pixel slice; injected items are Q10 safety items)\n`);
   if (dryRun) {
     for (const { item, set, stratum } of sample) process.stdout.write(`${JSON.stringify({ item: item.id, set, site, stratum, order: unitOrder(item) })}\n`);
     process.stderr.write(`dry run: ${shape.id} on ${sample.length} items (${branch} in the branch stratum, floor ${min}); at most ${2 * sample.length} calls; nothing was sent\n`);

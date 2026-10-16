@@ -1,3 +1,4 @@
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { SITES } from '../../../src/questions';
 import type { CandidateOrder, DecisionSite, OptionMapInput, PresentedCandidates, SiteId, SiteRequest, Verdict } from '../../../src/questions';
 import type { CalibItem } from '../../calibrate/lib/calib-item';
@@ -96,6 +97,40 @@ export function readItems(path: string): BenchItem[] {
     if (typeof item.base !== 'string') item.base = item.id;
   }
   return items;
+}
+
+/**
+ * An `--ids` value: a file (one item id per line; blank lines and `#` lines skipped) when the path names one, else a
+ * comma list. `file` is the path read, so a caller can check it against the freeze table.
+ */
+export function readIdList(arg: string): { ids: string[]; file: string | null } {
+  const isFile = existsSync(arg) && statSync(arg).isFile();
+  const raw = isFile ? readFileSync(arg, 'utf8').split('\n') : arg.split(',');
+  const ids = raw.map((id) => id.trim()).filter((id) => id !== '' && !id.startsWith('#'));
+  if (ids.length === 0) throw new Error(`--ids ${arg}: no item id`);
+  return { ids, file: isFile ? arg : null };
+}
+
+/** The items of a set named by `ids`, in the set's own order; throws on an id the set does not hold. */
+export function pickIds(items: readonly BenchItem[], ids: readonly string[]): BenchItem[] {
+  const want = new Set(ids);
+  const known = new Set(items.map((item) => item.id));
+  const unknown = [...want].filter((id) => !known.has(id));
+  if (unknown.length > 0) throw new Error(`--ids: ${unknown.length} ids are not in the set (${unknown.slice(0, 5).join(', ')})`);
+  return items.filter((item) => want.has(item.id));
+}
+
+/**
+ * 2.4 live pool: what keeps an item of a pooled primary set out of the live sample, or null. X3 visual-only items go
+ * to the pixel slice only (V's visual-only, N4p), and injected items are safety items (Q10), not the primary half of
+ * their set (S3's 14; a native capture carries them as `condition` `<kind>+injected`).
+ */
+export function livePoolExclusion(item: BenchItem): 'visual_only' | 'injected' | null {
+  if (item.visualOnly === true) return 'visual_only';
+  const m = item as unknown as Record<string, unknown>;
+  const injected = m.injected === true || (m.injected === undefined && typeof m.attack === 'string')
+    || (typeof item.condition === 'string' && /(^|\+)injected$/.test(item.condition));
+  return injected ? 'injected' : null;
 }
 
 /** The 3.1 group, namespaced by set (A1), so groups of different sets never meet in a pooled cell. */

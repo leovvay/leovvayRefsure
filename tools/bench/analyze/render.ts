@@ -16,13 +16,15 @@ import { helpExit } from '../lib/help';
   analyze/render.ts: reads the committed ledgers (P4, P5, P6, combos, P5b gates) and writes `tables.md` and
   `summary.json` (9.1: every report number is copied from these). Deterministic: the bootstrap is seeded and every
   table is sorted, so a rerun reproduces `tables.md` byte for byte except its `Generated:` line (9.2). With
-  `--interim` it reads only P4a rows (`slice: interim`) into `<out>/interim/`, every title marked interim (7.1).
+  `--interim` it reads only P4a rows (`slice: interim`) of P4 into `<out>/interim/` (7.1): P4a tables are titled
+  `interim:`, a table read wholly from P6, P7 or P8 rows is titled with that phase, and P6-read columns are noted.
 
     render --results <dir> --out <analysis dir> [--plan <plan.json>] [--interim] [--crosscheck <json>]
            [--agent-readings <agent-readings.json>] [--pii-egress] [--resamples 2000]
 
   Sections 7 and 8: Q15 from the P7 ledger `<results>/e2e/cli/runs*.jsonl`; Q16 from agent/score.ts's
-  `agent-readings.json` (`--agent-readings`, else `<out>/agent-readings.json`, else `<results>/P8/agent-readings.json`).
+  `agent-readings.json` (`--agent-readings`, else `<out>/agent-readings.json`, else `<results>/P8/scored/agent-readings.json`,
+  where p8/run.sh's score step writes it and A6 keeps it, else `<results>/P8/agent-readings.json`).
 
   Exit 0 written; 64 bad usage. Missing inputs do not stop the render: their cells read `inconclusive (missing
   <input>)` and are listed at the top; analyze/checks.ts fails on them.
@@ -75,14 +77,29 @@ const SECTION_TITLES: Readonly<Record<number, string>> = {
   6: 'Route, stability, safety and PII', 7: 'End-to-end CLI', 8: 'Agent level', 9: 'Cost', 10: 'Threats realised', 11: 'Reproduction',
 };
 
+/** An interim title prefix (7.1): `interim:` on P4a tables; a table read wholly from another phase names that phase. */
+function interimPrefix(source: string | undefined): string {
+  return source === undefined ? 'interim: ' : `from ${source} (not P4a rows): `;
+}
+
+/** Interim notes for P4a tables that also print columns read from P6 rows (timing, the 4.4 failure share). */
+const INTERIM_P6_COLUMNS: readonly [RegExp, string][] = [
+  [/^site-/, 'interim: p50, p95, p95 CI, over budget and R1-budget cov read P6 rows (timing, 4.4 failure share), not P4a rows.'],
+  [/^q9$/, 'interim: the p50 T_ask column reads P6 M1 rows, not P4a rows.'],
+  [/^combos$/, 'interim: added p50 and p95 read P6 M2 rows, not P4a rows.'],
+];
+
 /** `tables.md`: the `Generated:` line is the only line that may differ between two renders of the same ledgers. */
 export function renderMd(report: Report, generated: string, interim: boolean): string {
-  const prefix = interim ? 'interim: ' : '';
-  const out = [`# ${interim ? 'Interim readings (P4a rows only)' : 'Benchmark readings'}`, '', `Generated: ${generated}`, ''];
+  const title = interim ? 'Interim readings (P4a rows; tables read from P6, P7 or P8 are labelled with that phase)' : 'Benchmark readings';
+  const out = [`# ${title}`, '', `Generated: ${generated}`, ''];
   out.push(report.missing.length === 0 ? 'Missing inputs: none.' : `Missing inputs (each cell reads \`inconclusive (missing ...)\`):\n${report.missing.map((m) => `- ${m}`).join('\n')}`, '');
   for (const section of [...new Set(report.tables.map((t) => t.section))].sort((a, b) => a - b)) {
+    const tables = report.tables.filter((x) => x.section === section);
+    const sources = [...new Set(tables.map((t) => t.source))];
+    const prefix = !interim ? '' : interimPrefix(sources.length === 1 ? sources[0] : undefined);
     out.push(`## ${section}. ${prefix}${SECTION_TITLES[section] ?? ''}`, '');
-    for (const t of report.tables.filter((x) => x.section === section)) out.push(tableMd(t, prefix));
+    for (const t of tables) out.push(tableMd(t, interim ? interimPrefix(t.source) : ''));
   }
   return `${out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()}\n`;
 }
@@ -174,11 +191,15 @@ export function build(o: RenderOptions): { report: Report; md: (generated: strin
   const report = analyze(inputs, { egress: o.pii ? piiEgress(plan) : null, crosscheck: crosscheck === null ? null : { summary: crosscheck.summary ?? crosscheck } });
   const extraMissing: string[] = [];
   if ((inputs.comboNoFacts ?? 0) > 0) extraMissing.push(`single-arm unit rows (item facts) for ${inputs.comboNoFacts} combo unit rows`);
-  const agentPath = firstExisting(o.agentReadings, join(o.outBase, 'agent-readings.json'), join(o.results, 'P8', 'agent-readings.json'));
+  const agentPath = firstExisting(o.agentReadings, join(o.outBase, 'agent-readings.json'),
+    join(o.results, 'P8', 'scored', 'agent-readings.json'), join(o.results, 'P8', 'agent-readings.json'));
   report.tables.push(...e2eTables(o.results, extraMissing), agentTable(agentPath, extraMissing), threatsTable(o.results, inputs), reproductionTable(o.results));
   const slow = slowGateway(o.results);
   report.tables.find((t) => t.anchor === 'q13')?.notes.push(slow === null ? 'P6 end-RTT check (4.5): not recorded (P6/phase.jsonl)'
     : `P6 end-RTT check (4.5): ${slow ? 'slow_gateway: the end RTT was above 1.5x the P0 baseline; read every cell with that note' : 'within 1.5x of P0'}`);
+  if (o.interim) {
+    for (const t of report.tables) for (const [anchor, note] of INTERIM_P6_COLUMNS) if (anchor.test(t.anchor)) t.notes.push(note);
+  }
   report.missing.push(...extraMissing);
   if (o.resamples !== 2000) report.missing.push(`protocol resamples (this render used ${o.resamples}, not 2,000)`);
   report.missing.sort();

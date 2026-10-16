@@ -51,15 +51,19 @@ pinned commit and the bench commit on every row.
 | P0 combinator | `combos.mjs golden` | the copy in `lib/combine-copy/` against refsure's `combine/*` at the pinned commit equals `golden/combinator.diff` and differs in import lines only (`--write` records the golden once and refuses when it exists) |
 | P0 ablation inputs | `ablation-sets.mjs ping --write <file>`; `ablation-sets.mjs p1-sample --from <P1 set> --freeze <table> --write <file>` | writes the doctor-ping item and the 60-item gold-stratified P1 sample as set files, once, for the freeze table; `run.mjs --variant` also checks the 2.5 asserts (W0 = shipped) |
 | P5 ablation | `run.mjs --phase P5 --variant W0\|W1\|W2\|W3\|C1\|K --arm ... --set <presence set> ...` | presence items only; C1 on OpenAI arms only; 3 repeats; the row keeps the shipped wording hash |
+| P5 drift | `run.mjs --phase P5 --variant drift --arm oa_primary --set <P1 set> --prior <file> ...` | 2.5 drift since the prior run (`lib/drift.ts`): every item built masks off, its wire body compared byte for byte with the prior's stored body (`--prior`: one line per item, `{id, body, answers: {r1..r3: {order, status, p_true, answer, model}}}`, kept outside the repo and frozen); only byte-identical items are asked (3 repeats), each row carrying `prior` (the prior answer and p(true) of the same repeat); the rest are listed with the first differing byte in `<results>/P5/drift-bodies.<set>.json` (stderr on a dry run) |
+| P4 T29 recheck | `run.mjs --phase P4 --set <frozen P4a set> --ids <ids file> --variant recheck --orders p0,fixed --repeats 1 --resume ...` | asks only the drawn items of the frozen set, so every row keeps that set's own hash (9.2); the ids file is checked against the freeze table too |
 | P4/P5 offline combos | `combos.mjs replay --results <dir> --items <set> --out <dir> --freeze <table> [--combos "agree:a,b fallback:a,b"]` | Q2's five shapes by default; production shapes through `createDecide`, the rest `bench_combinator`; no call |
-| P5b live combos | `combos.mjs live --results <dir> --items <a,b,..> --site dismiss\|presence\|page-state --out <dir> --freeze <table>` | pools the primary sets; one pass, concurrency 1, real `decide()` with both real providers (keys via the secret store), then both gates; refuses a sample short of `n` or the branch floor unless `--allow-short-branch`; `--dry-run` prints the drawn sample only |
+| P5b live combos | `combos.mjs live --results <dir> --items <a,b,..> --site dismiss\|presence\|page-state --out <dir> --freeze <table>` | pools the primary sets, primary items only (X3 visual-only and injected items stay out; counts printed); one pass, concurrency 1, real `decide()` with both real providers (keys via the secret store), then both gates; refuses a sample short of `n` or the branch floor unless `--allow-short-branch`; `--dry-run` prints the drawn sample only |
 | P5b gates | `combos.mjs gates --live <file> --results <dir> --items <a,b,..> --freeze <table>` | recomputes the replay and separate-rows gates from a live ledger; no call |
 
 `run.mjs` flags: `--phase P4|P4a|P5`, `--arm a[,b,...]`, `--set <items.jsonl>`, `--out <results dir>`,
-`--freeze <table>` (required unless `--dry-run`), `--set-id` (default: the file name), `--orders p0,rb1,...`,
+`--freeze <table>` (required unless `--dry-run`), `--set-id` (default: the file name), `--ids <file|a,b>` (only
+those items of the set, in the set's order; a file holds one id per line), `--orders p0,rb1,...`,
 `--repeats 3`, `--concurrency 4` (per arm, at most 4), `--rpm 480` (one shared bucket for every gateway arm; each
 direct arm has its own), `--resume`, `--limit N`, `--dry-run`, `--manifest <json>` (planned rows and phase plans for
-the guards), `--variant shipped|recheck|W0|W1|W2|W3|C1|K` (the last six apply lib/ablate.ts's edit), `--deadline-ms 15000`, `--attempts 3`. Exit 3 = a guard stopped the run, 64 = bad
+the guards), `--variant shipped|recheck|drift|W0|W1|W2|W3|C1|K` (the last six apply lib/ablate.ts's edit; `drift`
+needs `--prior <file>`), `--deadline-ms 15000`, `--attempts 3`. Exit 3 = a guard stopped the run, 64 = bad
 usage. Items whose gold reads the same as another offered line (X1) are not asked; items holding a private term are
 never sent to a `public` arm (X4).
 
@@ -215,6 +219,7 @@ removes it.
 - `readItems(path)`; `buildFor(item, order): Built` (`site.build` with the order, plus the wording hash `decide` uses).
 - `CANDIDATE_ORDERS`, `OrderLabel`, `saltOf(order)`, `defaultOrders(item)`, `isCandidateSite(site)`, `CANDIDATE_SITES`.
 - `goldChecks(item): GoldChecks` X1 gold twin and X2 gold cut from the `p0` build; `score(site, verdict, gold, alt): Scored` acted / right / dangerous; `dangerEligible(site, gold)`; `groupOf(item, setId)`; `itemText(item)`.
+- `readIdList(arg)` an `--ids` file (one id per line) or comma list; `pickIds(items, ids)` those items in set order (an unknown id throws); `livePoolExclusion(item)` `visual_only`, `injected` or null (the 2.4 live pool).
 
 `lib/thresholds.ts`
 - `rowThreshold(site, provider, riskLabel, model, wordingHash): {threshold, source}` exactly `thresholdFor` as decide.ts calls it, else the research row.
@@ -225,7 +230,7 @@ removes it.
 
 `lib/ask.ts`
 - `armRuntime(file, arm, stateDir?): ArmRuntime` refsure's provider for the arm, with the bench's consent grant written to `stateDir`.
-- `prepare(rt, item, order, ablation?): Prepared` build, optional edit, `approve`, the part refsure would ask, digests and the exact wire body (`provider.body`); no network.
+- `prepare(rt, item, order, ablation?, {masks?}): Prepared` build, optional edit, `approve` (at the item's mask mode unless `masks` overrides it), the part refsure would ask, digests and the exact wire body (`provider.body`); no network. `AskRowOptions.masks` and `.prior` (written as the row's `prior`) serve the 2.5 drift rows.
 - `askRow(rt, item, opts: AskRowOptions): Promise<QualityRow>` one full ledger row: outer attempts on timeout|transport|429|5xx, every attempt timed (`T_wire`, `T_ask`); `opts.beforeAttempt` takes a rate token, `opts.settle` fills `settle`.
 - `Ablation` `{variant, edit(request, item), read?(answer, threshold)}`; `scrubDetail(detail)`.
 
@@ -256,6 +261,9 @@ removes it.
 `lib/settle.ts` (2.7)
 - `settleReplay(item, site, act): Settled | 'inconclusive (no settle inputs)'`: dismiss `vetoOf`/`closesOrRejects` (a vetoed pick is no act, a proposal stays acted), locate/find `classifyNames` and the re-read at the row of max(item risk or write, name class); other sites unchanged. Inputs: `item.settleInputs.names[callerIndex]` (and `roles`).
 - `settleRow(item, row, armModel)`, `settleHook(armModel)` (what `run.ts` passes to `askRow`); `SETTLE_LABEL`, `NO_SETTLE_INPUTS`.
+
+`lib/drift.ts` (2.5 drift since the prior run)
+- `DRIFT_VARIANT`, `readPrior(path)` the `--prior` file; `driftPlan(rt, items, prior)` every item built masks off, its wire body against the prior body byte for byte (`same` ids and one `BodyCheck` per item: result, `first_diff`, the two bytes there in hex, sizes, sha256s); `firstDiff(a, b)`; `driftCounts(checks)`; `priorOf(line, repeat, fileSha)` the row's `prior` (`p_true`, `answer`, `status`, `order`, `model`, `body_sha256`, `file_sha256`).
 
 `lib/ablate.ts` (2.5)
 - `ABLATION_TEXTS` (exact W0-W3), `ABLATION_VARIANTS`, `ABLATION_CELLS` (17), `ABLATION_REPEATS`, `DOCTOR_PING_ITEM`.
@@ -453,8 +461,9 @@ Inputs read: P4 (`shipped`, `recheck`, `slice`), P5 (variants `W0`..`K`, `C1`, `
 `bench:<shape>`), `<results>/P5b/live/*.jsonl` (both 2.4 gates recomputed from `replay_equal`, `separate_equal`,
 `explained`), the P7 CLI ledger `<results>/e2e/cli/runs*.jsonl` (section 7, read per cfg x backend and scenario),
 agent/score.ts's `agent-readings.json` (section 8, copied; `--agent-readings`, else `<analysis>/agent-readings.json`,
-else `<results>/P8/agent-readings.json`), `<results>/P6/phase.jsonl` (the 4.5 end-RTT `slow_gateway` note on Q13), guard
-lines. Combo rows take `visual_only`, `origin`, `lang`, `condition` and `masks` from the single-arm unit row of the same
+else `<results>/P8/scored/agent-readings.json` where p8/run.sh scores, else `<results>/P8/agent-readings.json`),
+`<results>/P6/phase.jsonl` (the 4.5 end-RTT `slow_gateway` note on Q13), guard lines.
+Combo rows take `visual_only`, `origin`, `lang`, `condition` and `masks` from the single-arm unit row of the same
 item (P4, any slice); a combo row without one is listed as a missing input.
 
 Groups: every fold (5.3), dev half (2.5) and bootstrap resample uses the ledger's `group` field exactly as stored

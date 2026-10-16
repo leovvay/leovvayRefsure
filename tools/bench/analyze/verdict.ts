@@ -16,8 +16,11 @@ import type { Bound, CellUnits, Danger, Gates, Meta, Plan, R2Cell, Site, TimingR
 
 export type Cell = string | number | null;
 
-/** One table of tables.md / summary.json, anchored for the report (9.1). */
-export interface Table { anchor: string; section: number; title: string; columns: string[]; rows: Cell[][]; notes: string[] }
+/**
+ * One table of tables.md / summary.json, anchored for the report (9.1). `source` names the phase whose rows the
+ * whole table reads when that is not P4 (P6 timing, P7 CLI, P8 agents), so an interim render labels it by phase.
+ */
+export interface Table { anchor: string; section: number; title: string; columns: string[]; rows: Cell[][]; notes: string[]; source?: string }
 
 export interface Report { tables: Table[]; missing: string[]; verdictCells: { anchor: string; cell: string; actedGroups: number | null }[] }
 
@@ -63,9 +66,12 @@ export function floorAt(P: number): number {
   return P >= 0.99 ? E99 : P >= 0.98 ? 149 : E95;
 }
 
-/** The printed danger bound: deff-adjusted, or the exact CP upper when the cell is below D299 (3.1, 5.5). */
+/**
+ * The printed danger bound: deff-adjusted, or the exact CP upper when the cell is below D299 (3.1, 5.5); presence's
+ * per-wait bound (5.1) is computed from that same printed bound (`Danger.bound`).
+ */
 export function dangerText(d: Danger): string {
-  const bound = d.verdict === 'below D299' ? `exact ${r4(d.exactUpper)}` : r4(d.upper);
+  const bound = d.verdict === 'below D299' ? `exact ${r4(d.bound)}` : r4(d.bound);
   return `${bound} (${d.verdict})${d.perWait === null ? '' : `; per wait ${r4(d.perWait)}`}`;
 }
 
@@ -116,9 +122,20 @@ export class Ctx {
     return cellUnits(source, { arm, site, sets, pixel });
   }
 
-  /** Every arm and set of a site (the 3.1 rho pool), text rows only. */
+  private readonly pools = new Map<string, Unit[]>();
+
+  /**
+   * Every arm and set of a site (the 3.1 rho pool): text, masks-on rows (the rows cells read), without dismiss rows
+   * whose after reading is unknown (2.7). One array per site, so the pooled rho is estimated once per site and
+   * indicator (A6).
+   */
   pool(site: string): Unit[] {
-    return [...this.i.units, ...this.i.combos].filter((u) => u.site === site && !u.visualOnly && !u.familyBad);
+    let pool = this.pools.get(site);
+    if (pool === undefined) {
+      pool = [...this.i.units, ...this.i.combos].filter((u) => u.site === site && !u.visualOnly && !u.familyBad && u.masks && !u.settleOpen);
+      this.pools.set(site, pool);
+    }
+    return pool;
   }
 
   timingOf(arm: string, site: string): TimingRow[] {
@@ -162,11 +179,13 @@ export interface CandEval {
 export function blockOf(ctx: Ctx, id: string, site: string, cell: CellUnits, sets: readonly string[]): string | null {
   if (cell.units.length === 0) return ctx.miss(`P4 rows of ${id} at ${site} on ${sets.join('+')}`);
   if (familyBlocked(cell)) return `inconclusive (family: ${cell.family} of ${cell.total} rows)`;
-  if (site === 'dismiss') {
-    const open = cell.units.filter((u) => u.actedBefore && u.vetoed === null).length;
-    if (open > 0) return `inconclusive (no settle inputs: ${open} acted rows)`;
-  }
-  return null;
+  return settleOpenText(cell.units);
+}
+
+/** 2.7: a dismiss cell with acted rows whose settle has no inputs has no after reading; null when it has one. */
+export function settleOpenText(units: readonly Unit[]): string | null {
+  const open = units.filter((u) => u.settleOpen).length;
+  return open > 0 ? `inconclusive (no settle inputs: ${open} acted rows)` : null;
 }
 
 /** 5.5 step 1 for one unit list: safe, fail or inconclusive (reason), at P* and `alpha`. */
@@ -258,7 +277,9 @@ export function siteVerdict(ctx: Ctx, site: Site): SiteVerdict {
   let text: string;
   let def: string | null = null;
   if (safe.length === 0) {
-    text = evals.every((e) => e.status === 'fail') ? `every route fails ${pS}` : `no route shown safe at ${pS}`;
+    // Step 3's "no route shown safe" needs a read candidate; with every input missing nothing was read.
+    text = evals.every((e) => e.status.startsWith('inconclusive (missing ')) ? 'inconclusive (missing inputs)'
+      : evals.every((e) => e.status === 'fail') ? `every route fails ${pS}` : `no route shown safe at ${pS}`;
   } else if (safe.some((e) => e.share === null)) {
     text = ctx.miss(`P6 M2 failure share at ${site} for ${safe.filter((e) => e.share === null).map((e) => e.cand.timing).join(', ')}`);
   } else {
@@ -330,6 +351,11 @@ const SITE_COLUMNS = ['arm', 'cell', 'label', 'items', 'failed rows', 'acted', '
   'precision', 'deff lower', 'item-CP lower / cluster-boot lower', 'rule at P*', 'at 0.98', 'at 0.95', 'wrong', 'dangerous / eligible', 'danger upper', 'before settle',
   'miss_write', 'R2 cov .95', 'R2 cov .98', 'R2 cov .99', 'R2 row .99', 'p50', 'p95', 'p95 CI', 'over budget', '$ / 1,000', '$ / settled'];
 
+/** The site-table columns read after the dismiss veto replay (2.7); `before settle` is the before reading. */
+const AFTER_COLUMNS = ['acted', 'acted groups', 'R1-answer cov', 'R1-budget cov', 'act rate', 'precision', 'deff lower',
+  'item-CP lower / cluster-boot lower', 'rule at P*', 'at 0.98', 'at 0.95', 'wrong', 'dangerous / eligible', 'danger upper',
+  'R2 cov .95', 'R2 cov .98', 'R2 cov .99', 'R2 row .99', '$ / settled'];
+
 /** The arms and combos with rows at a site, candidates first. */
 function armsAt(ctx: Ctx, site: Site): string[] {
   const all = [...new Set([...ctx.i.units, ...ctx.i.combos].filter((u) => u.site === site).map((u) => u.arm))].sort();
@@ -365,7 +391,7 @@ export function siteRow(ctx: Ctx, site: Site, arm: string, sets: readonly string
   const before = site === 'dismiss' ? `${units.filter((u) => u.dangerousBefore).length} wrong of ${units.filter((u) => u.actedBefore).length} acted` : null;
   const mw = site === 'outcome' ? missWrite(units) : null;
   const r2row = r2[2] ? Object.entries(r2[2].rows).map(([k, v]) => `${k === 'all' ? '' : `${k} `}${v === null ? 'none' : r4(v)}`).join('; ') + (arm === 'agree' || arm === 'fallback' || arm.startsWith('bench:') ? ' (shared)' : '') : null;
-  return [
+  const row: Cell[] = [
     name, sets.join('+'), familyBlocked(cell) ? `${label}; inconclusive (family)` : label, s.items, s.failures, s.acted, s.actedGroups,
     r4(s.coverage), share === null ? 'missing P6' : r4(s.coverage * (1 - share)), r4(s.actRate), r4(s.precision), r4(main.lower),
     `${r4(main.itemLower)} / ${r4(main.bootLower)}`,
@@ -377,6 +403,13 @@ export function siteRow(ctx: Ctx, site: Site, arm: string, sets: readonly string
     t ? (t.overDecision10k === null ? r4(t.overBudget) : `part ${r4(t.overPart)}; Decision@10k ${r4(t.overDecision10k)}`) : null,
     r4(usd), r4(usd / 1000 / s.coverage),
   ];
+  // 2.7: acted dismiss rows without settle inputs have no after reading, so no after column copies the before value.
+  const open = site === 'dismiss' ? settleOpenText(units) : null;
+  if (open !== null) {
+    for (const i of AFTER_COLUMNS.map((col) => SITE_COLUMNS.indexOf(col))) if (row[i] !== null) row[i] = 'inconclusive (no settle inputs)';
+    row[SITE_COLUMNS.indexOf('rule at P*')] = opts.status ?? open;
+  }
+  return row;
 }
 
 /** 9.1 item 2: one table per site, the verdict pool first (every arm and combo), then every other set labelled. */
@@ -1040,11 +1073,11 @@ export function timingTables(ctx: Ctx): Table[] {
   const adj = holm(ps);
   faster.forEach((row, i) => { row.push(r4(adj[i] ?? null)); if ((adj[i] ?? 1) >= 0.05 && String(row[5]).endsWith('faster')) row[5] = `${String(row[5])} (not after Holm)`; });
   return [
-    { anchor: 'q13', section: 2, title: 'Timing (Q13): p50/p95 per site, arm (M1, T_ask) and route (M2, T_decision)', columns: ['site', 'mode', 'arm or route', 'rows', 'cache-served excluded', 'p50', 'p95', 'p95 CI (group bootstrap)',
+    { anchor: 'q13', section: 2, source: 'P6', title: 'Timing (Q13): p50/p95 per site, arm (M1, T_ask) and route (M2, T_decision)', columns: ['site', 'mode', 'arm or route', 'rows', 'cache-served excluded', 'p50', 'p95', 'p95 CI (group bootstrap)',
       'p95 CI (order statistic, iid)', 'no-answer share', 'over budget', 'r1 vs r2/r3 p50/p95', 'cached tokens yes vs no p50/p95', 'without flagged rows p50/p95', 'loadavg1 p50/max'], rows,
     notes: ['Nearest-rank percentiles; a row without an answer ranks +inf; over 2% of such rows marks the cell `failures`. The flagged-row reading is sensitivity only.'] },
-    { anchor: 'q13-faster', section: 2, title: 'Timing: "A is faster than B" (paired group bootstrap, Holm within this table)', columns: ['site', 'mode', 'A - B', 'percentile', 'difference ms [CI]', 'statement', 'bootstrap p', 'draws on +inf', 'Holm p'], rows: faster, notes: [] },
-    { anchor: 'q13-index', section: 2, title: 'M2 T_decision p50 by row index within a repeat (thirds)', columns: ['site', 'route', 'first third', 'middle third', 'last third'], rows: index, notes: [] },
+    { anchor: 'q13-faster', section: 2, source: 'P6', title: 'Timing: "A is faster than B" (paired group bootstrap, Holm within this table)', columns: ['site', 'mode', 'A - B', 'percentile', 'difference ms [CI]', 'statement', 'bootstrap p', 'draws on +inf', 'Holm p'], rows: faster, notes: [] },
+    { anchor: 'q13-index', section: 2, source: 'P6', title: 'M2 T_decision p50 by row index within a repeat (thirds)', columns: ['site', 'route', 'first third', 'middle third', 'last third'], rows: index, notes: [] },
   ];
 }
 

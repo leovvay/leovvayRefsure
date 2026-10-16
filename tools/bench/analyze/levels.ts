@@ -22,7 +22,7 @@ export function e2eTables(results: string, missing: string[]): Table[] {
   const files = ledgerFiles(results, 'e2e', 'cli', 'runs');
   if (files.length === 0) {
     missing.push('P7 CLI ledger (e2e/cli/runs.jsonl)');
-    return [{ anchor: 'e2e', section: 7, title: 'End-to-end CLI (Q15)', columns: ['reading'], rows: [['inconclusive (missing P7 ledger)']], notes: [] }];
+    return [{ anchor: 'e2e', section: 7, source: 'P7', title: 'End-to-end CLI (Q15)', columns: ['reading'], rows: [['inconclusive (missing P7 ledger)']], notes: [] }];
   }
   const all = files.flatMap((f) => readRows<RunRow>(f));
   const latest = new Map<string, RunRow>();
@@ -55,10 +55,10 @@ export function e2eTables(results: string, missing: string[]): Table[] {
     }
   }
   return [
-    { anchor: 'e2e', section: 7, title: 'End-to-end CLI (Q15): runs per cfg x backend', columns: ['cfg', 'backend', 'run keys', 'scored', 'void (latest)', 'pass', 'safe', 'fail', 'false claims', 'wrong clicks', 'repeated writes'],
+    { anchor: 'e2e', section: 7, source: 'P7', title: 'End-to-end CLI (Q15): runs per cfg x backend', columns: ['cfg', 'backend', 'run keys', 'scored', 'void (latest)', 'pass', 'safe', 'fail', 'false claims', 'wrong clicks', 'repeated writes'],
       rows: summary, notes: ['Latest run row per run key; a void run was re-run under a new id, and a key whose latest row is void counts as void.'] },
-    { anchor: 'e2e-scenarios', section: 7, title: 'End-to-end CLI: per scenario (k of 3)', columns: ['scenario', 'cfg', 'backend', 'pass', 'safe', 'fail', 'void'], rows: perScenario, notes: [] },
-    { anchor: 'e2e-timing', section: 7, title: 'End-to-end CLI: T_cli per verb (nearest rank, ok and non-ok rows alike)', columns: ['cfg', 'backend', 'verb', 'commands', 'p50', 'p95'], rows: timing,
+    { anchor: 'e2e-scenarios', section: 7, source: 'P7', title: 'End-to-end CLI: per scenario (k of 3)', columns: ['scenario', 'cfg', 'backend', 'pass', 'safe', 'fail', 'void'], rows: perScenario, notes: [] },
+    { anchor: 'e2e-timing', section: 7, source: 'P7', title: 'End-to-end CLI: T_cli per verb (nearest rank, ok and non-ok rows alike)', columns: ['cfg', 'backend', 'verb', 'commands', 'p50', 'p95'], rows: timing,
       notes: ['T_cli includes the key injection; its cost measured alone is in `e2e/injection.jsonl`.'] },
   ];
 }
@@ -68,7 +68,7 @@ export function agentTable(path: string | null, missing: string[]): Table {
   const title = 'Agent level (Q16)';
   if (path === null || !existsSync(path)) {
     missing.push('agent readings (agent/score.ts agent-readings.json; render --agent-readings)');
-    return { anchor: 'agent', section: 8, title, columns: ['reading'], rows: [['inconclusive (missing agent readings)']], notes: [] };
+    return { anchor: 'agent', section: 8, source: 'P8', title, columns: ['reading'], rows: [['inconclusive (missing agent readings)']], notes: [] };
   }
   const rows: Cell[][] = [];
   const walk = (prefix: string, v: unknown) => {
@@ -77,7 +77,7 @@ export function agentTable(path: string | null, missing: string[]): Table {
     else rows.push([prefix, typeof v === 'number' || typeof v === 'string' || v === null ? v : JSON.stringify(v)]);
   };
   walk('', JSON.parse(readFileSync(path, 'utf8')) as unknown);
-  return { anchor: 'agent', section: 8, title, columns: ['reading', 'value'], rows, notes: [`Copied from ${path.split('/').slice(-2).join('/')} (agent/score.ts); section 6.5 rules are applied there.`] };
+  return { anchor: 'agent', section: 8, source: 'P8', title, columns: ['reading', 'value'], rows, notes: [`Copied from ${path.split('/').slice(-2).join('/')} (agent/score.ts); section 6.5 rules are applied there.`] };
 }
 
 /** The first existing path, else null. */

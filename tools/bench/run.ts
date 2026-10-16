@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { flags, list, need, num, opt } from '../calibrate/lib/args';
 import { pool } from '../calibrate/lib/pool';
@@ -8,9 +8,11 @@ import type { Arm } from './lib/arms';
 import { ablationAsserts, ablationFor, ABLATION_VARIANTS } from './lib/ablate';
 import { armRuntime, askRow, prepare } from './lib/ask';
 import type { Ablation, ArmRuntime } from './lib/ask';
+import { DRIFT_VARIANT, driftCounts, driftPlan, priorOf, readPrior } from './lib/drift';
+import type { DriftPlan } from './lib/drift';
 import { assertFrozen, assertPinnedSource, readFreezeTable, sha256File } from './lib/freeze';
 import { GUARD_USD_PER_CALL, RateBucket, RunnerGuards, readKeySpend, stopReason } from './lib/guards';
-import { CANDIDATE_ORDERS, goldChecks, isCandidateSite, itemText, readItems } from './lib/items';
+import { CANDIDATE_ORDERS, goldChecks, isCandidateSite, itemText, pickIds, readIdList, readItems } from './lib/items';
 import type { BenchItem, GoldChecks, OrderLabel } from './lib/items';
 import { doneKeys, ledgerFiles, ledgerPath, nextResume, openLedger, readRows, rowKey } from './lib/ledger';
 import type { LedgerWriter, QualityRow } from './lib/ledger';
@@ -24,19 +26,25 @@ import { helpExit } from './lib/help';
   mulberry32(FNV-1a(`refsure-bench-20261016:<block id>`)). One ledger file per (phase, arm, set); a rerun skips
   terminal keys, `--resume` re-asks failures into `<set>.resume<N>.jsonl`. `--dry-run` builds and approves every
   row and prints its digests without any network call. Exit 3 = a spend guard stopped the run; 64 = bad usage.
+  `--ids <file|a,b>` asks only those items of the frozen set (the T29 recheck), so every row keeps the set's own hash;
+  an ids file is itself checked against the freeze table. `--variant drift --prior <file>` is the 2.5 P1 drift
+  re-ask (lib/drift.ts): masks off, one o_primary arm, only items whose wire body equals the prior's byte for byte,
+  each row carrying `prior` (the prior's answer and p(true) of the same repeat); the rest are listed in
+  `<out>/<phase>/drift-bodies.<set>.json` (stderr on a dry run).
 
     run --phase P4|P4a|P5 --arm jev_gw,oa_s2 --set <items.jsonl> --out <results dir> [--freeze <table>]
-        [--set-id ID] [--orders p0,rb1,...] [--repeats 3] [--concurrency 4] [--rpm 480] [--resume]
-        [--limit N] [--dry-run] [--manifest <json>] [--variant shipped] [--deadline-ms 15000] [--attempts 3]
+        [--set-id ID] [--ids <file|a,b>] [--orders p0,rb1,...] [--repeats 3] [--concurrency 4] [--rpm 480] [--resume]
+        [--limit N] [--dry-run] [--manifest <json>] [--variant shipped|recheck|drift|W0..] [--prior <file>]
+        [--deadline-ms 15000] [--attempts 3]
 */
 
-const USAGE = 'usage: run --phase P4|P4a|P5 --arm a[,b] --set <items.jsonl> --out <dir> [--freeze <table>] [--set-id ID] [--orders p0,rb1,..] [--repeats 3] [--concurrency 4] [--rpm 480] [--resume] [--limit N] [--dry-run] [--manifest <json>] [--variant shipped] [--deadline-ms 15000] [--attempts 3]';
+const USAGE = 'usage: run --phase P4|P4a|P5 --arm a[,b] --set <items.jsonl> --out <dir> [--freeze <table>] [--set-id ID] [--ids <file|a,b>] [--orders p0,rb1,..] [--repeats 3] [--concurrency 4] [--rpm 480] [--resume] [--limit N] [--dry-run] [--manifest <json>] [--variant shipped|recheck|drift|W0|W1|W2|W3|C1|K] [--prior <file>] [--deadline-ms 15000] [--attempts 3]';
 helpExit(USAGE);
 const argv = process.argv.slice(2);
 const dryRun = argv.includes('--dry-run');
 const resume = argv.includes('--resume');
 const values = flags(argv.filter((a) => a !== '--dry-run' && a !== '--resume'),
-  ['phase', 'arm', 'set', 'out', 'freeze', 'set-id', 'orders', 'repeats', 'concurrency', 'rpm', 'limit', 'manifest', 'variant', 'deadline-ms', 'attempts'], USAGE);
+  ['phase', 'arm', 'set', 'out', 'freeze', 'set-id', 'ids', 'orders', 'repeats', 'concurrency', 'rpm', 'limit', 'manifest', 'variant', 'prior', 'deadline-ms', 'attempts'], USAGE);
 const phaseArg = need(values, 'phase', USAGE);
 if (!['P4', 'P4a', 'P5'].includes(phaseArg)) {
   process.stderr.write(`--phase ${phaseArg}: P4, P4a or P5\n${USAGE}\n`);
@@ -57,12 +65,24 @@ const limit = num(values, 'limit', Infinity, USAGE, { min: 1, integer: true });
 const deadlineMs = num(values, 'deadline-ms', 15_000, USAGE, { min: 1 });
 const maxAttempts = num(values, 'attempts', 3, USAGE, { min: 1, max: 5, integer: true });
 const variant = opt(values, 'variant') ?? 'shipped';
-// `shipped` and `recheck` send the shipped request; a 2.5 variant (W0..W3, C1, K) applies lib/ablate.ts's edit.
+// `shipped` and `recheck` send the shipped request; a 2.5 variant (W0..W3, C1, K) applies lib/ablate.ts's edit;
+// `drift` sends the shipped request masks off (2.5 drift since the prior run).
 const ablating = (ABLATION_VARIANTS as readonly string[]).includes(variant);
-if (variant !== 'shipped' && variant !== 'recheck' && !ablating) {
-  process.stderr.write(`--variant ${variant}: shipped, recheck or one of ${ABLATION_VARIANTS.join(', ')}\n${USAGE}\n`);
+const drifting = variant === DRIFT_VARIANT;
+if (variant !== 'shipped' && variant !== 'recheck' && !drifting && !ablating) {
+  process.stderr.write(`--variant ${variant}: shipped, recheck, ${DRIFT_VARIANT} or one of ${ABLATION_VARIANTS.join(', ')}\n${USAGE}\n`);
   process.exit(64);
 }
+/** Exit 64 with a message (a refused precondition). */
+function refuse(message: string): never {
+  process.stderr.write(`${message}\n`);
+  process.exit(64);
+}
+const priorPath = opt(values, 'prior');
+if (drifting !== (priorPath !== undefined)) refuse(`--prior <file> goes with --variant ${DRIFT_VARIANT}, and only with it (2.5)\n${USAGE}`);
+if (drifting && phaseArg !== 'P5') refuse(`--variant ${DRIFT_VARIANT}: the 2.5 drift re-ask is a P5 run`);
+/** The 2.5 drift rows are built masks off; every other run sends the item's own mask mode. */
+const masksOverride = drifting ? false : undefined;
 /** The 2.5 edit for this arm, when the run is an ablation run. */
 function ablationOf(arm: Arm): Ablation | undefined {
   return ablating ? ablationFor(variant, arm.provider) : undefined;
@@ -81,9 +101,26 @@ try {
 }
 const arms = readArmsFile();
 const chosen: Arm[] = armIds.map((id) => armById(arms, id));
+if (drifting && (chosen.length !== 1 || chosen[0]!.provider !== 'openai' || chosen[0]!.rendering !== 'o_primary')) {
+  refuse(`--variant ${DRIFT_VARIANT}: one OpenAI arm at the o_primary rendering (the prior's adapter A wire, 2.5); got ${armIds.join(', ')}`);
+}
 const freezePath = opt(values, 'freeze');
+const table = freezePath === undefined ? null : readFreezeTable(freezePath);
+/** The sha256 of an input the run reads besides the set (an ids file, the prior file): frozen, or noted on a dry run. */
+function frozenInput(path: string, what: string): string {
+  if (table === null) {
+    const sha = sha256File(path);
+    process.stderr.write(`note: no --freeze; a real run refuses an unfrozen ${what} file (sha256 ${sha.slice(0, 12)})\n`);
+    return sha;
+  }
+  try {
+    return assertFrozen(table, path);
+  } catch (error) {
+    return refuse(`${what}: ${(error as Error).message}`);
+  }
+}
 let setSha: string;
-if (freezePath !== undefined) setSha = assertFrozen(readFreezeTable(freezePath), setPath);
+if (table !== null) setSha = assertFrozen(table, setPath);
 else if (dryRun) {
   setSha = sha256File(setPath);
   process.stderr.write(`note: no --freeze; a real run refuses an unfrozen set (sha256 ${setSha.slice(0, 12)})\n`);
@@ -112,7 +149,23 @@ if (!dryRun) {
   }
 }
 
-const items = readItems(setPath).slice(0, limit);
+let picked = readItems(setPath);
+const idsArg = opt(values, 'ids');
+if (idsArg !== undefined) {
+  // T29: the recheck asks some items of a frozen P4a set, so its rows keep that set's own hash (9.2).
+  try {
+    const { ids, file } = readIdList(idsArg);
+    if (file !== null) frozenInput(file, '--ids');
+    picked = pickIds(picked, ids);
+  } catch (error) {
+    refuse((error as Error).message);
+  }
+}
+const items = picked.slice(0, limit);
+if (drifting) {
+  const other = items.find((item) => item.site !== 'presence');
+  if (other) refuse(`--variant ${DRIFT_VARIANT}: item ${other.id} is ${other.site}; the 2.5 drift re-ask builds the presence site only`);
+}
 if (ablating) {
   // P0 (2.5): W0 must be the shipped presence instruction and the shipped question must carry criteria.
   const asserts = ablationAsserts();
@@ -138,7 +191,32 @@ if (ablating) {
 const gold = new Map<string, GoldChecks>(items.map((item) => [item.id, goldChecks(item)]));
 const twins = items.filter((item) => gold.get(item.id)!.goldTwin);
 if (twins.length > 0) process.stderr.write(`X1: ${twins.length} gold-twin items are settle-layer only and not asked\n`);
-const asked = items.filter((item) => !gold.get(item.id)!.goldTwin);
+const runtimes = new Map<string, ArmRuntime>(chosen.map((arm) => [arm.id, armRuntime(arms, arm)]));
+// 2.5 drift: every item built masks off and its wire body compared with the prior's; only byte-identical ones are asked.
+let drift: DriftPlan | null = null;
+let priorSha = '';
+if (drifting) {
+  priorSha = frozenInput(priorPath!, '--prior');
+  let prior: ReturnType<typeof readPrior>;
+  try {
+    prior = readPrior(priorPath!);
+  } catch (error) {
+    refuse((error as Error).message);
+  }
+  drift = driftPlan(runtimes.get(chosen[0]!.id)!, items.filter((item) => !gold.get(item.id)!.goldTwin), prior);
+}
+const asked = items.filter((item) => !gold.get(item.id)!.goldTwin && (drift === null || drift.same.has(item.id)));
+/** The `prior` a drift row carries (2.5); undefined on every other run. */
+function priorField(item: BenchItem, repeat: string): unknown {
+  return drift === null ? undefined : priorOf(drift.prior.get(item.id), repeat, priorSha);
+}
+/** The 2.5 listing of the bodies not asked: written beside the phase's ledgers, or to stderr on a dry run. */
+function driftListing(): Record<string, unknown> | null {
+  if (drift === null) return null;
+  return { what: '2.5 drift: masks-off wire body vs the prior stored body, byte for byte', set: setId, set_sha: setSha,
+    prior_sha256: priorSha, arm: chosen[0]!.id, masks: false, counts: driftCounts(drift.checks),
+    listed: drift.checks.filter((check) => check.result !== 'same') };
+}
 
 /** The (order, repeat) pairs of 2.3 for one item, filtered by --orders. */
 function plan(item: BenchItem): { order: OrderLabel; repeat: string }[] {
@@ -157,7 +235,6 @@ for (const site of [...new Set(asked.map((item) => item.site))]) {
 }
 
 const runId = `${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z')}-${randomBytes(3).toString('hex')}`;
-const runtimes = new Map<string, ArmRuntime>(chosen.map((arm) => [arm.id, armRuntime(arms, arm)]));
 
 /** The arms' start order for one block (2.3). */
 function armOrder(blockId: string): Arm[] {
@@ -181,7 +258,7 @@ if (dryRun) {
           continue;
         }
         for (const { order, repeat } of plan(item)) {
-          const p = prepare(rt, item, order, ablationOf(arm));
+          const p = prepare(rt, item, order, ablationOf(arm), { masks: masksOverride });
           rows += 1;
           process.stdout.write(`${JSON.stringify({
             row_key: rowKey({ phase, set: setId, item: item.id, site: item.site, arm: arm.id, variant, order, repeat }),
@@ -189,10 +266,18 @@ if (dryRun) {
             digest: p.digest, qdigest: p.qdigest, wire_sha: p.wireSha, req_bytes: p.reqBytes,
             threshold: p.threshold.threshold, threshold_source: p.threshold.source,
             gold: gold.get(item.id)!.gold, ...(p.refusal ? { refused: p.refusal.cause } : {}),
+            ...(drift === null ? {} : { masks: false, prior: priorField(item, repeat) }),
           })}\n`);
         }
       }
     }
+  }
+  const listing = driftListing();
+  if (listing !== null) {
+    for (const check of listing.listed as { item: string; result: string; first_diff: number | null }[]) {
+      process.stderr.write(`drift body ${check.result}: ${check.item}${check.first_diff === null ? '' : ` at byte ${check.first_diff}`}\n`);
+    }
+    process.stderr.write(`drift: ${JSON.stringify(listing.counts)} (masks off on ${chosen[0]!.id}; only byte-identical bodies are asked)\n`);
   }
   process.stderr.write(`dry run: ${rows} rows built, ${withheld} item-arm pairs withheld by X4, ${twins.length} X1 items; nothing was sent\n`);
   process.exit(0);
@@ -291,7 +376,7 @@ async function askOneRow(lane: Lane, item: BenchItem, order: OrderLabel, repeat:
     phase, slice, set: setId, setSha, order, repeat, variant, deadlineMs, maxAttempts, runId, concurrency, commits,
     // flags are read after the bucket gate resolves, i.e. when the row is actually sent (7.3 latency rule).
     gold: gold.get(item.id)!, flags: () => lane.guards.flags(), beforeAttempt: () => lane.guards.attemptGate(),
-    ablation: ablationOf(lane.arm), settle: settleHook(lane.arm.model),
+    ablation: ablationOf(lane.arm), settle: settleHook(lane.arm.model), masks: masksOverride, prior: priorField(item, repeat),
   });
   lane.writer.append(row);
   lane.done.add(key);
@@ -311,6 +396,13 @@ async function askOneRow(lane: Lane, item: BenchItem, order: OrderLabel, repeat:
 }
 
 process.stderr.write(`${runId}: ${phaseArg} ${setId} (${asked.length} items, ${blocks.length} blocks) on ${chosen.map((a) => a.id).join(', ')}${resume ? ' (resume)' : ''}\n`);
+const listing = driftListing();
+if (listing !== null) {
+  // Deterministic for a frozen set, prior file and pinned code: every run (resumes too) rewrites the same listing.
+  mkdirSync(join(out, phase), { recursive: true });
+  writeFileSync(join(out, phase, `drift-bodies.${setId}.json`), `${JSON.stringify(listing, null, 1)}\n`);
+  process.stderr.write(`drift: ${JSON.stringify(listing.counts)}; listing in ${join(out, phase, `drift-bodies.${setId}.json`)}\n`);
+}
 for (const block of blocks) {
   if (stopReason(out) !== null || [...lanes.values()].every((lane) => lane.stopped !== null)) break;
   // Every arm asks every item of the block; arms start in the block's drawn order and then run side by side.
@@ -326,7 +418,8 @@ let exit = 0;
 for (const lane of lanes.values()) {
   lane.writer.close();
   const withheld = asked.filter((item) => !allowed(lane.arm, item)).length;
-  process.stdout.write(`${JSON.stringify({ run_id: runId, arm: lane.arm.id, set: setId, out: lane.writer.path, ...lane.tally, x4_withheld: withheld, stopped: lane.stopped })}\n`);
+  process.stdout.write(`${JSON.stringify({ run_id: runId, arm: lane.arm.id, set: setId, out: lane.writer.path, ...lane.tally, x4_withheld: withheld,
+    ...(drift === null ? {} : { drift: driftCounts(drift.checks) }), stopped: lane.stopped })}\n`);
   if (lane.stopped !== null) {
     process.stderr.write(`${lane.arm.id} stopped: ${lane.stopped}\n`);
     exit = 3;

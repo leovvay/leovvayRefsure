@@ -128,6 +128,11 @@ export interface Unit {
   acted: boolean; correct: boolean; dangerous: boolean; actedBefore: boolean; dangerousBefore: boolean;
   /** Dismiss veto and close word from the 2.7 replay; null when the row carries no settle inputs. */
   vetoed: boolean | null; closeWord: boolean | null;
+  /**
+   * A dismiss row acted before the veto replay whose settle is `inconclusive (no settle inputs)` (2.7): its after
+   * reading is unknown. `acted`/`correct`/`dangerous` then repeat the before values, so every after reading checks this.
+   */
+  settleOpen: boolean;
   /** Still acted after the 2.7 replay (`Settled.acted`: veto, close word, name-class re-read); null without settle inputs. */
   reread: boolean | null;
   /** Caller index (choice) or `true` (Noul yes) the model leaned to, and the score refsure compares (2.2). */
@@ -210,7 +215,11 @@ export function storedGroup(group: string, ledgerSet: string): string {
   return group.includes(':') ? group : `${ledgerSet}:${group}`;
 }
 
-/** One ledger row read as a unit (5.1), with the dismiss veto applied after the R1 read (Terms, A1). */
+/**
+ * One ledger row read as a unit (5.1), with the dismiss veto applied after the R1 read (Terms, A1). A dismiss row
+ * without settle inputs is not vetoed here only because no boolean says "unknown": it carries `settleOpen`, and
+ * the after readings print `inconclusive (no settle inputs)` for it (2.7).
+ */
 export function toUnit(row: QualityRow, plan: Plan): Unit {
   const set = canonSet(row.set, plan);
   const actedBefore = row.r1?.verdict === 'answer';
@@ -228,6 +237,7 @@ export function toUnit(row: QualityRow, plan: Plan): Unit {
     dangerEligible: row.danger_eligible ?? dangerOf(row.site, row.gold),
     acted: actedBefore && !vetoBlocks, correct: correctBefore && !vetoBlocks, dangerous: dangerousBefore && !vetoBlocks,
     actedBefore, dangerousBefore, vetoed, closeWord: typeof settle?.close_word === 'boolean' ? settle.close_word : null, reread,
+    settleOpen: row.site === 'dismiss' && actedBefore && vetoed === null,
     pick, score, twin: row.r1?.cause === 'twins',
     offers: pick !== null && score !== null && row.r1?.cause !== 'twins' && !vetoBlocks ? [{ score, pick, prio: 1 }] : [],
     answered: row.status === 'ok', failure: FAILURE.test(row.status),
@@ -251,11 +261,13 @@ export interface CellUnits { units: Unit[]; family: number; x7: number; total: n
 
 /**
  * Units of one cell: the unit rows of `arm` at `site` over `sets` (canonical ids), `family_ok` false rows set aside
- * (2.2), visual-only rows only when `pixel` (X3), and X7 duplicates by digest dropped across sets.
+ * (2.2), visual-only rows only when `pixel` (X3), and X7 duplicates by digest dropped across sets. Masks-off rows
+ * never enter a cell: quality rows send `piiMasks` true (2.2), and the masks-off half of S4 and N10 is read by Q11
+ * alone (3.2: S4 is primary on its masks-on half).
  */
 export function cellUnits(all: readonly Unit[], q: { arm: string; site: string; sets: readonly string[]; pixel?: boolean }): CellUnits {
   const inSets = new Set(q.sets);
-  const picked = all.filter((u) => u.arm === q.arm && u.site === q.site && inSets.has(u.set) && u.visualOnly === (q.pixel ?? false));
+  const picked = all.filter((u) => u.arm === q.arm && u.site === q.site && inSets.has(u.set) && u.masks && u.visualOnly === (q.pixel ?? false));
   const rank = (set: string) => { const i = X7_ORDER.indexOf(set); return i < 0 ? X7_ORDER.length : i; };
   const ordered = [...picked].sort((a, b) => rank(a.set) - rank(b.set) || a.key.localeCompare(b.key));
   const seen = new Set<string>();
@@ -359,16 +371,47 @@ export interface Bound {
   lower: number; upper: number; itemLower: number; itemUpper: number; bootLower: number; bootUpper: number;
 }
 
-/** The 3.1 rho of an indicator over units: the cell's ICC with >= 3 events, else the site pool's, else 0.1. */
-function rhoFor<T>(cell: readonly T[], pool: readonly T[] | undefined, group: (u: T) => string, hit: (u: T) => boolean): number {
-  const g = (rows: readonly T[]) => ({ events: rows.filter(hit).length, groups: groupsOf(rows, group, (u) => (hit(u) ? 1 : 0)) });
-  return pickRho(g(cell), pool ? g(pool) : undefined);
+/**
+ * The 3.1 rho cluster (A6): (arm, set, group). The same group read by two arms, or a group name shared by two sets,
+ * is two clusters, so the site pool never merges different arms' acts on one group into one cluster.
+ */
+export function clusterOf(u: Pick<Unit, 'arm' | 'set' | 'group'>): string {
+  return `${u.arm}\0${u.set}\0${u.group}`;
+}
+
+type Indicator = 'wrong' | 'dangerous';
+interface RhoInput { events: number; groups: number[][] }
+
+/** An indicator over its units (acted for `wrong`, danger-eligible for `dangerous`), clustered by `clusterOf`. */
+function rhoInput(units: readonly Unit[], indicator: Indicator): RhoInput {
+  const rows = units.filter((u) => (indicator === 'wrong' ? u.acted : u.dangerEligible));
+  const hit = (u: Unit) => (indicator === 'wrong' ? !u.correct : u.dangerous);
+  return { events: rows.filter(hit).length, groups: groupsOf(rows, clusterOf, (u) => (hit(u) ? 1 : 0)) };
+}
+
+/** The site pool's side of rho, estimated once per pool and indicator over every arm and set of the site (A6). */
+const POOL_RHO = new WeakMap<readonly Unit[], Map<Indicator, RhoInput>>();
+
+function poolInput(pool: readonly Unit[], indicator: Indicator): RhoInput {
+  let byIndicator = POOL_RHO.get(pool);
+  if (byIndicator === undefined) POOL_RHO.set(pool, (byIndicator = new Map()));
+  let input = byIndicator.get(indicator);
+  if (input === undefined) byIndicator.set(indicator, (input = rhoInput(pool, indicator)));
+  return input;
+}
+
+/**
+ * The 3.1 rho of an indicator: the cell's ICC with >= 3 events (wrong acts or dangerous acts), else the site
+ * pool's (read at each pool unit's own row), else 0.1. `cell` holds the units as the rule reads them.
+ */
+function rhoFor(cell: readonly Unit[], pool: readonly Unit[] | undefined, indicator: Indicator): number {
+  return pickRho(rhoInput(cell, indicator), pool === undefined ? undefined : poolInput(pool, indicator));
 }
 
 /**
  * 3.1 precision rule: one-sided deff-adjusted CP of precision at `alpha` (0.05, or 0.05/k for a non-incumbent's
  * pass, 5.4); `pass` lower >= P*, `fail` upper < P*, else `inconclusive`; `inconclusive (n)` below `floor` on n_eff.
- * `pool` = every arm and set of the site (the rho fallback).
+ * `pool` = every arm and set of the site (the rho fallback, clustered by (arm, set, group), A6).
  */
 export function precisionRule(units: readonly Unit[], pStar: number, floor: number,
   opts: { alpha?: number; pool?: readonly Unit[]; resamples?: number } = {}): Bound {
@@ -376,7 +419,7 @@ export function precisionRule(units: readonly Unit[], pStar: number, floor: numb
   const acted = units.filter((u) => u.acted);
   const wrong = acted.filter((u) => !u.correct).length;
   const groups = new Set(acted.map((u) => u.group)).size;
-  const rho = rhoFor(acted, opts.pool?.filter((u) => u.acted), (u) => u.group, (u) => !u.correct);
+  const rho = rhoFor(acted, opts.pool, 'wrong');
   const k = kish(acted.length, wrong, groups, rho);
   const cp = clopperPearson(k.xEff, k.nEff, alpha);
   const item = clopperPearson(wrong, acted.length, alpha);
@@ -394,23 +437,29 @@ export function precisionRule(units: readonly Unit[], pStar: number, floor: numb
 /** 3.1 danger reading: deff-adjusted one-sided 95% upper bound of the dangerous rate; safe below 1% with D299 met. */
 export interface Danger {
   verdict: 'safe' | 'unsafe' | 'below D299'; n: number; x: number; groups: number; rho: number; deff: number;
-  nEff: number; xEff: number; upper: number; exactUpper: number; perWait: number | null;
+  nEff: number; xEff: number; upper: number; exactUpper: number;
+  /** The per-Decision bound the cell reads and prints (3.1): `upper`, or `exactUpper` when below D299. */
+  bound: number;
+  /** Presence only (5.1): 1 - (1 - bound)^10, from the same per-Decision bound the cell prints. */
+  perWait: number | null;
 }
 
 export function dangerRule(units: readonly Unit[], pool?: readonly Unit[]): Danger {
   const eligible = units.filter((u) => u.dangerEligible);
   const x = eligible.filter((u) => u.dangerous).length;
   const groups = new Set(eligible.map((u) => u.group)).size;
-  const rho = rhoFor(eligible, pool?.filter((u) => u.dangerEligible), (u) => u.group, (u) => u.dangerous);
+  const rho = rhoFor(eligible, pool, 'dangerous');
   const k = kish(eligible.length, x, groups, rho);
   const upper = clopperPearson(k.xEff, k.nEff).upper;
   const exactUpper = clopperPearson(x, eligible.length).upper;
+  const verdict = k.nEff < D299 ? 'below D299' : upper < 0.01 ? 'safe' : 'unsafe';
+  // 3.1: a danger cell below D299 is read with its exact bound; 5.1's per-wait bound uses that same u.
+  const bound = verdict === 'below D299' ? exactUpper : upper;
   const site = units[0]?.site;
   return {
-    verdict: k.nEff < D299 ? 'below D299' : upper < 0.01 ? 'safe' : 'unsafe', n: eligible.length, x, groups, rho,
-    deff: k.deff, nEff: k.nEff, xEff: k.xEff, upper, exactUpper,
+    verdict, n: eligible.length, x, groups, rho, deff: k.deff, nEff: k.nEff, xEff: k.xEff, upper, exactUpper, bound,
     // 5.1: wait-for asks up to 10 times by default, so a presence cell also prints 1 - (1 - u)^10.
-    perWait: site === 'presence' ? 1 - (1 - upper) ** 10 : null,
+    perWait: site === 'presence' ? 1 - (1 - bound) ** 10 : null,
   };
 }
 

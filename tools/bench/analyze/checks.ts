@@ -5,10 +5,10 @@ import type { Verdict } from '../../../src/questions';
 import { readArmsFile } from '../lib/arms';
 import { readFreezeTable, sha256File } from '../lib/freeze';
 import { score } from '../lib/items';
-import { isTerminal, latestByKey, ledgerFiles } from '../lib/ledger';
+import { isTerminal, latestByKey, ledgerFiles, readRows } from '../lib/ledger';
 import type { QualityRow } from '../lib/ledger';
 import { rowThreshold } from '../lib/thresholds';
-import { canonSet, ledgerIndex, phaseRows, readPlan } from './readings';
+import { canonSet, ledgerIndex, phaseRows, plainRows, readPlan } from './readings';
 import { build } from './render';
 import type { RenderOptions } from './render';
 import { helpExit } from '../lib/help';
@@ -34,28 +34,39 @@ function allRows(results: string): QualityRow[] {
   return PHASES.flatMap((phase) => phaseRows<QualityRow>(results, phase));
 }
 
-/** 9.2: every set's sha256 equals its 9.4 row; every ledger row's `set_sha` is that set's frozen hash. */
+/**
+ * 9.2: every set's sha256 equals its 9.4 row; every ledger row's `set_sha` is its set file's frozen hash. A row's
+ * file is the plan's entry for its ledger set id, else for its canonical id when one file holds that set (P3 lists
+ * four files under one id). T29 recheck rows (variant `recheck`, asked by `--ids` on the frozen P4a file under the
+ * P4a set id) pass by carrying that P4a file's frozen hash.
+ */
 function setHashes(results: string, planPath: string | undefined, freeze: string): Check {
   const table = readFreezeTable(freeze);
   const frozen = new Set(table.map((e) => e.sha256));
   const plan = readPlan(planPath);
   const bad: string[] = [];
-  const shaOf = new Map<string, string>();
+  const byId = new Map<string, string>();
+  const byCanon = new Map<string, Set<string>>();
   for (const [set, path] of Object.entries(plan.sets ?? {})) {
     const sha = sha256File(path);
-    shaOf.set(set.toUpperCase(), sha);
+    byId.set(set, sha);
+    byCanon.set(canonSet(set, plan), (byCanon.get(canonSet(set, plan)) ?? new Set()).add(sha));
     if (!frozen.has(sha)) bad.push(`${set}: ${path} sha256 ${sha.slice(0, 12)} is not in the freeze table`);
   }
+  const fileSha = (ledgerSet: string): string | undefined => {
+    const canon = byCanon.get(canonSet(ledgerSet, plan));
+    return byId.get(ledgerSet) ?? (canon?.size === 1 ? [...canon][0] : undefined);
+  };
   const rowsBad = new Map<string, number>();
   for (const row of allRows(results)) {
-    const set = canonSet(row.set, plan);
-    const want = shaOf.get(set);
+    const want = fileSha(row.set);
     if (typeof row.set_sha !== 'string' || !frozen.has(row.set_sha) || (want !== undefined && row.set_sha !== want)) {
-      rowsBad.set(set, (rowsBad.get(set) ?? 0) + 1);
+      const k = `${row.set}${row.variant === 'recheck' ? ' (recheck)' : ''}`;
+      rowsBad.set(k, (rowsBad.get(k) ?? 0) + 1);
     }
   }
-  for (const [set, n] of [...rowsBad.entries()].sort()) bad.push(`${set}: ${n} rows whose set_sha is not the frozen hash`);
-  return { name: 'set hashes', pass: bad.length === 0, detail: `${shaOf.size} set files, ${bad.length} problems`, listing: bad };
+  for (const [set, n] of [...rowsBad.entries()].sort()) bad.push(`${set}: ${n} rows whose set_sha is not their set file's frozen hash`);
+  return { name: 'set hashes', pass: bad.length === 0, detail: `${byId.size} set files, ${bad.length} problems`, listing: bad };
 }
 
 /** The Verdict an R1 read stands for (enough for `score`, which reads only `kind` and `value`). */
@@ -91,34 +102,97 @@ export function terminalRow(r: QualityRow, phase: string): boolean {
   return isTerminal(r, phase === 'P6' ? 1 : 3);
 }
 
+/** A manifest key's latest rows, and how many of them end the key. */
+interface KeyRows { rows: number; terminal: number }
+
+/** P7 (`<results>/e2e/cli/runs*.jsonl`, 7.6): a run row per run key; a key ends once its latest run row is scored. */
+interface RunLike { kind?: string; row_key: string; cfg?: string; backend?: string; status?: string }
+/**
+ * P8 (`<results>/P8/agents.jsonl`; A6: the ledger stays there, 7.6): a run row ends its key unless the harness re-runs
+ * it (a `harness` click-log defect or a `shim_bypass`, run-agents' `rerun`). Other voids are final, as p8/run.sh's exit
+ * check reads them: model and version voids are scored and listed, and a credential hit is void and never re-run (A6).
+ */
+interface AgentLike { kind?: string; row_key: string; agent?: string; arm?: string; set?: string; void?: string | null }
+/** P5b (`<results>/P5b/live/*.jsonl`, combos.ts): one row per live item; `combo` is the shape id, `agree(a,b)`. */
+interface LiveLike { live_key: string; site?: string; combo?: string }
+
+function latestOf<T>(rows: readonly T[], key: (r: T) => string): T[] {
+  const map = new Map<string, T>();
+  for (const r of rows) map.set(key(r), r);
+  return [...map.values()];
+}
+
+/**
+ * The rows a manifest key `<phase>/<arm>/<set>` names, read where that phase writes them (7.6): P4a/P4/P5/P6 from
+ * `<results>/<phase>/<arm>/<set>.jsonl` (P4a = the interim slice of P4's files), P7 keys `<cfg>.<backend>/scenarios`
+ * from the CLI ledger, P8 keys `<agent>.<arm>/<set>` from the agent ledger, P5b keys `<combo kind>/<site>` (live items).
+ */
+function keyReader(results: string): (phase: string, arm: string, set: string) => KeyRows {
+  const cache = new Map<string, unknown[]>();
+  const once = <T>(phase: string, read: () => T[]): T[] => (cache.get(phase) ?? cache.set(phase, read()).get(phase)!) as T[];
+  return (phase, arm, set) => {
+    if (phase === 'P7') {
+      const runs = once<RunLike>(phase, () => latestOf(ledgerFiles(results, 'e2e', 'cli', 'runs').flatMap((f) => readRows<RunLike>(f)).filter((r) => r.kind === 'run'), (r) => r.row_key));
+      const mine = runs.filter((r) => `${r.cfg}.${r.backend}` === arm);
+      return { rows: mine.length, terminal: mine.filter((r) => r.status === 'scored').length };
+    }
+    if (phase === 'P8') {
+      const path = [join(results, 'P8', 'agents.jsonl'), join(results, 'agent', 'agents.jsonl')].find((p) => existsSync(p));
+      const runs = once<AgentLike>(phase, () => latestOf((path === undefined ? [] : readRows<AgentLike>(path)).filter((r) => r.kind === 'run'), (r) => r.row_key));
+      const mine = runs.filter((r) => `${r.agent}.${r.arm}` === arm && r.set === set);
+      const rerun = (r: AgentLike) => (r.void ?? '').startsWith('harness') || (r.void ?? '').includes('shim_bypass');
+      return { rows: mine.length, terminal: mine.filter((r) => !rerun(r)).length };
+    }
+    if (phase === 'P5b') {
+      const live = once<LiveLike>(phase, () => latestOf(plainRows<LiveLike>(join(results, 'P5b', 'live')), (r) => r.live_key));
+      const mine = live.filter((r) => r.site === set && (r.combo ?? '').startsWith(`${arm}(`));
+      return { rows: mine.length, terminal: mine.length };
+    }
+    const dir = phase === 'P4a' ? 'P4' : phase;
+    // The rows of that ledger file (a P6 sample file holds rows of many item sets, so `row.set` is not the file).
+    const rows = [...latestByKey<QualityRow>(ledgerFiles(results, dir, arm, set)).values()].filter((r) => (phase !== 'P4a' || r.slice === 'interim')
+      && (phase !== 'P4' || r.slice !== 'interim'));
+    return { rows: rows.length, terminal: rows.filter((r) => terminalRow(r, phase)).length };
+  };
+}
+
 /**
  * 9.2: every planned row has a latest (terminal) row, and the rows per (phase, arm, set) equal the manifest's
- * planned count (P3a/P3b). Manifest keys are `<phase>/<arm>/<set>` as run.ts reads them (`P4a` counts the
- * interim slice of P4's files).
+ * planned count (P3a/P3b). Manifest keys are `<phase>/<arm>/<set>` (keyReader). A phase none of whose keys has a
+ * row is listed once as `<phase>: not run`, apart from the short keys of a phase that ran (a missing ledger).
  */
 function planned(results: string, manifestPath: string | undefined): Check[] {
   if (manifestPath === undefined) {
     return [{ name: 'planned rows', pass: false, detail: 'no --manifest: the planned keys cannot be checked', listing: [] }];
   }
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Manifest;
-  const missing: string[] = [];
-  const over: string[] = [];
+  const read = keyReader(results);
+  const byPhase = new Map<string, { key: string; want: number; got: KeyRows }[]>();
   const counted = new Set<string>();
   for (const [key, want] of Object.entries(manifest.planned ?? {}).sort()) {
     const [phase, arm, set] = key.split('/') as [string, string, string];
-    const dir = phase === 'P4a' ? 'P4' : phase;
-    counted.add(`${dir}/${arm}/${set}`);
-    // The rows of that ledger file (a P6 sample file holds rows of many item sets, so `row.set` is not the file).
-    const rows = [...latestByKey<QualityRow>(ledgerFiles(results, dir, arm, set)).values()].filter((r) => (phase !== 'P4a' || r.slice === 'interim')
-      && (phase !== 'P4' || r.slice !== 'interim'));
-    const terminal = rows.filter((r) => terminalRow(r, phase)).length;
-    if (terminal < want) missing.push(`${key}: ${want - terminal} of ${want} planned rows have no terminal latest row`);
-    if (rows.length > want) over.push(`${key}: ${rows.length} rows, planned ${want}`);
+    counted.add(`${phase === 'P4a' ? 'P4' : phase}/${arm}/${set}`);
+    byPhase.set(phase, [...(byPhase.get(phase) ?? []), { key, want, got: read(phase, arm, set) }]);
+  }
+  const notRun: string[] = [];
+  const missing: string[] = [];
+  const over: string[] = [];
+  for (const [phase, keys] of [...byPhase.entries()].sort()) {
+    if (keys.every((k) => k.got.rows === 0)) {
+      notRun.push(`${phase}: not run (${keys.length} planned (arm, set) keys, ${keys.reduce((a, k) => a + k.want, 0)} planned rows; no row yet)`);
+      continue;
+    }
+    for (const { key, want, got } of keys) {
+      if (got.terminal < want) missing.push(`${key}: ${want - got.terminal} of ${want} planned rows have no terminal latest row${got.rows === 0 ? ' (no ledger rows)' : ''}`);
+      if (got.rows > want) over.push(`${key}: ${got.rows} rows, planned ${want}`);
+    }
   }
   const unplanned = ['P4', 'P5', 'P6'].flatMap((phase) => ledgerIndex(results, phase).map((x) => `${phase}/${x.arm}/${x.set}`))
     .filter((k) => !counted.has(k));
+  const phasesNotRun = notRun.map((n) => n.split(':')[0]).join(', ');
   return [
-    { name: 'planned row keys present', pass: missing.length === 0, detail: `${missing.length} (phase, arm, set) cells short; their cells read inconclusive`, listing: missing },
+    { name: 'planned row keys present', pass: missing.length === 0 && notRun.length === 0,
+      detail: `${missing.length} (phase, arm, set) cells short; their cells read inconclusive; phases not run: ${phasesNotRun || 'none'}`, listing: [...notRun, ...missing] },
     { name: 'row counts equal the manifests', pass: over.length === 0 && unplanned.length === 0, detail: `${over.length} over plan, ${unplanned.length} ledgers not in the manifest`, listing: [...over, ...unplanned.map((k) => `${k}: not in the manifest`)] },
   ];
 }

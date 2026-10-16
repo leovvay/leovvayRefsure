@@ -61,6 +61,8 @@ export interface QualityRow {
   ms_total: number; deadline_ms: number; flags: string[];
   concurrency: number; loadavg: number; host: string;
   arms_sha: string; refsure_commit: string; bench_commit: string; node: string;
+  /** 2.5 drift and 2.6 re-ask rows: the prior run's stored answer for the same item and repeat or order. */
+  prior?: unknown;
 }
 
 /** 7.4: sha256 of `phase \0 set \0 item \0 site \0 arm \0 variant \0 order \0 repeat`. */
