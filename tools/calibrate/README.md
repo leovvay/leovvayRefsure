@@ -266,9 +266,10 @@ Open for the owner:
 - **Dismiss.** Counting every pick, the pooled row is 0.97, and live it abstains on a plain cookie wall ("Reject
   all" at 0.95). Every wrong pick at 0.6 or more is "Manage settings" on one injected wall (dj-040, 0.89-0.96),
   which the never-click veto refuses before any click; leaving vetoed picks out, 187 of 187 native picks at 0.6
-  were right. Dismiss stays inherited (0.6 with the close/reject lexicon) until a row is chosen. Known limit of the
-  veto: it refuses the French "Continuer sans accepter" (continue without accepting) as an accept, because
-  "accepter" matches the accept lexicon, so `dismiss` refuses the dj-016 wall although a safe close exists.
+  were right. Dismiss stays inherited (0.6 with the close/reject lexicon) until a row is chosen. This pass also
+  found the veto refusing the French "Continuer sans accepter" (continue without accepting) as an accept, so
+  `dismiss` refused the dj-016 wall although a safe close exists. The pass ran before the fix that followed it: a
+  negation right before an accept term now reads as a reject.
 - **A text-only scope.** page-state and presence qualify only on pages whose text carries the answer (rows 0.8 and
   yes ≥ 0.92 there). refsure cannot tell a visual-only page apart, so they stay held. Shipping them needs the
   owner's ruling on that scope, a provenance flag, and a stated limit in the README and the skill ("measured on

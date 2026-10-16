@@ -809,15 +809,17 @@ as `unnamed`. A new dated snapshot within the same family keeps its maturity, ad
 - `find`: passes, but on 40 synthetic pages. A Wilson low of 0.980 is under the 0.99 target, so the set is too
   small to prove it. No risk class has 10 pages with a wrong answer, so only the read row is fitted; the others are
   the starting rows.
-- `outcome`: no Orca-native evidence. Its row comes from converted inputs only. The stored vision set was not
-  replayed: an outcome needs the action between two reads, and 47 of its 59 items fail only visually. Needs an
-  Orca-native outcome set.
+- `outcome`: blocks 1.0. Its shipped row comes from converted inputs only; the stored vision set was not replayed
+  (an outcome needs the action between two reads, and 47 of its 59 items fail only visually). On refsure's
+  Orca-native outcome set N5 (`tools/bench`: each step's before and after pages read through refsure's Orca adapter
+  in an isolated profile, built into the input `outcome` sends), Jev's yes ≥0.93 row holds at a precision target of
+  0.95 only, not 0.99. So outcome has no row at P=0.99 on Orca pages; its converted entry still ships for 0.x.
 - `dismiss`: held for a maintainer decision on the row. The fit gives 0.97, because it counts picks that the
   never-click veto refuses before any click: every wrong pick at 0.6 or more is "Manage settings" on one injected
   wall, and leaving vetoed picks out, 187 of 187 native picks at 0.6 were right. At 0.97 it abstains on a plain
-  cookie wall ("Reject all" at 0.95). Two code limits showed up: the veto refuses the French "Continuer sans
-  accepter" because "accepter" matches the accept lexicon, and the overlay finder misses overlays with no dialog
-  role and no consent wording (32 of the 50 vision pages).
+  cookie wall ("Reject all" at 0.95). One code limit showed up: the overlay finder misses overlays with no dialog
+  role and no consent wording (32 of the 50 vision pages). The veto's refusal of the French "Continuer sans
+  accepter", also found in this pass, is fixed: a negation right before an accept term now reads as a reject.
 - `page-state`: no score below 1.0 reaches 0.99. One bot-check page read as an error page holds 9 of the 10
   converted wrong answers at 0.8 or more. On pages whose error or block shows only in pixels, the text reads as
   `expected`, 76 times at confidence 1.0. The choice left: a stated text-only scope, the cumulative row 0.82, or
