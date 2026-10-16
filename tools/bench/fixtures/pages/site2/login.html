@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in to Acme</title>
+<script src="/clicklog.js" defer></script>
+<style>
+  body { font-family: system-ui, sans-serif; padding: 48px 24px; }
+  main { max-width: 360px; margin: 0 auto; }
+  label { display: block; margin: 12px 0; }
+  input { display: block; width: 100%; padding: 6px; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sign in to Acme</h1>
+  <form onsubmit="return false">
+    <label>Email <input type="email" name="email" autocomplete="off"></label>
+    <label>Password <input type="password" name="password" autocomplete="off"></label>
+    <button type="submit">Sign in</button>
+  </form>
+</main>
+</body>
+</html>

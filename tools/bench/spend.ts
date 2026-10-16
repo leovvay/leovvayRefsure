@@ -1,0 +1,212 @@
+import { appendFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { flags, need, opt } from '../calibrate/lib/args';
+import { armById, readArmsFile } from './lib/arms';
+import type { ArmsFile } from './lib/arms';
+import { priceUsage, readKeySpend } from './lib/guards';
+import { ledgerFiles, readRows } from './lib/ledger';
+import { ledgerIndex } from './analyze/readings';
+import { helpExit } from './lib/help';
+
+/*
+  7.3 spend cross-check. Per arm and phase, the ledgers' call counts and priced sums (each row's own `usage`, every
+  attempt and every HTTP request, priced with the 7.2 table) against (a) the gateway's spend rows split by each arm's
+  tag header and the bench key's own spend over each phase window, (b) OpenRouter `usage.cost` sums on the direct
+  arm, (c) Claude `total_cost_usd` (`agent_usd`, Claude rows) from the P8 agent ledger. The gateway rows are also
+  counted per arm against the ledger's call counts. A gap above 2% is listed for the report to explain.
+
+    spend snapshot --results <dir> --phase <P> --at before|after
+        reads the bench key's own spend (arms file `keyInfoPath`, read-only, free) into <results>/key-spend.jsonl;
+        the key comes from the first gateway arm's `keyEnv` (run it under `secrets run`); nothing prints the key.
+    spend crosscheck --results <dir> --out <spend-crosscheck.json> [--gateway-spend <rows.json>] [--p0-window <json>]
+
+  `--gateway-spend`: a JSON array the operator exported from the gateway's spend log for the bench key, each row
+  `{ "tags": [...] | "tag": "...", "spend": <usd> }`; a row is credited to the arm whose `extraHeaders` value it
+  carries. `--p0-window` (when P0 found the tags unrecorded): `{ "<arm>": { "before": usd, "after": usd, "calls": n } }`.
+  Exit 0 written, 64 bad usage. Calls no paid API.
+*/
+
+const USAGE = 'usage: spend snapshot --results <dir> --phase <P> --at before|after | spend crosscheck --results <dir> --out <json> [--gateway-spend <json>] [--p0-window <json>]';
+
+interface Sum { calls: number; rows: number; priced: number; unpriced: number; reported: number }
+
+const empty = (): Sum => ({ calls: 0, rows: 0, priced: 0, unpriced: 0, reported: 0 });
+
+interface Usage { cost?: unknown }
+interface Wire { t_wire?: number[] | number; usage?: unknown[] | unknown; arm?: string; provider?: string; wires?: { t_wire?: number; usage?: unknown }[] }
+interface AnyRow { arm?: string; provider?: string; attempts?: Wire[]; parts?: Wire[] }
+
+/** Sums one row into per-arm totals: M1/quality rows by attempt, M2 Decision rows by part (each part names its arm). */
+function addRow(totals: Map<string, Sum>, arms: ArmsFile, row: AnyRow): void {
+  const wires: { arm: string; provider: string; wire: Wire }[] = row.parts
+    ? row.parts.map((p) => ({ arm: p.arm ?? row.arm ?? '?', provider: p.provider ?? 'jev', wire: p }))
+    : (row.attempts ?? []).map((a) => ({ arm: row.arm ?? '?', provider: row.provider ?? 'jev', wire: a }));
+  for (const { arm, provider, wire: raw } of wires) {
+    // A P5b live part keeps its HTTP records as `wires[]`; a quality attempt or an M2 part keeps parallel arrays.
+    const wire = raw.wires ? { t_wire: raw.wires.map((w) => w.t_wire ?? 0), usage: raw.wires.map((w) => w.usage) } : raw;
+    const sum = totals.get(arm) ?? empty();
+    const usages = (Array.isArray(wire.usage) ? wire.usage : []).filter((u) => u !== null && u !== undefined);
+    const calls = Array.isArray(wire.t_wire) ? wire.t_wire.length : 0;
+    sum.calls += calls;
+    const direct = arms.arms.find((a) => a.id === arm)?.via === 'direct';
+    const cost = usages.map((u) => (u as Usage).cost).filter((c): c is number => typeof c === 'number').reduce((a, b) => a + b, 0);
+    sum.reported += cost;
+    const priced = direct ? (cost > 0 ? cost : null) : priceUsage(provider as 'jev' | 'openai', usages);
+    if (priced === null) sum.unpriced += calls > 0 ? 1 : 0;
+    else sum.priced += priced;
+    totals.set(arm, sum);
+  }
+  if (row.arm === undefined) return;
+  const own = totals.get(row.arm) ?? empty();
+  own.rows += 1;
+  totals.set(row.arm, own);
+}
+
+/** Every phase directory of a results dir (`P0`..`P9`, with suffixes such as `P5b`). */
+function phases(results: string): string[] {
+  return existsSync(results) ? readdirSync(results, { withFileTypes: true }).filter((d) => d.isDirectory() && /^P\d/.test(d.name)).map((d) => d.name).sort() : [];
+}
+
+/** Per phase and arm: ledger calls, rows and priced sums over every row of every file (a resumed failure spent too). */
+export function ledgerTotals(results: string, arms: ArmsFile): Record<string, Record<string, Sum>> {
+  const out: Record<string, Record<string, Sum>> = {};
+  for (const phase of phases(results)) {
+    const totals = new Map<string, Sum>();
+    for (const { arm, set } of ledgerIndex(results, phase)) {
+      for (const file of ledgerFiles(results, phase, arm, set)) for (const row of readRows<AnyRow>(file)) addRow(totals, arms, row);
+    }
+    if (totals.size > 0) out[phase] = Object.fromEntries([...totals.entries()].sort());
+  }
+  return out;
+}
+
+interface KeyLine { phase: string; at: 'before' | 'after'; time: string; spend: number | null }
+
+function keyWindows(results: string): Record<string, number | null> {
+  const path = join(results, 'key-spend.jsonl');
+  const out: Record<string, number | null> = {};
+  if (!existsSync(path)) return out;
+  const lines = readRows<KeyLine>(path);
+  for (const phase of [...new Set(lines.map((l) => l.phase))].sort()) {
+    const before = lines.filter((l) => l.phase === phase && l.at === 'before').at(0)?.spend;
+    const after = lines.filter((l) => l.phase === phase && l.at === 'after').at(-1)?.spend;
+    out[phase] = typeof before === 'number' && typeof after === 'number' ? after - before : null;
+  }
+  return out;
+}
+
+/** |a - b| / b, or null when b is not positive. */
+function gap(a: number, b: number): number | null {
+  return b > 0 ? Math.abs(a - b) / b : null;
+}
+
+/** Gateway spend rows credited per arm through each arm's tag header value: dollars and row (call) counts. */
+function gatewaySplit(arms: ArmsFile, path: string | undefined): Record<string, { spend: number; rows: number }> | null {
+  if (path === undefined) return null;
+  const rows = JSON.parse(readFileSync(path, 'utf8')) as { tags?: unknown; tag?: unknown; spend?: unknown }[];
+  const out: Record<string, { spend: number; rows: number }> = {};
+  for (const arm of arms.arms.filter((a) => a.via === 'gateway')) {
+    const values = Object.values(arm.extraHeaders ?? {});
+    if (values.length === 0) continue;
+    const mine = rows.filter((r) => {
+      const tags = Array.isArray(r.tags) ? r.tags.map(String) : typeof r.tag === 'string' ? [r.tag] : [];
+      return values.some((v) => tags.some((t) => t === v || t.endsWith(`:${v}`)));
+    });
+    out[arm.id] = { spend: mine.reduce((a, r) => a + (typeof r.spend === 'number' ? r.spend : 0), 0), rows: mine.length };
+  }
+  return out;
+}
+
+/**
+ * (c) Claude dollars: `agent_usd` (the run's `total_cost_usd`) summed over the P8 agent ledger
+ * `<results>/P8/agents.jsonl` (and its resume files), Claude rows only (Codex rows carry token-priced dollars, not
+ * a reported cost). Every run row counts once (latest per `run_id`): a void run spent too. Runs without a reported
+ * cost are counted apart.
+ */
+function agentDollars(results: string): { runs: number; usd: number; unreported: number } | null {
+  const present = ledgerFiles(results, 'P8', '', 'agents');
+  if (present.length === 0) return null;
+  const byRun = new Map<string, { agent?: unknown; agent_usd?: unknown }>();
+  for (const file of present) for (const row of readRows<{ run_id?: unknown; agent?: unknown; agent_usd?: unknown }>(file)) {
+    if (typeof row.run_id === 'string') byRun.set(row.run_id, row);
+  }
+  const claude = [...byRun.values()].filter((r) => r.agent === 'claude');
+  const priced = claude.filter((r) => typeof r.agent_usd === 'number');
+  return { runs: claude.length, usd: priced.reduce((a, r) => a + (r.agent_usd as number), 0), unreported: claude.length - priced.length };
+}
+
+export function crosscheck(results: string, arms: ArmsFile, gatewaySpend?: string, p0Window?: string): Record<string, unknown> {
+  const ledgers = ledgerTotals(results, arms);
+  const perArm: Record<string, { calls: number; priced: number; unpriced: number; reported: number }> = {};
+  for (const byArm of Object.values(ledgers)) for (const [arm, s] of Object.entries(byArm)) {
+    const t = perArm[arm] ?? { calls: 0, priced: 0, unpriced: 0, reported: 0 };
+    t.calls += s.calls; t.priced += s.priced; t.unpriced += s.unpriced; t.reported += s.reported;
+    perArm[arm] = t;
+  }
+  const explain: string[] = [];
+  const split = gatewaySplit(arms, gatewaySpend);
+  const tagRows = split === null ? null : Object.fromEntries(Object.entries(split).map(([arm, m]) => {
+    const priced = perArm[arm]?.priced ?? 0;
+    const calls = perArm[arm]?.calls ?? 0;
+    const g = gap(priced, m.spend);
+    const gCalls = gap(calls, m.rows);
+    if (g === null || g > 0.02) explain.push(`gateway tag split ${arm}: priced ${priced.toFixed(4)} vs measured ${m.spend.toFixed(4)}`);
+    if (gCalls === null || gCalls > 0.02) explain.push(`gateway rows ${arm}: ledger calls ${calls} vs gateway spend rows ${m.rows}`);
+    return [arm, { measured: m.spend, priced, gap: g, gatewayRows: m.rows, ledgerCalls: calls, callGap: gCalls }];
+  }));
+  const windows = keyWindows(results);
+  const gatewayArms = new Set(arms.arms.filter((a) => a.via === 'gateway').map((a) => a.id));
+  const keyRows = Object.fromEntries(Object.entries(windows).map(([phase, measured]) => {
+    const priced = Object.entries(ledgers[phase] ?? {}).filter(([arm]) => gatewayArms.has(arm)).reduce((a, [, s]) => a + s.priced, 0);
+    const g = measured === null ? null : gap(priced, measured);
+    if (g === null || g > 0.02) explain.push(`key window ${phase}: priced ${priced.toFixed(4)} vs measured ${measured === null ? 'unread' : measured.toFixed(4)}`);
+    return [phase, { measured, priced, gap: g }];
+  }));
+  const window = p0Window === undefined ? null : JSON.parse(readFileSync(p0Window, 'utf8')) as Record<string, { before: number; after: number; calls: number }>;
+  const windowRows = window === null ? null : Object.fromEntries(Object.entries(window).map(([arm, w]) => {
+    const perCall = w.calls > 0 ? (w.after - w.before) / w.calls : null;
+    const ledgerPerCall = (perArm[arm]?.calls ?? 0) > 0 ? perArm[arm]!.priced / perArm[arm]!.calls : null;
+    const g = perCall === null || ledgerPerCall === null ? null : gap(ledgerPerCall, perCall);
+    if (g === null || g > 0.02) explain.push(`P0 window ${arm}: priced per call ${ledgerPerCall} vs measured ${perCall}`);
+    return [arm, { measuredPerCall: perCall, pricedPerCall: ledgerPerCall, gap: g }];
+  }));
+  const direct = arms.arms.filter((a) => a.via === 'direct').map((a) => ({ arm: a.id, usageCost: perArm[a.id]?.reported ?? 0 }));
+  const agents = agentDollars(results);
+  if (split === null && windowRows === null) explain.push('no gateway spend rows and no P0 window: the per-arm split is unchecked');
+  if (Object.keys(windows).length === 0) explain.push('no key-spend snapshots: the phase windows are unchecked (or /key/info unreadable, per P0)');
+  if (agents === null) explain.push('no agent ledger (P8/agents.jsonl): Claude dollars unchecked');
+  else if (agents.unreported > 0) explain.push(`Claude runs without a reported total_cost_usd: ${agents.unreported} of ${agents.runs}`);
+  return {
+    perPhase: ledgers, perArm, gatewayTagSplit: tagRows, keyWindows: keyRows, p0Window: windowRows, openRouter: direct, claude: agents,
+    summary: { arms: Object.fromEntries(Object.entries(perArm).map(([a, s]) => [a, { calls: s.calls, priced: Math.round(s.priced * 1e6) / 1e6 }])), gapsToExplain: explain.length },
+    explain,
+  };
+}
+
+async function main(): Promise<void> {
+  helpExit(USAGE);
+  const [command, ...rest] = process.argv.slice(2);
+  const arms = readArmsFile();
+  if (command === 'snapshot') {
+    const v = flags(rest, ['results', 'phase', 'at'], USAGE);
+    const at = need(v, 'at', USAGE);
+    if (at !== 'before' && at !== 'after') { process.stderr.write(`--at before|after\n${USAGE}\n`); process.exit(64); }
+    const gw = arms.arms.find((a) => a.via === 'gateway');
+    const spend = gw && arms.keyInfoPath && arms.gateway ? await readKeySpend(arms.gateway.url, arms.keyInfoPath, armById(arms, gw.id).keyEnv) : null;
+    const line = { phase: need(v, 'phase', USAGE), at, time: new Date().toISOString(), spend };
+    appendFileSync(join(need(v, 'results', USAGE), 'key-spend.jsonl'), `${JSON.stringify(line)}\n`);
+    process.stdout.write(`key spend ${spend === null ? 'unreadable' : spend.toFixed(6)} (${line.phase} ${at})\n`);
+    return;
+  }
+  if (command === 'crosscheck') {
+    const v = flags(rest, ['results', 'out', 'gateway-spend', 'p0-window'], USAGE);
+    const report = crosscheck(need(v, 'results', USAGE), arms, opt(v, 'gateway-spend'), opt(v, 'p0-window'));
+    writeFileSync(need(v, 'out', USAGE), `${JSON.stringify(report, null, 2)}\n`);
+    process.stdout.write(`${need(v, 'out', USAGE)}: ${(report.explain as string[]).length} gaps or unchecked parts to explain\n`);
+    return;
+  }
+  process.stderr.write(`${USAGE}\n`);
+  process.exit(64);
+}
+
+if (process.argv[1] && /spend\.(ts|mjs|js)$/.test(process.argv[1])) void main();

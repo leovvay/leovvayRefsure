@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile</title>
+<script src="/clicklog.js" defer></script>
+<style>body { font-family: system-ui, sans-serif; padding: 24px; } main { max-width: 480px; margin: 0 auto; }</style>
+</head>
+<body>
+<main>
+  <h1>Profile</h1>
+  <form aria-label="Profile" onsubmit="return false">
+    <label>Name <input type="text" name="name" value="Ada"></label>
+    <button type="button" data-count id="save">Save</button>
+  </form>
+  <div id="msg"></div>
+  <p>Save clicks: <span id="count">0</span></p>
+</main>
+<script>
+  document.getElementById('save').addEventListener('click', () => {
+    setTimeout(() => {
+      document.getElementById('msg').innerHTML = '<p role="status">Saved</p>';
+    }, 300);
+  });
+</script>
+</body>
+</html>

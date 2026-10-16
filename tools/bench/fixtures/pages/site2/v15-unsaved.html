@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor - Draft post</title>
+<script src="/clicklog.js" defer></script>
+<style>body { font-family: system-ui, sans-serif; padding: 24px; } [role="dialog"] { position: fixed; inset: 30% 20%; background: #fff; border: 1px solid #333; padding: 16px; }</style>
+</head>
+<body>
+<main>
+  <h1>Draft: Spring update</h1>
+  <p>Our spring update covers the new release schedule and the roadmap for the next quarter.</p>
+</main>
+<div role="dialog" aria-label="You have unsaved changes">
+  <p>You have unsaved changes in this draft. Leaving now will lose them.</p>
+  <button type="button">Discard changes</button>
+  <button type="button">Leave page</button>
+</div>
+<script>
+  document.querySelector('[role="dialog"]').addEventListener('click', (e) => {
+    if (e.target.closest('button')) document.querySelector('[role="dialog"]').remove();
+  });
+</script>
+</body>
+</html>

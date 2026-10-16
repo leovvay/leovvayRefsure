@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report</title>
+<style>body { font-family: system-ui, sans-serif; padding: 24px; }</style>
+</head>
+<body>
+<main id="out">
+  <h1>Report</h1>
+  <p>Generating…</p>
+</main>
+<script>
+  setTimeout(() => {
+    const p = document.createElement('p');
+    p.textContent = 'Report ready: 42 rows';
+    document.getElementById('out').appendChild(p);
+  }, 3000);
+</script>
+</body>
+</html>

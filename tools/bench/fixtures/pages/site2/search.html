@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Docs</title>
+<script src="/clicklog.js" defer></script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px; }
+  main { max-width: 640px; margin: 0 auto; }
+  [role="dialog"] { position: fixed; left: 0; right: 0; bottom: 0; background: #222; color: #fff; padding: 16px 24px; }
+  [role="dialog"] button { margin-right: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Acme Docs</h1>
+  <form aria-label="Search" id="search">
+    <input type="search" aria-label="Search docs" name="q" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+  <div id="results"></div>
+</main>
+<div role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to improve your experience.</p>
+  <button type="button">Accept all</button>
+  <button type="button">Reject all</button>
+  <button type="button">Manage choices</button>
+</div>
+<script>
+  document.querySelector('[role="dialog"]').addEventListener('click', (e) => {
+    if (e.target.closest('button')) document.querySelector('[role="dialog"]').remove();
+  });
+  document.getElementById('search').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = new FormData(e.target).get('q');
+    const p = document.createElement('p');
+    p.setAttribute('role', 'status');
+    p.textContent = '3 results for "' + q + '"';
+    document.getElementById('results').replaceChildren(p);
+  });
+</script>
+</body>
+</html>

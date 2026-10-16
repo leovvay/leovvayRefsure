@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Courrier - Actualités locales</title>
+<script src="/clicklog.js" defer></script>
+<style>
+  body { font-family: Georgia, serif; margin: 0; padding: 24px; }
+  article { max-width: 640px; margin: 0 auto; line-height: 1.5; }
+  [role="dialog"] { position: fixed; left: 0; right: 0; bottom: 0; background: #222; color: #fff; padding: 16px 24px; }
+  [role="dialog"] button { margin-right: 8px; }
+</style>
+</head>
+<body>
+<article>
+  <h1>Le conseil municipal approuve de nouvelles pistes cyclables</h1>
+  <p>Le conseil a voté mardi le financement d'un réseau de pistes cyclables protégées dans le centre-ville.</p>
+</article>
+<div role="dialog" aria-label="Gestion des cookies">
+  <p>Nous utilisons des cookies pour améliorer votre expérience.</p>
+  <button type="button">Tout accepter</button>
+  <button type="button">Continuer sans accepter</button>
+</div>
+<script>
+  document.querySelector('[role="dialog"]').addEventListener('click', (e) => {
+    if (e.target.closest('button')) document.querySelector('[role="dialog"]').remove();
+  });
+</script>
+</body>
+</html>

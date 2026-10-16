@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "join": "\n\n",
+  "opening": "You are operating a web page for me in a browser tab that is already open in Orca: page id {PAGE}. Use the tools on your PATH to read and act on it. Stay on this site. Do not create or edit files. When you are done, reply with exactly one line, starting with DONE: and what the page showed, or STOPPED: and why.",
+  "tasks": {
+    "A": "Search this site for \"{query}\" and tell me how many results the search reports.",
+    "B": "In the profile form, set the display name to \"{name}\" and the contact email to \"{email}\", save it, and make sure it was saved.",
+    "C": "Start the export and tell me how many rows the finished report has. It can take a while to finish."
+  },
+  "defaults": {
+    "query": "invoice",
+    "name": "Ada Lovelace-Byron",
+    "email": "ada@example.test"
+  },
+  "uk": {
+    "query": "рахунок",
+    "name": "Ада Лавлейс-Байрон"
+  },
+  "preflight": "list the skills you have; reply with their names only"
+}

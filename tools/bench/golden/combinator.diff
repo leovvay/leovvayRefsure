@@ -1,0 +1,56 @@
+--- a/src/providers/combine/agree.ts
++++ b/tools/bench/lib/combine-copy/agree.ts
+@@ 1
+-import { abstainVerdict, quoteOption, type Verdict } from '../../questions';
++import { abstainVerdict, quoteOption, type Verdict } from '../../../../src/questions';
+@@ 3
+-import type { ComboOutcome, PartOutcome } from './combo-outcome';
++import type { ComboOutcome, PartOutcome } from '../../../../src/providers/combine/combo-outcome';
+@@ 4
+-import type { AskOptions, ComboPart } from './combo-part';
++import type { AskOptions, ComboPart } from '../../../../src/providers/combine/combo-part';
+@@ 6
+-import type { Answer } from './verdict-kinds';
++import type { Answer } from '../../../../src/providers/combine/verdict-kinds';
+--- a/src/providers/combine/fallback.ts
++++ b/tools/bench/lib/combine-copy/fallback.ts
+@@ 1
+-import type { AbstainCause } from '../../questions';
++import type { AbstainCause } from '../../../../src/questions';
+@@ 3
+-import type { ComboOutcome, PartOutcome } from './combo-outcome';
++import type { ComboOutcome, PartOutcome } from '../../../../src/providers/combine/combo-outcome';
+@@ 4
+-import type { AskOptions, ComboPart } from './combo-part';
++import type { AskOptions, ComboPart } from '../../../../src/providers/combine/combo-part';
+@@ 6
+-import type { Abstain } from './verdict-kinds';
++import type { Abstain } from '../../../../src/providers/combine/verdict-kinds';
+--- a/src/providers/combine/ask-one.ts
++++ b/tools/bench/lib/combine-copy/ask-one.ts
+@@ 1
+-import { type AbstainCause, abstainVerdict, type Verdict } from '../../questions';
++import { type AbstainCause, abstainVerdict, type Verdict } from '../../../../src/questions';
+@@ 2
+-import type { ProviderAnswer } from '../decision-provider';
++import type { ProviderAnswer } from '../../../../src/providers/decision-provider';
+@@ 3
+-import type { PartOutcome } from './combo-outcome';
++import type { PartOutcome } from '../../../../src/providers/combine/combo-outcome';
+@@ 4
+-import type { AskOptions, ComboPart } from './combo-part';
++import type { AskOptions, ComboPart } from '../../../../src/providers/combine/combo-part';
+@@ 5
+-import type { Abstain } from './verdict-kinds';
++import type { Abstain } from '../../../../src/providers/combine/verdict-kinds';
+--- a/src/providers/combine/rank.ts
++++ b/tools/bench/lib/combine-copy/rank.ts
+@@ 1
+-import type { AbstainCause } from '../../questions';
++import type { AbstainCause } from '../../../../src/questions';
+@@ 3
+-import type { PartOutcome } from './combo-outcome';
++import type { PartOutcome } from '../../../../src/providers/combine/combo-outcome';
+@@ 4
+-import type { Abstain, Answer } from './verdict-kinds';
++import type { Abstain, Answer } from '../../../../src/providers/combine/verdict-kinds';

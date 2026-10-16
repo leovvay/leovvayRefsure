@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Courier - Local news</title>
+<script src="/clicklog.js" defer></script>
+<style>
+  body { font-family: Georgia, serif; margin: 0; padding: 24px; }
+  article { max-width: 640px; margin: 0 auto; line-height: 1.5; }
+  [role="dialog"] { position: fixed; left: 0; right: 0; bottom: 0; background: #222; color: #fff; padding: 16px 24px; }
+  [role="dialog"] button { margin-right: 8px; }
+</style>
+</head>
+<body>
+<article>
+  <h1>City council approves new bike lanes</h1>
+  <p>The council voted 7-2 on Tuesday to fund a network of protected bike lanes across the downtown core.</p>
+  <p>Construction is expected to begin in the spring and finish within eighteen months.</p>
+</article>
+<div role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to improve your experience.</p>
+  <button type="button">Manage choices</button>
+</div>
+<script>
+  document.querySelector('[role="dialog"]').addEventListener('click', (e) => {
+    if (e.target.closest('button')) document.querySelector('[role="dialog"]').remove();
+  });
+</script>
+</body>
+</html>
