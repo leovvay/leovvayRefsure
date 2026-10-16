@@ -26,7 +26,7 @@ export REFSURE_REPO="$PWD"                             # lets a bundle outside t
 ```
 
 Bundle every entry point the same way: `run`, `p0`, `combos`, `ablation-sets`, `timing`, `spend`, `fixture-server`,
-`e2e/run-cli`, `agent/run-agents`, `agent/score`, `analyze/render`, `analyze/checks`. Each prints its usage on `--help`.
+`e2e/run-cli`, `capture/capture`, `agent/run-agents`, `agent/score`, `analyze/render`, `analyze/checks`. Each prints its usage on `--help`.
 
 Keys enter only through the environment of one command, from a secret store (for example
 `secrets run KEY_NAME -- node "$OUT/bin/run.mjs" ...`). Nothing in the harness prints a key; failure details are
@@ -65,6 +65,39 @@ never sent to a `public` arm (X4).
 
 Arms interleave: items run in blocks of 25 per (set, site); within a block every listed arm asks every item, and the
 arms start in an order drawn from mulberry32(FNV-1a(`refsure-bench-20261016:<block id>`)).
+
+## Native capture (P2): `capture/`
+
+`capture/capture.ts` (bundle it like `run.ts`) captures an authored set (`sets/n1`-`n10`, not N12) into bench items
+through refsure's Orca adapter in the isolated profile. Pages are served by `capture/page-server.ts` (tools/calibrate's
+mount server on a fixed port, 8767 by default: each page at its recorded `at` with its query, else the path of a
+provisional `pageUrl`, else `/<page>`), from `sets/<set>/`. Never run it while the fixture server (P7) holds the port.
+
+```sh
+node "$OUT/bin/capture.mjs" --set tools/bench/sets/n5.jsonl --out <captures>/n5.jsonl --profile <isolated id> \
+  [--ids a,b] [--limit N] [--resume] [--parity N --cfgs <cfgs.json> --dist dist/refsure.mjs [--golden <dir> --golden-items <dir>]]
+```
+
+- Sites: locate/find/dismiss (`capture/candidates.ts`, calibrate's scenes; gold `{selector, name}` mapped by
+  `gold_ref`, then the mapped name must fold-equal the stated name and the selector must match one element (`orca
+  eval`); `settleInputs` = raw names and roles of the offered lines), presence/page-state (calibrate's `captureItem`),
+  outcome (`capture/outcome.ts`: `readLiveTarget` on the acted ref, after page read after `SETTLE_MS`, refsure's
+  `outcomeInput`; `acted` is `describeElement(role, seen)`; `refsure_risk_class` kept), option-map
+  (`capture/option-map.ts`: pick-option's steps; `open: true` clicks the field first). Mask modes (N10) give
+  `<id>~masks-on|off` items with the mode's gold (`gold_masks_on`).
+- Writes `<out>` (asked items, with the row's labels, `gold_twin`, `gold_cut`, `gold_not_offered`, `origin: native`),
+  `<out>.rows.jsonl` (code-settled and dropped, X5), `<out>.meta.json`, and with `--parity` `<out>.parity.jsonl`.
+  A gold on the page but outside the offered lines is gold `none` with `gold_cut: true` (X2; `goldChecks` reads
+  `gold_not_offered`).
+- An item that throws (a transient Orca error) is a `capture_error` drop with its `error`; 5 in a row end the run
+  (`aborted` in the meta, exit 1). `--resume` keeps `<out>`, `.rows.jsonl` and `.parity.jsonl`, removes the
+  `capture_error` rows, skips every item already written and captures the rest (not with `--golden`).
+- Parity (3.5) through refsure's built CLI under `--dry-run` (cli_both = jev_gw): option-map body == `pick-option
+  --dry-run`; outcome: `outcome -- click --dry-run` body == the item's body with refsure's stand-in after-side,
+  `outcome --mark` before/after == the item's (equal only without a URL query: the mark keeps the bare URL), and a
+  re-read builds the same body; other sites: the command's own `--dry-run` body (masks-on items).
+- `--golden` writes the first parity item's outcome and option-map pairs for jev_gw and jev_or (`p0.mjs body` on
+  `--golden-items` reproduces each body).
 
 ## Timing (P0 pieces, P3a sample, P6)
 
@@ -346,9 +379,11 @@ node "$OUT/bin/run-cli.mjs" setup --cfgs <cfgs.json> --gateway-config <owner con
 node "$OUT/bin/run-cli.mjs" preflight --cfgs <cfgs.json> --dist dist/refsure.mjs --log "$RESULTS/e2e/clicks.log" \
   --backend agent-browser --ab-profiles <dir>                                         # 6.4 --dry-run parse check
 node "$OUT/bin/run-cli.mjs" injection --cfgs <cfgs.json> --out "$RESULTS"             # 20 x `<keyWrap> true`
-node "$OUT/bin/run-cli.mjs" run --cfgs <cfgs.json> --dist dist/refsure.mjs --out "$RESULTS" \
-  --log "$RESULTS/e2e/clicks.log" --freeze <table> --rtt-baseline <P0 rtt json> \
-  --profile <isolated Orca profile id> --ab-profiles <dir>                            # P7, 792 runs
+<store> run <gateway key NAME> -- node "$OUT/bin/run-cli.mjs" run --cfgs <cfgs.json> --dist dist/refsure.mjs \
+  --out "$RESULTS" --log "$RESULTS/e2e/clicks.log" --freeze <table> --manifest <P3 manifest> \
+  --rtt-baseline <P0 rtt json> --profile <isolated Orca profile id> --ab-profiles <dir>   # P7, 792 runs
+# run: dist/refsure.mjs must be in the freeze table; 7.3 guards from the manifest (1.15x planned runs per
+# cfg.backend; the gateway key's spend, read before each repeat, above 2x planUsd.P7 writes STOP, exit 3)
 node "$OUT/bin/run-cli.mjs" summary --out "$RESULTS"                                 # 6.4 readings -> e2e/summary.json
 ```
 

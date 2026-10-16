@@ -9,8 +9,11 @@ import type { ProviderId } from '../../../src/questions';
   before each row; no guard is lifted without a dated note in the run log (delete STOP by hand).
 */
 
-/** 7.2 list prices per input token (output $0): Jev $0.042 / M, OpenAI Decisions $0.10 / M. */
+/** 7.2 list prices per input token: Jev $0.042 / M, OpenAI Decisions $0.10 / M. */
 export const PRICE_PER_INPUT_TOKEN: Readonly<Record<ProviderId, number>> = { jev: 0.042e-6, openai: 0.10e-6 };
+
+/** 7.2 after A5: output tokens, Jev $0, OpenAI Decisions $0.50 / M. */
+export const PRICE_PER_OUTPUT_TOKEN: Readonly<Record<ProviderId, number>> = { jev: 0, openai: 0.5e-6 };
 
 /** 7.3: priced at 3x the 7.2 planning per-call values. */
 export const GUARD_USD_PER_CALL: Readonly<Record<ProviderId, number>> = { jev: 0.0002, openai: 0.0003 };
@@ -21,25 +24,27 @@ export const PLAN_USD_PER_CALL: Readonly<Record<ProviderId, number>> = { jev: 0.
 export const ALL_PHASES_PRICED_STOP_USD = 60;
 export const OPENROUTER_STOP_USD = 10;
 
-function inputTokens(usage: unknown): number | null {
+function tokens(usage: unknown, names: readonly string[]): number | null {
   if (typeof usage !== 'object' || usage === null) return null;
   const u = usage as Record<string, unknown>;
-  for (const name of ['prompt_tokens', 'input_tokens']) if (typeof u[name] === 'number') return u[name];
+  for (const name of names) if (typeof u[name] === 'number') return u[name];
   return null;
 }
 
-/** A row's own usage priced with the 7.2 table (sum over every HTTP request); null when no usage names tokens. */
+/**
+ * A row's own usage priced with the 7.2 table after A5 (input plus output, summed over every HTTP request); null
+ * when no usage names input tokens.
+ */
 export function priceUsage(provider: ProviderId, usages: readonly unknown[]): number | null {
-  let tokens = 0;
+  let usd = 0;
   let seen = false;
   for (const usage of usages) {
-    const n = inputTokens(usage);
-    if (n !== null) {
-      tokens += n;
-      seen = true;
-    }
+    const n = tokens(usage, ['prompt_tokens', 'input_tokens']);
+    if (n === null) continue;
+    seen = true;
+    usd += n * PRICE_PER_INPUT_TOKEN[provider] + (tokens(usage, ['completion_tokens', 'output_tokens']) ?? 0) * PRICE_PER_OUTPUT_TOKEN[provider];
   }
-  return seen ? tokens * PRICE_PER_INPUT_TOKEN[provider] : null;
+  return seen ? usd : null;
 }
 
 /** Appends one guard line to `<results>/<phase>/guards.jsonl`. */

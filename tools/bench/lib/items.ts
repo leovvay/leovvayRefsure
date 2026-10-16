@@ -120,6 +120,8 @@ export interface GoldChecks {
 }
 
 export function goldChecks(item: BenchItem): GoldChecks {
+  // A native capture whose gold is on the page but outside the offered lines (X2): gold is `none`, recorded as cut.
+  if ((item as { gold_not_offered?: unknown }).gold_not_offered === true) return { goldTwin: false, goldCut: true, gold: 'none', alt: [...item.alt] };
   const plain = { goldTwin: false, goldCut: false, gold: item.gold, alt: [...item.alt] };
   if (!isCandidateSite(item.site) || item.gold === 'none') return plain;
   const built = buildFor(item, 'p0');

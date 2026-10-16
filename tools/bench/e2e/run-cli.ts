@@ -1,10 +1,10 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { flags, list, need, num, opt } from '../../calibrate/lib/args';
 import { readArmsFile } from '../lib/arms';
-import { guardLine, stopAll, stopReason } from '../lib/guards';
+import { guardLine, readKeySpend, stopAll, stopReason } from '../lib/guards';
 import { assertFrozen, assertPinnedSource, readFreezeTable, repoRoot, sha256File } from '../lib/freeze';
 import { ledgerFiles, ledgerPath, nextResume, openLedger, readRows } from '../lib/ledger';
 import type { LedgerWriter } from '../lib/ledger';
@@ -42,19 +42,22 @@ import { baselineMedians } from '../timing/gate';
                       [--profile <isolated Orca profile id>] [--ab-profiles <dir>] [--only E01,...] [--cfg ...]
     run-cli injection --cfgs <cfgs.json> --out <results> [--n 20]
     run-cli run       --cfgs <cfgs.json> --dist <dist/refsure.mjs> --out <results> --log <clicks.log> --freeze <table>
-                      --rtt-baseline <json> [--profile <id>] [--ab-profiles <dir>] [--only E01,...] [--cfg ...]
+                      --manifest <json> --rtt-baseline <json> [--profile <id>] [--ab-profiles <dir>] [--only E01,...] [--cfg ...]
                       [--backend ...] [--repeats 3] [--limit N] [--timeout-ms 180000] [--no-start-gate]
     run-cli summary   --out <results>                                    6.4 readings -> <results>/e2e/summary.json
 
   The run stops (exit 3) at a `<results>/STOP` file and writes its guard lines to `<results>/P7/guards.jsonl`; a
-  401/403 in any command's envelope writes the STOP file for every runner (7.3).
+  401/403 in any command's envelope writes the STOP file for every runner (7.3). From the manifest (7.3): each
+  cfg.backend cell stops at 1.15x its planned runs (`planned["P7/<cfg>.<backend>/scenarios"]`), and before each
+  repeat the bench key's measured spend since the start above 2x `planUsd.P7` writes STOP (exit 3). The key spend is
+  read with the key in this process's env (`REFSURE_BENCH_GATEWAY_KEY`, never passed to a refsure command).
 */
 
 const USAGE = [
   'usage: run-cli setup --cfgs <f> --gateway-config <f> --consent-gateway <f> --consent-openrouter <f>',
   '       run-cli preflight --cfgs <f> --dist <f> --log <f> [--backend b] [--profile id] [--ab-profiles dir] [--only ids] [--cfg ids]',
   '       run-cli injection --cfgs <f> --out <dir> [--n 20]',
-  '       run-cli run --cfgs <f> --dist <f> --out <dir> --log <f> --freeze <f> --rtt-baseline <f> [--profile id] [--ab-profiles dir]',
+  '       run-cli run --cfgs <f> --dist <f> --out <dir> --log <f> --freeze <f> --manifest <f> --rtt-baseline <f> [--profile id] [--ab-profiles dir]',
   '               [--only ids] [--cfg ids] [--backend ids] [--repeats 3] [--limit N] [--timeout-ms 180000] [--no-start-gate]',
   '       run-cli summary --out <dir>',
   '       (preflight, run: [--scenarios <scenarios.json>], default tools/bench/e2e/scenarios.json)',
@@ -68,7 +71,7 @@ const [mode, ...rest] = process.argv.slice(2);
 const noGate = rest.includes('--no-start-gate');
 const values = flags(rest.filter((a) => a !== '--no-start-gate'), [
   'cfgs', 'dist', 'out', 'log', 'freeze', 'rtt-baseline', 'profile', 'ab-profiles', 'only', 'cfg', 'backend', 'repeats',
-  'limit', 'timeout-ms', 'gateway-config', 'consent-gateway', 'consent-openrouter', 'n', 'scenarios',
+  'limit', 'timeout-ms', 'gateway-config', 'consent-gateway', 'consent-openrouter', 'n', 'scenarios', 'manifest',
 ], USAGE);
 const root = repoRoot();
 const say = (line: string): void => { process.stderr.write(`${line}\n`); };
@@ -314,6 +317,42 @@ function freezeCheck(table: string, files: readonly string[]): void {
   for (const file of files) assertFrozen(frozen, file);
 }
 
+interface CliGuards { cap: Readonly<Record<string, number>>; planUsd: number; keySpend: () => Promise<number | null> }
+
+/** 7.3 from the manifest: per cfg.backend run caps (1.15x planned) and the key-spend reader; refuses missing entries. */
+function cliGuards(cfgList: readonly CfgId[], backends: readonly Backend[]): CliGuards {
+  const manifest = JSON.parse(readFileSync(need(values, 'manifest', USAGE), 'utf8')) as {
+    planned?: Record<string, number>; planUsd?: Record<string, number>;
+  };
+  const cap: Record<string, number> = {};
+  const missing: string[] = [];
+  for (const cfg of cfgList) for (const backend of backends) {
+    const planned = manifest.planned?.[`${PHASE}/${cfg}.${backend}/scenarios`];
+    if (typeof planned === 'number') cap[`${cfg}.${backend}`] = Math.floor(planned * 1.15);
+    else missing.push(`planned["${PHASE}/${cfg}.${backend}/scenarios"]`);
+  }
+  const planUsd = manifest.planUsd?.[PHASE];
+  if (typeof planUsd !== 'number') missing.push(`planUsd["${PHASE}"]`);
+  const arms = readArmsFile();
+  const gwArm = arms.arms.find((a) => a.via === 'gateway');
+  if (!arms.gateway || !arms.keyInfoPath || !gwArm) missing.push('arms file gateway, keyInfoPath and a gateway arm');
+  if (missing.length > 0) throw new Error(`a real run needs its 7.3 guard inputs: missing ${missing.join(', ')}`);
+  return { cap, planUsd: planUsd!, keySpend: () => readKeySpend(arms.gateway!.url, arms.keyInfoPath!, gwArm!.keyEnv) };
+}
+
+/** Runs (distinct run ids, scored or void) already in the ledger, per cfg.backend: they count toward the 1.15x cap. */
+function runsPerCell(files: readonly string[]): Record<string, number> {
+  const ids = new Map<string, Set<string>>();
+  for (const file of files) {
+    for (const row of readRows<{ kind?: string; cfg?: string; backend?: string; run_id?: string }>(file)) {
+      if (row.kind !== 'run') continue;
+      const cell = `${row.cfg}.${row.backend}`;
+      ids.set(cell, (ids.get(cell) ?? new Set()).add(row.run_id ?? ''));
+    }
+  }
+  return Object.fromEntries([...ids].map(([cell, set]) => [cell, set.size]));
+}
+
 async function modeRun(): Promise<void> {
   const pins = assertPinnedSource(root, undefined, { requireCleanBench: true });
   const cfgs = readCfgsFile(need(values, 'cfgs', USAGE));
@@ -327,13 +366,17 @@ async function modeRun(): Promise<void> {
   const pages = join(root, 'tools', 'bench', 'fixtures', 'pages');
   freezeCheck(need(values, 'freeze', USAGE), [
     set.path, ...set.files.map((f) => join(root, f)), join(pages, 'clicklog.js'), join(pages, 'bench-events.js'),
-    ...new Set(set.all.map((sc) => join(pages, sc.entry))),
+    ...new Set(set.all.map((sc) => join(pages, sc.entry))), ctx.dist,
   ]);
   await serverUp(ctx.origin);
   const cfgList = pickList('cfg', CFGS);
   const backends = pickList('backend', BACKENDS);
   const repeats = num(values, 'repeats', set.repeats, USAGE, { min: 1, max: 9, integer: true });
   const limit = num(values, 'limit', Infinity, USAGE, { min: 1, integer: true });
+  const guards = cliGuards(cfgList, backends);
+  const keyAtStart = await guards.keySpend();
+  if (keyAtStart === null) throw new Error('7.3 key-spend guard: the bench key spend is unreadable (key not in env?)');
+  guardLine(out, PHASE, 'key_spend_start', { spend: keyAtStart, plan: guards.planUsd, cap: guards.cap }, 'guards armed');
 
   let gate: string[] = ['no_start_gate'];
   if (!noGate) {
@@ -351,6 +394,7 @@ async function modeRun(): Promise<void> {
 
   const files = ledgerFiles(out, 'e2e', 'cli', 'runs');
   const scored = scoredKeys(files);
+  const cellRuns = runsPerCell(files);
   const writer = openLedger(ledgerPath(out, 'e2e', 'cli', 'runs', files.length === 0 ? 0 : nextResume(out, 'e2e', 'cli', 'runs')));
   const rc: RunContext = { pins, dist_sha256: sha256File(ctx.dist), gate, node: process.version };
   const queue: Planned[] = [];
@@ -368,6 +412,7 @@ async function modeRun(): Promise<void> {
   let lastAfter = statSync(ctx.log).size;
   let last: { p: Planned; run_id: string } | null = null;
   let stopped: string | null = null;
+  let repeatNow = 0;
   const requeue = (p: Planned): void => {
     if (p.tries < MAX_VOID_RETRIES) queue.unshift({ ...p, tries: p.tries + 1 });
   };
@@ -391,6 +436,22 @@ async function modeRun(): Promise<void> {
         guardLine(out, PHASE, 'stop', stopped, 'stop P7 (exit 3)');
         break;
       }
+      if (queue[0]!.repeat !== repeatNow) {  // 7.3 key spend, read before each repeat
+        repeatNow = queue[0]!.repeat;
+        const spend = await guards.keySpend();
+        if (spend !== null && spend - keyAtStart > 2 * guards.planUsd) {
+          stopAll(out, PHASE, 'key_spend', { since: spend - keyAtStart, plan: guards.planUsd, repeat: repeatNow });
+          stopped = 'measured key spend guard';
+          break;
+        }
+        if (spend === null) guardLine(out, PHASE, 'key_spend', { repeat: repeatNow, spend: null }, 'unreadable, run goes on');
+      }
+      const cell = `${queue[0]!.cfg}.${queue[0]!.backend}`;
+      if ((cellRuns[cell] ?? 0) >= guards.cap[cell]!) {  // 7.3 count: 1.15x the planned runs of a cfg.backend
+        guardLine(out, PHASE, 'count', { cell, runs: cellRuns[cell], cap: guards.cap[cell] }, 'stop P7 (exit 3)');
+        stopped = `count guard: ${cell} at 1.15x its planned runs`;
+        break;
+      }
       const p = queue.shift()!;
       const run = await execute(p.sc, p.cfg, p.backend, ctx, false);
       const auth = authRefusal(run);
@@ -399,6 +460,7 @@ async function modeRun(): Promise<void> {
       lastAfter = run.offsets.after;
       last = { p, run_id: run.run_id };
       const outcome = writeRun(writer, p, run, rc);
+      cellRuns[cell] = (cellRuns[cell] ?? 0) + 1;
       counts[outcome] = (counts[outcome] ?? 0) + 1;
       ran += 1;
       say(`${p.sc.id} ${p.cfg} ${p.backend} r${p.repeat}: ${outcome}`);

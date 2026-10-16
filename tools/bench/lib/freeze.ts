@@ -85,7 +85,7 @@ export function repoRoot(root?: string): string {
 /**
  * A3: the code under test equals the pinned commit, both at HEAD and in the working tree. Returns the two commits
  * every row records; throws when anything under `PINNED_PATHS` differs. `bench_commit` carries `+dirty` when
- * `tools/bench` has uncommitted or untracked files, and with `requireCleanBench` (every real run) that throws.
+ * `tools/bench` (outside `tools/bench/sets`) has uncommitted or untracked files, and with `requireCleanBench` (every real run) that throws.
  */
 export function assertPinnedSource(root = repoRoot(), pinned = PINNED_REFSURE_COMMIT, opts: { requireCleanBench?: boolean } = {}): { refsure_commit: string; bench_commit: string } {
   const git = (...args: string[]) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
@@ -96,7 +96,8 @@ export function assertPinnedSource(root = repoRoot(), pinned = PINNED_REFSURE_CO
       throw new Error(`the code under test differs from ${pinned} (${against.length > 0 ? 'HEAD' : 'working tree'}): ${PINNED_PATHS.join(' ')}`);
     }
   }
-  const dirty = git('status', '--porcelain', '--', 'tools/bench') !== '';
+  // Set data under tools/bench/sets is checked by its freeze-table hash, so only the code makes a run dirty.
+  const dirty = git('status', '--porcelain', '--', 'tools/bench', ':(exclude)tools/bench/sets') !== '';
   if (dirty && opts.requireCleanBench) {
     throw new Error('tools/bench has uncommitted or untracked changes: commit them so bench_commit names the code that runs');
   }
