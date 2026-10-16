@@ -50,7 +50,8 @@ import { baselineMedians } from '../timing/gate';
   401/403 in any command's envelope writes the STOP file for every runner (7.3). From the manifest (7.3): each
   cfg.backend cell stops at 1.15x its planned runs (`planned["P7/<cfg>.<backend>/scenarios"]`), and before each
   repeat the bench key's measured spend since the start above 2x `planUsd.P7` writes STOP (exit 3). The key spend is
-  read with the key in this process's env (`REFSURE_BENCH_GATEWAY_KEY`, never passed to a refsure command).
+  read with the key in this process's env (the variable the arms file names in `keyEnv`, never passed to a refsure
+  command).
 */
 
 const USAGE = [
