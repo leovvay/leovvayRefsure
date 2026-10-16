@@ -176,9 +176,9 @@ lexicons, whatever the page language.
 
 There are no test suites. A change is proven by running the real command against a real page:
 
-1. Build and typecheck:
+1. Build and typecheck. Install with `--ignore-scripts`, as CI does, so no dependency's install script runs:
    ```sh
-   npm ci
+   npm ci --ignore-scripts
    npm run typecheck
    npm run build
    ```
@@ -229,8 +229,10 @@ literal strings comes from `REFSURE_SCRUB_ALLOW` or `~/.config/refsure-scrub/all
 
 Without a pattern source the script exits 2 ("no scrub patterns configured"). That is expected on a contributor's
 machine. CI runs the gate on every push and on pull requests from this repository's branches (fork pull requests get
-no secrets, so the gate runs on the push that merges them), and `prepublishOnly` runs it before a publish. If CI
-reports a hit in your change, the maintainer will tell you which line to change.
+no secrets, so the gate runs on the push that merges them), and `prepublishOnly` runs typecheck, build and the gate
+before every `npm publish`. That is why the repository has no `.npmrc` with `ignore-scripts=true`: it would skip
+`prepublishOnly` too, so installs pass `--ignore-scripts` on the command line instead. If CI reports a hit in your
+change, the maintainer will tell you which line to change.
 
 ## Style
 

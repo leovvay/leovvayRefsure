@@ -132,7 +132,10 @@ scan_listing 'repo' "$(pwd)" "$tmp/repo-paths"
 # --- 2. the npm tarball -------------------------------------------------------------------------------------------
 
 mkdir "$tmp/pack" "$tmp/unpacked"
-npm pack --pack-destination "$tmp/pack" > "$tmp/pack.log" 2>&1 || fail 'npm pack failed; run it by hand to see why'
+# Under `prepublishOnly`, npm hands its own flags down as npm_config_* variables, and `npm publish --dry-run` would
+# make this pack write no tarball, so the flag is turned off here.
+npm pack --dry-run=false --pack-destination "$tmp/pack" > "$tmp/pack.log" 2>&1 ||
+  fail 'npm pack failed; run it by hand to see why'
 tarball=$(find "$tmp/pack" -name '*.tgz' -type f | head -n 1)
 [ -n "$tarball" ] || fail 'npm pack produced no tarball'
 tar -xzf "$tarball" -C "$tmp/unpacked"

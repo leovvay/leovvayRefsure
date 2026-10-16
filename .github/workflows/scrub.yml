@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # Build first, so the scanned tarball holds the bundle that would be published.
       - run: npm run build
       - run: sh tools/scrub/scrub.sh
