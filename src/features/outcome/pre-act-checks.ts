@@ -10,10 +10,10 @@ import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 
 /**
- * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), and the body text read
- * before the act, which is the outcome's before-side.
+ * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`). The body text it read
+ * fed only the confirm-dialog raiser; the outcome's before-side is read after every check (spec §6.2).
  */
-type Cleared = { acted: string; bodyText: string };
+type Cleared = { acted: string };
 
 type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared };
 
@@ -46,7 +46,7 @@ export async function checkBeforeAct(
 
   const { action, ref } = args.act;
   const target = await readLiveTarget(ctx.browser, page, ref, action);
-  const { live, role, bodyText } = target;
+  const { live, role } = target;
   const named = nameCheck(live, args.expectName);
   if (named !== 'ok') {
     ctx.trace.untrusted.add('why.detail');
@@ -69,5 +69,5 @@ export async function checkBeforeAct(
       + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
-  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen), bodyText } };
+  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen) } };
 }

@@ -1,7 +1,8 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
+import { urlNorm } from '../../page-model';
 import { outcomeSite } from '../../questions';
-import { abstainOutcome, readPage, sleep } from '../shared';
+import { abstainOutcome, nothingDone, readPage, sleep } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
@@ -11,7 +12,8 @@ import { outcomeInput, SETTLE_MS, unconfirmed } from './outcome-side';
 
 /**
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
- * dispatch; after it, only `landed` (exit 0) or `effect_unknown` (exit 30) is honest, never "failed".
+ * dispatch; after it, only `landed` (exit 0) or `effect_unknown` (exit 30) is honest, never "failed". The before-read
+ * comes after every check, so only one read lies between it and the dispatch.
  */
 export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promise<CommandOutcome<OutcomeResult>> {
   const page = ctx.page;
@@ -20,14 +22,19 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   const checked = await checkBeforeAct(ctx, page, args, tab);
   if ('refusal' in checked) return checked.refusal;
   const { action, ref, value } = args.act;
+  const before = await readPage(ctx.browser, page);
+  // The route, origin and risk were read on the URL the checks saw: a page that moved on since is not the one judged.
+  if (urlNorm(before.tab.url) !== urlNorm(tab.url) || (before.tab.tabKey ?? undefined) !== (tab.tabKey ?? undefined)) {
+    return nothingDone('stale', 'page_changed', 'the page moved to another URL or tab while the act was checked; '
+      + 'nothing was done', { next: RE_OBSERVE });
+  }
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const sides = { piiMasks: ctx.config.piiMasks, value };
-  const before = { tab, text: checked.cleared.bodyText };
   if (ctx.dryRun) {
     // The body the outcome Decision would get (spec §6.3), its after-side a stand-in; `decide` throws `DryRunStop`.
     ctx.trace.notes.push('dry_run: the after side is a stand-in; it is read only after the act runs');
     const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, null, sides),
-      { combo: 'auto', originUrl: tab.url, dryRun: true, signal: ctx.signal });
+      { combo: 'auto', originUrl: before.tab.url, dryRun: true, signal: ctx.signal });
     if (verdict.kind === 'abstain') return abstainOutcome<OutcomeResult>(verdict, null);
   }
 
