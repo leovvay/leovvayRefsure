@@ -1,5 +1,6 @@
+import { PROVIDER_IDS } from '../../shared';
 import type { DecideOpts } from '../decide-fn';
-import { PROVIDER_IDS, type ProviderId, type SiteId } from '../site-id';
+import type { ProviderId, SiteId } from '../site-id';
 import type { SitePolicy } from '../site-policy';
 import type { Readiness } from './readiness';
 import type { RoutePlan } from './route-plan';

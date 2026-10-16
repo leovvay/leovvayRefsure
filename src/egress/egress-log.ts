@@ -1,8 +1,7 @@
 import { closeSync, constants, fstatSync, openSync, readSync, writeSync } from 'node:fs';
+import { isProviderId } from '../shared';
 import type { EgressLogEntry } from './egress-log-entry';
 import { ensureParentDir } from './private-file';
-// The file, not the barrel: questions imports egress, and site-id imports nothing.
-import { isProviderId } from '../questions/site-id';
 
 // Covers a full day at the default per-minute cap; the limits never look further back.
 const MAX_READ_BYTES = 16 * 1024 * 1024;

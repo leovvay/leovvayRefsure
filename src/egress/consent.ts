@@ -1,10 +1,9 @@
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
-// The file, not the barrel: questions imports egress, and site-id imports nothing.
-import { isProviderId, type ProviderId } from '../questions/site-id';
+import type { ProviderId } from '../questions';
+import { isProviderId, isRecord } from '../shared';
 import type { Consent, ConsentGrant } from './consent-record';
 import { DISCLOSURE_HASH } from './disclosure';
 import { writePrivateFile } from './private-file';
-import { isRecord } from '../shared';
 
 
 function asGrant(value: unknown): ConsentGrant | null {

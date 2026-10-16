@@ -1,7 +1,7 @@
 import type { DecisionQuestion, SiteRequest } from '../questions';
-import { BOUNDS } from '../questions/bounds';
 import type { ApprovedRequest } from './approved-request';
 import type { ApproveContext } from './approve-context';
+import { EGRESS_BYTES } from './byte-bounds';
 import { canonicalJson, sha256Hex, utf8Bytes } from './canonical';
 import { cleanEgressText } from './clean-text';
 import { consentMissing, grantFor, readConsent } from './consent';
@@ -9,8 +9,8 @@ import type { EgressRefusal } from './egress-refusal';
 import { checkLimits } from './limits';
 import { checkOrigin } from './origin-policy';
 
-// The file, not the barrel: questions imports egress. Anything larger is `oversize` before any call (spec §7.3).
-const { STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } = BOUNDS;
+// Anything larger is `oversize` before any call (spec §7.3).
+const { STATE_MAX_BYTES, QUESTIONS_MAX_BYTES } = EGRESS_BYTES;
 
 const REFUSAL_CAUSES: ReadonlySet<unknown> = new Set(['not_set_up', 'origin_denied', 'oversize', 'spend_limit']);
 

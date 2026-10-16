@@ -13,7 +13,7 @@ export type * from './route';
 export type * from './asking';
 export { abstainVerdict } from './abstain-verdict';
 export { BOUNDS } from './bounds';
-export { isProviderId, PROVIDER_IDS } from './site-id';
+export { isProviderId, PROVIDER_IDS } from '../shared';
 export { NONE_KEY, quoteOption } from './present-candidates';
 export { noulVerdict, validateAnswers } from './validate-answers';
 export {

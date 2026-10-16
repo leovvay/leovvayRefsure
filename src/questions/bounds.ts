@@ -1,3 +1,5 @@
+import { EGRESS_BYTES } from '../egress';
+
 /*
   Every bound a Decision input is cut to, ported from the author's earlier
   decision code. A bound is part of the wording it measured with: raising one
@@ -25,11 +27,11 @@ export const BOUNDS = {
   DISMISS_MAX: 12,
   /**
    * Canonical JSON of the state, in UTF-8 bytes (spec §7.3): `approve` refuses more as `oversize`, and outcome fits
-   * its two sides to it.
+   * its two sides to it. Egress owns the number; it is here so the sites read every bound from one place.
    */
-  STATE_MAX_BYTES: 24_000,
+  STATE_MAX_BYTES: EGRESS_BYTES.STATE_MAX_BYTES,
   /** Canonical JSON of the questions, in UTF-8 bytes: `approve` refuses more, and a candidate site asks over fewer. */
-  QUESTIONS_MAX_BYTES: 12_000,
+  QUESTIONS_MAX_BYTES: EGRESS_BYTES.QUESTIONS_MAX_BYTES,
   /** One Decision's whole budget, retry included. */
   DEADLINE_MS: 5_000,
   /** A second attempt is made only when at least this much of the budget is left. */

@@ -5,6 +5,7 @@ export type * from './consent-record';
 export type * from './egress-log-entry';
 export type * from './secret-shapes';
 export { approve, isEgressRefusal } from './pipeline';
+export { EGRESS_BYTES } from './byte-bounds';
 export { redactSecrets } from './redact';
 export { cleanEgressText } from './clean-text';
 export { boundJsonBytes, boundText, jsonTextBytes, stripControl } from './bound-text';
