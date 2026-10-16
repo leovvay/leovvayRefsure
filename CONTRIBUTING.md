@@ -132,7 +132,8 @@ Rules for `run`:
 Then update the "Commands" section of `README.md` (the tables and "Options by command") and its causes table from the
 built binary's `refsure commands --json`, `refsure causes --json` and `refsure <verb> --help`, never from memory. Add
 the verb to `skills/refsure/SKILL.md` if agents should reach for it unprompted, and give a new cause a row in the
-skill's troubleshooting table.
+skill's troubleshooting table. `npm run build` refuses a table that misses a cause from `CAUSES`, names one it does not
+have, or gives one another status or exit than `exitFor`, and a skill over its 150 lines.
 
 ## Recipe 3: add a language
 
