@@ -21,8 +21,8 @@ import { helpExit } from './lib/help';
     spend crosscheck --results <dir> --out <spend-crosscheck.json> [--gateway-spend <rows.json>] [--p0-window <json>]
 
   `--gateway-spend`: a JSON array the operator exported from the gateway's spend log for the bench key, each row
-  `{ "tags": [...] | "tag": "...", "spend": <usd> }`; a row is credited to the arm whose `extraHeaders` value it
-  carries. `--p0-window` (when P0 found the tags unrecorded): `{ "<arm>": { "before": usd, "after": usd, "calls": n } }`.
+  `{ "tags": [...] | "request_tags": [...] | "tag": "...", "spend": <usd> }` (the gateway's own rows fit as they
+  are); a row is credited to the arm whose every `extraHeaders` tag (the header's comma list) it carries. `--p0-window` (when P0 found the tags unrecorded): `{ "<arm>": { "before": usd, "after": usd, "calls": n } }`.
   Exit 0 written, 64 bad usage. Calls no paid API.
 */
 
@@ -34,7 +34,7 @@ const empty = (): Sum => ({ calls: 0, rows: 0, priced: 0, unpriced: 0, reported:
 
 interface Usage { cost?: unknown }
 interface Wire { t_wire?: number[] | number; usage?: unknown[] | unknown; arm?: string; provider?: string; wires?: { t_wire?: number; usage?: unknown }[] }
-interface AnyRow { arm?: string; provider?: string; attempts?: Wire[]; parts?: Wire[] }
+interface AnyRow { arm?: string; provider?: string; attempts?: Wire[]; parts?: Wire[]; slice?: string }
 
 /** Sums one row into per-arm totals: M1/quality rows by attempt, M2 Decision rows by part (each part names its arm). */
 function addRow(totals: Map<string, Sum>, arms: ArmsFile, row: AnyRow): void {
@@ -62,19 +62,33 @@ function addRow(totals: Map<string, Sum>, arms: ArmsFile, row: AnyRow): void {
   totals.set(row.arm, own);
 }
 
-/** Every phase directory of a results dir (`P0`..`P9`, with suffixes such as `P5b`). */
-function phases(results: string): string[] {
-  return existsSync(results) ? readdirSync(results, { withFileTypes: true }).filter((d) => d.isDirectory() && /^P\d/.test(d.name)).map((d) => d.name).sort() : [];
+/**
+ * Every phase directory of a results dir (`P0`..`P9`, with suffixes such as `P5b`): `dir` as it is on disk, `phase`
+ * as the protocol and `key-spend.jsonl` name it. The phase scripts create some directories in lower case (`p5`,
+ * `p6`), so the match ignores case.
+ */
+function phases(results: string): { dir: string; phase: string }[] {
+  if (!existsSync(results)) return [];
+  return readdirSync(results, { withFileTypes: true }).filter((d) => d.isDirectory() && /^p\d/i.test(d.name))
+    .map((d) => ({ dir: d.name, phase: `P${d.name.slice(1)}` })).sort((a, b) => a.phase.localeCompare(b.phase));
 }
 
-/** Per phase and arm: ledger calls, rows and priced sums over every row of every file (a resumed failure spent too). */
+/**
+ * Per phase and arm: ledger calls, rows and priced sums over every row of every file (a resumed failure spent too).
+ * P4a's rows are P4 rows (`slice: interim`, 7.1) and are summed under P4a, the phase whose window they were sent in.
+ */
 export function ledgerTotals(results: string, arms: ArmsFile): Record<string, Record<string, Sum>> {
-  const out: Record<string, Record<string, Sum>> = {};
-  for (const phase of phases(results)) {
-    const totals = new Map<string, Sum>();
-    for (const { arm, set } of ledgerIndex(results, phase)) {
-      for (const file of ledgerFiles(results, phase, arm, set)) for (const row of readRows<AnyRow>(file)) addRow(totals, arms, row);
+  const byPhase = new Map<string, Map<string, Sum>>();
+  const totalsOf = (phase: string) => byPhase.get(phase) ?? byPhase.set(phase, new Map()).get(phase)!;
+  for (const { dir, phase } of phases(results)) {
+    for (const { arm, set } of ledgerIndex(results, dir)) {
+      for (const file of ledgerFiles(results, dir, arm, set)) {
+        for (const row of readRows<AnyRow>(file)) addRow(totalsOf(phase === 'P4' && row.slice === 'interim' ? 'P4a' : phase), arms, row);
+      }
     }
+  }
+  const out: Record<string, Record<string, Sum>> = {};
+  for (const [phase, totals] of [...byPhase.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     if (totals.size > 0) out[phase] = Object.fromEntries([...totals.entries()].sort());
   }
   return out;
@@ -103,14 +117,17 @@ function gap(a: number, b: number): number | null {
 /** Gateway spend rows credited per arm through each arm's tag header value: dollars and row (call) counts. */
 function gatewaySplit(arms: ArmsFile, path: string | undefined): Record<string, { spend: number; rows: number }> | null {
   if (path === undefined) return null;
-  const rows = JSON.parse(readFileSync(path, 'utf8')) as { tags?: unknown; tag?: unknown; spend?: unknown }[];
+  const rows = JSON.parse(readFileSync(path, 'utf8')) as { tags?: unknown; request_tags?: unknown; tag?: unknown; spend?: unknown }[];
   const out: Record<string, { spend: number; rows: number }> = {};
   for (const arm of arms.arms.filter((a) => a.via === 'gateway')) {
-    const values = Object.values(arm.extraHeaders ?? {});
+    // The tag header is a comma list (`refsure-bench,arm:<id>`) that the gateway stores split, so a row is the arm's
+    // when it carries every tag of the list; the first tag alone is shared by every arm.
+    const values = Object.values(arm.extraHeaders ?? {}).flatMap((v) => v.split(',')).map((v) => v.trim()).filter((v) => v !== '');
     if (values.length === 0) continue;
     const mine = rows.filter((r) => {
-      const tags = Array.isArray(r.tags) ? r.tags.map(String) : typeof r.tag === 'string' ? [r.tag] : [];
-      return values.some((v) => tags.some((t) => t === v || t.endsWith(`:${v}`)));
+      const list = Array.isArray(r.tags) ? r.tags : Array.isArray(r.request_tags) ? r.request_tags : typeof r.tag === 'string' ? [r.tag] : [];
+      const tags = list.map(String);
+      return values.every((v) => tags.some((t) => t === v || t.endsWith(`:${v}`)));
     });
     out[arm.id] = { spend: mine.reduce((a, r) => a + (typeof r.spend === 'number' ? r.spend : 0), 0), rows: mine.length };
   }
