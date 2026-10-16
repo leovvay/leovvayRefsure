@@ -24,9 +24,10 @@ prints the copy of this skill that matches the installed binary, as raw Markdown
 
 A Decision sends a bounded, redacted slice of the page (URL, title, headings, a few candidate lines, and at most a
 few thousand characters of page text) to the provider host the human consented to. Pages may be logged in. Cookies,
-storage, screenshots, keys and typed values are never sent. `--dry-run` on any command prints the exact request and
-sends nothing; `egress` in the envelope lists what was sent. If the human called a page or site private, do not run
-refsure commands on it.
+storage, screenshots, keys and typed values are never sent: text in an editable region is cut out, and when refsure
+cannot read those regions the page text is withheld (`typed_text_withheld` in `result.notes`). `--dry-run` on any
+command prints the exact request and sends nothing; `egress` in the envelope lists what was sent. If the human called
+a page or site private, do not run refsure commands on it.
 
 ## 3. When to call what
 
@@ -41,7 +42,7 @@ refsure commands on it.
 | Content that loads later | `refsure wait-for --expect "<what should appear>" [--text "<literal>"]` |
 | A dropdown value by meaning ("Ukraine" vs "Україна") | `refsure pick-option --field @eN --want "<meaning>"`, then `act --ticket`. A custom dropdown that lists its options only once open: add `--open --expect-name "<name you saw on the field>"` (required with `--open`) |
 | Something broke and you need the console or failed requests | `refsure mark` before, `refsure triage --since <M>` after |
-| Money, irreversible, auth or consent | only `refsure act-high-risk`, and only when the human asked for exactly that action in this session |
+| Money, irreversible, auth (an OAuth consent screen too) or consent | only `refsure act-high-risk`, and only when the human asked for exactly that action in this session |
 
 More rules:
 - `outcome` acts for you. Use it for `click`, `dblclick`, `fill`, `select`, `check` and `uncheck`. It refuses

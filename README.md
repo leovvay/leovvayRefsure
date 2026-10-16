@@ -695,13 +695,16 @@ Names are matched against the union of all lexicons (English, Ukrainian, Russian
 Polish), whatever the page language. Typographic apostrophes fold to a straight one (`J’accepte` reads as
 `j'accepte`), and an `<input>` button with no text is named by its `value` (an image button by its `alt`), as the
 snapshot names it. A name only ever lowers a control's class when it is, as a whole, a close, cancel or reject word
-(`Close`, `Close dialog`, `No, cancel`): `Close project` and `Yes, cancel` keep their class.
+(`Close`, `Close dialog`, `No, cancel`): `Close project` and `Yes, cancel` keep their class. The path rules read the
+URL's path and fragment and raise every control on the page, whatever its name: an OAuth consent screen names its
+buttons neutrally, so on an `oauth` or `authorize` route a plain `Continue` reads auth, and so does its `Cancel`.
 
 **Tickets.** `locate`, `dismiss` (when it proposes rather than clicks) and `pick-option` issue a single-use ticket
 that lives 120 s and stores the element's fingerprint (role, name, section path, ordinal among twins), never its ref
 number. `act` claims it, checks the URL, takes a fresh snapshot, finds the same element again, re-reads its risk, and
 acts at once. If anything moved, nothing is clicked (`stale`). Two agents racing one ticket: exactly one wins, the
-other gets `ticket_used`.
+other gets `ticket_used`. Tickets and marks (a mark lives 15 minutes) are kept under `$XDG_STATE_HOME/refsure/`
+(mode `0600`), and every call purges the expired ones first, even `--help`, `--version` or a usage error.
 
 **Your own refs.** `outcome` and `act-high-risk --ref` take no snapshot, so your refs survive. `pick-option --open`
 clicks your ref with no snapshot first, then takes one to read the options it lists (`earlier_refs_void: true`). All
@@ -717,7 +720,9 @@ accept term (`without`, `sans`, `ohne`, `sin`, `bez`, `без`) turns it into a 
 (continue without accepting) can be clicked; it never turns a money, irreversible or auth term. Before the click,
 `dismiss` finds its pick again on a fresh snapshot by fingerprint, on the same URL and tab, and reads the veto and the
 risk again on the fresh element: if anything changed, nothing is clicked. After a click, the overlay must be gone,
-else the result is `effect_unknown`.
+else the result is `effect_unknown`. With `agree` (`--agree`, or the default when both providers are set up), Jev's
+pick meets the veto, the twin rule and the risk read before the two answers are compared, so a vetoed, twinned or
+high-risk pick names that cause (`veto`, `twins` or `high_risk_class`), never `disagree`.
 
 **Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in shuffled option lines,
 and the envelope lists it under `untrusted`.

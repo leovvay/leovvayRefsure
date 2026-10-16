@@ -22,7 +22,10 @@ This guide has three recipes (add a Decision site, add a verb, add a language) a
   - only `src/main.ts` calls `process.exit`;
   - only `src/egress/pipeline.ts` constructs an `ApprovedRequest`, the only thing a provider accepts.
 - **Never send textbox values.** The snapshot carries them after `: ` on a textbox line. They never enter a line,
-  `snap` output or a Decision.
+  `snap` output or a Decision. Text typed into an editable region (`contenteditable`) shows in the body text
+  instead, so body text never leaves with it: `pageView` cuts it by the snapshot, and a `readPage` reading goes
+  through `withoutTyped` (`src/features/shared/`), which cuts it, or withholds the whole text when the regions
+  could not be read.
 
 ## Recipe 1: add a Decision site
 
@@ -52,7 +55,10 @@ wording and its thresholds are one unit and several verbs reuse the same site.
      (`provider_not_allowed`). A row is a number (choice), a band `{ yesAtLeast, noAtMost }` (Noul), or a record by
      `RiskClass` for risk-scaled sites. Start no looser than the existing rows: choice 0.8, Noul 0.85 / 0.15;
    - `combos`: `'agree'` and/or `'fallback'`, only where two providers make the site safer. `fallback` adds wrong acts
-     where an answer leads to a click (`locate`, `dismiss`, `outcome`), so it is never allowed there;
+     where an answer leads to a click (`locate`, `dismiss`, `outcome`), so it is never allowed there. Where `agree`
+     meets a pick, the twin rule and the guard come before the comparison: a `disagree` carries Jev's pick as
+     `leanedValue`, and the verb runs those checks on it first, as `dismiss` does, so a vetoed or high-risk lean
+     names its own cause;
    - `solo` (optional): the providers that may answer alone. Without it, every provider with a row may; `dismiss`
      lists only `jev`, so OpenAI answers there only through `agree`;
    - `maturity: 'experimental'`. A new wording always starts experimental. `inherited` is reserved for wordings
@@ -124,16 +130,17 @@ Rules for `run`:
 - `result` is a plain JSON object. Keep the envelope about 1 KB in the common case.
 - Every verb prints exactly one envelope. The one exception is a verb whose product is a file (`skill print`): it
   returns the file as `text` on an `ok` outcome, and `main.ts` prints that verbatim instead of the envelope.
-- A new `why.cause` gets a row in `src/output/causes.ts`. A new cause or `next.do` value ships only in a minor
-  release, and never moves between exit classes.
+- A new `why.cause` gets a row in `src/output/causes.ts`, and a new `next.do` value goes in `NEXT_DO`
+  (`src/output/next-do-values.ts`); `causes --json` lists both. Either ships only in a minor release, and a cause
+  never moves between exit classes.
 - The envelope major and the `refsure-skill:` line in `skills/refsure/SKILL.md` move together. `npm run build`
   refuses a skill whose major differs from the binary's, since `doctor` would call the copy it prints stale.
 
 Then update the "Commands" section of `README.md` (the tables and "Options by command") and its causes table from the
 built binary's `refsure commands --json`, `refsure causes --json` and `refsure <verb> --help`, never from memory. Add
 the verb to `skills/refsure/SKILL.md` if agents should reach for it unprompted, and give a new cause a row in the
-skill's troubleshooting table. `npm run build` refuses a table that misses a cause from `CAUSES`, names one it does not
-have, or gives one another status or exit than `exitFor`, and a skill over its 150 lines.
+skill's troubleshooting table. `npm run build` refuses a table that misses a cause from `CAUSES`, names one it does
+not have, or gives one another status or exit than `exitFor`, and a skill over its 150 lines.
 
 ## Recipe 3: add a language
 
@@ -211,7 +218,8 @@ There are no test suites. A change is proven by running the real command against
 5. Throwaway helper scripts live outside the repo too, and are deleted afterwards.
 
 Describe the scenarios you ran and their envelopes in the pull request. Use `--dry-run` or a localhost mock gateway
-(configured with `jevPath`/`jevModel` and `openaiPath`/`openaiModel`) when a scenario does not need a real provider.
+(its URL in `REFSURE_GATEWAY_URL` or `gateway.url`, and the config file's `jevPath`/`jevModel` and
+`openaiPath`/`openaiModel`) when a scenario does not need a real provider.
 
 ## The scrub gate
 
