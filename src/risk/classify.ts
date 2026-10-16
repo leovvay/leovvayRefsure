@@ -18,6 +18,8 @@ const READ_ROLES: ReadonlySet<string> = new Set(['link', 'tab', 'treeitem', 'opt
 const LEXICON_CLASSES = ['money', 'irreversible', 'auth', 'consent'] as const;
 const MONEY_PATH = /checkout|payment|billing/i;
 const IRREVERSIBLE_PATH = /delete|close-account/i;
+// An OAuth consent screen names its buttons neutrally ("Continue", "Yes"), so its route alone makes it auth.
+const AUTH_PATH = /oauth|authori[sz]e/i;
 
 /**
  * Rule 1: what the element is, before any word on it counts. A close button reads `read` only when its whole name is
@@ -94,6 +96,11 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   if (gone !== null) {
     risk = maxRisk(risk, 'irreversible');
     reasons.push(`url:${gone[0].toLowerCase()}`);
+  }
+  const auth = AUTH_PATH.exec(route);
+  if (auth !== null) {
+    risk = maxRisk(risk, 'auth');
+    reasons.push(`url:${auth[0].toLowerCase()}`);
   }
 
   if (opts.userRisk !== undefined) {

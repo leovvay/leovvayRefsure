@@ -679,7 +679,7 @@ These rules live in code, not in the agent skill:
 | write | fields, toggles, a plain submit | `act`, at the site's write row (0.8-0.89) |
 | money | pay, buy, order, checkout, top up; card, CVV and IBAN forms; `checkout`, `payment`, `billing` paths | `act-high-risk` only |
 | irreversible | delete, remove, send, publish, revoke; "cancel" next to subscription, order, account or booking; the confirming button of a confirm dialog (never its own Cancel or No); `delete`, `close-account` paths | `act-high-risk` only |
-| auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent | `act-high-risk` only |
+| auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent (`oauth`, `authorize` paths) | `act-high-risk` only |
 | consent | accept, agree, allow cookies, opt in | `act-high-risk` only |
 
 Names are matched against the union of all lexicons (English, Ukrainian, Russian, German, Spanish, French and
