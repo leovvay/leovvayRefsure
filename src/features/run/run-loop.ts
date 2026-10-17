@@ -20,6 +20,9 @@ type Out = CommandOutcome<RunResult>;
 
 /** An unsure Decision: it read the page and found nothing it was sure of. */
 const UNSURE: ReadonlySet<string> = new Set(['low_confidence', 'none_chosen']);
+/** How long an unsure Decision's page gets before one more look, and how many such looks one step may take. */
+const RELOOK_MS = 1_000;
+const RELOOKS_MAX = 2;
 /** WAIT sleeps this long before the next look. */
 const WAIT_MS = 400;
 const SCROLL_PX = 600;
@@ -70,12 +73,12 @@ function endOf(reading: StepReading, index: string | null, expect: string | null
 /**
  * The loop (design 2026-10-17 §2): per step, the budget, the `--text` rule on the new text, one step Decision, then
  * at most one act. The done Noul at the presence edge ends it `seen` whatever leads; DONE without it ends it
- * `done_unconfirmed`, BLOCKED `blocked`. The look after an act is the next step's look. An unsure Decision gets one
- * more look, and is asked again only when the page has changed since.
+ * `done_unconfirmed`, BLOCKED `blocked`. The look after an act is the next step's look. An unsure Decision gets
+ * another look a second later (twice at most per step), and is asked again only when the page has changed since.
  */
 async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
   const { args } = run;
-  let relooked = false;
+  let relooks = 0;
   for (;;) {
     const at = ctx.now();
     const budget = overBudget(run, at);
@@ -89,17 +92,18 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     });
     const { verdict } = decided;
     if (verdict.kind === 'abstain') {
-      // Unsure on a page still moving (a menu closing, prices filling in): one more look, and a Decision only when
-      // the page now shows something else. Asked again on the same page, it would only be asked until it said yes.
-      if (relooked || !UNSURE.has(verdict.cause)) return abstainStop(verdict);
-      relooked = true;
-      await sleep(SETTLE_MS, ctx.signal);
+      // Unsure on a page still moving (results loading, a menu closing, prices filling in): one more look a second
+      // later, and a Decision only when the page now shows something else. Asked again on the same page, it would
+      // only be asked until it said yes.
+      if (relooks >= RELOOKS_MAX || !UNSURE.has(verdict.cause)) return abstainStop(verdict);
+      relooks += 1;
+      await sleep(RELOOK_MS, ctx.signal);
       const again = await look(ctx, run.page, run.hints);
       if (again.sig === run.current.sig) return abstainStop(verdict);
       run.current = again;
       continue;
     }
-    relooked = false;
+    relooks = 0;
     if (decided.newFamily) return newFamilyStop(ctx.trace.decisions.at(-1)?.model);
     const reading = verdict.value;
     const end = endOf(reading, verdict.index, args.expect);

@@ -109,7 +109,7 @@ Each step is one look, one Jev Decision and at most one act:
    operation needs 0.5; a target needs its risk row (read 0.5, write 0.6); every act is at least write, so 0.6.
    Two readings join heads: a split between CLICK and TYPE aimed at one field reads as TYPE (typing focuses the
    field as the click would), and when the leading operation's head is unsure, the runner-up's sure head is the
-   step. An unsure `WAIT` is waited on, since it sends nothing.
+   step. An unsure operation with `WAIT` leading or next waits, since a wait sends nothing.
 3. **End checks.** `--text` in the new text ends it `seen` by code; the done Noul at 0.85 ends it `seen` whatever
    operation leads; `DONE` without that is `done_unconfirmed`; `BLOCKED` is `blocked`.
 4. **Guard, as `act` guards a ticket.** Right before the act: a fresh snapshot on the same URL and tab, the element
@@ -120,8 +120,8 @@ Each step is one look, one Jev Decision and at most one act:
    or consent refused with `act-high-risk` in `next`; the pick held to its risk row. Then one act on the fresh ref.
    A sent act is never sent again by this code, and an act that may not have landed stops the run (exit 30).
 5. **Settle and look.** 250 ms (500 ms after a click in a dialog, on a field or an option), then the next look; after
-   a `TYPE` into a combobox, once more up to 600 ms until its options show. An unsure Decision gets one more look,
-   and is asked again only when the page has changed since.
+   a `TYPE` into a combobox, once more up to 600 ms until its options show. An unsure Decision gets another look a
+   second later (twice at most per step), and is asked again only when the page has changed since.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget`; three acts in a row that change nothing,
    or the same act on the same element a third time, end it `no_progress` (Orca delivers clicks only while its
    browser tab is on screen).

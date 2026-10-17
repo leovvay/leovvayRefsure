@@ -121,13 +121,16 @@ function typeIntent(answers: Answers, context: StepContext, operation: DecisionC
 
 /**
  * The step's answers together (design 2026-10-17 §2.3-2.4). The done Noul first: at the presence edge it is the
- * answer whatever leads. Then the operation, which needs `STEP_OP_MIN` (but WAIT, which sends nothing; and a split
- * between CLICK and TYPE on one field reads as TYPE: `typeIntent`); then only the head of that operation, at
+ * answer whatever leads. Then the operation, which needs `STEP_OP_MIN` (an unsure split with WAIT leading or next
+ * waits, since WAIT sends nothing; a split between CLICK and TYPE on one field reads as TYPE: `typeIntent`); then
+ * only the head of that operation, at
  * `threshold` (the write row: every act is floored at write, and the caller holds the pick to its risk row once it
  * has read the risk), with the twin rule on what was sent; when that head is unsure, the runner-up operation's
  * (`secondOperation`). A refusal names the leading options.
  */
-export function readStep(answers: Answers, context: StepContext, threshold: Threshold, sent: Sent): Verdict<StepReading> {
+export function readStep(
+  answers: Answers, context: StepContext, threshold: Threshold, sent: Sent,
+): Verdict<StepReading> {
   const operation = answers[STEP_QUESTIONS.operation];
   if (operation?.type !== 'choice') return abstainVerdict('provider_error', 'expected a choice answer to the operation');
   const op = operation.choice as StepOp;
@@ -140,10 +143,20 @@ export function readStep(answers: Answers, context: StepContext, threshold: Thre
     };
   }
   const merged = operation.confidence < STEP_OP_MIN ? typeIntent(answers, context, operation) : null;
-  if (merged !== null && merged >= STEP_OP_MIN) return readHead(answers, context, 'TYPE', merged, done, threshold, sent);
-  // An unsure WAIT is waited on: it sends nothing, so no threshold guards it, and the run's budget bounds it.
-  const unsureWait = op === 'WAIT' && context.ops.includes(op);
-  if (!unsureWait && (operation.confidence < STEP_OP_MIN || !context.ops.includes(op))) {
+  if (merged !== null && merged >= STEP_OP_MIN) {
+    return readHead(answers, context, 'TYPE', merged, done, threshold, sent);
+  }
+  // Unsure, with WAIT leading or next: it is waited on. It sends nothing, so no threshold guards it, and the run's
+  // budget bounds it; results still loading are what such a split most often reads.
+  const [, runnerUp] = Object.entries(operation.probabilities).sort((a, b) => b[1] - a[1]);
+  const waitLeads = op === 'WAIT' || runnerUp?.[0] === 'WAIT';
+  if (operation.confidence < STEP_OP_MIN && context.ops.includes('WAIT') && waitLeads) {
+    const p = operation.probabilities.WAIT ?? 0;
+    return {
+      kind: 'answer', value: { op: 'WAIT', p, target: null, done }, index: 'WAIT', confidence: p, threshold: STEP_OP_MIN,
+    };
+  }
+  if (operation.confidence < STEP_OP_MIN || !context.ops.includes(op)) {
     return {
       kind: 'abstain', cause: 'low_confidence', leaned: op, confidence: operation.confidence, threshold: STEP_OP_MIN,
       detail: `the operation leaned to ${op} at ${operation.confidence}, below the threshold ${STEP_OP_MIN}; `
@@ -154,16 +167,20 @@ export function readStep(answers: Answers, context: StepContext, threshold: Thre
   return read.kind === 'abstain' ? secondOperation(answers, context, operation, read, done, threshold, sent) : read;
 }
 
-/** The least probability the second operation needs to stand in for the first (`secondOperation`). */
+/**
+ * The least probability the second operation needs to stand in for the first (`secondOperation`): less when the
+ * first head was sure that none of its options fits, which refutes the first operation.
+ */
 const SECOND_MIN = 0.2;
+const SECOND_MIN_REFUTED = 0.1;
 /** A head that read the page and found no target it is sure of: the step may still have a concrete second way. */
 const UNSURE_HEAD: ReadonlySet<string> = new Set(['low_confidence', 'none_chosen']);
 
 /**
  * The leading operation's head could name no target it is sure of. When the runner-up operation takes a target, has
- * at least `SECOND_MIN` (any share, when the first head was sure that none of its options fits), and its own head is
- * sure (at its threshold, the twin rule read), that is the step; else the first refusal stands. Two right next steps
- * (a date, an option the goal names) split the first head's mass.
+ * at least `SECOND_MIN` (`SECOND_MIN_REFUTED` when the first head was sure that none of its options fits), and its
+ * own head is sure (at its threshold, the twin rule read), that is the step; else the first refusal stands. Two
+ * right next steps (a date, an option the goal names) split the first head's mass.
  */
 function secondOperation(
   answers: Answers, context: StepContext, operation: DecisionChoiceAnswer, first: Verdict<StepReading>,
@@ -171,8 +188,8 @@ function secondOperation(
 ): Verdict<StepReading> {
   if (first.kind !== 'abstain' || !UNSURE_HEAD.has(first.cause)) return first;
   const [, second] = Object.entries(operation.probabilities).sort((a, b) => b[1] - a[1]);
-  // A head sure that none of its options fits refutes its operation: the runner-up needs no share of its own then.
-  if (second === undefined || (first.cause !== 'none_chosen' && second[1] < SECOND_MIN)) return first;
+  const least = first.cause === 'none_chosen' ? SECOND_MIN_REFUTED : SECOND_MIN;
+  if (second === undefined || second[1] < least) return first;
   const op = second[0] as StepOp;
   if (!context.ops.includes(op) || HEADS[op] === undefined) return first;
   const read = readHead(answers, context, op, second[1], done, threshold, sent);
