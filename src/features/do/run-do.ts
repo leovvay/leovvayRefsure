@@ -13,7 +13,7 @@ import type { DoStepReport } from './do-step-report';
 import { blockerUnknown, failedAfterAct, stepStopped, waited } from './do-finish';
 import { locateAll, lookAt } from './do-locate';
 import { runSteps } from './do-steps';
-import { baselineOf, newReading, shownLines, valuesOf } from './new-text';
+import { baselineOf, expectationOf, newReading, shownLines, valuesOf } from './new-text';
 
 type Out = CommandOutcome<DoResult>;
 
@@ -59,8 +59,9 @@ async function blockers(ctx: CommandContext, page: PageRef, first: LocateScene):
 async function finish(ctx: CommandContext, page: PageRef, args: DoArgs, before: PageReading, acted: boolean, result: DoResult): Promise<Out> {
   const baseline = baselineOf(before);
   const values = valuesOf(args.steps);
-  const seen: { last: PageReading | null } = { last: null };
+  const seen: { last: PageReading | null; whole: PageReading | null } = { last: null, whole: null };
   const view = (whole: PageReading): PageReading | null => {
+    seen.whole = whole;
     seen.last = newReading(whole, baseline, values);
     // Withheld for the run's own short value, not the page's typing, which `readPage` notes itself.
     const byValue = seen.last !== null && typedWithheld(whole.text, whole.typed) === null
@@ -73,7 +74,7 @@ async function finish(ctx: CommandContext, page: PageRef, args: DoArgs, before: 
   };
   const started = ctx.now();
   const sofar = (polls: number): DoResult => ({
-    ...result, new_text: shownLines(seen.last), polls, waited_ms: ctx.now() - started, decisions: ctx.trace.egress.length,
+    ...result, new_text: shownLines(seen.whole, baseline), polls, waited_ms: ctx.now() - started, decisions: ctx.trace.egress.length,
   });
   try {
     // The page gets `SETTLE_MS` to show the acts' effect before the first look, as `outcome` and `act --verify` give
@@ -88,7 +89,7 @@ async function finish(ctx: CommandContext, page: PageRef, args: DoArgs, before: 
       return { status: 'ok', acted, effect: acted ? 'dispatched' : 'none', result: { ...sofar(1), verdict: 'done' } };
     }
     const wait: WaitForArgs = {
-      expect: args.expect, text: args.text, url: null, timeoutMs: args.timeoutMs, intervalMs: POLL_MS,
+      expect: expectationOf(args.expect, values), text: args.text, url: null, timeoutMs: args.timeoutMs, intervalMs: POLL_MS,
       maxDecisions: decisionsCap(args.timeoutMs), agree: false, stallMs: args.stallMs,
     };
     const poll = await pollPresence(wait, ctx, page, view);

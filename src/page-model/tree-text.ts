@@ -117,13 +117,16 @@ export function showsAsWord(text: string, pieces: readonly string[]): boolean {
   });
 }
 
-/** Text line by line, `norm`ed, with every piece cut out (case ignored) and blank lines dropped. */
-export function cutPieces(text: string, pieces: readonly string[]): string {
+/**
+ * Text line by line, `norm`ed, with every piece cut out (case ignored) and blank lines dropped. With `mark`, the mark
+ * stands where each piece was, so a line that echoed it still reads as a sentence.
+ */
+export function cutPieces(text: string, pieces: readonly string[], mark = ' '): string {
   const res = pieces.map((piece) => new RegExp(escapeRegExp(piece), 'giu'));
   const lines: string[] = [];
   for (const raw of text.split(/\r?\n/)) {
     let line = norm(raw);
-    for (const re of res) line = norm(line.replace(re, ' '));
+    for (const re of res) line = norm(line.replace(re, () => mark));
     if (line !== '') lines.push(line);
   }
   return lines.join('\n');
