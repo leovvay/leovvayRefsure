@@ -715,7 +715,9 @@ clicks your ref with no snapshot first, then takes one to read the options it li
 three take `--expect-name`, and for `pick-option` it is required with `--open`: it must match the element's live text
 (or its `aria-label`, `placeholder`, `title`, or an `<input>` button's `value`), and page raisers (a password field,
 card fields) lift the risk class. Money, irreversible, auth and consent still refuse before the click, `--open`
-included.
+included. `outcome` reads the page before the act after all of that, so it then checks the URL and tab again and
+reads the ref's text again: a page that moved is `page_changed`, a ref that no longer shows `--expect-name` is
+`expect_name_mismatch`, and nothing is clicked. A confirm dialog that opens in that short window is not seen.
 
 **Dismiss.** The overlay is found by code (the last `dialog` or `alertdialog` on the page, or else a cookie region
 with at least two buttons; never a page `banner`). A veto list (accept, agree, allow, subscribe, buy, trial, enable,

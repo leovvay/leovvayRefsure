@@ -1,19 +1,20 @@
-import type { PageRef, TabInfo } from '../../browser';
+import { type PageRef, type Ref, type TabInfo, VALUE_ACTIONS } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
-import { describeElement } from '../../page-model';
+import { describeElement, norm } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { actionRole, liveRefRisk, nameCheck, readLiveTarget, refusesHighRisk } from '../../risk';
-import type { RiskReading } from '../../risk';
+import type { LiveName, RiskReading } from '../../risk';
 import { abstainOutcome, highRiskNext, nothingDone } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 
 /**
- * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`). The body text it read
- * fed only the confirm-dialog raiser; the outcome's before-side is read after every check (spec §6.2).
+ * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), and the names the live
+ * ref showed, for `nameStill`. The body text it read fed only the confirm-dialog raiser; the outcome's before-side is
+ * read after every check (spec §6.2).
  */
-type Cleared = { acted: string };
+type Cleared = { acted: string; live: LiveName };
 
 type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared };
 
@@ -48,12 +49,7 @@ export async function checkBeforeAct(
   const target = await readLiveTarget(ctx.browser, page, ref, action);
   const { live, role } = target;
   const named = nameCheck(live, args.expectName);
-  if (named !== 'ok') {
-    ctx.trace.untrusted.add('why.detail');
-    const shown = named.mismatch === '' ? 'no name' : JSON.stringify(named.mismatch);
-    const detail = `@${ref} shows ${shown}, not ${JSON.stringify(args.expectName)}; nothing was done`;
-    return { refusal: nothingDone('stale', 'expect_name_mismatch', detail, { next: RE_OBSERVE }) };
-  }
+  if (named !== 'ok') return { refusal: nameMismatch(ctx, ref, 'shows', named.mismatch, args.expectName) };
 
   const risk: RiskReading = await liveRefRisk(ctx.browser, page, ref, action, target, {
     url: tab.url, ...(args.risk ? { userRisk: args.risk } : {}),
@@ -69,5 +65,33 @@ export async function checkBeforeAct(
       + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
-  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen) } };
+  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen), live } };
+}
+
+/** `expect_name_mismatch`: the live ref shows another name than `--expect-name` (page text, so untrusted). */
+function nameMismatch(
+  ctx: CommandContext, ref: Ref, verb: string, seen: string, expectName: string,
+): CommandOutcome<OutcomeResult> {
+  ctx.trace.untrusted.add('why.detail');
+  const shown = seen === '' ? 'no name' : JSON.stringify(seen);
+  const detail = `@${ref} ${verb} ${shown}, not ${JSON.stringify(expectName)}; nothing was done`;
+  return nothingDone('stale', 'expect_name_mismatch', detail, { next: RE_OBSERVE });
+}
+
+/**
+ * The before-read runs after the guard (spec §6.2), so the ref gets one more look before the dispatch: its text,
+ * read again in one call. Unchanged, the guard's names stand; changed, those names with the new text in place of
+ * the old must still show `--expect-name`. A fill's or select's text is no name, so its names stand. Null: go on.
+ */
+export async function nameStill(
+  ctx: CommandContext, page: PageRef, args: OutcomeWrapArgs, cleared: Cleared,
+): Promise<CommandOutcome<OutcomeResult> | null> {
+  const { action, ref } = args.act;
+  if (VALUE_ACTIONS.has(action)) return null;
+  const text = norm(await ctx.browser.text(page, ref));
+  const { live } = cleared;
+  if (text === live.text) return null;
+  const names = [...live.names.filter((name) => norm(name) !== live.text), text];
+  const named = nameCheck({ seen: text, names }, args.expectName);
+  return named === 'ok' ? null : nameMismatch(ctx, ref, 'now shows', named.mismatch, args.expectName);
 }

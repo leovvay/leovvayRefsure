@@ -7,13 +7,15 @@ import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
 import { landedOutcome } from './landed-outcome';
-import { checkBeforeAct } from './pre-act-checks';
+import { checkBeforeAct, nameStill } from './pre-act-checks';
 import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from './outcome-side';
 
 /**
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
  * dispatch; after it, only `landed` (exit 0) or `effect_unknown` (exit 30) is honest, never "failed". The before-read
- * comes after every check, so only one read lies between it and the dispatch.
+ * comes after every check. It lies between the guard and the dispatch, so after it the URL and tab are compared
+ * again and the ref's name read again (`nameStill`). One window stays open: a confirm dialog that opens while the
+ * before-read runs is not seen, since the risk was read before it.
  */
 export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promise<CommandOutcome<OutcomeResult>> {
   const page = ctx.page;
@@ -28,6 +30,9 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
     return nothingDone('stale', 'page_changed', 'the page moved to another URL or tab while the act was checked; '
       + 'nothing was done', { next: RE_OBSERVE });
   }
+  // The same URL can still have renamed the ref while the before-read ran.
+  const renamed = await nameStill(ctx, page, args, checked.cleared);
+  if (renamed !== null) return renamed;
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const sides = { piiMasks: ctx.config.piiMasks, value };
   if (ctx.dryRun) {
