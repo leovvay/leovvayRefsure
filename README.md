@@ -731,7 +731,9 @@ a page that moved is `page_changed`, a ref that no longer shows `--expect-name` 
 whose new name reads money, irreversible, auth or consent ("Save" renamed "Save and send", or an icon button's
 `aria-label` changed to "Send now") is `high_risk_class` with no command offered, and nothing is clicked. A confirm
 dialog that opens, or a password or card field that appears, in that window, which can last seconds on Orca, is not
-seen.
+seen. A page that renames the element after refsure's last re-read and before the click (well under a second) is
+still clicked, as with any tool that checks and then acts: an agent cannot close that race without the page's
+cooperation.
 
 **Dismiss.** The overlay is found by code (the last `dialog` or `alertdialog` on the page, or else a cookie region
 with at least two buttons; never a page `banner`). A veto list (accept, agree, allow, subscribe, buy, trial, enable,
