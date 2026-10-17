@@ -2,7 +2,8 @@ name: release
 
 # From 0.2, a pushed version tag publishes to npm with provenance, over OIDC (npm trusted publishing): no npm token
 # is stored anywhere. 0.1.0 is published by hand. Before the first run, the npm package must name this repository
-# and this workflow file as its trusted publisher.
+# and this workflow file as its trusted publisher, and package.json must name this repository in `repository.url`
+# (the owner adds it with the GitHub account): npm refuses a provenance publish without a matching one.
 
 on:
   push:
@@ -32,6 +33,17 @@ jobs:
           want="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_NAME" != "$want" ]; then
             echo "tag $GITHUB_REF_NAME does not name package.json's version ($want)"
+            exit 1
+          fi
+      # npm refuses `--provenance` (E422) when repository.url does not name the repository this runs in. Stop here,
+      # before the build, rather than at the upload.
+      - name: package.json names its repository
+        run: |
+          url="$(node -p "const r = require('./package.json').repository; (typeof r === 'string' ? r : r?.url) ?? ''")"
+          if [ -z "$url" ]; then
+            echo "package.json has no repository.url, and npm refuses a --provenance publish without one that names"
+            echo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY. Add, then tag again:"
+            echo "  \"repository\": {\"type\": \"git\", \"url\": \"git+$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git\"}"
             exit 1
           fi
       # `prepublishOnly` runs typecheck, build and the scrub gate before anything is uploaded, as on a hand publish.

@@ -245,7 +245,9 @@ change, the maintainer will tell you which line to change.
 
 0.1.0 is published by hand. From 0.2, a release is a pushed `v<version>` tag that names `package.json`'s version:
 `.github/workflows/release.yml` checks the tag and runs `npm publish --provenance` over OIDC (npm trusted publishing,
-no stored token), and `prepublishOnly` runs the gate there with the same secrets.
+no stored token), and `prepublishOnly` runs the gate there with the same secrets. npm refuses a provenance publish
+unless `package.json`'s `repository.url` names the GitHub repository the workflow runs in. The owner adds that field
+with the GitHub account; until then the workflow stops at its `repository.url` step, before anything is built.
 
 ## Style
 
