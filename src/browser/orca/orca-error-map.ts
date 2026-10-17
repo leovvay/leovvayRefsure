@@ -14,6 +14,9 @@ const NOT_RUNNING = new Set([
 const BEFORE_DISPATCH = new Set(['browser_tab_not_found', 'browser_no_tab']);
 // `runtime_unavailable` also covers a socket that dropped mid-request; only these messages are certainly pre-send.
 const NEVER_SENT = /runtime metadata|no compatible transport|APPDATA is not set/i;
+// The CLI's flag check, or the runtime's own param check (and `rpcFor`, which mirrors the CLI's), refuses a missing
+// or malformed flag before any page is resolved.
+const BAD_FLAG = /^(Missing required --|Invalid (numeric value|positive integer) for --|--\S+ requires a value)/;
 
 /**
  * The ref resolved to no element, so nothing was dispatched. Orca names an unknown ref `browser_stale_ref`; an
@@ -38,5 +41,6 @@ export function orcaError(orcaCode: string, message: string): BrowserError {
 /** True only when Orca's answer proves the action never reached the page; anything else may have landed. */
 export function refusedBeforeDispatch(orcaCode: string, message: string): boolean {
   return staleRefReply(orcaCode, message) || BEFORE_DISPATCH.has(orcaCode)
-    || (orcaCode === 'runtime_unavailable' && NEVER_SENT.test(message));
+    || (orcaCode === 'runtime_unavailable' && NEVER_SENT.test(message))
+    || (orcaCode === 'invalid_argument' && BAD_FLAG.test(message));
 }

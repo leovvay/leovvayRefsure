@@ -17,12 +17,14 @@ const STATUS_TIMEOUT_MS = 1_000;
 export function createOrcaRun(bin: string | null, env: NodeJS.ProcessEnv, childEnv: NodeJS.ProcessEnv): OrcaRun {
   return async (args, timeoutMs, onSpawn) => {
     const choice = chooseOrcaTransport(env);
-    const rpc = choice.kind === 'socket' ? rpcFor(args) : null;
-    // A refusal the CLI prints before it connects: nothing is sent, so `onSpawn` never fires.
-    if (rpc !== null && 'ok' in rpc) return rpc;
-    if (rpc !== null && choice.kind === 'socket') {
-      const reply = await callRuntime(choice.endpoint, rpc, { timeoutMs, verb: orcaVerb(args), onWritten: onSpawn });
-      if (reply !== null) return reply;
+    if (choice.kind === 'socket') {
+      const rpc = rpcFor(args);
+      // A refusal the CLI prints before it connects: nothing is sent, so `onSpawn` never fires.
+      if (rpc !== null && 'ok' in rpc) return rpc;
+      if (rpc !== null) {
+        const reply = await callRuntime(choice.endpoint, rpc, { timeoutMs, verb: orcaVerb(args), onWritten: onSpawn });
+        if (reply !== null) return reply;
+      }
     }
     return runOrca(bin, args, { env: childEnv, timeoutMs, onSpawn });
   };

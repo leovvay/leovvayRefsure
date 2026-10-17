@@ -1,3 +1,4 @@
+/** How one runtime call is bounded and reported: its whole budget, the verb for messages, and the written hook. */
 export interface RuntimeCallOptions {
   timeoutMs: number;
   /** The verb words for messages: never a value. */
