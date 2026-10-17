@@ -6,7 +6,7 @@ import { outcomeSite } from '../../questions';
 import {
   classifyNames, fieldRaisers, liveRefRisk, mergeReadings, nameCheck, readLiveName, readLiveTarget, refusesHighRisk,
 } from '../../risk';
-import type { LiveName, RiskReading } from '../../risk';
+import type { LiveName, NameClassifyOpts, RiskReading } from '../../risk';
 import { abstainOutcome, highRiskNext, nothingDone } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
@@ -22,6 +22,17 @@ type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared }
 
 /** The ref after the before-read: the names it shows at the dispatch, or why nothing is done. */
 type Still = { refusal: CommandOutcome<OutcomeResult> } | { live: LiveName };
+
+/**
+ * Why a high-risk ref refuses, after the name it quotes: "which reads" only when a lexicon term in that name reads the
+ * class itself. Otherwise the class came from another of its names, a page or field raiser, a confirm dialog, the URL
+ * or `--risk`, and a human approving the act must not take the quoted name for the risk.
+ */
+function readsAs(name: string, risk: RiskReading, opts: NameClassifyOpts): string {
+  const own = classifyNames([name], opts).reasons;
+  const byName = own.some((reason) => reason.startsWith('lexicon:') && reason.split(':')[2] === risk.class);
+  return `${byName ? ', which reads' : '; acting on it reads'} ${risk.class} (${risk.reasons.join(', ')})`;
+}
 
 /**
  * The route check, before anything is read or done. Any refusal stops the act, with one exception: over the spend
@@ -69,8 +80,9 @@ export async function checkBeforeAct(
       ...(args.act.value === undefined ? {} : { value: args.act.value }),
       ...(args.risk ? { risk: args.risk } : {}),
     });
-    const detail = `@${ref} shows ${JSON.stringify(cutName(norm(live.seen)))}, which reads ${risk.class} `
-      + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done. `
+    const seen = norm(live.seen);
+    const detail = `@${ref} shows ${JSON.stringify(cutName(seen))}${readsAs(seen, risk, { url: tab.url, action, role })}`
+      + ': outcome never acts on money, irreversible, auth or consent; nothing was done. '
       + 'Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
@@ -124,11 +136,10 @@ export async function nameStill(
   // None is new when only a field's attributes changed, so the name a browser gives is quoted as it stood.
   const fresh = live.names.map(norm).filter((name) => !cleared.live.sources.includes(name));
   const shown = fresh.find((name) => refusesHighRisk(classifyNames([name], byName).class)) ?? fresh[0];
-  const quoted = shown === undefined
-    ? `shows ${JSON.stringify(cutName(norm(live.seen)))}`
-    : `now shows ${JSON.stringify(cutName(shown))}`;
-  const detail = `@${ref} ${quoted}, which reads ${risk.class} `
-    + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent, and the page changed `
-    + 'it while the act was checked, so no command is offered for it; nothing was done. A human decides';
+  const quoted = shown ?? norm(live.seen);
+  const verb = shown === undefined ? 'shows' : 'now shows';
+  const detail = `@${ref} ${verb} ${JSON.stringify(cutName(quoted))}${readsAs(quoted, risk, byName)}: outcome never `
+    + 'acts on money, irreversible, auth or consent, and the page changed it while the act was checked, so no command '
+    + 'is offered for it; nothing was done. A human decides';
   return { refusal: nothingDone('refused', 'high_risk_class', detail, { next: NEEDS_HUMAN }) };
 }
