@@ -12,7 +12,7 @@ and `causes --json` give version-specific detail; `refsure skill print` prints t
 
 ## 1. Run a task: `refsure do`
 
-`do` is the default: one call runs dismiss, locate, act and wait. Call it first; no snapshot is needed before:
+`do` is the default: one call runs dismiss, locate, act and wait. Call it first, with no `state` or `snap` before:
 
 ```
 refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect "search results for invoice"
