@@ -8,7 +8,7 @@ import type { EntryKind } from './state-store';
 import type { ReadOutcome, StoredEntry } from './stored-entry';
 
 const ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
-export const ENTRY_RE = /^(ticket|mark)-[A-Za-z0-9_-]{1,80}\.json$/;
+export const ENTRY_RE = /^(ticket|mark|still)-[A-Za-z0-9_-]{1,80}\.json$/;
 export const CLAIMED_RE = /\.json\.claimed\.\d+$/;
 export const TEMP_RE = /^\.tmp-/;
 export const PAGE_DIR_RE = /^[0-9a-f]{16}$/;
@@ -100,7 +100,7 @@ function parseEntry(raw: string): { entry: StoredEntry } | 'corrupt' {
   if (typeof data !== 'object' || data === null) return 'corrupt';
   const e = data as Record<string, unknown>;
   if (e.v !== 1 || typeof e.pageId !== 'string' || typeof e.id !== 'string') return 'corrupt';
-  if (e.kind !== 'ticket' && e.kind !== 'mark') return 'corrupt';
+  if (e.kind !== 'ticket' && e.kind !== 'mark' && e.kind !== 'still') return 'corrupt';
   return { entry: { v: 1, pageId: e.pageId, kind: e.kind, id: e.id, value: e.value } };
 }
 

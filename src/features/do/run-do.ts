@@ -95,7 +95,7 @@ async function finish(
     }
     const wait: WaitForArgs = {
       expect: expectationOf(args.expect, values), text: args.text, url: null, timeoutMs: args.timeoutMs, intervalMs: POLL_MS,
-      maxDecisions: decisionsCap(args.timeoutMs), agree: false, stallMs: args.stallMs,
+      maxDecisions: decisionsCap(args.timeoutMs), agree: false, stallMs: args.stallMs, carryStall: false,
     };
     const poll = await pollPresence(wait, ctx, page, view, acted ? () => newFields(ctx, page, looks) : undefined);
     return waited(poll, acted, sofar(poll.result?.polls ?? 0));

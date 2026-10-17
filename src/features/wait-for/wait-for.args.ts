@@ -17,4 +17,6 @@ export interface WaitForArgs {
   agree: boolean;
   /** End `stalled` once neither the page text nor the URL changed for this long; `null`: never (the default). */
   stallMs: number | null;
+  /** False after an act (`do`): the page was acted on, so its stall clock starts with this wait, never earlier. */
+  carryStall?: boolean;
 }

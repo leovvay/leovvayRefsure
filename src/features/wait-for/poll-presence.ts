@@ -7,6 +7,7 @@ import { BOUNDS, presenceSite } from '../../questions';
 import { abstainOutcome, readPage, sleep, typedWithheld, urlGlobMatches, withoutTyped } from '../shared';
 import type { AbstainWhy, PageReading } from '../shared';
 import { belowOneRound, ended, stalled } from './poll-end';
+import { readStill, writeStill } from './page-still';
 import type { PollTally } from './poll-tally';
 
 /**
@@ -84,6 +85,23 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
 export async function pollPresence(
   args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole, asks?: AsksMore,
 ): Promise<CommandOutcome<WaitForResult>> {
+  // The stall clock is the page's, not the call's: a wait right after another on the same page, with the page as that
+  // one last saw it, counts from that page's last change (`readStill`), and leaves its own for the next.
+  const prior = args.stallMs === null || args.carryStall === false ? null : await readStill(ctx, page);
+  const clock: StallClock = { prior, key: null, since: ctx.now() };
+  try {
+    return await pollOn(args, ctx, page, view, asks, clock);
+  } finally {
+    if (args.stallMs !== null && clock.key !== null) await writeStill(ctx, page, clock.key, clock.since);
+  }
+}
+
+/** The stall rule's clock: the page key last seen, since when, and the earlier wait's record it may carry on from. */
+interface StallClock { prior: { key: string; since: number } | null; key: string | null; since: number }
+
+async function pollOn(
+  args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView, asks: AsksMore | undefined, clock: StallClock,
+): Promise<CommandOutcome<WaitForResult>> {
   const tally: PollTally = { polls: 0, decisions: 0, answered: 0, withheld: 0, started: ctx.now() };
   const deadline = tally.started + args.timeoutMs;
   const byCode = args.text !== null || args.url !== null;
@@ -98,6 +116,12 @@ export async function pollPresence(
   let closed: string | null = null;
   let lastKey: string | null = null;
   let changedAt = tally.started;
+  // The first poll may find the page as the earlier wait last saw it: then it has been still since that one's change.
+  const carry = (key: string): number => {
+    const prior = lastKey === null ? clock.prior : null;
+    tally.carried = prior !== null && prior.key === key;
+    return prior !== null && prior.key === key ? prior.since : ctx.now();
+  };
   /** The last Decision that was unsure (inside its band), and the page it read. */
   let lean: { key: string; at: number; confidence: number; threshold: number } | null = null;
   /** The last Decision that said a clear no, and the page it read; `asks` is put to it once. */
@@ -123,8 +147,10 @@ export async function pollPresence(
     tally.polls += 1;
     const key = pageKey(whole);
     if (key !== lastKey) {
+      changedAt = carry(key);
       lastKey = key;
-      changedAt = ctx.now();
+      clock.key = key;
+      clock.since = changedAt;
     }
     const reading = view(whole);
     const rule = reading === null ? null : codePresence(args, reading);

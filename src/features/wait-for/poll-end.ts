@@ -38,6 +38,7 @@ export function stalled(
   stallMs: number, tally: PollTally, result: ResultOf, note: StallNote | null = null,
 ): CommandOutcome<WaitForResult> {
   const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
+  if (tally.carried) notes.push('the still time counts from an earlier refsure wait on this page, as it left it');
   if (tally.withheld > 0) {
     notes.push(`the page text was withheld on ${tally.withheld} of them (typed_text_withheld), so no Decision read it `
       + 'there; --text "<literal>" lets code see it');

@@ -1,4 +1,5 @@
-export type EntryKind = 'ticket' | 'mark';
+/** `still`: when a page last changed, as a wait saw it (a hash of its URL and text, never the text). */
+export type EntryKind = 'ticket' | 'mark' | 'still';
 
 /** File-backed local state (spec §8.7): one file per entry, 0600, atomic writes, claim by rename. */
 export interface StateStore {

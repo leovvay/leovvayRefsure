@@ -34,11 +34,11 @@ async function cleared(
  */
 export const forgetCommand: CommandSpec<ForgetArgs, ForgetResult> = {
   name: 'forget',
-  summary: 'Clear this page\'s marks and tickets, or every page\'s with --all',
+  summary: 'Clear this page\'s marks, tickets and stall clock, or every page\'s with --all',
   since: '0.1.0',
   stability: 'stable',
   options: {
-    all: { type: 'boolean', summary: 'Clear every page\'s marks and tickets' },
+    all: { type: 'boolean', summary: 'Clear every page\'s marks, tickets and stall clocks' },
   },
   forms: ['[--all]'],
   needs: { page: 'none', capabilities: [], sites: [], acts: 'never' },
@@ -53,7 +53,7 @@ export const forgetCommand: CommandSpec<ForgetArgs, ForgetResult> = {
     return { all: false, hint };
   },
   async run(args, ctx) {
-    // Marks and tickets both live in the state store, filed by page: one clear takes both kinds.
+    // Marks, tickets and the stall clock live in the state store, filed by page: one clear takes every kind.
     if (args.all) return cleared(ctx, 'all', null);
     const page = await pageToClear(args, ctx);
     ctx.page = page;

@@ -79,9 +79,11 @@ did, and `result.new_text` holds up to 8 new lines (untrusted). Once anything ac
 the reason in `result.unconfirmed`, also when a browser call fails after an act. `next` is `state` after
 `not_seen`, and `stop` after `stalled` (or a fresh look when the new text was withheld from the Decision). After
 either, read `result.new_text`: if the page asks for one more thing (a confirm field), `do` only the steps still to
-do. A stall is the answer: when a task can take a while, give `do` `--stall 30s` up front. To wait again for a
+do. A stall is the answer, also on a task said to take a while: keep the default and report it. To wait again for a
 time the human named, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a
-plain wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`.
+plain wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`. The
+stall clock is the page's: a wait that starts within 2 minutes of an earlier one on the same page, with the page as
+that one left it, counts from the page's last change, and the detail says so. Only a hash of the URL and text is kept.
 
 ## Install
 
@@ -393,7 +395,7 @@ Global options, accepted by every command:
 | `pick-option` | own-ref | Find the dropdown option that means what you want ("Ukraine" → "Україна"); returns a ticket for act *(experimental)* |
 | `act-high-risk` | high-risk | Act on a money, irreversible, auth or consent control: class check, highlight, one act; no Decision confirms *(experimental)* |
 | `triage` | never | List console errors, failed requests (status ≥400 or 0) and the load error, optionally since a mark |
-| `forget` | never | Clear this page's marks and tickets, or every page's with --all |
+| `forget` | never | Clear this page's marks, tickets and stall clock, or every page's with --all |
 | `commands` | never | Describe every command: options, page and capability needs, Decision sites, whether it acts |
 | `causes` | never | List every why.cause with its status and exit code, and every next.do |
 | `skill` | never | Print the agent skill (SKILL.md) bundled with this version, as the file itself, not an envelope |
@@ -598,7 +600,7 @@ refsure triage [--since M]
 refsure forget [--all]
 ```
 
-- `--all`: Clear every page's marks and tickets
+- `--all`: Clear every page's marks, tickets and stall clocks
 
 **`commands`** (no Decision)
 
