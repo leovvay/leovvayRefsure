@@ -290,8 +290,9 @@ when either side's text was withheld.
 - A custom gateway does whatever its operator does.
 
 **See it before it happens.** Add `--dry-run` to any command: it prints the exact redacted request body for each
-provider and sends nothing, and it never clicks. It saves nothing locally either: `mark` returns `mark: null`, and
-`forget` removes nothing and reports `would_remove`.
+provider and sends nothing, and it never clicks. It saves and removes nothing of its own either: `mark` returns
+`mark: null`, and `forget` removes nothing and reports `would_remove` (entries that expired more than 10 minutes ago
+are still purged, as on every call).
 
 **See it after it happened.** Every envelope lists `egress: [{host, bytes}]` (or `null` when nothing was sent). A
 local log at `$XDG_STATE_HOME/refsure/egress.log` (default `~/.local/state/refsure/egress.log`, mode `0600`) records
@@ -708,7 +709,8 @@ that lives 120 s and stores the element's fingerprint (role, name, section path,
 number. `act` claims it, checks the URL, takes a fresh snapshot, finds the same element again, re-reads its risk, and
 acts at once. If anything moved, nothing is clicked (`stale`). Two agents racing one ticket: exactly one wins, the
 other gets `ticket_used`. Tickets and marks (a mark lives 15 minutes) are kept under `$XDG_STATE_HOME/refsure/`
-(mode `0600`), and every call purges the expired ones first, even `--help`, `--version` or a usage error.
+(mode `0600`). Every call, even `--help`, `--version`, a usage error or `--dry-run`, first purges entries that
+expired more than 10 minutes ago, so a late claim still reads `ticket_expired`.
 
 **Your own refs.** `outcome` and `act-high-risk --ref` take no snapshot, so your refs survive. `pick-option --open`
 clicks your ref with no snapshot first, then takes one to read the options it lists (`earlier_refs_void: true`). All

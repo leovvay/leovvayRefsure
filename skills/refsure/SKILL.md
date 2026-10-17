@@ -52,9 +52,9 @@ More rules:
   it is less sure it proposes a ticket for `act` instead, and `--propose` never clicks. A negated accept ("continue
   without accepting") counts as a reject. After its click the overlay must be gone, else exit 30.
 - `wait-for` answering `not_seen` does not mean absent. It means not seen within the timeout.
-- `--dry-run` also leaves local state alone: `mark` returns `mark: null` and `forget` only reports `would_remove`.
-- `snap` prints compact candidate lines when you must look yourself. `guard --ref @eN` tells you an element's risk
-  class before you touch it.
+- `--dry-run` saves and removes nothing of its own: `mark` returns `mark: null` and `forget` only reports
+  `would_remove` (expired entries are still purged).
+- `snap` prints compact candidate lines when you must look yourself; `guard --ref @eN` gives an element's risk class.
 - Pass `--risk` honestly: `read` for links, tabs and close buttons; `write` for fields, toggles and plain submits.
   refsure only ever raises the class you give.
 
