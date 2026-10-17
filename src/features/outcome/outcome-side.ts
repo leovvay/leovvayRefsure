@@ -1,9 +1,8 @@
 import type { CommandOutcome } from '../../cli';
 import { boundText, cleanEgressText } from '../../egress';
 import { RE_OBSERVE } from '../../output';
-import { cutPieces, fold, norm, valuePieces } from '../../page-model';
+import { cutPieces, norm, showsAsWord, valuePieces } from '../../page-model';
 import { BOUNDS } from '../../questions';
-import { escapeRegExp } from '../../shared';
 import { type AbstainWhy, type PageReading, withoutTyped } from '../shared';
 
 const TITLE_MAX = 300;
@@ -33,8 +32,7 @@ function withoutValue(text: string, value: string | undefined): string {
   if (value === undefined || norm(value) === '') return text;
   const pieces = valuePieces([value]);
   if (pieces.length > 0) return cutPieces(text, pieces);
-  const word = new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(fold(value))}(?![\\p{L}\\p{N}])`, 'u');
-  return word.test(fold(text)) ? WITHHELD : text;
+  return showsAsWord(text, [value]) ? WITHHELD : text;
 }
 
 /**

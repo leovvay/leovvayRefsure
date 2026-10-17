@@ -11,4 +11,9 @@ export interface PageView {
   alerts: string[];
   /** The body's innerText, `norm`ed per line, blank lines dropped, typed field text cut out. */
   text: string;
+  /**
+   * `text` is a placeholder: a text typed into an editable region, too short to cut out (one or two characters),
+   * shows in the body text as a word, so none of it is sent.
+   */
+  textWithheld: boolean;
 }

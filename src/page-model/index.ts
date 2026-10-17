@@ -12,6 +12,6 @@ export { DIALOG_ROLES, nearestAncestor, underControl } from './ancestors';
 export { groupOf, twinKey, twinsOf } from './twins';
 export { candidatesOf, findByFingerprint, fingerprintOf } from './fingerprint-of';
 export { rowContains, rowTextOf } from './row-text';
-export { cutPieces, insideValueField, subtree, subtreeText, valuePieces } from './tree-text';
+export { cutPieces, insideValueField, shortPieces, showsAsWord, subtree, subtreeText, valuePieces } from './tree-text';
 export { pageView } from './page-view';
 export { exactNameMatch, RANK_MAX, rankCandidates } from './rank-candidates';

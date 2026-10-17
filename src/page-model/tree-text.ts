@@ -1,7 +1,7 @@
 import type { AxNode, AxTree } from '../browser';
 import { escapeRegExp } from '../shared';
 import { nearestAncestor } from './ancestors';
-import { norm } from './normalize';
+import { fold, norm } from './normalize';
 
 /**
  * Fields whose StaticText children repeat what was typed (phase 0: a textbox carries its value after `: ` and as
@@ -78,19 +78,43 @@ export function subtreeText(tree: AxTree, root: number, opts: { staticOnly?: boo
   return parts.join(' ');
 }
 
-/**
- * A typed value as text is cut by: whole and line by line, `norm`ed, of three code points or more, longest first.
- * Shorter pieces would cut ordinary words out of the page.
- */
-export function valuePieces(values: Iterable<string>): string[] {
+/** Typed values whole and line by line, `norm`ed, each piece once, kept by its length in code points. */
+function piecesOf(values: Iterable<string>, keep: (codePoints: number) => boolean): string[] {
   const out = new Set<string>();
   for (const value of values) {
     for (const piece of [value, ...value.split(/\r?\n/)]) {
       const text = norm(piece);
-      if (Array.from(text).length >= 3) out.add(text);
+      if (keep(Array.from(text).length)) out.add(text);
     }
   }
-  return [...out].sort((a, b) => b.length - a.length);
+  return [...out];
+}
+
+/**
+ * A typed value as text is cut by: whole and line by line, `norm`ed, of three code points or more, longest first.
+ * Shorter pieces would cut ordinary words out of the page (`shortPieces`).
+ */
+export function valuePieces(values: Iterable<string>): string[] {
+  return piecesOf(values, (n) => n >= 3).sort((a, b) => b.length - a.length);
+}
+
+/**
+ * Typed text too short for `valuePieces` (one or two code points: "42", "OK", one OTP cell), whole and line by line,
+ * `norm`ed. Cutting it would cut words out of the page, so a text it shows in as a word may not leave at all.
+ */
+export function shortPieces(values: Iterable<string>): string[] {
+  return piecesOf(values, (n) => n > 0 && n < 3);
+}
+
+/** Whether one of `pieces` shows in `text` as a whole word (not inside a longer word or number), case ignored. */
+export function showsAsWord(text: string, pieces: readonly string[]): boolean {
+  if (pieces.length === 0) return false;
+  const folded = fold(text);
+  return pieces.some((piece) => {
+    const needle = fold(piece);
+    return needle !== ''
+      && new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(needle)}(?![\\p{L}\\p{N}])`, 'u').test(folded);
+  });
 }
 
 /** Text line by line, `norm`ed, with every piece cut out (case ignored) and blank lines dropped. */
@@ -115,4 +139,16 @@ export function typedValues(tree: AxTree): string[] {
     if (node.value !== null && isValueField(node) && node.role !== 'combobox') values.push(node.value);
   }
   return valuePieces(values);
+}
+
+/**
+ * What was typed into editable regions and is too short to cut (`shortPieces`). Only an editable region's text
+ * shows in the body text; a textbox value never does, so a short one is no reason to withhold it.
+ */
+export function shortTypedValues(tree: AxTree): string[] {
+  const values: string[] = [];
+  for (const node of tree.nodes) {
+    if (node.value !== null && node.attrs.contenteditable === true) values.push(node.value);
+  }
+  return shortPieces(values);
 }

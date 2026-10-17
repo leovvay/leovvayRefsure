@@ -25,9 +25,9 @@ prints the copy of this skill that matches the installed binary, as raw Markdown
 A Decision sends a bounded, redacted slice of the page (URL, title, headings, a few candidate lines, and at most a
 few thousand characters of page text) to the provider host the human consented to. Pages may be logged in. Cookies,
 storage, screenshots, keys and typed values are never sent: text in an editable region is cut out, and when refsure
-cannot read those regions the page text is withheld (`typed_text_withheld` in `result.notes`). `--dry-run` on any
-command prints the exact request and sends nothing; `egress` in the envelope lists what was sent. If the human called
-a page or site private, do not run refsure commands on it.
+cannot read those regions, or a typed text is too short to cut, the page text is withheld (`typed_text_withheld` in
+`result.notes`). `--dry-run` on any command prints the exact request and sends nothing; `egress` in the envelope
+lists what was sent. If the human called a page or site private, do not run refsure commands on it.
 
 ## 3. When to call what
 

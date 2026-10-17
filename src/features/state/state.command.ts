@@ -1,7 +1,7 @@
 import type { CommandOutcome, CommandSpec } from '../../cli';
 import { DIALOG_ROLES, pageView } from '../../page-model';
 import { pageStateSite, RESEARCH_STATES } from '../../questions';
-import { abstainOutcome } from '../shared';
+import { abstainOutcome, SHORT_TYPED, withheldNote } from '../shared';
 import { parseState } from './parse-state';
 import type { StateArgs } from './state.args';
 import type { StateResult } from './state.contract';
@@ -71,6 +71,7 @@ export const stateCommand: CommandSpec<StateArgs, StateResult> = {
 
     const body = await ctx.browser.text(page, 'body');
     const view = pageView(tree, tab, body);
+    if (view.textWithheld) ctx.trace.notes.push(withheldNote(SHORT_TYPED));
     const { pageUrl, page: block } = stateInput(view, ctx.config.piiMasks);
     const { verdict } = await ctx.decide(
       pageStateSite,

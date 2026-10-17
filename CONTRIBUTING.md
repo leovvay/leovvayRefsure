@@ -25,7 +25,8 @@ This guide has three recipes (add a Decision site, add a verb, add a language) a
   `snap` output or a Decision. Text typed into an editable region (`contenteditable`) shows in the body text
   instead, so body text never leaves with it: `pageView` cuts it by the snapshot, and a `readPage` reading goes
   through `withoutTyped` (`src/features/shared/`), which cuts it, or withholds the whole text when the regions
-  could not be read.
+  could not be read. A typed text of one or two characters cannot be cut without cutting words: when it shows in
+  the text as a word (`showsAsWord`), both withhold the whole text.
 
 ## Recipe 1: add a Decision site
 
