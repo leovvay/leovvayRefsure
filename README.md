@@ -78,8 +78,9 @@ did, and `result.new_text` holds up to 8 new lines (untrusted). Once anything ac
 the reason in `result.unconfirmed`, also when a browser call fails after an act. `next` is `state` after
 `not_seen`, and `stop` after `stalled` (or a fresh look when the new text was withheld from the Decision). After
 either, read `result.new_text`: if the page asks for one more thing (a confirm field), `do` only the steps still to
-do. To wait longer, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a plain
-wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`.
+do. A stall is the answer: when a task can take a while, give `do` a longer `--stall` up front. To wait again for a
+time the human named, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a
+plain wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`.
 
 ## Install
 
