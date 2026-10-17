@@ -1,4 +1,4 @@
-import type { AxTree, PageRef } from '../../browser';
+import { type AxTree, isBrowserError, type PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
 import { type Candidate, candidatesOf, isValueField } from '../../page-model';
@@ -51,20 +51,32 @@ export async function lookAt(ctx: CommandContext, page: PageRef, tree?: AxTree):
   return { page, tab, tree: read, cands: candidatesOf(read) };
 }
 
+/** A field by role and name: a heading inserted above a form changes every path, never what a field is called. */
 function fieldKey(cand: Candidate): string {
-  return `${cand.fp.role}\n${cand.fp.name}\n${cand.fp.path}\n${cand.fp.ordinal}`;
+  return `${cand.fp.role}\n${cand.fp.name}`;
+}
+
+function fieldsOf(scene: Pick<LocateScene, 'tree' | 'cands'>): Candidate[] {
+  return scene.cands.filter((cand) => isValueField(scene.tree.nodes[cand.node]!));
 }
 
 /**
- * What asks for more input after the steps: fields to type into or pick on a fresh snapshot that the scene the steps
- * were located on did not have (a "Confirm contact email" box after Save), as their v1 lines, at most 3; null when
- * none. Lines carry no values.
+ * What asks for more input after the steps: empty fields to type into or pick on a fresh snapshot that no look this
+ * run took had (a "Confirm contact email" box after Save), as their v1 lines, at most 3; null when none, or when
+ * the snapshot cannot be read in time (the wait goes on). A field's value is read only here, to see it is empty; the
+ * lines carry no values.
  */
-export async function newFields(ctx: CommandContext, page: PageRef, before: LocateScene): Promise<string | null> {
-  const isField = (tree: AxTree, cand: Candidate) => isValueField(tree.nodes[cand.node]!);
-  const had = new Set(before.cands.filter((cand) => isField(before.tree, cand)).map(fieldKey));
-  const tree = await ctx.browser.snapshot(page);
-  const fresh = candidatesOf(tree).filter((cand) => isField(tree, cand) && !had.has(fieldKey(cand)));
+export async function newFields(ctx: CommandContext, page: PageRef, looks: readonly LocateScene[]): Promise<string | null> {
+  const had = new Set(looks.flatMap(fieldsOf).map(fieldKey));
+  let tree: AxTree;
+  try {
+    tree = await ctx.browser.snapshot(page);
+  } catch (error) {
+    if (isBrowserError(error) && (error.code === 'timeout' || error.code === 'backend_error')) return null;
+    throw error;
+  }
+  const empty = (cand: Candidate) => (tree.nodes[cand.node]!.value ?? '') === '';
+  const fresh = fieldsOf({ tree, cands: candidatesOf(tree) }).filter((cand) => empty(cand) && !had.has(fieldKey(cand)));
   if (fresh.length === 0) return null;
   const more = fresh.length > 3 ? ` and ${fresh.length - 3} more` : '';
   return `${fresh.length === 1 ? 'a new field' : 'new fields'}: ${fresh.slice(0, 3).map((cand) => cand.line).join('; ')}${more}`;
@@ -81,7 +93,9 @@ export async function locateAll(ctx: CommandContext, scene: LocateScene, steps: 
   return located;
 }
 
-/** One step located again on a fresh look: it may only show after an earlier step, or its element moved. */
-export async function locateAgain(ctx: CommandContext, page: PageRef, step: DoStep): Promise<Located> {
-  return locateStep(ctx, await lookAt(ctx, page), step);
+/** One step located again on a fresh look, kept in `looks`: it may only show after an earlier step, or it moved. */
+export async function locateAgain(ctx: CommandContext, page: PageRef, step: DoStep, looks: LocateScene[]): Promise<Located> {
+  const scene = await lookAt(ctx, page);
+  looks.push(scene);
+  return locateStep(ctx, scene, step);
 }

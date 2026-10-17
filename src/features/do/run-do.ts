@@ -59,7 +59,8 @@ async function blockers(ctx: CommandContext, page: PageRef, first: LocateScene):
  * last poll's. A browser failure after an act keeps all of it (`failedAfterAct`).
  */
 async function finish(
-  ctx: CommandContext, page: PageRef, args: DoArgs, before: PageReading, scene: LocateScene, acted: boolean, result: DoResult,
+  ctx: CommandContext, page: PageRef, args: DoArgs, before: PageReading, looks: readonly LocateScene[], acted: boolean,
+  result: DoResult,
 ): Promise<Out> {
   const baseline = baselineOf(before);
   const values = valuesOf(args.steps);
@@ -96,7 +97,7 @@ async function finish(
       expect: expectationOf(args.expect, values), text: args.text, url: null, timeoutMs: args.timeoutMs, intervalMs: POLL_MS,
       maxDecisions: decisionsCap(args.timeoutMs), agree: false, stallMs: args.stallMs,
     };
-    const poll = await pollPresence(wait, ctx, page, view, acted ? () => newFields(ctx, page, scene) : undefined);
+    const poll = await pollPresence(wait, ctx, page, view, acted ? () => newFields(ctx, page, looks) : undefined);
     return waited(poll, acted, sofar(poll.result?.polls ?? 0));
   } catch (error) {
     if (!acted || !isBrowserError(error)) throw error;
@@ -124,6 +125,8 @@ export async function runDo(args: DoArgs, ctx: CommandContext): Promise<Out> {
   let acted = false;
   let stepping = false;
   let scene = first;
+  /** Every look the run took, so a field the steps used is never read as new (`newFields`). */
+  const looks: LocateScene[] = [first];
   try {
     if (args.dismiss) {
       const level = await blockers(ctx, page, first);
@@ -132,14 +135,17 @@ export async function runDo(args: DoArgs, ctx: CommandContext): Promise<Out> {
       acted = level?.clicked ?? false;
       // The level may have read its own snapshot, which may renumber refs, and a click changed the page: look again,
       // or take the snapshot that showed the overlay gone, the page as it now is.
-      if (level !== null) scene = await lookAt(ctx, page, level.tree);
+      if (level !== null) {
+        scene = await lookAt(ctx, page, level.tree);
+        looks.push(scene);
+      }
     }
     const located = args.steps.length === 0 ? [] : await locateAll(ctx, scene, args.steps);
     // Every pick was settled by code, or there was none: a dry run ends here, before any act or wait.
     if (ctx.dryRun) throw new DryRunStop();
     if (args.steps.length > 0) {
       stepping = true;
-      const run = await runSteps(ctx, page, args.steps, located, reports);
+      const run = await runSteps(ctx, page, args.steps, located, reports, looks);
       acted ||= run.acted;
       if (run.stop !== null) return stepStopped(run.stop, args.steps, acted, { ...result, decisions: ctx.trace.egress.length });
     }
@@ -150,5 +156,5 @@ export async function runDo(args: DoArgs, ctx: CommandContext): Promise<Out> {
     if (at) at.verdict = 'stopped';
     return failedAfterAct(error, { ...result, decisions: ctx.trace.egress.length });
   }
-  return finish(ctx, page, args, before, scene, acted, result);
+  return finish(ctx, page, args, before, looks, acted, result);
 }

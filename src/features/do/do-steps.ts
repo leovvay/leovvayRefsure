@@ -1,6 +1,7 @@
 import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { type ActCommandResult, runAct } from '../act';
+import type { LocateScene } from '../locate';
 import type { DoStep } from './do-step';
 import type { DoStepReport } from './do-step-report';
 import { type Located, locateAgain } from './do-locate';
@@ -40,6 +41,7 @@ function actOn(ctx: CommandContext, step: DoStep, ticket: string): Promise<Comma
  */
 export async function runSteps(
   ctx: CommandContext, page: PageRef, steps: readonly DoStep[], located: readonly Located[], reports: DoStepReport[],
+  looks: LocateScene[],
 ): Promise<StepsRun> {
   let acted = false;
   for (const [index, step] of steps.entries()) {
@@ -53,7 +55,7 @@ export async function runSteps(
     let pick = located[index]!;
     let again = true;
     if (ticketOf(pick) === null && FIND_AGAIN.has(pick.why?.cause ?? '')) {
-      pick = await locateAgain(ctx, page, step);
+      pick = await locateAgain(ctx, page, step, looks);
       again = false;
       report.located_again = true;
     }
@@ -62,7 +64,7 @@ export async function runSteps(
     if (ticket === null) return stop(pick);
     let sent = await actOn(ctx, step, ticket);
     if (sent.status === 'stale' && !sent.acted && again && MOVED.has(sent.why?.cause ?? '')) {
-      pick = await locateAgain(ctx, page, step);
+      pick = await locateAgain(ctx, page, step, looks);
       report.located_again = true;
       noted(report, pick);
       ticket = ticketOf(pick);
