@@ -259,7 +259,8 @@ that cannot read them one by one, the page text is withheld from the Decision (n
 when a typed text too short to cut out without cutting words (one or two characters: `42`, `OK`, one code cell)
 shows in the page text as a word. `state` then asks over the URL, title, headings, dialogs and alerts, with a
 placeholder for the text. No other Decision is asked on a withheld text, and nothing is spent: `wait-for` keeps
-polling until a poll it can read, and `outcome` and `act --verify` answer `effect_unknown` (exit 30) when a side is
+polling until a poll it can read (with no `--text` or `--url`, a wait whose every poll was withheld ends `not_seen`
+and says nothing judged the page), and `outcome` and `act --verify` answer `effect_unknown` (exit 30) when a side is
 withheld and the URL did not change. `wait-for --text` and `outcome -- … --expect-text` still match the whole page
 text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles nothing
 when either side's text was withheld.

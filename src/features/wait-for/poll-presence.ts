@@ -15,8 +15,11 @@ const STOPS: ReadonlySet<Status> = new Set<Status>(['not_set_up', 'spend_limit',
 /** A provider that failed may answer on a later poll, even over the same text; a refused key never does. */
 const RETRY: ReadonlySet<string> = new Set(['provider_timeout', 'provider_error']);
 
-/** `decisions` counts provider calls; `answered`, Decisions a provider actually answered (present or not). */
-type Tally = { polls: number; decisions: number; answered: number; started: number };
+/**
+ * `decisions` counts provider calls; `answered`, Decisions a provider actually answered (present or not);
+ * `withheld`, polls whose text was withheld (`typedWithheld`), which no Decision is asked on.
+ */
+type Tally = { polls: number; decisions: number; answered: number; withheld: number; started: number };
 
 function codePresence(args: WaitForArgs, reading: PageReading): WaitForResult['rule'] | null {
   if (args.text !== null && fold(reading.text).includes(fold(args.text))) return 'text';
@@ -45,7 +48,8 @@ function plural(n: number, word: string): string {
  * glob matches. Otherwise the presence Noul is asked, only when the cleaned text changed and at least one interval
  * passed since the last ask, and only when the whole round fits what is left of `--max-decisions` (an `agree`
  * round is two calls). It is never asked on a poll whose text is withheld (`typedWithheld`, noted): a wait only the
- * Decision could settle then ends `not_seen` by code. A timeout is `not_seen` (exit 10), never "absent".
+ * Decision could settle then ends `not_seen` by code, and says so when every poll was withheld, since nothing judged
+ * the page. A timeout is `not_seen` (exit 10), never "absent".
  *
  * When the Decision cannot be asked (setup, caps, policy, a refused key), a wait that `--text` or `--url` can
  * settle keeps polling by code and names the cause in its notes; any other wait stops at once with that cause.
@@ -53,7 +57,7 @@ function plural(n: number, word: string): string {
  * `usage` when the cap is below a single round, since nothing else can ever see it.
  */
 export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page: PageRef): Promise<CommandOutcome<WaitForResult>> {
-  const tally: Tally = { polls: 0, decisions: 0, answered: 0, started: ctx.now() };
+  const tally: Tally = { polls: 0, decisions: 0, answered: 0, withheld: 0, started: ctx.now() };
   const deadline = tally.started + args.timeoutMs;
   const byCode = args.text !== null || args.url !== null;
   const combo = args.agree ? 'agree' : 'auto';
@@ -91,6 +95,7 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
     closed ??= capped(1);
     // A withheld text is no page to judge: this poll asks nothing and spends nothing, and a later readable poll may.
     const withheld = typedWithheld(reading.text, reading.typed) !== null;
+    if (withheld) tally.withheld += 1;
     if (closed === null && !withheld && ctx.now() - lastAskAt >= args.intervalMs) {
       const input = presenceInput(args, reading, ctx.config.piiMasks);
       const hash = sha256Hex(`${input.pageUrl}\n${input.page}`);
@@ -159,6 +164,11 @@ function ended(
   const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
   if (closed !== null && !end.early) notes.push(closed);
   if (lastCause !== null && !(closed ?? '').includes(lastCause)) notes.push(`the last Decision: ${lastCause}`);
+  // Only the Decision could see it, and it never got a page: the end is no judgement (spec §7.3).
+  if (!end.byCode && tally.decisions === 0 && tally.withheld === tally.polls) {
+    const all = tally.polls === 1 ? 'the one poll' : `all ${tally.polls} polls`;
+    notes.push(`the page text was withheld on ${all}, so nothing judged it`);
+  }
   let within = `within ${formatDuration(args.timeoutMs)}`;
   if (end.early && closed !== null) within = `before ${closed}`;
   else if (ctx.signal.aborted) within = 'before the wait was interrupted';
