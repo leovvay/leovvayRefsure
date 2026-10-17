@@ -1,7 +1,9 @@
 import { cutPieces, cutShown, fold, norm, shortPieces, showsAsWord, valuePieces } from '../../page-model';
 import { escapeRegExp } from '../../shared';
-import { type PageReading, type TypedText, typedWithheld, withoutTyped } from '../shared';
-import type { DoStep } from './do-step';
+import type { PageReading } from './page-reading';
+import type { TypedText } from './typed-text';
+import type { Values, ValueStep } from './value-step';
+import { typedWithheld, withoutTyped } from './without-typed';
 
 const SHOWN_LINES = 8;
 const SHOWN_LINE_MAX = 200;
@@ -11,12 +13,13 @@ const SHOWN_LINE_MAX = 200;
  */
 const TYPED_MARK = '[typed]';
 
-/** What a run's own values cut: the typed text shape, read from its steps (`valuesOf`), never unread. */
-type Values = Extract<TypedText, { short: readonly string[] }>;
-
 function linesOf(text: string): string[] {
   return text.split(/\r?\n/).map(norm).filter((line) => line !== '');
 }
+
+/*
+  New text, as `do` and `run` judge it: only lines the page did not show when they began, their own values cut.
+*/
 
 /**
  * The page's lines before the steps, `norm`ed: a line the page showed then is never new text while it stays.
@@ -31,7 +34,7 @@ export function baselineOf(before: PageReading): Set<string> {
  * for invoice"), and a fill value too short to cut withholds a text it shows in as a word (spec §7.3). A short
  * option label does not: it is page text, already in the select's own option list.
  */
-export function valuesOf(steps: readonly DoStep[]): Values {
+export function valuesOf(steps: readonly ValueStep[]): Values {
   const values = steps.flatMap((step) => (step.value === undefined ? [] : [step.value]));
   const filled = steps.flatMap((step) => (step.action === 'fill' && step.value !== undefined ? [step.value] : []));
   return { pieces: valuePieces(values), short: shortPieces(filled) };

@@ -37,7 +37,8 @@ function verdictOf<Out>(part: ComboPart<Out>, answer: ProviderAnswer): Verdict<O
   const one = answer.answers?.[part.question];
   if (!one) return unavailable('provider_error', labelled(who, `no answer to ${part.question}`));
   try {
-    return part.read(one, part.threshold);
+    // Validation already held every answer to its question, so a site of several questions reads them all.
+    return part.readAll ? part.readAll(answer.answers ?? {}, part.threshold) : part.read(one, part.threshold);
   } catch {
     return unavailable('provider_error', labelled(who, 'the answer could not be read'));
   }

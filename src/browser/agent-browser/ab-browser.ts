@@ -7,7 +7,7 @@ import type { BrowserCapability } from '../capability';
 import { checkedAttr, checkedRef, LOG_LIMIT } from '../checked-args';
 import type { PageRef } from '../page-ref';
 import { READ_TIMEOUT_MS } from '../run-json';
-import { actOnSession, dismissSessionDialog } from './ab-act';
+import { actOnSession, dismissSessionDialog, pressSessionEnter } from './ab-act';
 import type { AbActDeps } from './ab-act-deps';
 import type { AbBatchRun } from './ab-batch-run';
 import { findAgentBrowserBinary } from './ab-binary';
@@ -134,6 +134,12 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
     },
 
     act: async (page, ref, action, value) => actOnSession(actDeps(page), ref, action, value),
+
+    pressEnter: async (page) => pressSessionEnter(actDeps(page)),
+
+    async scrollDown(page, px) {
+      await call(page, ['scroll', 'down', String(Math.max(1, Math.round(px)))]);
+    },
 
     async highlight(page, ref) {
       await call(page, ['highlight', `@${checkedRef(ref)}`]);

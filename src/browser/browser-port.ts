@@ -32,6 +32,13 @@ export interface BrowserPort {
    */
   selectorAttr?(page: PageRef, css: string, name: string): Promise<string | null>;
   act(page: PageRef, ref: Ref, action: ActAction, value?: string): Promise<ActResult>;
+  /**
+   * Enter, to the element that has focus in the page (never a terminal: the backend sends it to the page itself).
+   * Page-changing, like `act`; it names no element, so it is never `stale_ref`.
+   */
+  pressEnter?(page: PageRef): Promise<ActResult>;
+  /** Scrolls the page down by `px`. It moves the view only, so it is no act: nothing is dispatched. */
+  scrollDown?(page: PageRef, px: number): Promise<void>;
   highlight?(page: PageRef, ref: Ref): Promise<void>;
   /** The page's recent console lines; a caller filters them by time itself. */
   console?(page: PageRef): Promise<ConsoleLine[]>;

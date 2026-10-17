@@ -77,6 +77,8 @@ function buildParts<In, Ctx, Out>(
       threshold,
       read: (answer, bound) => stopSentTwin(site.read(answer, built.context, bound), twins),
     };
+    const readAll = site.readAll;
+    if (readAll) part.readAll = (answers, bound) => readAll(answers, built.context, bound, approved.questions);
     if (id === 'openai') part.rendering = renderingFor(site.id, plan);
     if (plan.kind === 'fallback' && parts.length > 0) part.admit = () => capsNow(deps.config);
     parts.push(part);

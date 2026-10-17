@@ -7,9 +7,9 @@ interface WatchOpts { command: string; mayAct: boolean; dryRun: boolean; signal:
 
 /**
  * Wraps the port for one command. It remembers the last `tabInfo`, and it guards every method that changes the
- * page (`act`, `dialogDismiss`): an `acts: never` verb cannot reach them, under `--dry-run` they throw `DryRunStop`,
- * and once SIGINT or SIGTERM aborted the run they throw before anything is dispatched, so a cancelled command never
- * clicks. Methods are delegated one by one, so a frozen port still works.
+ * page (`act`, `pressEnter`, `scrollDown`, `dialogDismiss`): an `acts: never` verb cannot reach them, under
+ * `--dry-run` they throw `DryRunStop`, and once SIGINT or SIGTERM aborted the run they throw before anything is
+ * dispatched, so a cancelled command never clicks. Methods are delegated one by one, so a frozen port still works.
  */
 export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrowser {
   let last: TabInfo | null = null;
@@ -44,6 +44,19 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
   if (highlight) port.highlight = (page, ref) => highlight.call(browser, page, ref);
   if (consoleLines) port.console = (page) => consoleLines.call(browser, page);
   if (network) port.network = (page) => network.call(browser, page);
+  const { pressEnter, scrollDown } = browser;
+  if (pressEnter) {
+    port.pressEnter = async (page) => {
+      guard();
+      return pressEnter.call(browser, page);
+    };
+  }
+  if (scrollDown) {
+    port.scrollDown = async (page, px) => {
+      guard();
+      return scrollDown.call(browser, page, px);
+    };
+  }
   if (dialogDismiss) {
     port.dialogDismiss = async (page) => {
       guard();

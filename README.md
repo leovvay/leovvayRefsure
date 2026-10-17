@@ -85,6 +85,66 @@ plain wait (off by default; it judges the whole page, not only new text). `--sta
 stall clock is the page's: a wait that starts within 2 minutes of an earlier one on the same page, with the page as
 that one left it, counts from the page's last change, and the detail says so. Only a hash of the URL and text is kept.
 
+## Hand over a multi-step task: `refsure run`
+
+`do` runs steps the agent already knows. When it does not know them up front (a suggestion to pick from a list, a
+date picker, a second page), `refsure run` takes the whole sub-task on one site and returns one envelope:
+
+```text
+refsure run --page <id> --goal "Set the ticket type to one-way, then search flights from Warsaw to Brussels on 20 November 2026, and stop at the results" \
+  --fill "origin=Warsaw" --fill "destination=Brussels" --expect "flight results from Warsaw to Brussels on November 20"
+```
+
+Each step is one look, one Jev Decision and at most one act:
+
+1. **Look.** One snapshot and the tab, read together. The element table is the page's candidates, numbered in page
+   order, each with its value or state; a long list of look-alikes (a calendar's days, a list of results) keeps the
+   rows that name the most of the goal, and the table is cut to the questions bound, dialogs first. The page text
+   comes off the same snapshot, with nothing typed in it; the new text is its lines the page did not show when the
+   run began (after the blocker level).
+2. **One Decision, site `step`** (Jev only, experimental). One request asks the operation (`CLICK`, `TYPE`,
+   `SELECT`, `PRESS_ENTER` right after a `TYPE`, `SCROLL_DOWN`, `WAIT`, `DONE`, `BLOCKED`, as the page allows), a
+   target for each operation that takes one (the element table; field × `--fill` value pairs; select × option
+   pairs), and with `--expect` a done Noul over the new text. Only the head of the chosen operation is read. The
+   operation needs 0.5; a target needs its risk row (read 0.5, write 0.6); every act is at least write, so 0.6.
+   Two readings join heads: a split between CLICK and TYPE aimed at one field reads as TYPE (typing focuses the
+   field as the click would), and when the leading operation's head is unsure, the runner-up's sure head is the
+   step. An unsure `WAIT` is waited on, since it sends nothing.
+3. **End checks.** `--text` in the new text ends it `seen` by code; the done Noul at 0.85 ends it `seen` whatever
+   operation leads; `DONE` without that is `done_unconfirmed`; `BLOCKED` is `blocked`.
+4. **Guard, as `act` guards a ticket.** Right before the act: a fresh snapshot on the same URL and tab, the element
+   found again by its fingerprint (role, name, path, ordinal in an unchanged twin group), else nothing is sent and
+   the step is looked at again; the never-click veto on what a click presses (accept, subscribe, enable…), refused;
+   the risk read on the fresh tree (lexicon, confirm dialog, URL, page raisers for a click, field raisers for a fill
+   or select, Enter as a click on the field and its form's buttons), at least write, and money, irreversible, auth
+   or consent refused with `act-high-risk` in `next`; the pick held to its risk row. Then one act on the fresh ref.
+   A sent act is never sent again by this code, and an act that may not have landed stops the run (exit 30).
+5. **Settle and look.** 250 ms (500 ms after a click in a dialog, on a field or an option), then the next look; after
+   a `TYPE` into a combobox, once more up to 600 ms until its options show. An unsure Decision gets one more look,
+   and is asked again only when the page has changed since.
+6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget`; three acts in a row that change nothing,
+   or the same act on the same element a third time, end it `no_progress` (Orca delivers clicks only while its
+   browser tab is on screen).
+
+`run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
+offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
+never put a secret in `--goal` or `--fill`. `result.verdict` is `seen`, `done_unconfirmed`, `blocked`,
+`no_progress`, `budget`, `refused`, `low_confidence`, `decision_unavailable` or `stopped` (the browser failed, or an
+act may not have landed). `result.steps` lists each step (`n`, `op`, `element` as a v1 line, `value` as the
+`--fill` key and never the value, `p`, `risk`, `page_changed`, `ms`); `new_text`, `url`, `elapsed_ms` and
+`decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
+`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `new_text` and `why.detail` are
+untrusted. One Decision per step adds up: mind `decisionsPerMinute` (30 by default) on long tasks.
+
+Write the goal as a person would ask it, options first when the order matters ("set one-way, then search …"), and
+give every value the task names as a `--fill`, dates included (many date pickers take a typed date). Known limits,
+as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab drops clicks; a
+date the picker has not rendered yet takes its Next button, step by step.
+
+The next-step rules of the `step` wording follow those of
+[browser-use/jev-ultrafast](https://github.com/browser-use/jev-ultrafast) (MIT), reworded in refsure's style; the
+loop, the element table and the guard are refsure's own.
+
 ## Install
 
 Requires Node 22 or newer.
@@ -288,6 +348,7 @@ Per Decision, refsure sends only the following, after redaction:
 | `dismiss` | the overlay's text (≤1,000 chars), plus ≤12 control lines |
 | `outcome` | your intent, the acted element (≤300 chars), page text before and after (≤4,000 chars each) |
 | `wait-for` | your expectation (≤500 chars), plus page text (≤6,000 chars) |
+| `run` | per step: your goal (≤600 chars), every `--fill` key **and value** (≤200 chars each), your expectation, the URL, title, page text (≤4,000 chars), new text (≤2,000 chars), the last 8 steps, and the element table (rows of ≤600 chars, with each field's current value and each control's state), as the target options too |
 
 A candidate line is `<role> "<name>" in="<section path>"`: no attributes, no values, no element ids.
 
@@ -298,7 +359,10 @@ weakest, so those verbs never refuse `oversize` for their own options. `pick-opt
 the likeliest stay, and `--open` is never followed by an `oversize` refusal once it has clicked the list open.
 
 **Never sent:** cookies, local or session storage, screenshots, API keys, values you typed or filled, textbox
-values, console and network bodies. Text in an editable region (`contenteditable`: a comment box, a rich editor)
+values, console and network bodies. The one exception is `run`: it sends its `--fill` values (so Jev can pair each
+with a field) and the current value of each field in its element table (so Jev can see what is filled), both
+through the same redaction and masks; an editable region's text is never sent, only that it holds text. `do` never
+sends a value. Text in an editable region (`contenteditable`: a comment box, a rich editor)
 shows in the page text, so `state`, `outcome`, `act --verify`, `wait-for`, `do` and `mark` read each such region (up
 to 16) without a snapshot and cut its text out; `state` also cuts what its snapshot shows. `do` also cuts every value
 it filled or selected from its new text, and sends only the page's origin as its URL once a value shows in it (a
@@ -375,6 +439,7 @@ Global options, accepted by every command:
 |---|---|---|
 | `state` | never | Say which state the page is in: expected, login_wall, bot_challenge, error_page, blocking_modal, rate_limited or unexpected_page |
 | `do` | ticket | Run a whole task in one call: dismiss, fill, select, check, click in order, then wait for what should show *(experimental)* |
+| `run` | recheck | Hand over a multi-step task on one site: Jev picks each step, refsure acts on it guarded, until it is done *(experimental)* |
 | `locate` | never | Find the element an intent (or a recorded line) means; returns a single-use ticket for act |
 | `act` | ticket | Act on a ticket from locate, dismiss --propose or pick-option: claim, recheck, guard, then one typed act |
 | `dismiss` | ticket | Close a cookie wall or pop-up by its reject or close control, guarded; or propose one with a ticket |
@@ -401,10 +466,12 @@ Global options, accepted by every command:
 | `skill` | never | Print the agent skill (SKILL.md) bundled with this version, as the file itself, not an envelope |
 
 `Acts` is what a command may do in the page: `never`; `ticket`, only through a claimed single-use ticket after a
-fresh recheck; `own-ref`, your own ref after a name and risk check; `high-risk`, the one path for money,
-irreversible, auth and consent controls.
+fresh recheck; `recheck`, a Decision's pick found again by fingerprint on a fresh snapshot and guarded as `act`
+guards a ticket, with no ticket in between; `own-ref`, your own ref after a name and risk check; `high-risk`, the one
+path for money, irreversible, auth and consent controls.
 
-Never shipped: a goal loop, login, 2FA or CAPTCHA automation, screenshots or vision, a "failed" or "absent" verdict,
+Never shipped: an unbounded or unguarded goal loop (`run` is bounded by steps and time, and every act passes the
+guard), login, 2FA or CAPTCHA automation, screenshots or vision, a "failed" or "absent" verdict,
 or a Decision that confirms money or an irreversible action.
 
 ### Options by command
@@ -455,6 +522,20 @@ refsure do [--fill "<field>=<value>"] [--select "<field>=<option>"] [--check "<b
 - `--timeout <value>`: How long to wait for --expect, from 1s to 10m (default 60s)
 - `--stall <value>`: End the wait (stalled) once the page text and URL stop changing this long (default 10s)
 - `--no-dismiss`: Leave any cookie banner or pop-up alone
+
+**`run`** (runs on a page; Decision sites: dismiss, step)
+
+```text
+refsure run --goal "<what to get done on this site>" [--fill "<what it is>=<value>"]... (up to 8) [--expect "<what shows when it is done>"] [--text <literal>] [--max-steps 25] [--timeout 90s] [--no-dismiss]
+```
+
+- `--goal <value>`: What to get done on this site, in a sentence or two (required); sent to the provider
+- `--fill <value>`: A value run may type, "<what it is>=<value>" (at most 8); the only text it types; sent to the provider (repeatable)
+- `--expect <value>`: What shows once it is done; judged on text new since the start only
+- `--text <value>`: A literal that ends it by code once it is in the new text
+- `--max-steps <value>`: The most steps, 1 to 60 (default 25)
+- `--timeout <value>`: How long it may take, from 5s to 10m (default 90s)
+- `--no-dismiss`: Leave any cookie banner or pop-up alone at the start
 
 **`locate`** (runs on a page; Decision sites: locate, find)
 
@@ -626,7 +707,7 @@ Each Decision site declares which providers may answer it:
 
 | Site | Allowed providers |
 |---|---|
-| `locate`, `find`, `outcome`, `option-map` (`verify-target` uses `find`) | Jev only |
+| `locate`, `find`, `outcome`, `option-map` (`verify-target` uses `find`), `step` (`run`) | Jev only |
 | `dismiss` | Jev, or `agree` (Jev and OpenAI must pick the same control) |
 | `page-state` (`state`, `state --state`) | Jev or OpenAI, plus `fallback` (OpenAI is asked only when Jev abstains) |
 | `presence` (`wait-for`) | Jev or OpenAI, plus `agree` |
@@ -703,6 +784,10 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `disagree` | `abstained` | 10 | The two providers did not pick the same option. |
 | `not_seen` | `abstained` | 10 | wait-for did not see it within its timeout; never a claim that it is absent. |
 | `stalled` | `abstained` | 10 | Not seen, and the page text and URL stopped changing for the --stall time; report it. |
+| `done_unconfirmed` | `abstained` | 10 | run: the Decision said the goal is done, and nothing (--expect, --text) confirmed it. |
+| `blocked` | `abstained` | 10 | run: no offered operation can make progress (a sign-in, a bot check, a missing value). |
+| `no_progress` | `abstained` | 10 | run: acts changed nothing three times in a row, or the same act came a third time. |
+| `budget` | `abstained` | 10 | run: --max-steps or --timeout ran out before the goal showed. |
 | `veto` | `refused` | 11 | The control is on the never-click list (accept, subscribe, settings, ...). |
 | `high_risk_class` | `refused` | 11 | Money, irreversible, auth or consent: refused on this path. |
 | `oversize` | `refused` | 11 | The request was over the egress byte bounds. |
@@ -753,7 +838,8 @@ These rules live in code, not in the agent skill:
 3. Every non-answer before a dispatch is `acted: false` with a named cause. A refusal quotes the option the model
    leaned to, by its text and never by its shuffled key, and the threshold it missed.
 4. Risk only rises: it is the highest of `--risk`, the lexicon match and the page raisers.
-5. Money, irreversible, auth and consent controls never go through `act`, `outcome`, `dismiss` or `pick-option`.
+5. Money, irreversible, auth and consent controls never go through `act`, `outcome`, `dismiss`, `pick-option` or
+   `run`.
 6. No Decision says "failed" or "absent", and no Decision confirms money or an irreversible action.
 7. A group of identical controls (twins) is resolved by code (`--within`, `--first`) or refsure stops.
 8. Nothing leaves your machine without a matching consent grant. `--dry-run` works everywhere.
@@ -817,8 +903,16 @@ high-risk pick names that cause (`veto`, `twins` or `high_risk_class`), never `d
 made goes to a human (`next.do: needs_human`) with no `act-high-risk` command: one provider's pick is not a control
 to hand on. A high-risk pick both providers agreed on, or the one provider asked, names its `act-high-risk` command.
 
-**Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in shuffled option lines,
-and the envelope lists it under `untrusted`.
+**Run.** `run` holds no ticket: its pick is acted on in the same process, right after a fresh snapshot finds the
+element again by fingerprint, as `act` finds a ticket's, with the same risk read, refusals and single send. Its
+`step` site is experimental, so a ticket would carry only `read` authority below 0.85 with corroboration; `run`
+instead acts at the `step` rows (write 0.6) on what the agent handed over with `--goal`, which is why every act is
+floored at write, high risk still goes only to `act-high-risk`, and the veto still refuses accept, subscribe and
+enable. Its rows are numbered in page order (no shuffle: the goal is a route, not a recorded element), and two rows
+that read the same but for their number are twins the model could not tell apart, so a pick of one stops.
+
+**Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in option lines (shuffled,
+except `run`'s numbered table), and the envelope lists it under `untrusted`.
 
 ### Honest limits
 
@@ -888,6 +982,7 @@ the honest sample size.
 | `page-state` | `state --expect` | `inherited` (held) | 0.8 | browser_page_state 117 (converted); pii_masks 29, each asked with masks on and off; vision_page_state 64 | 1785 | no row ships; at 0.8, 899 of 909 converted (0.980), 357 of 357 on Orca pages whose text carries the answer (0.989), 131 of 275 on pages that show it only in pixels (0.418) | |
 | `presence` | `wait-for`, `doctor --ping` | `inherited` (held) | yes at ≥0.85, no at ≤0.15 | presence_false 40; vision_presence 68 | 648 | no row ships; on text pages 126 of 126 at yes ≥0.92 (0.970); on pixel-only pages 18 of 36 (0.345) | |
 | `option-map` | `pick-option` | `experimental` | 0.8 | none | 0 | not measured | |
+| `step` | `run` | `experimental` | operation 0.5; targets read 0.5, write 0.6 (every act is at least write); done yes at ≥0.85 | none | 0 | not measured | |
 
 OpenAI (`gpt-6-luna`), which may answer `state` and `wait-for`, was not measured in this pass: its answers run at
 the declared maturity on the starting rows. A new model family gets no authority at all: its answers are reported as

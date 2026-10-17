@@ -7,6 +7,7 @@ import { optionMapSite } from './option-map';
 import { outcomeSite } from './outcome';
 import { pageStateSite } from './page-state';
 import { presenceSite } from './presence';
+import { stepSite } from './step';
 
 /** Every shipped site by id: one bundle, no lookup by name outside this map. */
 export const SITES: Readonly<Record<SiteId, DecisionSite<unknown, unknown, unknown>>> = Object.freeze({
@@ -17,4 +18,5 @@ export const SITES: Readonly<Record<SiteId, DecisionSite<unknown, unknown, unkno
   outcome: outcomeSite,
   presence: presenceSite,
   'option-map': optionMapSite,
+  step: stepSite,
 });

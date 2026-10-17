@@ -64,6 +64,21 @@ export async function dismissSessionDialog(deps: AbActDeps): Promise<boolean> {
 }
 
 /**
+ * `press Enter` on the session's active tab, to whatever has focus in the page. Dispatched from the moment the
+ * process exists; a failure after that is `unknown`, never retried. A browser started during the call holds none of
+ * the user's page, so the press is reported as possibly landed elsewhere.
+ */
+export async function pressSessionEnter(deps: AbActDeps): Promise<ActResult> {
+  const sent = await send(deps, ['press', 'Enter'], ACT_TIMEOUT_MS);
+  if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'agent-browser', undefined) };
+  const { replies, launched } = sent.reply;
+  const reply = replies[0]!;
+  if (launched) return launchedAct(deps, reply, sent.before, undefined);
+  if (reply.ok) return { kind: 'done' };
+  return { kind: 'unknown', detail: actDetail(`agent-browser: ${reply.message}`, undefined) };
+}
+
+/**
  * The act reached a browser agent-browser started during the call, not the page the ref came from. A ref it could
  * not resolve touched nothing (`no_tab`); anything else may have landed on a page a persistent profile restored.
  */

@@ -25,6 +25,7 @@ export {
   presenceSite,
   RESEARCH_STATES,
   SITES,
+  stepSite,
 } from './sites';
 export { bareModel, familyOf, KNOWN_FAMILIES, snapshotChanged, thresholdFor } from './calibration';
 export { createDecide } from './decide';

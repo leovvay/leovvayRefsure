@@ -15,6 +15,10 @@ export const CAUSES: readonly CauseRow[] = [
   row('disagree', 'abstained', 'The two providers did not pick the same option.'),
   row('not_seen', 'abstained', 'wait-for did not see it within its timeout; never a claim that it is absent.'),
   row('stalled', 'abstained', 'Not seen, and the page text and URL stopped changing for the --stall time; report it.'),
+  row('done_unconfirmed', 'abstained', 'run: the Decision said the goal is done, and nothing (--expect, --text) confirmed it.'),
+  row('blocked', 'abstained', 'run: no offered operation can make progress (a sign-in, a bot check, a missing value).'),
+  row('no_progress', 'abstained', 'run: acts changed nothing three times in a row, or the same act came a third time.'),
+  row('budget', 'abstained', 'run: --max-steps or --timeout ran out before the goal showed.'),
 
   row('veto', 'refused', 'The control is on the never-click list (accept, subscribe, settings, ...).'),
   row('high_risk_class', 'refused', 'Money, irreversible, auth or consent: refused on this path.'),

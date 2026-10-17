@@ -1,4 +1,5 @@
 export type * from './site-inputs';
+export type * from './step-reading';
 export { locateSite } from './locate';
 export { findSite } from './find';
 export { dismissSite } from './dismiss';
@@ -6,5 +7,6 @@ export { pageStateSite } from './page-state';
 export { outcomeSite } from './outcome';
 export { presenceSite } from './presence';
 export { optionMapSite } from './option-map';
+export { stepSite } from './step';
 export { SITES } from './registry';
 export { RESEARCH_STATES } from './wordings';

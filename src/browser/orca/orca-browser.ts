@@ -5,7 +5,7 @@ import type { BrowserPort } from '../browser-port';
 import { checkedAttr, checkedRef, LOG_LIMIT } from '../checked-args';
 import type { PageRef } from '../page-ref';
 import { READ_TIMEOUT_MS, stripRefsureEnv } from '../run-json';
-import { actOnOrca, dismissOrcaDialog } from './orca-act';
+import { actOnOrca, dismissOrcaDialog, pressEnterOnOrca } from './orca-act';
 import { findOrcaBinary } from './orca-binary';
 import type { OrcaBrowserOptions } from './orca-browser-options';
 import { orcaError } from './orca-error-map';
@@ -95,6 +95,12 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
     },
 
     act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),
+
+    pressEnter: (page) => pressEnterOnOrca({ env, trace, run }, page),
+
+    async scrollDown(page, px) {
+      await call(onPage(page, ['scroll'], '--direction=down', `--amount=${Math.max(1, Math.round(px))}`));
+    },
 
     async highlight(page, ref) {
       await call(onPage(page, ['highlight'], `--selector=@${checkedRef(ref)}`));

@@ -7,6 +7,8 @@ const COMMANDS: readonly [BrowserCapability, RegExp][] = [
   ['console', /^\s+console\b/m],
   ['network', /^\s+requests\b/m],
   ['dialog', /^\s+dialog\s/m],
+  ['press-enter', /^\s+press\s+</m],
+  ['scroll', /^\s+scroll\s+</m],
 ];
 const GET_TARGETS: readonly [BrowserCapability, string][] = [
   ['count', 'count'],

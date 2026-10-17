@@ -15,3 +15,5 @@ export { urlGlobMatches } from './url-glob';
 export type * from './high-risk-via';
 export { highRiskNext, highRiskVia } from './high-risk-next';
 export { argText } from './arg-text';
+export type * from './value-step';
+export { baselineOf, expectationOf, newReading, shownLines, valuesOf } from './new-text';

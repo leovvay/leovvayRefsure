@@ -52,3 +52,20 @@ export async function dismissOrcaDialog(deps: ActDeps, page: PageRef): Promise<b
   if (none) return false;
   throw orcaError(reply.code, reply.message);
 }
+
+/**
+ * `keypress --key=Enter`: Orca sends the key to the page itself, to whatever has focus there. As an act, it counts
+ * as dispatched from the moment the request is written; a failure after that is `unknown`, never retried.
+ */
+export async function pressEnterOnOrca(deps: ActDeps, page: PageRef): Promise<ActResult> {
+  const args = ['keypress', '--key=Enter', ...pageArgs(page, deps.env)];
+  const sent = await sendOnce(deps.trace, (onSpawn) => deps.run(args, ACT_TIMEOUT_MS, onSpawn));
+  if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'orca', undefined) };
+  const reply = sent.reply;
+  if (reply.ok) return { kind: 'done' };
+  if (refusedBeforeDispatch(reply.code, reply.message)) {
+    deps.trace.dispatched = sent.before;
+    throw orcaError(reply.code, reply.message);
+  }
+  return { kind: 'unknown', detail: actDetail(`${reply.code}: ${reply.message}`, undefined) };
+}

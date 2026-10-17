@@ -23,7 +23,11 @@ export interface CommandSpec<Args, Result> {
     page: 'required' | 'none';
     capabilities: readonly BrowserCapability[];
     sites: readonly SiteId[];
-    acts: 'never' | 'own-ref' | 'ticket' | 'high-risk';
+    /**
+     * `recheck`: a Decision's pick, found again by fingerprint on a fresh snapshot and guarded as `act` guards a
+     * ticket, with no ticket in between (`run`).
+     */
+    acts: 'never' | 'own-ref' | 'ticket' | 'recheck' | 'high-risk';
   };
   parse(raw: ParsedArgs): Args | UsageError;
   run(args: Args, ctx: CommandContext): Promise<CommandOutcome<Result>>;

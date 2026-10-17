@@ -13,6 +13,7 @@ import { markCommand } from './mark';
 import { outcomeCommand } from './outcome';
 import { pickOptionCommand } from './pick-option';
 import { privacyCommand } from './privacy';
+import { runCommand } from './run';
 import { setupCommand } from './setup';
 import { skillCommand } from './skill';
 import { snapCommand } from './snap';
@@ -28,6 +29,7 @@ export const FEATURES: readonly AnyCommandSpec[] = [
   doctorCommand,
   stateCommand,
   doCommand,
+  runCommand,
   locateCommand,
   actCommand,
   dismissCommand,

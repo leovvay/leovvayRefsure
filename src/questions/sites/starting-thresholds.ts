@@ -24,3 +24,19 @@ export const LOCATE_ROWS: Readonly<Record<RiskClass, number>> = Object.freeze({
 
 /** A dismiss only closes an overlay, so it answers at the reading row. */
 export const DISMISS_START = LOCATE_ROWS.read;
+
+/** `run`'s step: the operation needs this confidence, whatever its target. */
+export const STEP_OP_MIN = 0.5;
+
+/**
+ * `run`'s step targets by risk class (design 2026-10-17 §2.3). Every act is floored at write; the high-risk rows
+ * are never reached, since those classes refuse before any act.
+ */
+export const STEP_ROWS: Readonly<Record<RiskClass, number>> = Object.freeze({
+  read: 0.5,
+  write: 0.6,
+  consent: 0.85,
+  auth: 0.85,
+  money: 0.85,
+  irreversible: 0.85,
+});

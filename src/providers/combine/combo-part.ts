@@ -12,6 +12,8 @@ export interface ComboPart<Out> {
   threshold: Threshold;
   /** The site's `read` with its presented order bound. */
   read(answer: DecisionAnswer, threshold: Threshold): Verdict<Out>;
+  /** A site of several questions: its `readAll` with its context and the questions as sent bound, used over `read`. */
+  readAll?(answers: Readonly<Record<string, DecisionAnswer>>, threshold: Threshold): Verdict<Out>;
   rendering?: Rendering;
   /**
    * Checked just before a part that is asked only after another part answered (OpenAI in `fallback`): the caps

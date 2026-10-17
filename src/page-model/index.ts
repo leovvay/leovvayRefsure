@@ -14,4 +14,5 @@ export { candidatesOf, findByFingerprint, fingerprintOf } from './fingerprint-of
 export { rowContains, rowTextOf } from './row-text';
 export { cutPieces, insideValueField, isValueField, shortPieces, showsAsWord, subtree, subtreeText, valuePieces } from './tree-text';
 export { pageView } from './page-view';
+export { pageLines } from './page-lines';
 export { exactNameMatch, RANK_MAX, rankCandidates } from './rank-candidates';

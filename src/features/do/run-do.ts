@@ -5,7 +5,10 @@ import { presenceSite } from '../../questions';
 import { detectOverlay, dismissLevel, type LevelOutcome } from '../dismiss';
 import type { LocateScene } from '../locate';
 import { SETTLE_MS } from '../outcome';
-import { abstainOutcome, type PageReading, readPage, sleep, typedWithheld, withheldNote } from '../shared';
+import {
+  abstainOutcome, baselineOf, expectationOf, newReading, type PageReading, readPage, shownLines, sleep, typedWithheld,
+  valuesOf, withheldNote,
+} from '../shared';
 import { pollPresence, type WaitForArgs } from '../wait-for';
 import type { DoArgs } from './do.args';
 import type { DoResult } from './do.contract';
@@ -13,7 +16,6 @@ import type { DoStepReport } from './do-step-report';
 import { blockerUnknown, failedAfterAct, stepStopped, waited } from './do-finish';
 import { locateAll, lookAt, newFields } from './do-locate';
 import { runSteps } from './do-steps';
-import { baselineOf, expectationOf, newReading, shownLines, valuesOf } from './new-text';
 
 type Out = CommandOutcome<DoResult>;
 
