@@ -18,9 +18,8 @@ and `causes --json` give version-specific detail; `refsure skill print` prints t
 refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect "search results for invoice"
 ```
 
-- Steps run in the order given, at most 8: `--fill "<field>=<value>"`, `--select "<field>=<option>"` (native, by
-  option label), `--check`/`--uncheck "<box>"`, `--click "<control>"`. Describe each target by its visible text or
-  purpose. The value after the first `=` is typed; it never goes to a Decision.
+- Steps run in order, at most 8: `--fill "<field>=<value>"` (the value is typed, never sent to a Decision), `--select
+  "<field>=<option>"` (by label), `--check`/`--uncheck "<box>"`, `--click "<control>"`, each by visible text or purpose.
 - It first closes a cookie banner or pop-up as `dismiss` does (never Accept; `--no-dismiss` skips it), then finds
   every step on one snapshot and acts in order, each through a single-use ticket, a recheck and the risk guard.
 - `--expect` waits up to `--timeout` (60s) until that shows in text **new** since the call began (your filled values
@@ -28,7 +27,8 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
   (10s), or 2s after the Decision was unsure, neither yes nor a clear no (judge `result.new_text` yourself).
 
 Read the answer (`result.steps`: what each step found and did; `result.new_text`: lines new since the call began):
-- Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.
+- Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it,
+  leading with what the human asked for (the count, the saved value), before other numbers on the page.
 - Exit 30: something acted; `result.unconfirmed` says why it is unconfirmed. Never rerun that `do`: writes repeat.
   - `stalled` or `not_seen`: read `result.new_text`. If the page asks one more thing (a confirm field), `do` only the
     steps still to do. Otherwise report it from `new_text`, with no snapshot or second wait. A stall is final, also on
