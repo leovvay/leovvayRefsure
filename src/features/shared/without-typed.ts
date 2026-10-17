@@ -30,8 +30,9 @@ export function withheldNote(why: string): string {
 
 /**
  * Body text as it may leave (spec §7.3): what was typed into editable regions cut out line by line, or, when that
- * cannot be done (`typedWithheld`), a placeholder in place of the whole text. Code rules (`--text`, `--expect-text`)
- * read the raw text, locally.
+ * cannot be done (`typedWithheld`), a placeholder in place of the whole text. Code rules read the raw text, locally
+ * (`wait-for --text`, `outcome -- … --expect-text`), except `outcome --mark`: a mark keeps only this cut text, so
+ * its `--expect-text` compares the cut text, and is not read at all when either side is withheld.
  */
 export function withoutTyped(text: string, typed: TypedText): string {
   const out = cut(text, typed);

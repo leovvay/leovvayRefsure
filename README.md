@@ -258,7 +258,8 @@ a snapshot and cut its text out; `state` cuts it by its snapshot. With more regi
 them one by one, the page text is withheld from the Decision (note `typed_text_withheld`). So it is, `state`'s too,
 when a typed text too short to cut out without cutting words (one or two characters: `42`, `OK`, one code cell)
 shows in the page text as a word. `wait-for --text` and `outcome -- … --expect-text` still match the whole page
-text, locally; `outcome --mark` compares the mark's text, cut the same way.
+text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles nothing
+when either side's text was withheld.
 
 **Before anything is sent:**
 

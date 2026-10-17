@@ -14,8 +14,9 @@ const MARK_HINT = 'take a new one (refsure mark) before your next act';
 
 /**
  * `outcome --mark M` (spec §6.2): did the intent land since the mark, after the agent acted itself? Reads only.
- * Both sides are cleaned alike (query-less URL; URL and text redacted and masked) before the code rules or the
- * Decision see them, so `--expect-url` matches the URL without its query. An unconfirmed answer is `effect_unknown` (exit 30),
+ * Both sides are cleaned alike (query-less URL; typed text cut out; URL and text redacted and masked) before the
+ * code rules or the Decision see them, so `--expect-url` matches the URL without its query, and `--expect-text` is
+ * not read when either side's text was withheld. An unconfirmed answer is `effect_unknown` (exit 30),
  * never `abstained`: the agent did act, and only a fresh look can say what happened.
  */
 export async function runMark(args: OutcomeMarkArgs, ctx: CommandContext): Promise<CommandOutcome<OutcomeResult>> {
@@ -26,11 +27,17 @@ export async function runMark(args: OutcomeMarkArgs, ctx: CommandContext): Promi
 
   const reading = await readPage(ctx, page);
   const now = markView(reading);
-  // A needle past the mark's cut reads as absent before while it was there all along: only the Decision can say.
-  if (args.expectText !== null && mark.textCut) {
-    ctx.trace.notes.push('--expect-text: the mark kept only the start of a long page, so the Decision judges it');
+  // A needle past the mark's cut reads as absent before while it was there all along, and a withheld side is a
+  // placeholder, whose own words could match: code cannot compare either, so `--expect-text` settles nothing.
+  const withheld = mark.textWithheld || now.textWithheld;
+  if (args.expectText !== null && (mark.textCut || withheld)) {
+    ctx.trace.notes.push(withheld
+      ? '--expect-text: typed text was withheld on one side, so code cannot compare the page text'
+      : '--expect-text: the mark kept only the start of a long page, so the Decision judges it');
   }
-  const expectText = args.expectText === null || mark.textCut ? null : cleanEgressText(args.expectText, true);
+  const expectText = args.expectText === null || mark.textCut || withheld
+    ? null
+    : cleanEgressText(args.expectText, true);
   const rule = landedByCode({ ...args, expectText }, { url: mark.url, text: mark.text }, { url: now.url, text: now.text });
   if (rule) return landedOutcome('none', 'code', rule);
 

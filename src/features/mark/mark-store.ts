@@ -1,6 +1,6 @@
 import { boundText, cleanEgressText } from '../../egress';
 import type { StateStore } from '../../local-state';
-import { type PageReading, withoutTyped } from '../shared';
+import { type PageReading, typedWithheld, withoutTyped } from '../shared';
 import { bareUrl } from './bare-url';
 import type { MarkRecord } from './mark-record';
 
@@ -16,13 +16,16 @@ const URL_MAX = 2_000;
  * title and text redacted and PII-masked (masks always on, whatever the config says), then cut. Both sides of a
  * `--mark` comparison go through this, so they compare alike.
  */
-export function markView(reading: PageReading): Pick<MarkRecord, 'url' | 'title' | 'text' | 'textCut'> {
+export function markView(
+  reading: PageReading,
+): Pick<MarkRecord, 'url' | 'title' | 'text' | 'textCut' | 'textWithheld'> {
   const text = cleanEgressText(withoutTyped(reading.text, reading.typed), true);
   return {
     url: bareUrl(reading.tab.url, { max: URL_MAX }),
     title: boundText(cleanEgressText(reading.tab.title, true), { max: TITLE_MAX, inline: true }),
     text: boundText(text, { max: MARK_TEXT_MAX }),
     textCut: text.length > MARK_TEXT_MAX,
+    textWithheld: typedWithheld(reading.text, reading.typed) !== null,
   };
 }
 
@@ -34,14 +37,18 @@ function isTime(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
-/** A stored mark read back from disk, checked field by field; anything else is not a mark. */
+/**
+ * A stored mark read back from disk, checked field by field; anything else is not a mark. `textWithheld` came later:
+ * a mark stored without it reads false.
+ */
 function asMark(value: unknown): MarkRecord | null {
   if (typeof value !== 'object' || value === null) return null;
   const m = value as Record<string, unknown>;
   const ok = isText(m.id) && isText(m.pageId) && (m.label === null || isText(m.label))
     && isText(m.url) && isText(m.title) && isText(m.text) && typeof m.textCut === 'boolean'
+    && (m.textWithheld === undefined || typeof m.textWithheld === 'boolean')
     && isTime(m.createdAt) && isTime(m.ttlMs);
-  return ok ? (value as MarkRecord) : null;
+  return ok ? { ...(value as MarkRecord), textWithheld: m.textWithheld === true } : null;
 }
 
 export async function saveMark(store: StateStore, mark: MarkRecord): Promise<void> {

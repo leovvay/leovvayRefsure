@@ -15,6 +15,11 @@ export interface MarkRecord {
    * on the page, and "absent before" cannot be read from it.
    */
   textCut: boolean;
+  /**
+   * The text was withheld (`typedWithheld`): typed text in an editable region could not be cut out, so `text` is a
+   * placeholder, and nothing about the page text can be read from it. A mark stored without it reads false.
+   */
+  textWithheld: boolean;
   createdAt: number;
   ttlMs: number;
 }
