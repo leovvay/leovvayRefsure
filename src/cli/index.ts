@@ -13,7 +13,7 @@ export { GLOBAL_OPTIONS, isUsageError, parseCommandArgs } from './parse-args';
 export { hintOf, oneLine, parsePageArg, parseRefArg, parseRisk, parseTicketArg } from './arg-values';
 export { runCommand } from './registry';
 export { RegistryInvariantError } from './registry-invariant-error';
-export { pinNextToPage } from './registry-outcomes';
+export { failureOutcome, pinNextToPage } from './registry-outcomes';
 export { routeArgv } from './route-argv';
 export { commandHelp, usageText } from './usage';
 export { verbHelp, wantsHelp } from './verb-help';

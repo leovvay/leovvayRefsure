@@ -4,13 +4,11 @@ import { formatDuration, parseDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
 
 export const DEFAULTS = { timeout: '30s', interval: '2s', maxDecisions: '10' } as const;
-const TIMEOUT_MIN_MS = 1_000;
-const TIMEOUT_MAX_MS = 600_000;
+/** A wait's `--timeout` and `--stall`, here and in `do`: from 1 s to 10 m. */
+export const WAIT_BOUNDS = { minMs: 1_000, maxMs: 600_000 } as const;
 const INTERVAL_MIN_MS = 1_000;
 const INTERVAL_MAX_MS = 300_000;
 const MAX_DECISIONS_LIMIT = 100;
-const STALL_MIN_MS = 1_000;
-const STALL_MAX_MS = 600_000;
 const URL_GLOB_MAX = 2_000;
 
 function stringOf(value: unknown, fallback: string): string {
@@ -27,12 +25,13 @@ export function durationOf(name: string, text: string, min: number, max: number)
 /** `--stall`: off when absent, else a duration from 1 s to 10 m. */
 export function stallOf(value: unknown): number | null | UsageError {
   if (value === undefined) return null;
-  return durationOf('stall', stringOf(value, ''), STALL_MIN_MS, STALL_MAX_MS);
+  return durationOf('stall', stringOf(value, ''), WAIT_BOUNDS.minMs, WAIT_BOUNDS.maxMs);
 }
 
 /**
  * `wait-for`'s options, checked: durations `\d+(ms|s|m)`, an interval of at least 1 s, a bounded call cap, and
- * something that can settle the wait (a Decision, `--text` or `--url`). `--stall` is off unless given.
+ * something that can settle the wait (a Decision, `--text` or `--url`). `--stall` is off unless given, and shorter
+ * than `--timeout` when it is: a stall the timeout always comes before could never end the wait.
  */
 export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (raw.positionals.length > 0) return { usage: `wait-for takes no positional arguments, got ${raw.positionals.length}` };
@@ -49,7 +48,7 @@ export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (url === '') return { usage: '--url is empty: give a glob such as "*/done*", or leave it out' };
   if (url !== null && url.length > URL_GLOB_MAX) return { usage: `--url is over ${URL_GLOB_MAX} characters` };
 
-  const timeoutMs = durationOf('timeout', stringOf(raw.values.timeout, DEFAULTS.timeout), TIMEOUT_MIN_MS, TIMEOUT_MAX_MS);
+  const timeoutMs = durationOf('timeout', stringOf(raw.values.timeout, DEFAULTS.timeout), WAIT_BOUNDS.minMs, WAIT_BOUNDS.maxMs);
   if (typeof timeoutMs !== 'number') return timeoutMs;
   const intervalMs = durationOf('interval', stringOf(raw.values.interval, DEFAULTS.interval), INTERVAL_MIN_MS, INTERVAL_MAX_MS);
   if (typeof intervalMs !== 'number') return intervalMs;
@@ -64,5 +63,9 @@ export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   }
   const stallMs = stallOf(raw.values.stall);
   if (typeof stallMs === 'object' && stallMs !== null) return stallMs;
+  if (stallMs !== null && stallMs >= timeoutMs) {
+    return { usage: `--stall ${formatDuration(stallMs)} is not shorter than --timeout ${formatDuration(timeoutMs)}, so it `
+      + 'could never end the wait: raise --timeout too' };
+  }
   return { expect, text, url, timeoutMs, intervalMs, maxDecisions, agree: raw.values.agree === true, stallMs };
 }

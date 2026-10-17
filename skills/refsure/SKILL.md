@@ -23,16 +23,16 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
   its visible text or purpose. The value after the first `=` is typed; it never goes to a Decision.
 - It first closes a cookie banner or pop-up as `dismiss` does (never Accept; `--no-dismiss` skips it), then finds
   every step on one snapshot and acts in order, each through a single-use ticket, a recheck and the risk guard.
-- `--expect` waits up to `--timeout` (default 60s) until that shows in text **new** since the call began, so text
-  already on the page cannot fake success; `--text "<literal>"` settles it by code. The wait ends early as
-  `stalled` when the page text and URL stop changing for `--stall` (default 10s).
+- `--expect` waits up to `--timeout` (default 60s) until that shows in text **new** since the call began, with your
+  filled values cut, so neither old text nor an echo of your input can fake success; `--text "<literal>"` settles
+  it by code. It ends early as `stalled` when the page text and URL stop changing for `--stall` (default 10s).
 
 Read the answer (`result.steps` says what each step found and did; `result.new_text` is what the page now says):
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.
 - Exit 30: something acted; `result.unconfirmed` says why it is unconfirmed. Never rerun that `do`: writes repeat.
-  - `not_seen`: look with `refsure state --page <id>`. If the page asks one more thing (a confirm field), `do` only
-    the steps still to do.
-  - `stalled`: report it. Wait longer only when the human said so: `refsure wait-for --page <id> --stall 60s …`.
+  - `stalled` or `not_seen`: read `result.new_text`. If the page asks one more thing (a confirm field), `do` only the
+    steps still to do. Otherwise report it; wait longer only when the human said so (`refsure wait-for --page <id>
+    --expect "…" --timeout <longer> --stall <longer>`, which judges the whole page, not only new text).
   - Another cause: a step stopped after an earlier one acted (`not_run` steps never ran). Follow `next`.
 - Exit 10-29 or 64-78: nothing was done. The stopping step's cause and `next` (section 9) hold, e.g. `twins`, `veto`,
   or `high_risk_class` with `act-high-risk` in `next.argv`.
@@ -119,7 +119,7 @@ Pass `--page <id>` to every refsure call and to your own browser calls (same tab
 | `proposed_only` (abstained, 10) | Not trusted enough to act on alone. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
 | `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
-| `stalled` (abstained, 10) | The page stopped changing before it showed what you expected. Report it; wait longer (`wait-for --stall <longer>`) only when the human said so |
+| `stalled` (abstained, 10) | The page stopped changing before it showed what you expected. If it asks for one more thing, do only that; else report it. Wait longer (`wait-for --timeout <longer> --stall <longer>`) only when the human said so |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human |
 | `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
 | `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |

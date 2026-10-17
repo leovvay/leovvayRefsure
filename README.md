@@ -65,14 +65,19 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
    element moved before anything was sent, is found again once at its turn. Any refusal stops the run; a write is
    never sent twice, and high risk still goes only through `act-high-risk`.
 4. With `--expect`, it waits as `wait-for` does, but judges only the text that is new since step 1, with typed and
-   filled text cut, so text that was on the page before (an injected "999 rows" box) cannot fake success. `--text` is
-   the code rule. The wait ends at `present`, at `--timeout` (default 60s, `not_seen`), or once neither the page text
-   nor the URL changed for `--stall` (default 10s, `stalled`).
+   filled text cut, so neither text that was on the page before (an injected "999 rows" box) nor the page echoing a
+   filled value can fake success. A line the page removes and shows again counts as new. `--text` is the code rule,
+   matched on that cut text, so it may not hold a filled value. The wait ends at `present`, at `--timeout` (default
+   60s, `not_seen`), or once neither the page text nor the URL changed for `--stall` (default 10s, `stalled`); the
+   Decision is asked at most once a poll, and no call cap ends it sooner.
 
 `result.verdict` is `done`, `seen`, `not_seen`, `stalled` or `stopped`; `result.steps` says what each step found and
 did, and `result.new_text` holds up to 8 new lines (untrusted). Once anything acted, the exit is only 0 or 30, with
-the reason in `result.unconfirmed`; `next` is `stop` after `stalled` and `state` after `not_seen`. `wait-for --stall
-<duration>` gives the same stall rule to a plain wait (off by default).
+the reason in `result.unconfirmed`, also when a browser call fails after an act. `next` is `state` after
+`not_seen`, and `stop` after `stalled` (or a fresh look when the new text was withheld from the Decision). After
+either, read `result.new_text`: if the page asks for one more thing (a confirm field), `do` only the steps still to
+do. To wait longer, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a plain
+wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`.
 
 ## Install
 
@@ -101,9 +106,11 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
 - **Orca transport:** each call goes over Orca's runtime socket, the one the `orca` CLI itself uses (found through
   `orca-runtime.json` in `$ORCA_USER_DATA_PATH`, else Orca's default user-data folder), as the same method and
   params the CLI would send. That saves a process per call (a snapshot takes about 0.17 s instead of 0.4 s). refsure
-  spawns the CLI instead when the metadata is missing or names no unix socket, when the socket refuses the
-  connection, when `ORCA_PAIRING_CODE`, `ORCA_REMOTE_PAIRING`, `ORCA_ENVIRONMENT` or `ORCA_SSH_BRIDGE_CREDENTIAL`
-  sends the CLI elsewhere, and always with `REFSURE_ORCA_TRANSPORT=cli`. The runtime token goes only to that socket.
+  spawns the CLI instead when the metadata is missing, holds no runtime token, or names no unix socket (or Windows
+  named pipe), when the socket refuses the connection, when `ORCA_PAIRING_CODE`, `ORCA_REMOTE_PAIRING`,
+  `ORCA_ENVIRONMENT` or `ORCA_SSH_BRIDGE_CREDENTIAL` sends the CLI elsewhere, for a call the map does not cover
+  (`status`, or a worktree the CLI resolves from its own folder), and always with `REFSURE_ORCA_TRANSPORT=cli`. The
+  runtime token goes only to that socket.
   `refsure doctor` names the transport in its `orca_transport` check.
 - **agent-browser:** refsure uses `agent-browser` on `PATH` first, then the copy Orca bundles
   (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). It drives only a session you opened
@@ -258,8 +265,7 @@ if you had granted nothing, because anyone who can write it could grant on your 
   sessions), keys (by name), consent, the config file mode, model drift and the installed skill. On Orca, its
   `orca_terminal` check reports the worktree (`ORCA_WORKTREE_ID`) on its own: a terminal outside Orca fails that
   check, and `orca_running` still reports Orca itself; `orca_transport` says whether calls take the runtime socket
-  or spawn the CLI, and why. `refsure doctor --ping` sends one synthetic Decision per
-  configured provider.
+  or spawn the CLI, and why. `refsure doctor --ping` sends one synthetic Decision per configured provider.
 
 Consent is a disclosure, not a security control: an agent with a terminal could fake the typed step. The point is
 that you, the human, have read what is sent before anything is.
@@ -289,10 +295,11 @@ the likeliest stay, and `--open` is never followed by an `oversize` refusal once
 values, console and network bodies. Text in an editable region (`contenteditable`: a comment box, a rich editor)
 shows in the page text, so `state`, `outcome`, `act --verify`, `wait-for`, `do` and `mark` read each such region (up
 to 16) without a snapshot and cut its text out; `state` also cuts what its snapshot shows. `do` also cuts every value
-it filled or selected from its new text. With more regions, or a backend
-that cannot read them one by one, the page text is withheld from the Decision (note `typed_text_withheld`). So it is
-when a typed text too short to cut out without cutting words (one or two characters: `42`, `OK`, one code cell)
-shows in the page text as a word. `state` then asks over the URL, title, headings, dialogs and alerts, with a
+it filled or selected from its new text, and sends only the page's origin as its URL once a value shows in it (a
+search form's `?q=`). With more regions, or a backend that cannot read them one by one, the page text is withheld
+from the Decision (note `typed_text_withheld`). So it is when a typed text too short to cut out without cutting
+words (one or two characters: `42`, `OK`, one code cell) shows in the page text as a word; for `do`, a short
+`--fill` value counts, a short `--select` option label (page text already) does not. `state` then asks over the URL, title, headings, dialogs and alerts, with a
 placeholder for the text. No other Decision is asked on a withheld text alone, and nothing is spent: `wait-for`
 keeps polling until a poll it can read (with no `--text` or `--url`, a wait whose every poll was withheld ends
 `not_seen` and says nothing judged the page), and `outcome`, `act --verify` and `outcome --mark` answer

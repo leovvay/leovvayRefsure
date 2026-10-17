@@ -47,9 +47,10 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
  * The wait (spec §6.2): each poll reads `tab show` + body text, and judges what `view` keeps of it (the whole page
  * by default). Code says `present` when the literal or the URL glob matches. Otherwise the presence Noul is asked,
  * only when the cleaned text changed and at least one interval passed since the last ask, and only when the whole
- * round fits what is left of `--max-decisions` (an `agree` round is two calls). It is never asked on a poll whose text is withheld (`typedWithheld`, noted): a wait only the
- * Decision could settle then ends `not_seen` by code, and says so when every poll was withheld, since nothing judged
- * the page. A timeout is `not_seen` (exit 10), never "absent".
+ * round fits what is left of `--max-decisions` (an `agree` round is two calls). It is never asked on a poll whose
+ * text is withheld (`typedWithheld`, noted): a wait only the Decision could settle then ends `not_seen` by code,
+ * and says so when every poll was withheld, since nothing judged the page. A timeout is `not_seen` (exit 10), never
+ * "absent".
  *
  * When the Decision cannot be asked (setup, caps, policy, a refused key), a wait that `--text` or `--url` can
  * settle keeps polling by code and names the cause in its notes; any other wait stops at once with that cause.

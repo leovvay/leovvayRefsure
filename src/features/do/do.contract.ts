@@ -3,8 +3,9 @@ import type { DoStepReport } from './do-step-report';
 
 /**
  * `refsure do`: `done` when every step ran and nothing was expected, `seen` when the expectation showed in the new
- * text, `not_seen` or `stalled` when it did not (never "absent" or "failed"), `stopped` when a step stopped it.
- * `steps`, `dismissed` and `new_text` are page text.
+ * text, `not_seen` or `stalled` when it did not (never "absent" or "failed"; `not_seen` also when no Decision could
+ * be asked, which `why.cause` names), `stopped` when a step or a browser failure stopped it. `steps`, `dismissed`
+ * and `new_text` are page text.
  */
 export interface DoResult {
   verdict: 'done' | 'seen' | 'not_seen' | 'stalled' | 'stopped';
@@ -17,6 +18,6 @@ export interface DoResult {
   polls: number;
   /** Provider calls in all: the blocker level, the picks and the wait. */
   decisions: number;
-  /** Something acted, and this is why it is not confirmed: `not_seen`, `stalled`, or the stopping cause. */
+  /** Set whenever something acted and the exit is 30: `not_seen`, `stalled`, or the stopping cause. */
   unconfirmed?: string;
 }

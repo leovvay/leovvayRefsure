@@ -1,8 +1,8 @@
 import { VALUE_ACTIONS } from '../../browser';
 import { oneLine, type OptionToken, type ParsedArgs, type UsageError } from '../../cli';
-import { norm } from '../../page-model';
+import { fold, norm, valuePieces } from '../../page-model';
 import { BOUNDS } from '../../questions';
-import { durationOf } from '../wait-for';
+import { durationOf, WAIT_BOUNDS } from '../wait-for';
 import type { DoArgs } from './do.args';
 import type { DoStep, StepAction } from './do-step';
 
@@ -10,8 +10,6 @@ import type { DoStep, StepAction } from './do-step';
 export const STEP_ACTIONS: readonly StepAction[] = ['fill', 'select', 'check', 'uncheck', 'click'];
 export const STEPS_MAX = 8;
 export const DO_DEFAULTS = { timeout: '60s', stall: '10s' } as const;
-const DURATION_MIN_MS = 1_000;
-const DURATION_MAX_MS = 600_000;
 
 function isStepAction(name: string): name is StepAction {
   return (STEP_ACTIONS as readonly string[]).includes(name);
@@ -27,7 +25,8 @@ function targetOf(flag: string, text: string, what: string): string | UsageError
 
 /**
  * One step from its token. A fill or select is `<field>=<value>`, split at the first `=`, so the value may hold
- * more. A refusal never quotes the value: it may be a password.
+ * more, and is never empty: Orca refuses an empty fill before it sends anything. A refusal never quotes the value:
+ * it may be a password.
  */
 function stepOf(token: OptionToken & { name: StepAction }): DoStep | UsageError {
   const action = token.name;
@@ -43,6 +42,7 @@ function stepOf(token: OptionToken & { name: StepAction }): DoStep | UsageError 
   if (typeof target !== 'string') return target;
   const value = given.slice(at + 1);
   if (action === 'select' && norm(value) === '') return { usage: '--select names no option after "="' };
+  if (action === 'fill' && value === '') return { usage: `--fill names no value after "=" for ${JSON.stringify(target)}` };
   return { action, target, value };
 }
 
@@ -65,7 +65,19 @@ function waitDuration(raw: ParsedArgs, name: 'timeout' | 'stall', expect: string
   const given = raw.values[name];
   if (given !== undefined && expect === null) return { usage: `--${name} needs --expect: without it nothing is waited for` };
   const text = typeof given === 'string' ? given : DO_DEFAULTS[name];
-  return durationOf(name, text, DURATION_MIN_MS, DURATION_MAX_MS);
+  return durationOf(name, text, WAIT_BOUNDS.minMs, WAIT_BOUNDS.maxMs);
+}
+
+/**
+ * `--text` never holds a fill or select value: the new text has the values cut out before `--text` reads it (a page
+ * echoing the agent's own input is no success), so such a literal could never match. The refusal names no value.
+ */
+function textRefusal(text: string, steps: readonly DoStep[]): UsageError | null {
+  const values = steps.flatMap((step) => (step.value === undefined ? [] : [step.value]));
+  const literal = fold(text);
+  if (!valuePieces(values).some((piece) => literal.includes(fold(piece)))) return null;
+  return { usage: '--text holds a --fill or --select value, which is cut from the new text before --text is read: '
+    + 'give a literal the page shows only on success' };
 }
 
 /** At least one step or `--expect`; `--text`, `--timeout` and `--stall` only with `--expect`. */
@@ -86,6 +98,8 @@ export function parseDo(raw: ParsedArgs): DoArgs | UsageError {
   if (text === '') return { usage: '--text is empty: give the literal to look for, or leave it out' };
   if (text !== null && expect === null) return { usage: '--text needs --expect: it is the code rule of the wait' };
   if (text !== null && text.length > BOUNDS.INTENT_MAX) return { usage: `--text is over ${BOUNDS.INTENT_MAX} characters` };
+  const echo = text === null ? null : textRefusal(text, steps);
+  if (echo !== null) return echo;
   const timeoutMs = waitDuration(raw, 'timeout', expect);
   if (typeof timeoutMs !== 'number') return timeoutMs;
   const stallMs = waitDuration(raw, 'stall', expect);
