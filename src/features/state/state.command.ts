@@ -1,7 +1,7 @@
 import type { CommandOutcome, CommandSpec } from '../../cli';
 import { DIALOG_ROLES, pageView } from '../../page-model';
 import { pageStateSite, RESEARCH_STATES } from '../../questions';
-import { abstainOutcome, SHORT_TYPED, withheldNote } from '../shared';
+import { abstainOutcome, readTyped, SHORT_TYPED, typedWithheld, withheldNote, withoutTyped } from '../shared';
 import { parseState } from './parse-state';
 import type { StateArgs } from './state.args';
 import type { StateResult } from './state.contract';
@@ -69,9 +69,15 @@ export const stateCommand: CommandSpec<StateArgs, StateResult> = {
       return answered('blocking_modal', 'code', args);
     }
 
-    const body = await ctx.browser.text(page, 'body');
-    const view = pageView(tree, tab, body);
-    if (view.textWithheld) ctx.trace.notes.push(withheldNote(SHORT_TYPED));
+    // The editable regions, read as the other verbs read them (spec §7.3): a role="textbox" contenteditable shows in
+    // the tree as a plain textbox, so only this read finds its typing in the body text. The tree's cut applies on top.
+    const [body, typed] = await Promise.all([ctx.browser.text(page, 'body'), readTyped(ctx.browser, page)]);
+    const withheld = typedWithheld(body, typed);
+    const shown = pageView(tree, tab, withheld === null ? withoutTyped(body, typed) : '');
+    // Withheld, the text is the shared placeholder, whole: the tree's cut would take words out of it.
+    const view = withheld === null ? shown : { ...shown, text: withoutTyped(body, typed) };
+    const why = withheld ?? (shown.textWithheld ? SHORT_TYPED : null);
+    if (why !== null) ctx.trace.notes.push(withheldNote(why));
     const { pageUrl, page: block } = stateInput(view, ctx.config.piiMasks);
     const { verdict } = await ctx.decide(
       pageStateSite,

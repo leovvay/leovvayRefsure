@@ -142,8 +142,11 @@ export function typedValues(tree: AxTree): string[] {
 }
 
 /**
- * What was typed into editable regions and is too short to cut (`shortPieces`). Only an editable region's text
- * shows in the body text; a textbox value never does, so a short one is no reason to withhold it.
+ * What was typed into editable regions the tree marks `contenteditable`, too short to cut (`shortPieces`). An
+ * `<input>`'s value never shows in the body text, so a short one is no reason to withhold it. A `role="textbox"`
+ * contenteditable does show its text there, but the tree prints it as a plain textbox and cannot tell it from an
+ * `<input>`: its typing is found only by reading the editable regions without a snapshot (spec §7.3), as every
+ * verb that sends body text does.
  */
 export function shortTypedValues(tree: AxTree): string[] {
   const values: string[] = [];
