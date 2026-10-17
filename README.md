@@ -721,10 +721,11 @@ clicks your ref with no snapshot first, then takes one to read the options it li
 three take `--expect-name`, and for `pick-option` it is required with `--open`: it must match the element's live text
 (or its `aria-label`, `placeholder`, `title`, or an `<input>` button's `value`), and page raisers (a password field,
 card fields) lift the risk class. Money, irreversible, auth and consent still refuse before the click, `--open`
-included. `outcome` reads the page before the act after all of that, so it then checks the URL and tab again and
-reads the ref's names again (its text, `aria-label`, `placeholder`, `title` and labels, so an icon button too): a
-page that moved is `page_changed`, a ref that no longer shows `--expect-name` is `expect_name_mismatch`, a ref whose
-new name reads money, irreversible, auth or consent ("Save" renamed "Save and send", or an icon button's
+included, and the refusal's `act-high-risk` command carries the full name the ref shows (`Save and send` where you
+passed `Save`). `outcome` reads the page before the act after all of that, so it then checks the URL and tab again
+and reads the ref's names again (its text, `aria-label`, `placeholder`, `title` and labels, so an icon button too):
+a page that moved is `page_changed`, a ref that no longer shows `--expect-name` is `expect_name_mismatch`, a ref
+whose new name reads money, irreversible, auth or consent ("Save" renamed "Save and send", or an icon button's
 `aria-label` changed to "Send now") is `high_risk_class` with no command offered, and nothing is clicked. A confirm
 dialog that opens, or a password or card field that appears, in that window, which can last seconds on Orca, is not
 seen.

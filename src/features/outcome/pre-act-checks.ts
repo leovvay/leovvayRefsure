@@ -60,14 +60,18 @@ export async function checkBeforeAct(
     url: tab.url, ...(args.risk ? { userRisk: args.risk } : {}),
   });
   if (refusesHighRisk(risk.class)) {
-    // The caller's own ref, name and intent: the one command that may take it, spelled out (spec §6.3).
+    // The caller's own ref and intent, with the full name the ref shows now, which `--expect-name` may only be part
+    // of ("Save" in "Save and send"): the one command that may take it, spelled out (spec §6.3). Page text in both.
+    ctx.trace.untrusted.add('next.argv');
+    ctx.trace.untrusted.add('why.detail');
     const next = highRiskNext({
-      class: risk.class, via: { ref, expectName: args.expectName }, action, intent: args.intent,
+      class: risk.class, via: { ref, expectName: live.seen }, action, intent: args.intent,
       ...(args.act.value === undefined ? {} : { value: args.act.value }),
       ...(args.risk ? { risk: args.risk } : {}),
     });
-    const detail = `${risk.class} (${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or `
-      + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
+    const detail = `@${ref} shows ${JSON.stringify(cutName(norm(live.seen)))}, which reads ${risk.class} `
+      + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent; nothing was done. `
+      + 'Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
   return { cleared: { live, role, url: tab.url } };
