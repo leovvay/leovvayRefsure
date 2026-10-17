@@ -118,7 +118,9 @@ export async function nameStill(
     : lexical;
   if (!refusesHighRisk(risk.class)) return { live };
   ctx.trace.untrusted.add('why.detail');
-  const detail = `@${ref} now shows ${JSON.stringify(cutName(norm(live.seen)))}, which reads ${risk.class} `
+  // The name the guard did not see (a title or label renamed while the text stayed), else the one a browser gives.
+  const shown = live.sources.find((name) => !cleared.live.sources.includes(name)) ?? norm(live.seen);
+  const detail = `@${ref} now shows ${JSON.stringify(cutName(shown))}, which reads ${risk.class} `
     + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent, and the page changed `
     + 'it while the act was checked, so no command is offered for it; nothing was done. A human decides';
   return { refusal: nothingDone('refused', 'high_risk_class', detail, { next: NEEDS_HUMAN }) };
