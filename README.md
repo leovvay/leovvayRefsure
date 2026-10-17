@@ -258,14 +258,15 @@ without a snapshot and cut its text out; `state` also cuts what its snapshot sho
 that cannot read them one by one, the page text is withheld from the Decision (note `typed_text_withheld`). So it is
 when a typed text too short to cut out without cutting words (one or two characters: `42`, `OK`, one code cell)
 shows in the page text as a word. `state` then asks over the URL, title, headings, dialogs and alerts, with a
-placeholder for the text. No other Decision is asked on a withheld text, and nothing is spent: `wait-for` keeps
-polling until a poll it can read (with no `--text` or `--url`, a wait whose every poll was withheld ends `not_seen`
-and says nothing judged the page), and `outcome` and `act --verify` answer `effect_unknown` (exit 30) when a side is
-withheld and the URL did not change. `wait-for --text` and `outcome -- … --expect-text` still match the whole page
-text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles nothing
-when either side's text was withheld. The acted element that `outcome` and `act --verify` send has its name cut the
-same way: a region with no label, which goes by its own text, is named by its placeholder or title, or by its role
-alone.
+placeholder for the text. No other Decision is asked on a withheld text alone, and nothing is spent: `wait-for`
+keeps polling until a poll it can read (with no `--text` or `--url`, a wait whose every poll was withheld ends
+`not_seen` and says nothing judged the page), and `outcome`, `act --verify` and `outcome --mark` answer
+`effect_unknown` (exit 30) when a side is withheld and the URL did not change; when the URL changed, the Decision
+sees both URLs, titles and the placeholder. `wait-for --text` and `outcome -- … --expect-text` still match the whole
+page text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles
+nothing when either side's text was withheld. The acted element that `outcome` and `act --verify` send has its name
+cut the same way: a region with no label, which goes by its own text, is named by its placeholder or title, or by
+its role alone.
 
 **Before anything is sent:**
 
