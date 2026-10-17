@@ -110,17 +110,24 @@ export async function nameStill(
   if (unchanged(cleared.live, live)) return { live: cleared.live };
   const named = nameCheck(live, args.expectName);
   if (named !== 'ok') return { refusal: nameMismatch(ctx, ref, 'now shows', named.mismatch, args.expectName) };
+  const byName = { url: cleared.url, action, role: cleared.role };
   const lexical = classifyNames([...new Set([...cleared.live.sources, ...live.sources])], {
-    url: cleared.url, action, role: cleared.role, ...(args.risk ? { userRisk: args.risk } : {}),
+    ...byName, ...(args.risk ? { userRisk: args.risk } : {}),
   });
   const risk = FIELD_ACTIONS.has(action)
     ? mergeReadings(lexical, await fieldRaisers(ctx.browser, page, ref, live.fieldAttrs))
     : lexical;
   if (!refusesHighRisk(risk.class)) return { live };
   ctx.trace.untrusted.add('why.detail');
-  // The name the guard did not see (a title or label renamed while the text stayed), else the one a browser gives.
-  const shown = live.sources.find((name) => !cleared.live.sources.includes(name)) ?? norm(live.seen);
-  const detail = `@${ref} now shows ${JSON.stringify(cutName(shown))}, which reads ${risk.class} `
+  // The names the guard did not see (a title or label renamed while the text stayed), never a fill or select's own
+  // text, which is a value or its options: the first that reads high risk by itself (not by `--risk`), else the first.
+  // None is new when only a field's attributes changed, so the name a browser gives is quoted as it stood.
+  const fresh = live.names.map(norm).filter((name) => !cleared.live.sources.includes(name));
+  const shown = fresh.find((name) => refusesHighRisk(classifyNames([name], byName).class)) ?? fresh[0];
+  const quoted = shown === undefined
+    ? `shows ${JSON.stringify(cutName(norm(live.seen)))}`
+    : `now shows ${JSON.stringify(cutName(shown))}`;
+  const detail = `@${ref} ${quoted}, which reads ${risk.class} `
     + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent, and the page changed `
     + 'it while the act was checked, so no command is offered for it; nothing was done. A human decides';
   return { refusal: nothingDone('refused', 'high_risk_class', detail, { next: NEEDS_HUMAN }) };
