@@ -17,12 +17,17 @@ const STOPS: ReadonlySet<Status> = new Set<Status>(['not_set_up', 'spend_limit',
 /** A provider that failed may answer on a later poll, even over the same text; a refused key never does. */
 const RETRY: ReadonlySet<string> = new Set(['provider_timeout', 'provider_error']);
 /**
- * After the Decision leaned to `present` under the edge, the stall window this wait shrinks to: the page is not
- * changing, so the text it read is all there is to read, and the caller can judge that text itself.
+ * After the Decision was unsure (its Noul inside the band, neither `present` nor a clear no), the stall window this
+ * wait shrinks to: the page is not changing, so the text it read is all there is to read, and the caller can judge
+ * that text itself. A clear no (at or under the band's low edge) keeps the whole window: the page may still be
+ * loading.
  */
 const LEAN_STALL_MS = 2_000;
-/** A Noul at or above this, under the edge, leans to `present`. */
-const LEAN_AT_LEAST = 0.5;
+
+/** Whether a Noul under the `present` edge is still above the band's low edge, the mirror of that edge. */
+function unsure(confidence: number, threshold: number): boolean {
+  return confidence > Math.round((1 - threshold) * 100) / 100;
+}
 
 /**
  * What the stall rule compares from poll to poll: the URL and the body text as read. It never leaves the machine,
@@ -65,8 +70,8 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
  * `usage` when the cap is below a single round, since nothing else can ever see it.
  *
  * With `stallMs`, a poll that leaves the whole page (text and URL) as it has been for that long ends the wait
- * `stalled`, after that poll's own code rule and Decision had their turn. Once the Decision leaned to `present` under
- * the edge, the window is `LEAN_STALL_MS` from that ask while the page stays as it read it, and the detail says so.
+ * `stalled`, after that poll's own code rule and Decision had their turn. Once the Decision was unsure (`unsure`),
+ * the window is `LEAN_STALL_MS` from that ask while the page stays as it read it, and the detail says so.
  */
 export async function pollPresence(
   args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole,
@@ -144,7 +149,7 @@ export async function pollPresence(
           if (verdict.kind === 'answer') return { status: 'ok', acted: false, effect: 'none', result: result('present', 'decision') };
           lastCause = verdict.cause;
           const { confidence, threshold } = verdict;
-          lean = verdict.cause === 'low_confidence' && confidence !== null && threshold !== null && confidence >= LEAN_AT_LEAST
+          lean = verdict.cause === 'low_confidence' && confidence !== null && threshold !== null && unsure(confidence, threshold)
             ? { key, at: ctx.now(), confidence, threshold } : null;
           const status = causeStatus(verdict.cause);
           if (status === 'abstained') tally.answered += 1;

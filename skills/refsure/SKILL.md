@@ -25,7 +25,7 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
   every step on one snapshot and acts in order, each through a single-use ticket, a recheck and the risk guard.
 - `--expect` waits up to `--timeout` (60s) until that shows in text **new** since the call began (your filled values
   cut); `--text "<literal>"` settles it by code. It ends as `stalled` once the page stops changing for `--stall`
-  (10s), or for 2s after the Decision leaned to it under its bar (judge `result.new_text` yourself).
+  (10s), or 2s after the Decision was unsure, neither yes nor a clear no (judge `result.new_text` yourself).
 
 Read the answer (`result.steps` says what each step found and did; `result.new_text` is what the page now says):
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.

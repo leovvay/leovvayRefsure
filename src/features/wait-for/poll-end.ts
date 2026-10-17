@@ -25,8 +25,8 @@ export function belowOneRound(cap: number, calls: number): CommandOutcome<WaitFo
  * The stall rule (spec §6.2, `--stall`): neither the page text nor the URL changed for `stallMs`, so what the wait
  * expects is not coming by itself. `stalled` (exit 10), never "absent" and never "failed". `next` is `stop`: only
  * the human says to wait longer. When a poll's text was withheld (`typedWithheld`), no Decision read it, so the
- * detail says so and `next` is to look again: the page may show it already. With `lean`, the Decision leaned to
- * `present` under the edge and the page has not changed for `stallMs` since: the detail names the lean.
+ * detail says so and `next` is to look again: the page may show it already. With `lean`, the Decision was unsure
+ * (inside its band) and the page has not changed for `stallMs` since: the detail says so.
  */
 export function stalled(
   stallMs: number, tally: PollTally, result: ResultOf, lean: { confidence: number; threshold: number } | null = null,
@@ -46,8 +46,9 @@ export function stalled(
       detail: lean === null
         ? `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')}); `
           + 'the wait for it is over: report the page as it stands, and wait again only for a time the human named'
-        : `not confirmed: the Decision leaned to present at ${lean.confidence}, under the ${lean.threshold} edge, and the `
-          + `page text and URL have not changed for ${formatDuration(stallMs)} since (${notes.join('; ')})`,
+        : `not confirmed: the Decision was unsure (${lean.confidence}, under the ${lean.threshold} edge), and the page `
+          + `text and URL have not changed for ${formatDuration(stallMs)} since (${notes.join('; ')}); judge the new text `
+          + 'yourself',
     },
     next: tally.withheld > 0 ? RE_OBSERVE : STALLED_NEXT,
   };

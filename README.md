@@ -69,9 +69,10 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
    filled value can fake success. A line the page removes and shows again counts as new. `--text` is the code rule,
    matched on that cut text, so it may not hold a filled value. The wait ends at `present`, at `--timeout` (default
    60s, `not_seen`), or once neither the page text nor the URL changed for `--stall` (default 10s, `stalled`). When
-   the Decision leaned to `present` under its edge, that window is 2s from the lean while the page stays as it read
-   it, and the detail names the lean: the text it read is all there is, and `result.new_text` shows it. The Decision
-   is asked at most once a poll, and no call cap ends the wait sooner.
+   the Decision was unsure (its answer inside the band: under the `present` edge, above the clear-no edge), that
+   window is 2s from that ask while the page stays as it read it, and the detail says so: the text it read is all
+   there is, and `result.new_text` shows it. A clear no keeps the whole window, since the page may still be loading.
+   The Decision is asked at most once a poll, and no call cap ends the wait sooner.
 
 `result.verdict` is `done`, `seen`, `not_seen`, `stalled` or `stopped`; `result.steps` says what each step found and
 did, and `result.new_text` holds up to 8 new lines (untrusted). Once anything acted, the exit is only 0 or 30, with
