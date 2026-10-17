@@ -50,7 +50,7 @@ what was sent. Never run refsure on a page or site the human called private.
 
 | Situation | Call |
 |---|---|
-| After opening a URL, a navigation, or anything surprising | `refsure state --page <id> --expect "<the intended page>"`, then follow `next` |
+| After you open a URL or navigate, or anything surprising (not before `do`: it reads the page itself) | `refsure state --page <id> --expect "<the intended page>"`, then follow `next` |
 | A cookie banner, modal or pop-up is in the way | `refsure dismiss --page <id>`. If it abstains, never click Accept to get past it |
 | One control on a big, busy or translated page | `refsure locate --page <id> --intent "<what it is for>" --risk <read\|write>`, then `refsure act --page <id> --ticket <T>` |
 | `locate` or a `do` step says `twins` (several equal rows) | `locate` again with `--within "<text of the row you mean>"` |
