@@ -266,7 +266,9 @@ sees both URLs, titles and the placeholder. `wait-for --text` and `outcome -- â€
 page text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles
 nothing when either side's text was withheld. The acted element that `outcome` and `act --verify` send has its name
 cut the same way: a region with no label, which goes by its own text, is named by its placeholder or title, or by
-its role alone.
+its role alone. A ref inside a region (an auto-linked URL, a chip) whose name is part of a typed line, and shows
+nowhere else in the page text, loses that name too. When the regions cannot be read, any element is named by its
+role alone.
 
 **Before anything is sent:**
 

@@ -1,9 +1,9 @@
 import type { CommandOutcome } from '../../cli';
 import { boundText, cleanEgressText } from '../../egress';
 import { RE_OBSERVE } from '../../output';
-import { cutPieces, describeElement, norm, showsAsWord, valuePieces } from '../../page-model';
+import { cutPieces, describeElement, fold, norm, showsAsWord, valuePieces } from '../../page-model';
 import { BOUNDS } from '../../questions';
-import { type AbstainWhy, type PageReading, typedWithheld, withoutTyped } from '../shared';
+import { type AbstainWhy, type PageReading, type TypedText, typedWithheld, withoutTyped } from '../shared';
 import type { ActedElement } from './acted-element';
 
 const TITLE_MAX = 300;
@@ -70,24 +70,39 @@ export function withheldUnmoved(
 }
 
 /**
+ * Whether a name is only part of a line typed into an editable region, which the cut takes out only whole: a ref
+ * inside the region (an auto-linked URL, a chip) is named by a piece of the typing around it. A name the page also
+ * shows outside every region (`body`: the before-side's text with the typing cut out, folded) keeps it, as a "Save"
+ * button does. One under three code points is no piece (`valuePieces`).
+ */
+function typedPart(name: string, typed: TypedText, body: string): boolean {
+  const folded = fold(name);
+  if (!('pieces' in typed) || Array.from(folded).length < 3) return false;
+  return typed.pieces.some((piece) => fold(piece).includes(folded)) && !body.includes(folded);
+}
+
+/**
  * One name of the element acted on, as it may leave (spec §7.3): what was typed into editable regions before the act,
  * when the name was read, and the value a fill or select typed, cut out as the sides are cut. Null when it is
- * withheld (`typedWithheld`) or nothing is left.
+ * withheld (`typedWithheld`), nothing is left, or what is left is part of a typed line (`typedPart`).
  */
-function nameShown(name: string, before: PageReading, value?: string): string | null {
+function nameShown(name: string, before: PageReading, body: string, value?: string): string | null {
   if (typedWithheld(name, before.typed) !== null) return null;
   const shown = withoutValue(withoutTyped(name, before.typed), value);
-  return norm(shown) === '' || shown === WITHHELD ? null : shown;
+  if (norm(shown) === '' || shown === WITHHELD) return null;
+  return typedPart(shown, before.typed, body) ? null : shown;
 }
 
 /**
  * The element acted on as it may leave, `<role> "<name>"`: its first name `nameShown` keeps, so the dry-run body and
  * the one sent after the act name it alike. An editable region with no label is named by its own text, which is
- * typing, so it falls to its placeholder or title, or to the role alone.
+ * typing, so it falls to its placeholder or title, or to the role alone; so does any element when the regions could
+ * not be read, since any name may then hold typing.
  */
 function actedShown(acted: ActedElement, before: PageReading, value?: string): string {
+  const body = fold(withoutTyped(before.text, before.typed));
   for (const name of acted.names) {
-    const shown = nameShown(name, before, value);
+    const shown = nameShown(name, before, body, value);
     if (shown !== null) return describeElement(acted.role, shown);
   }
   return acted.role;
