@@ -25,9 +25,12 @@ export function belowOneRound(cap: number, calls: number): CommandOutcome<WaitFo
  * The stall rule (spec §6.2, `--stall`): neither the page text nor the URL changed for `stallMs`, so what the wait
  * expects is not coming by itself. `stalled` (exit 10), never "absent" and never "failed". `next` is `stop`: only
  * the human says to wait longer. When a poll's text was withheld (`typedWithheld`), no Decision read it, so the
- * detail says so and `next` is to look again: the page may show it already.
+ * detail says so and `next` is to look again: the page may show it already. With `lean`, the Decision leaned to
+ * `present` under the edge and the page has not changed for `stallMs` since: the detail names the lean.
  */
-export function stalled(stallMs: number, tally: PollTally, result: ResultOf): CommandOutcome<WaitForResult> {
+export function stalled(
+  stallMs: number, tally: PollTally, result: ResultOf, lean: { confidence: number; threshold: number } | null = null,
+): CommandOutcome<WaitForResult> {
   const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
   if (tally.withheld > 0) {
     notes.push(`the page text was withheld on ${tally.withheld} of them (typed_text_withheld), so no Decision read it `
@@ -40,7 +43,10 @@ export function stalled(stallMs: number, tally: PollTally, result: ResultOf): Co
     result: result('stalled', tally.answered > 0 ? 'decision' : 'code'),
     why: {
       cause: 'stalled',
-      detail: `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')})`,
+      detail: lean === null
+        ? `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')})`
+        : `not confirmed: the Decision leaned to present at ${lean.confidence}, under the ${lean.threshold} edge, and the `
+          + `page text and URL have not changed for ${formatDuration(stallMs)} since (${notes.join('; ')})`,
     },
     next: tally.withheld > 0 ? RE_OBSERVE : STALLED_NEXT,
   };

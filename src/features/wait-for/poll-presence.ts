@@ -16,6 +16,13 @@ import type { WaitForResult } from './wait-for.contract';
 const STOPS: ReadonlySet<Status> = new Set<Status>(['not_set_up', 'spend_limit', 'refused']);
 /** A provider that failed may answer on a later poll, even over the same text; a refused key never does. */
 const RETRY: ReadonlySet<string> = new Set(['provider_timeout', 'provider_error']);
+/**
+ * After the Decision leaned to `present` under the edge, the stall window this wait shrinks to: the page is not
+ * changing, so the text it read is all there is to read, and the caller can judge that text itself.
+ */
+const LEAN_STALL_MS = 2_000;
+/** A Noul at or above this, under the edge, leans to `present`. */
+const LEAN_AT_LEAST = 0.5;
 
 /**
  * What the stall rule compares from poll to poll: the URL and the body text as read. It never leaves the machine,
@@ -58,7 +65,8 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
  * `usage` when the cap is below a single round, since nothing else can ever see it.
  *
  * With `stallMs`, a poll that leaves the whole page (text and URL) as it has been for that long ends the wait
- * `stalled`, after that poll's own code rule and Decision had their turn.
+ * `stalled`, after that poll's own code rule and Decision had their turn. Once the Decision leaned to `present` under
+ * the edge, the window is `LEAN_STALL_MS` from that ask while the page stays as it read it, and the detail says so.
  */
 export async function pollPresence(
   args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole,
@@ -77,6 +85,8 @@ export async function pollPresence(
   let closed: string | null = null;
   let lastKey: string | null = null;
   let changedAt = tally.started;
+  /** The last Decision that leaned to `present` under the edge, and the page it read. */
+  let lean: { key: string; at: number; confidence: number; threshold: number } | null = null;
 
   // A Decision that can never be asked on this wait: stop, unless code can still see it.
   const shut = (why: AbstainWhy): CommandOutcome<WaitForResult> | null => {
@@ -133,6 +143,9 @@ export async function pollPresence(
           tally.decisions += ctx.trace.egress.length - calls;
           if (verdict.kind === 'answer') return { status: 'ok', acted: false, effect: 'none', result: result('present', 'decision') };
           lastCause = verdict.cause;
+          const { confidence, threshold } = verdict;
+          lean = verdict.cause === 'low_confidence' && confidence !== null && threshold !== null && confidence >= LEAN_AT_LEAST
+            ? { key, at: ctx.now(), confidence, threshold } : null;
           const status = causeStatus(verdict.cause);
           if (status === 'abstained') tally.answered += 1;
           if (STOPS.has(status) || verdict.permanent) {
@@ -147,6 +160,9 @@ export async function pollPresence(
     // Without --text or --url only the Decision can see it: once it is closed, waiting on cannot change the answer.
     if (closed !== null && !byCode) return ended(args, ctx, { tally, byCode, closed, early: true, lastCause, result });
     if (args.stallMs !== null && ctx.now() - changedAt >= args.stallMs) return stalled(args.stallMs, tally, result);
+    if (args.stallMs !== null && lean !== null && lean.key === key && ctx.now() - lean.at >= Math.min(LEAN_STALL_MS, args.stallMs)) {
+      return stalled(Math.min(LEAN_STALL_MS, args.stallMs), tally, result, lean);
+    }
     const left = deadline - ctx.now();
     if (left <= 0 || ctx.signal.aborted) break;
     await sleep(Math.min(args.intervalMs, left), ctx.signal);
