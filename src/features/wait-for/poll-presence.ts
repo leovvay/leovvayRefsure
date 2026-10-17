@@ -4,7 +4,7 @@ import { boundText, cleanEgressText, sha256Hex } from '../../egress';
 import { causeStatus, RE_OBSERVE, type Status } from '../../output';
 import { fold } from '../../page-model';
 import { BOUNDS, presenceSite } from '../../questions';
-import { abstainOutcome, nothingDone, readPage, sleep, urlGlobMatches, withoutTyped } from '../shared';
+import { abstainOutcome, nothingDone, readPage, sleep, typedWithheld, urlGlobMatches, withoutTyped } from '../shared';
 import type { AbstainWhy, PageReading } from '../shared';
 import { formatDuration } from './duration';
 import type { WaitForArgs } from './wait-for.args';
@@ -44,7 +44,8 @@ function plural(n: number, word: string): string {
  * The wait (spec §6.2): each poll reads `tab show` + body text. Code says `present` when the literal or the URL
  * glob matches. Otherwise the presence Noul is asked, only when the cleaned text changed and at least one interval
  * passed since the last ask, and only when the whole round fits what is left of `--max-decisions` (an `agree`
- * round is two calls). A timeout is `not_seen` (exit 10), never "absent".
+ * round is two calls). It is never asked on a poll whose text is withheld (`typedWithheld`, noted): a wait only the
+ * Decision could settle then ends `not_seen` by code. A timeout is `not_seen` (exit 10), never "absent".
  *
  * When the Decision cannot be asked (setup, caps, policy, a refused key), a wait that `--text` or `--url` can
  * settle keeps polling by code and names the cause in its notes; any other wait stops at once with that cause.
@@ -88,7 +89,9 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
     }
 
     closed ??= capped(1);
-    if (closed === null && ctx.now() - lastAskAt >= args.intervalMs) {
+    // A withheld text is no page to judge: this poll asks nothing and spends nothing, and a later readable poll may.
+    const withheld = typedWithheld(reading.text, reading.typed) !== null;
+    if (closed === null && !withheld && ctx.now() - lastAskAt >= args.intervalMs) {
       const input = presenceInput(args, reading, ctx.config.piiMasks);
       const hash = sha256Hex(`${input.pageUrl}\n${input.page}`);
       if (hash !== lastHash) {

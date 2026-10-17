@@ -1,7 +1,7 @@
 import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { outcomeSite } from '../../questions';
-import { outcomeInput, SETTLE_MS, unconfirmed } from '../outcome';
+import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from '../outcome';
 import { type PageReading, readPage, sleep } from '../shared';
 import type { ActCommandResult } from './act.contract';
 
@@ -20,14 +20,16 @@ export async function dryVerify(ctx: CommandContext, opts: VerifyOpts) {
 }
 
 /**
- * `--verify` after the act ran (spec §6.2): wait as `outcome` does, read the page again, and ask the outcome Noul.
- * Only `landed` is exit 0; anything else, a provider failure included, is `effect_unknown` (exit 30), never "failed".
+ * `--verify` after the act ran (spec §6.2): wait as `outcome` does, read the page again, and ask the outcome Noul,
+ * unless a side's text is withheld on an unmoved URL (`withheldUnmoved`), where nothing is asked. Only `landed` is
+ * exit 0; anything else, a provider failure included, is `effect_unknown` (exit 30), never "failed".
  */
 export async function verifyAfter(
   ctx: CommandContext, page: PageRef, opts: VerifyOpts & { base: Base },
 ): Promise<CommandOutcome<ActCommandResult>> {
   await sleep(SETTLE_MS, ctx.signal);
   const after = await readPage(ctx, page);
+  if (withheldUnmoved(opts.before, after, opts)) return unjudged({ verdict: 'unknown', ...opts.base }, true);
   const { verdict } = await ctx.decide(outcomeSite, outcomeInput(opts.intent, opts.acted, opts.before, after, opts),
     { combo: 'auto', originUrl: after.tab.url, dryRun: false, signal: ctx.signal });
   if (verdict.kind === 'answer') {

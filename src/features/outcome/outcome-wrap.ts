@@ -8,7 +8,7 @@ import type { OutcomeResult } from './outcome.contract';
 import { landedByCode } from './landed-by-code';
 import { landedOutcome } from './landed-outcome';
 import { checkBeforeAct } from './pre-act-checks';
-import { outcomeInput, SETTLE_MS, unconfirmed } from './outcome-side';
+import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from './outcome-side';
 
 /**
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
@@ -64,6 +64,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   const after = await readPage(ctx, page);
   const rule = landedByCode(args, { url: before.tab.url, text: before.text }, { url: after.tab.url, text: after.text });
   if (rule) return landedOutcome('dispatched', 'code', rule);
+  if (withheldUnmoved(before, after, sides)) return unjudged<OutcomeResult>({ verdict: 'unknown', by: 'code' }, true);
 
   const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, after, sides),
     { combo: 'auto', originUrl: after.tab.url, dryRun: ctx.dryRun, signal: ctx.signal });
