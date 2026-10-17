@@ -720,10 +720,12 @@ three take `--expect-name`, and for `pick-option` it is required with `--open`: 
 (or its `aria-label`, `placeholder`, `title`, or an `<input>` button's `value`), and page raisers (a password field,
 card fields) lift the risk class. Money, irreversible, auth and consent still refuse before the click, `--open`
 included. `outcome` reads the page before the act after all of that, so it then checks the URL and tab again and
-reads the ref's text again: a page that moved is `page_changed`, a ref that no longer shows `--expect-name` is
-`expect_name_mismatch`, a ref whose new text reads money, irreversible, auth or consent ("Save" renamed "Save and
-send") is `high_risk_class` with no command offered, and nothing is clicked. A confirm dialog that opens in that
-window, which can last seconds on Orca, is not seen.
+reads the ref's names again (its text, `aria-label`, `placeholder`, `title` and labels, so an icon button too): a
+page that moved is `page_changed`, a ref that no longer shows `--expect-name` is `expect_name_mismatch`, a ref whose
+new name reads money, irreversible, auth or consent ("Save" renamed "Save and send", or an icon button's
+`aria-label` changed to "Send now") is `high_risk_class` with no command offered, and nothing is clicked. A confirm
+dialog that opens, or a password or card field that appears, in that window, which can last seconds on Orca, is not
+seen.
 
 **Dismiss.** The overlay is found by code (the last `dialog` or `alertdialog` on the page, or else a cookie region
 with at least two buttons; never a page `banner`). A veto list (accept, agree, allow, subscribe, buy, trial, enable,

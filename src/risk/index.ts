@@ -11,7 +11,7 @@ export { clickRisk, floorAtWrite, mergeReadings } from './merge-readings';
 export { classify } from './classify';
 export { actionRole, classifyNames } from './classify-name';
 export { fieldRaisers, pageRaisers } from './raisers';
-export { nameCheck } from './live-ref-check';
+export { nameCheck, readLiveName } from './live-ref-check';
 export { liveRefRisk, readLiveTarget } from './live-ref-risk';
 export { refusesHighRisk } from './refuses-high-risk';
 export { findTerm, findTermAnyReading, findWholeTerm, findWholeTermEveryReading, readingsOf } from './term-match';

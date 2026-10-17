@@ -1,7 +1,8 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
-import { urlNorm } from '../../page-model';
+import { describeElement, urlNorm } from '../../page-model';
 import { outcomeSite } from '../../questions';
+import { actionRole } from '../../risk';
 import { abstainOutcome, nothingDone, readPage, sleep } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
@@ -14,8 +15,9 @@ import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from 
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
  * dispatch; after it, only `landed` (exit 0) or `effect_unknown` (exit 30) is honest, never "failed". The before-read
  * comes after every check. It lies between the guard and the dispatch, so after it the URL and tab are compared
- * again and the ref's name and risk read again (`nameStill`). One window stays open: a confirm dialog that opens
- * while the before-read runs is not seen, since the risk was read before it.
+ * again, and the ref's names (its text, `aria-label`, `title`, labels) read again, with their risk when any changed
+ * (`nameStill`). One window stays open: a confirm dialog that opens, or a password or card field that appears, while
+ * the before-read runs is not seen, since the page was read for them before it.
  */
 export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promise<CommandOutcome<OutcomeResult>> {
   const page = ctx.page;
@@ -31,14 +33,15 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
       + 'nothing was done', { next: RE_OBSERVE });
   }
   // The same URL can still have renamed the ref while the before-read ran.
-  const renamed = await nameStill(ctx, page, args, checked.cleared);
-  if (renamed !== null) return renamed;
+  const still = await nameStill(ctx, page, args, checked.cleared);
+  if ('refusal' in still) return still.refusal;
+  const acted = describeElement(checked.cleared.role ?? actionRole(action), still.live.seen);
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const sides = { piiMasks: ctx.config.piiMasks, value };
   if (ctx.dryRun) {
     // The body the outcome Decision would get (spec §6.3), its after-side a stand-in; `decide` throws `DryRunStop`.
     ctx.trace.notes.push('dry_run: the after side is a stand-in; it is read only after the act runs');
-    const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, null, sides),
+    const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, acted, before, null, sides),
       { combo: 'auto', originUrl: before.tab.url, dryRun: true, signal: ctx.signal });
     if (verdict.kind === 'abstain') return abstainOutcome<OutcomeResult>(verdict, null);
   }
@@ -71,7 +74,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   if (rule) return landedOutcome('dispatched', 'code', rule);
   if (withheldUnmoved(before, after, sides)) return unjudged<OutcomeResult>({ verdict: 'unknown', by: 'code' }, true);
 
-  const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, checked.cleared.acted, before, after, sides),
+  const { verdict } = await ctx.decide(outcomeSite, outcomeInput(args.intent, acted, before, after, sides),
     { combo: 'auto', originUrl: after.tab.url, dryRun: ctx.dryRun, signal: ctx.signal });
   if (verdict.kind === 'answer') return landedOutcome('dispatched', 'decision');
   return unconfirmed({ verdict: 'unknown', by: 'decision', unconfirmed: verdict.cause }, verdict);
