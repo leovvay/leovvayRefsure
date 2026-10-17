@@ -44,7 +44,8 @@ export function stalled(
     why: {
       cause: 'stalled',
       detail: lean === null
-        ? `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')})`
+        ? `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')}); `
+          + 'the wait for it is over: report the page as it stands, and wait again only for a time the human named'
         : `not confirmed: the Decision leaned to present at ${lean.confidence}, under the ${lean.threshold} edge, and the `
           + `page text and URL have not changed for ${formatDuration(stallMs)} since (${notes.join('; ')})`,
     },
