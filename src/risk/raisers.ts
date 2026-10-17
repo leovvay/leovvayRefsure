@@ -11,6 +11,8 @@ const CARD_INPUTS = [
   ...['name', 'id'].flatMap((attr) => CARD_WORDS.map((word) => `input[${attr}*=${word} i]`)),
 ].join(',');
 const CARD_NAME = new RegExp(CARD_WORDS.join('|'), 'i');
+/** Either input: one count settles both raisers on a page with neither, as most pages are. */
+const RAISER_INPUTS = `${PASSWORD_INPUTS},${CARD_INPUTS}`;
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
 
@@ -24,12 +26,14 @@ function assumedReading(): RiskReading {
 
 /**
  * Page-level raisers for a click (spec §8.3): a password input on the page → auth; a card, CVV or IBAN input →
- * money. A backend without `count` counts both as hit. Other actions read nothing here.
+ * money. A backend without `count` counts both as hit. Other actions read nothing here. One count of either input
+ * comes first: none on the page is both misses, as the two counts would read; a hit or a failed read counts each.
  */
 export async function pageRaisers(port: BrowserPort, page: PageRef, action: ActAction): Promise<RiskReading> {
   if (!CLICK_ACTIONS.has(action)) return emptyReading();
   if (port.count === undefined || !port.features().has('count')) return assumedReading();
   const out = emptyReading();
+  if (await countProbe(port, page, RAISER_INPUTS) === 'miss') return out;
   const [password, card] = await Promise.all([
     countProbe(port, page, PASSWORD_INPUTS),
     countProbe(port, page, CARD_INPUTS),
