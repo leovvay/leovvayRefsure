@@ -75,12 +75,12 @@ export async function dismissLevel(ctx: CommandContext, page: PageRef, args: Dis
   const scene: DismissScene = { page, tab, tree, container, overlay, level, args };
   if (verdict.kind === 'abstain') {
     // The twin rule and the guard come before the agreement (spec §8.2 steps 9-11): when the providers disagree, Jev's
-    // pick still meets them first, so a vetoed, twinned or high-risk lean names that cause, not `disagree`.
+    // pick still meets them first, so a vetoed, twinned or high-risk lean names that cause, not `disagree`. A
+    // high-risk lean goes to a human, with no act-high-risk command.
     const leaned = verdict.cause === 'disagree' ? verdict.leanedValue : undefined;
     const lean = leaned === undefined ? undefined : controls[leaned];
     if (lean !== undefined) {
-      const aside = ` (Jev's pick; the providers disagreed: ${verdict.detail})`;
-      const guarded = await guardDismissPick(ctx, scene, lean, aside);
+      const guarded = await guardDismissPick(ctx, scene, lean, verdict.detail);
       if ('stop' in guarded) return guarded.stop;
     }
     return abstained(level, overlay, verdict);

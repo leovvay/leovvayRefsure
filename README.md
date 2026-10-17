@@ -726,7 +726,9 @@ accept term (`without`, `sans`, `ohne`, `sin`, `bez`, `без`) turns it into a 
 risk again on the fresh element: if anything changed, nothing is clicked. After a click, the overlay must be gone,
 else the result is `effect_unknown`. With `agree` (`--agree`, or the default when both providers are set up), Jev's
 pick meets the veto, the twin rule and the risk read before the two answers are compared, so a vetoed, twinned or
-high-risk pick names that cause (`veto`, `twins` or `high_risk_class`), never `disagree`.
+high-risk pick names that cause (`veto`, `twins` or `high_risk_class`), never `disagree`. A high-risk pick only Jev
+made goes to a human (`next.do: needs_human`) with no `act-high-risk` command: one provider's pick is not a control
+to hand on. A high-risk pick both providers agreed on, or the one provider asked, names its `act-high-risk` command.
 
 **Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in shuffled option lines,
 and the envelope lists it under `untrusted`.

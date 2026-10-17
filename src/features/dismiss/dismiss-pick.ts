@@ -26,11 +26,13 @@ function proposeWhy(scene: DismissScene, authority: Authority, risk: RiskReading
 /**
  * The twin rule and the guard on one picked control (spec §8.2 steps 9-10, §8.4): the veto first, never overridable;
  * the twin rule; the risk on the tree (lexicon, confirm dialog, URL, page raisers). A stop, or the risk it read.
- * `aside` is added to every stop's detail (the disagreement a lean came from).
+ * `lean`: the pick is only Jev's, and the providers disagreed (that detail); every stop's detail says so. A high-risk
+ * lean gets no act-high-risk command: one provider's pick is no control to hand on, so the way on is a human.
  */
 export async function guardDismissPick(
-  ctx: CommandContext, scene: DismissScene, pick: Candidate, aside = '',
+  ctx: CommandContext, scene: DismissScene, pick: Candidate, lean: string | null = null,
 ): Promise<{ stop: LevelOutcome } | { risk: RiskReading }> {
+  const aside = lean === null ? '' : ` (Jev's pick; the providers disagreed: ${lean})`;
   const name = JSON.stringify(cutName(pick.fp.name));
   const report = reportOf(scene, pick);
   const veto = vetoOf(scene.tree.nodes[pick.node]?.name ?? pick.fp.name);
@@ -44,15 +46,22 @@ export async function guardDismissPick(
   }
   const risk = await dismissRisk(ctx, scene.page, scene.tab.url, scene.tree, pick.node);
   if (refusesHighRisk(risk.class)) {
-    // The fresh ref and the name it shows (page text): the one command that may take it (spec §6.3).
+    const reads = `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it`;
+    const refused: DismissLevelReport = { ...report, verdict: 'refused', risk: risk.class };
+    if (lean !== null) {
+      return { stop: stop(refused, 'refused', 'high_risk_class',
+        `${reads}, and only one provider picked it, so no command is offered for it; a human decides${aside}`,
+        NEEDS_HUMAN) };
+    }
+    // A pick both providers agreed on, or the one provider asked: the fresh ref and the name it shows (page text),
+    // in the one command that may take it (spec §6.3).
     ctx.trace.untrusted.add('next.argv');
     const next = highRiskNext({
       class: risk.class, via: { ref: pick.ref, expectName: pick.fp.name }, action: 'click',
       intent: `dismiss the overlay by clicking ${describeElement(pick.fp.role, pick.fp.name)}`,
     });
-    return { stop: stop({ ...report, verdict: 'refused', risk: risk.class }, 'refused', 'high_risk_class',
-      `${name} reads ${risk.class} (${risk.reasons.join(', ')}): dismiss never clicks it; only act-high-risk takes it, `
-        + `and only when the human asked for exactly this${aside}`, next) };
+    return { stop: stop(refused, 'refused', 'high_risk_class',
+      `${reads}; only act-high-risk takes it, and only when the human asked for exactly this`, next) };
   }
   return { risk };
 }

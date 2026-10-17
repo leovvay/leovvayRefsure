@@ -114,7 +114,7 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
 | `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human |
-| `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it |
+| `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
 | `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |
 | `origin_denied`, `oversize` (refused, 11) | The human's config blocks this site, or the input is too large. Do not work around it |
 | `ambiguous_option` (refused, 11) | Two options read the same; refsure will not pick. Ask the human which one |
