@@ -1,4 +1,4 @@
-import type { PageRef } from '../../browser';
+import type { AxTree, PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
 import { type Candidate, candidatesOf, isValueField } from '../../page-model';
@@ -45,10 +45,29 @@ function locateStep(ctx: CommandContext, scene: LocateScene, step: DoStep): Prom
   return locateOn(locateArgs(step), ctx, { ...scene, cands });
 }
 
-/** One look: the tab, a snapshot, and the candidates it offers. */
-export async function lookAt(ctx: CommandContext, page: PageRef): Promise<LocateScene> {
-  const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
-  return { page, tab, tree, cands: candidatesOf(tree) };
+/** One look: the tab, a snapshot, and the candidates it offers. With `tree`, a snapshot just read stands for it. */
+export async function lookAt(ctx: CommandContext, page: PageRef, tree?: AxTree): Promise<LocateScene> {
+  const [tab, read] = await Promise.all([ctx.browser.tabInfo(page), tree ?? ctx.browser.snapshot(page)]);
+  return { page, tab, tree: read, cands: candidatesOf(read) };
+}
+
+function fieldKey(cand: Candidate): string {
+  return `${cand.fp.role}\n${cand.fp.name}\n${cand.fp.path}\n${cand.fp.ordinal}`;
+}
+
+/**
+ * What asks for more input after the steps: fields to type into or pick on a fresh snapshot that the scene the steps
+ * were located on did not have (a "Confirm contact email" box after Save), as their v1 lines, at most 3; null when
+ * none. Lines carry no values.
+ */
+export async function newFields(ctx: CommandContext, page: PageRef, before: LocateScene): Promise<string | null> {
+  const isField = (tree: AxTree, cand: Candidate) => isValueField(tree.nodes[cand.node]!);
+  const had = new Set(before.cands.filter((cand) => isField(before.tree, cand)).map(fieldKey));
+  const tree = await ctx.browser.snapshot(page);
+  const fresh = candidatesOf(tree).filter((cand) => isField(tree, cand) && !had.has(fieldKey(cand)));
+  if (fresh.length === 0) return null;
+  const more = fresh.length > 3 ? ` and ${fresh.length - 3} more` : '';
+  return `${fresh.length === 1 ? 'a new field' : 'new fields'}: ${fresh.slice(0, 3).map((cand) => cand.line).join('; ')}${more}`;
 }
 
 /**

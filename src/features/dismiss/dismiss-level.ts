@@ -37,10 +37,15 @@ function controlsOf(tree: AxTree, container: number): Candidate[] {
 /**
  * One overlay (spec §6.2, §8.4): find it by code; refuse by code when every control is on the never-click list;
  * else ask the dismiss Decision over its controls (v1 lines) with its text as the popup, then settle the pick (or
- * guard Jev's lean when the providers disagreed).
+ * guard Jev's lean when the providers disagreed). `look` is a tab and snapshot the caller has just read, used in
+ * place of a fresh pair; the click still finds its pick again on a fresh snapshot.
  */
-export async function dismissLevel(ctx: CommandContext, page: PageRef, args: DismissArgs, level: number): Promise<LevelOutcome> {
-  const [tab, tree]: [TabInfo, AxTree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
+export async function dismissLevel(
+  ctx: CommandContext, page: PageRef, args: DismissArgs, level: number, look?: { tab: TabInfo; tree: AxTree },
+): Promise<LevelOutcome> {
+  const [tab, tree]: [TabInfo, AxTree] = look
+    ? [look.tab, look.tree]
+    : await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
   const container = detectOverlay(tree);
   if (container === null) return { report: { level, verdict: 'no_overlay' }, status: 'ok', clicked: false };
   const box = tree.nodes[container]!;

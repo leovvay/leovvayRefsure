@@ -8,6 +8,12 @@ import { abstainOutcome, readPage, sleep, typedWithheld, urlGlobMatches, without
 import type { AbstainWhy, PageReading } from '../shared';
 import { belowOneRound, ended, stalled } from './poll-end';
 import type { PollTally } from './poll-tally';
+
+/**
+ * Put once to the caller after a clear no on a page that then stopped changing for the short window: what the page
+ * now shows that asks for more input (a field the steps made appear), or null to keep waiting the whole stall.
+ */
+export type AsksMore = () => Promise<string | null>;
 import type { PollView } from './poll-view';
 import type { WaitForArgs } from './wait-for.args';
 import type { WaitForResult } from './wait-for.contract';
@@ -71,10 +77,12 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
  *
  * With `stallMs`, a poll that leaves the whole page (text and URL) as it has been for that long ends the wait
  * `stalled`, after that poll's own code rule and Decision had their turn. Once the Decision was unsure (`unsure`),
- * the window is `LEAN_STALL_MS` from that ask while the page stays as it read it, and the detail says so.
+ * the window is `LEAN_STALL_MS` from that ask while the page stays as it read it, and the detail says so. After a
+ * clear no, the same window passes and `asks` (when given) is asked once whether the page asks for more input; if it
+ * names something, the wait ends `stalled` with it.
  */
 export async function pollPresence(
-  args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole,
+  args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole, asks?: AsksMore,
 ): Promise<CommandOutcome<WaitForResult>> {
   const tally: PollTally = { polls: 0, decisions: 0, answered: 0, withheld: 0, started: ctx.now() };
   const deadline = tally.started + args.timeoutMs;
@@ -90,8 +98,11 @@ export async function pollPresence(
   let closed: string | null = null;
   let lastKey: string | null = null;
   let changedAt = tally.started;
-  /** The last Decision that leaned to `present` under the edge, and the page it read. */
+  /** The last Decision that was unsure (inside its band), and the page it read. */
   let lean: { key: string; at: number; confidence: number; threshold: number } | null = null;
+  /** The last Decision that said a clear no, and the page it read; `asks` is put to it once. */
+  let clearNo: { key: string; at: number } | null = null;
+  let asked = false;
 
   // A Decision that can never be asked on this wait: stop, unless code can still see it.
   const shut = (why: AbstainWhy): CommandOutcome<WaitForResult> | null => {
@@ -149,8 +160,9 @@ export async function pollPresence(
           if (verdict.kind === 'answer') return { status: 'ok', acted: false, effect: 'none', result: result('present', 'decision') };
           lastCause = verdict.cause;
           const { confidence, threshold } = verdict;
-          lean = verdict.cause === 'low_confidence' && confidence !== null && threshold !== null && unsure(confidence, threshold)
-            ? { key, at: ctx.now(), confidence, threshold } : null;
+          const low = verdict.cause === 'low_confidence' && confidence !== null && threshold !== null;
+          lean = low && unsure(confidence, threshold) ? { key, at: ctx.now(), confidence, threshold } : null;
+          clearNo = low && !unsure(confidence, threshold) ? { key, at: ctx.now() } : null;
           const status = causeStatus(verdict.cause);
           if (status === 'abstained') tally.answered += 1;
           if (STOPS.has(status) || verdict.permanent) {
@@ -166,7 +178,13 @@ export async function pollPresence(
     if (closed !== null && !byCode) return ended(args, ctx, { tally, byCode, closed, early: true, lastCause, result });
     if (args.stallMs !== null && ctx.now() - changedAt >= args.stallMs) return stalled(args.stallMs, tally, result);
     if (args.stallMs !== null && lean !== null && lean.key === key && ctx.now() - lean.at >= Math.min(LEAN_STALL_MS, args.stallMs)) {
-      return stalled(Math.min(LEAN_STALL_MS, args.stallMs), tally, result, lean);
+      return stalled(Math.min(LEAN_STALL_MS, args.stallMs), tally, result, { unsure: lean });
+    }
+    if (asks && args.stallMs !== null && !asked && clearNo !== null && clearNo.key === key
+      && ctx.now() - clearNo.at >= Math.min(LEAN_STALL_MS, args.stallMs)) {
+      asked = true;
+      const shows = await asks();
+      if (shows !== null) return stalled(Math.min(LEAN_STALL_MS, args.stallMs), tally, result, { asks: shows });
     }
     const left = deadline - ctx.now();
     if (left <= 0 || ctx.signal.aborted) break;

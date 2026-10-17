@@ -11,6 +11,12 @@ const STALLED_NEXT: Next = { do: 'stop' };
 
 type ResultOf = (verdict: WaitForResult['verdict'], by: WaitForResult['by']) => WaitForResult;
 
+/**
+ * Why a stall ended early: the Decision was unsure (inside its band), or, after a clear no, the caller found that
+ * the page asks for more input (`asks` names what it shows).
+ */
+export type StallNote = { unsure: { confidence: number; threshold: number } } | { asks: string };
+
 function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
@@ -29,7 +35,7 @@ export function belowOneRound(cap: number, calls: number): CommandOutcome<WaitFo
  * (inside its band) and the page has not changed for `stallMs` since: the detail says so.
  */
 export function stalled(
-  stallMs: number, tally: PollTally, result: ResultOf, lean: { confidence: number; threshold: number } | null = null,
+  stallMs: number, tally: PollTally, result: ResultOf, note: StallNote | null = null,
 ): CommandOutcome<WaitForResult> {
   const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
   if (tally.withheld > 0) {
@@ -43,15 +49,24 @@ export function stalled(
     result: result('stalled', tally.answered > 0 ? 'decision' : 'code'),
     why: {
       cause: 'stalled',
-      detail: lean === null
-        ? `not seen, and the page text and URL have not changed for ${formatDuration(stallMs)} (${notes.join('; ')}); `
-          + 'the wait for it is over: report the page as it stands, and wait again only for a time the human named'
-        : `not confirmed: the Decision was unsure (${lean.confidence}, under the ${lean.threshold} edge), and the page `
-          + `text and URL have not changed for ${formatDuration(stallMs)} since (${notes.join('; ')}); judge the new text `
-          + 'yourself',
+      detail: stallDetail(stallMs, notes.join('; '), note),
     },
-    next: tally.withheld > 0 ? RE_OBSERVE : STALLED_NEXT,
+    next: tally.withheld > 0 || (note !== null && 'asks' in note) ? RE_OBSERVE : STALLED_NEXT,
   };
+}
+
+function stallDetail(stallMs: number, notes: string, note: StallNote | null): string {
+  const still = `the page text and URL have not changed for ${formatDuration(stallMs)}`;
+  if (note === null) {
+    return `not seen, and ${still} (${notes}); the wait for it is over: report the page as it stands, and wait again `
+      + 'only for a time the human named';
+  }
+  if ('asks' in note) {
+    return `not seen: the page now shows ${note.asks}, and ${still} since the Decision said no (${notes}); it asks for `
+      + 'more input: do only the steps still to do';
+  }
+  return `not confirmed: the Decision was unsure (${note.unsure.confidence}, under the ${note.unsure.threshold} edge), `
+    + `and ${still} since (${notes}); judge the new text yourself`;
 }
 
 /**

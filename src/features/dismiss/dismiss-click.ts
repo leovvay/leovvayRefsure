@@ -45,8 +45,7 @@ export async function clickPick(
     ...stop({ ...report, verdict: 'unknown' }, 'effect_unknown', 'effect_unknown', detail, RE_OBSERVE), clicked: true, effect,
   });
   if (sent.kind === 'unknown') return unknown(sent.detail, 'unknown');
-  if (!(await overlayGone(ctx, scene.page, fingerprintOf(scene.tree, scene.container)))) {
-    return unknown(`clicked ${name}; the overlay is still there`, 'dispatched');
-  }
-  return { report: { ...report, verdict: 'dismissed' }, status: 'ok', clicked: true };
+  const gone = await overlayGone(ctx, scene.page, fingerprintOf(scene.tree, scene.container));
+  if (gone === null) return unknown(`clicked ${name}; the overlay is still there`, 'dispatched');
+  return { report: { ...report, verdict: 'dismissed' }, status: 'ok', clicked: true, tree: gone };
 }

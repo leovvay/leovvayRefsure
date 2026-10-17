@@ -11,7 +11,7 @@ import type { DoArgs } from './do.args';
 import type { DoResult } from './do.contract';
 import type { DoStepReport } from './do-step-report';
 import { blockerUnknown, failedAfterAct, stepStopped, waited } from './do-finish';
-import { locateAll, lookAt } from './do-locate';
+import { locateAll, lookAt, newFields } from './do-locate';
 import { runSteps } from './do-steps';
 import { baselineOf, expectationOf, newReading, shownLines, valuesOf } from './new-text';
 
@@ -19,6 +19,7 @@ type Out = CommandOutcome<DoResult>;
 
 /** The wait polls once a second; a Decision is asked at most once per poll, and only on new text that changed. */
 const POLL_MS = 1_000;
+
 /** The most provider calls one Decision round takes: an `agree` asks both providers. */
 const ROUND_CALLS_MAX = 2;
 /** Why no Decision saw a new text that a value this run filled, too short to cut out, shows in as a word. */
@@ -48,15 +49,18 @@ async function waitRouteRefusal(ctx: CommandContext, args: DoArgs, tab: TabInfo)
  */
 async function blockers(ctx: CommandContext, page: PageRef, first: LocateScene): Promise<LevelOutcome | null> {
   if (detectOverlay(first.tree) === null) return null;
-  return dismissLevel(ctx, page, { propose: false, agree: false, depth: 1 }, 1);
+  return dismissLevel(ctx, page, { propose: false, agree: false, depth: 1 }, 1, first);
 }
 
 /**
- * After the steps (spec §2.1 step 5), and `SETTLE_MS` after the last act: with `--expect`, `wait-for`'s poll judging
- * only the new text, with the stall rule; without it, one read. `new_text` is the last poll's. A browser failure after
- * an act keeps all of it (`failedAfterAct`).
+ * After the steps (spec §2.1 step 5), and `SETTLE_MS` after the last act: with `--expect`, `wait-for`'s poll
+ * judging only the new text, with the stall rule; without it, one read. After a clear no on a page that stopped
+ * changing, one snapshot checks for fields the steps made appear (`newFields`), and names them. `new_text` is the
+ * last poll's. A browser failure after an act keeps all of it (`failedAfterAct`).
  */
-async function finish(ctx: CommandContext, page: PageRef, args: DoArgs, before: PageReading, acted: boolean, result: DoResult): Promise<Out> {
+async function finish(
+  ctx: CommandContext, page: PageRef, args: DoArgs, before: PageReading, scene: LocateScene, acted: boolean, result: DoResult,
+): Promise<Out> {
   const baseline = baselineOf(before);
   const values = valuesOf(args.steps);
   const seen: { last: PageReading | null; whole: PageReading | null } = { last: null, whole: null };
@@ -92,7 +96,7 @@ async function finish(ctx: CommandContext, page: PageRef, args: DoArgs, before: 
       expect: expectationOf(args.expect, values), text: args.text, url: null, timeoutMs: args.timeoutMs, intervalMs: POLL_MS,
       maxDecisions: decisionsCap(args.timeoutMs), agree: false, stallMs: args.stallMs,
     };
-    const poll = await pollPresence(wait, ctx, page, view);
+    const poll = await pollPresence(wait, ctx, page, view, acted ? () => newFields(ctx, page, scene) : undefined);
     return waited(poll, acted, sofar(poll.result?.polls ?? 0));
   } catch (error) {
     if (!acted || !isBrowserError(error)) throw error;
@@ -119,15 +123,16 @@ export async function runDo(args: DoArgs, ctx: CommandContext): Promise<Out> {
 
   let acted = false;
   let stepping = false;
+  let scene = first;
   try {
-    let scene = first;
     if (args.dismiss) {
       const level = await blockers(ctx, page, first);
       result.dismissed = level?.report ?? { level: 1, verdict: 'no_overlay' };
       if (level?.status === 'effect_unknown') return blockerUnknown(level, { ...result, decisions: ctx.trace.egress.length });
       acted = level?.clicked ?? false;
-      // The level read its own snapshot, which may renumber refs, and a click changed the page: look again.
-      if (level !== null) scene = await lookAt(ctx, page);
+      // The level may have read its own snapshot, which may renumber refs, and a click changed the page: look again,
+      // or take the snapshot that showed the overlay gone, the page as it now is.
+      if (level !== null) scene = await lookAt(ctx, page, level.tree);
     }
     const located = args.steps.length === 0 ? [] : await locateAll(ctx, scene, args.steps);
     // Every pick was settled by code, or there was none: a dry run ends here, before any act or wait.
@@ -145,5 +150,5 @@ export async function runDo(args: DoArgs, ctx: CommandContext): Promise<Out> {
     if (at) at.verdict = 'stopped';
     return failedAfterAct(error, { ...result, decisions: ctx.trace.egress.length });
   }
-  return finish(ctx, page, args, before, acted, result);
+  return finish(ctx, page, args, before, scene, acted, result);
 }
