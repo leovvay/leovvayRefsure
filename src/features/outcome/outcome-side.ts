@@ -75,22 +75,25 @@ export function withheldUnmoved(
  * shows outside every region (`body`: the before-side's text with the typing cut out, folded) keeps it, as a "Save"
  * button does. One under three code points is no piece (`valuePieces`).
  */
-function typedPart(name: string, typed: TypedText, body: string): boolean {
+function typedPart(name: string, typed: TypedText, body: string, raw: string): boolean {
   const folded = fold(name);
   if (!('pieces' in typed) || Array.from(folded).length < 3) return false;
-  return typed.pieces.some((piece) => fold(piece).includes(folded)) && !body.includes(folded);
+  // The raw page text catches a name that spans two typed lines, which no single piece holds.
+  return (typed.pieces.some((piece) => fold(piece).includes(folded)) || raw.includes(folded)) && !body.includes(folded);
 }
 
 /**
  * One name of the element acted on, as it may leave (spec §7.3): what was typed into editable regions before the act,
  * when the name was read, and the value a fill or select typed, cut out as the sides are cut. Null when it is
- * withheld (`typedWithheld`), nothing is left, or what is left is part of a typed line (`typedPart`).
+ * withheld (`typedWithheld`) or nothing is left; `'typed'` when what is left is part of a typed line (`typedPart`).
  */
-function nameShown(name: string, before: PageReading, body: string, value?: string): string | null {
+function nameShown(
+  name: string, before: PageReading, body: string, raw: string, value?: string,
+): string | null | 'typed' {
   if (typedWithheld(name, before.typed) !== null) return null;
   const shown = withoutValue(withoutTyped(name, before.typed), value);
   if (norm(shown) === '' || shown === WITHHELD) return null;
-  return typedPart(shown, before.typed, body) ? null : shown;
+  return typedPart(shown, before.typed, body, raw) ? 'typed' : shown;
 }
 
 /**
@@ -101,8 +104,11 @@ function nameShown(name: string, before: PageReading, body: string, value?: stri
  */
 function actedShown(acted: ActedElement, before: PageReading, value?: string): string {
   const body = fold(withoutTyped(before.text, before.typed));
+  const raw = fold(before.text);
   for (const name of acted.names) {
-    const shown = nameShown(name, before, body, value);
+    const shown = nameShown(name, before, body, raw, value);
+    // A name that is part of a typed line ends the search: a later title or label may repeat the same typing.
+    if (shown === 'typed') return acted.role;
     if (shown !== null) return describeElement(acted.role, shown);
   }
   return acted.role;

@@ -266,9 +266,9 @@ sees both URLs, titles and the placeholder. `wait-for --text` and `outcome -- â€
 page text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles
 nothing when either side's text was withheld. The acted element that `outcome` and `act --verify` send has its name
 cut the same way: a region with no label, which goes by its own text, is named by its placeholder or title, or by
-its role alone. A ref inside a region (an auto-linked URL, a chip) whose name is part of a typed line, and shows
-nowhere else in the page text, loses that name too. When the regions cannot be read, any element is named by its
-role alone.
+its role alone. Any element whose name is part of a typed line and shows nowhere else in the page text is named by
+its role alone: a link or chip inside a region, and an icon-only "Send" button too when the region holds "send".
+When the regions cannot be read, any element is named by its role alone.
 
 **Before anything is sent:**
 
@@ -729,10 +729,10 @@ passed `Save`). `outcome` reads the page before the act after all of that, so it
 and reads the ref's names again (its text, `aria-label`, `placeholder`, `title` and labels, so an icon button too):
 a page that moved is `page_changed`, a ref that no longer shows `--expect-name` is `expect_name_mismatch`, a ref
 whose new name reads money, irreversible, auth or consent ("Save" renamed "Save and send", or an icon button's
-`aria-label` changed to "Send now") is `high_risk_class` with no command offered, and nothing is clicked. A confirm
+`aria-label` changed to "Save and send") is `high_risk_class` with no command offered, and nothing is clicked. A confirm
 dialog that opens, or a password or card field that appears, in that window, which can last seconds on Orca, is not
-seen. A page that renames the element after refsure's last re-read and before the click (well under a second) is
-still clicked, as with any tool that checks and then acts: an agent cannot close that race without the page's
+seen. A page that renames the element after refsure's last re-read and before the click (up to about two seconds on
+Orca, whose reads run one after another; under a second on agent-browser) is still clicked, as with any tool that checks and then acts: an agent cannot close that race without the page's
 cooperation.
 
 **Dismiss.** The overlay is found by code (the last `dialog` or `alertdialog` on the page, or else a cookie region
