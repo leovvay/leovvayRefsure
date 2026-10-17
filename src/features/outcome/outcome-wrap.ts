@@ -14,8 +14,8 @@ import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from 
  * `outcome -- <verb> --element @eN`: the agent's own act, guarded (spec §6.2). Every refusal comes before the
  * dispatch; after it, only `landed` (exit 0) or `effect_unknown` (exit 30) is honest, never "failed". The before-read
  * comes after every check. It lies between the guard and the dispatch, so after it the URL and tab are compared
- * again and the ref's name read again (`nameStill`). One window stays open: a confirm dialog that opens while the
- * before-read runs is not seen, since the risk was read before it.
+ * again and the ref's name and risk read again (`nameStill`). One window stays open: a confirm dialog that opens
+ * while the before-read runs is not seen, since the risk was read before it.
  */
 export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promise<CommandOutcome<OutcomeResult>> {
   const page = ctx.page;

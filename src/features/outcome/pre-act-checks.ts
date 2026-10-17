@@ -1,20 +1,20 @@
 import { type PageRef, type Ref, type TabInfo, VALUE_ACTIONS } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import { RE_OBSERVE } from '../../output';
-import { describeElement, norm } from '../../page-model';
+import { NEEDS_HUMAN, RE_OBSERVE } from '../../output';
+import { cutName, describeElement, norm } from '../../page-model';
 import { outcomeSite } from '../../questions';
-import { actionRole, liveRefRisk, nameCheck, readLiveTarget, refusesHighRisk } from '../../risk';
+import { actionRole, classifyNames, liveRefRisk, nameCheck, readLiveTarget, refusesHighRisk } from '../../risk';
 import type { LiveName, RiskReading } from '../../risk';
 import { abstainOutcome, highRiskNext, nothingDone } from '../shared';
 import type { OutcomeWrapArgs } from './outcome.args';
 import type { OutcomeResult } from './outcome.contract';
 
 /**
- * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`), and the names the live
- * ref showed, for `nameStill`. The body text it read fed only the confirm-dialog raiser; the outcome's before-side is
- * read after every check (spec §6.2).
+ * What the guard learned: `acted` for the Decision's `acted_element` (e.g. `button "Save"`); the names the live ref
+ * showed, its explicit role and the URL its risk was read on, for `nameStill`. The body text it read fed only the
+ * confirm-dialog raiser; the outcome's before-side is read after every check (spec §6.2).
  */
-type Cleared = { acted: string; live: LiveName };
+type Cleared = { acted: string; live: LiveName; role: string | null; url: string };
 
 type Checked = { refusal: CommandOutcome<OutcomeResult> } | { cleared: Cleared };
 
@@ -65,7 +65,7 @@ export async function checkBeforeAct(
       + 'consent; nothing was done. Only act-high-risk takes it, and only when the human asked for exactly this';
     return { refusal: nothingDone('refused', 'high_risk_class', detail, { next }) };
   }
-  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen), live } };
+  return { cleared: { acted: describeElement(role ?? actionRole(action), live.seen), live, role, url: tab.url } };
 }
 
 /** `expect_name_mismatch`: the live ref shows another name than `--expect-name` (page text, so untrusted). */
@@ -80,8 +80,11 @@ function nameMismatch(
 
 /**
  * The before-read runs after the guard (spec §6.2), so the ref gets one more look before the dispatch: its text,
- * read again in one call. Unchanged, the guard's names stand; changed, those names with the new text in place of
- * the old must still show `--expect-name`. A fill's or select's text is no name, so its names stand. Null: go on.
+ * read again in one call. Unchanged, the guard's names and risk stand. Changed, those names with the new text in
+ * place of the old must still show `--expect-name`, and every name, the new text included, is read for risk again
+ * (spec §8.1 rules 4-5: risk only rises): a rename to "Save and send" refuses as the guard would, with no command
+ * offered, since the page renamed it while the act was checked. A fill's or select's text is no name, so its names
+ * stand. Null: go on.
  */
 export async function nameStill(
   ctx: CommandContext, page: PageRef, args: OutcomeWrapArgs, cleared: Cleared,
@@ -93,5 +96,14 @@ export async function nameStill(
   if (text === live.text) return null;
   const names = [...live.names.filter((name) => norm(name) !== live.text), text];
   const named = nameCheck({ seen: text, names }, args.expectName);
-  return named === 'ok' ? null : nameMismatch(ctx, ref, 'now shows', named.mismatch, args.expectName);
+  if (named !== 'ok') return nameMismatch(ctx, ref, 'now shows', named.mismatch, args.expectName);
+  const risk = classifyNames([...live.sources, text], {
+    url: cleared.url, action, role: cleared.role, ...(args.risk ? { userRisk: args.risk } : {}),
+  });
+  if (!refusesHighRisk(risk.class)) return null;
+  ctx.trace.untrusted.add('why.detail');
+  const detail = `@${ref} now shows ${JSON.stringify(cutName(text))}, which reads ${risk.class} `
+    + `(${risk.reasons.join(', ')}): outcome never acts on money, irreversible, auth or consent, and the page renamed `
+    + 'it while the act was checked, so no command is offered for it; nothing was done. A human decides';
+  return nothingDone('refused', 'high_risk_class', detail, { next: NEEDS_HUMAN });
 }
