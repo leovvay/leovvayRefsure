@@ -112,7 +112,7 @@ Every cause from `refsure causes --json`, with its status and exit. Run it for t
 | `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine. If the detail says the options read the same as sent, the model could not tell them apart: with `locate` narrow with `--within`; with `pick-option` ask the human |
 | `proposed_only` (abstained, 10) | Not trusted enough to act on alone. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
-| `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
+| `not_seen`, `stalled` (abstained, 10) | Not seen within the timeout, which does not mean absent: check with `state`, or wait again. `stalled`: the page stopped changing; report it, unless the human said to wait longer (`wait-for --stall <longer>`) |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human |
 | `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
 | `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |

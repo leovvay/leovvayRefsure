@@ -7,7 +7,8 @@ import type { WaitForResult } from './wait-for.contract';
 /**
  * Waits until the page shows what `--expect` describes (spec §6.2). Code first on every poll (`--text`, `--url`);
  * else the presence Noul, asked only when the text changed, at most once per interval and within
- * `--max-decisions` provider calls. With both providers set up, `agree` is the default route. Reads only.
+ * `--max-decisions` provider calls. With both providers set up, `agree` is the default route. `--stall` ends it
+ * early, `stalled`, once the page stops changing. Reads only.
  */
 export const waitForCommand: CommandSpec<WaitForArgs, WaitForResult> = {
   name: 'wait-for',
@@ -24,10 +25,13 @@ export const waitForCommand: CommandSpec<WaitForArgs, WaitForResult> = {
       type: 'string', summary: 'Provider calls the wait may make; 0 waits by code only (with --text or --url)', default: DEFAULTS.maxDecisions,
     },
     agree: { type: 'boolean', summary: 'Both providers must say present (needs both set up)' },
+    stall: {
+      type: 'string', summary: 'End early (stalled) once the page text and URL stop changing this long, as 10s; off by default',
+    },
   },
   forms: [
     '--expect "<what should appear>" [--text <literal>] [--url <glob>] [--timeout 30s] [--interval 2s] '
-      + '[--max-decisions 10] [--agree]',
+      + '[--max-decisions 10] [--agree] [--stall 10s]',
   ],
   needs: { page: 'required', capabilities: [], sites: ['presence'], acts: 'never' },
   parse: parseWaitFor,

@@ -2,11 +2,10 @@ import type { AxTree } from '../../browser';
 import type { CommandSpec } from '../../cli';
 import { RE_OBSERVE } from '../../output';
 import { type Candidate, candidatesOf, RANK_MAX, rowContains, rowTextOf } from '../../page-model';
-import { abstainOutcome, nothingDone } from '../shared';
+import { nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
-import { codePick, decidePick } from './locate-pick';
-import { settlePick } from './locate-settle';
+import { locateOn } from './locate-on';
 import { parseLocate } from './parse-locate';
 
 /**
@@ -70,17 +69,6 @@ export const locateCommand: CommandSpec<LocateArgs, LocateResult> = {
     }
     ctx.trace.untrusted.add('result.line');
     ctx.trace.untrusted.add('result.top');
-    const picked = codePick(args, cands) ?? await decidePick(args, ctx, tab, cands);
-    if (picked.kind === 'abstain') {
-      // A low-confidence or twins refusal quotes the line the model leaned to: page text.
-      ctx.trace.untrusted.add('why.detail');
-      const result: LocateResult = { ticket: null, by: 'decision' };
-      if (picked.top !== null) {
-        result.top = picked.top;
-        result.note = 'top is a ranking, not probabilities';
-      }
-      return abstainOutcome<LocateResult>(picked.why, result);
-    }
-    return settlePick(ctx, { page, tab, tree, cands }, picked, args);
+    return locateOn(args, ctx, { page, tab, tree, cands });
   },
 };

@@ -1,6 +1,7 @@
 import { parseArgs, type ParseArgsConfig } from 'node:util';
 import type { CommandSpec } from './command-spec';
 import type { OptionSpec } from './option-spec';
+import type { OptionToken } from './option-token';
 import type { ParsedArgs } from './parsed-args';
 import type { UsageError } from './usage-error';
 
@@ -64,7 +65,8 @@ export function isUsageError(value: unknown): value is UsageError {
 
 /**
  * `util.parseArgs` in strict mode over the verb's options plus `GLOBAL_OPTIONS`. Everything after the first bare
- * `--` goes to `rest` untouched (the act that `outcome` wraps); positionals are only the ones before it.
+ * `--` goes to `rest` untouched (the act that `outcome` wraps); positionals are only the ones before it, and so are
+ * `tokens`, the options in the order given.
  */
 export function parseCommandArgs(
   spec: Pick<CommandSpec<unknown, unknown>, 'options'>,
@@ -86,7 +88,9 @@ export function parseCommandArgs(
     }
     const positionals = parsed.tokens
       .flatMap((token) => (token.kind === 'positional' && token.index < cut ? [token.value] : []));
-    return { values: plainValues(parsed.values), positionals, rest: argv.slice(cut + 1) };
+    const tokens = parsed.tokens.flatMap((token): OptionToken[] => (
+      token.kind === 'option' && token.index < cut ? [{ name: token.name, value: token.value }] : []));
+    return { values: plainValues(parsed.values), positionals, rest: argv.slice(cut + 1), tokens };
   } catch (error) {
     return { usage: error instanceof Error ? error.message : String(error) };
   }

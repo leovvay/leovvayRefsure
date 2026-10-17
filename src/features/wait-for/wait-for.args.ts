@@ -1,4 +1,7 @@
-/** `wait-for --expect e [--text t] [--url g] [--timeout 30s] [--interval 2s] [--max-decisions 10] [--agree]`. */
+/**
+ * `wait-for --expect e [--text t] [--url g] [--timeout 30s] [--interval 2s] [--max-decisions 10] [--agree]
+ * [--stall d]`.
+ */
 export interface WaitForArgs {
   /** What should appear, described; the presence Decision's `expectation`. */
   expect: string;
@@ -12,4 +15,6 @@ export interface WaitForArgs {
   maxDecisions: number;
   /** Force `agree` (both providers must say present); else the site's default route. */
   agree: boolean;
+  /** End `stalled` once neither the page text nor the URL changed for this long; `null`: never (the default). */
+  stallMs: number | null;
 }

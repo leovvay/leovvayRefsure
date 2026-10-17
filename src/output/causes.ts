@@ -14,6 +14,7 @@ export const CAUSES: readonly CauseRow[] = [
   row('proposed_only', 'abstained', 'The ticket only proposes at this risk; it may not act.'),
   row('disagree', 'abstained', 'The two providers did not pick the same option.'),
   row('not_seen', 'abstained', 'wait-for did not see it within its timeout; never a claim that it is absent.'),
+  row('stalled', 'abstained', 'Not seen, and the page text and URL stopped changing for the --stall time; report it.'),
 
   row('veto', 'refused', 'The control is on the never-click list (accept, subscribe, settings, ...).'),
   row('high_risk_class', 'refused', 'Money, irreversible, auth or consent: refused on this path.'),

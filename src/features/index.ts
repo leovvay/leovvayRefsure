@@ -4,6 +4,7 @@ import { actHighRiskCommand } from './act-high-risk';
 import { causesCommand } from './causes';
 import { commandsCommand } from './commands';
 import { dismissCommand } from './dismiss';
+import { doCommand } from './do';
 import { doctorCommand } from './doctor';
 import { forgetCommand } from './forget';
 import { guardCommand } from './guard';
@@ -26,6 +27,7 @@ export const FEATURES: readonly AnyCommandSpec[] = [
   privacyCommand,
   doctorCommand,
   stateCommand,
+  doCommand,
   locateCommand,
   actCommand,
   dismissCommand,

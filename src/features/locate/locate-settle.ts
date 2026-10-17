@@ -1,4 +1,3 @@
-import type { AxTree, PageRef, TabInfo } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { type Next, RE_OBSERVE } from '../../output';
 import { type Candidate, candidateKey, cutShown, describeElement, fold, rowTextOf, twinsOf } from '../../page-model';
@@ -10,10 +9,10 @@ import {
 import { highRiskNext, highRiskVia, nothingDone } from '../shared';
 import type { LocateArgs } from './locate.args';
 import type { LocateResult } from './locate.contract';
+import type { LocateScene } from './locate-scene';
 import type { Picked } from './picked';
 
 type Chosen = Exclude<Picked, { kind: 'abstain' }>;
-type Scene = { page: PageRef; tab: TabInfo; tree: AxTree; cands: readonly Candidate[] };
 
 const ROW_SHOWN = 120;
 const ROWS_SHOWN = 10;
@@ -33,7 +32,7 @@ function base(picked: Chosen, cand: Candidate, args: LocateArgs): LocateResult {
  * The lexicon, confirm-dialog and URL rules, the page raisers for a click, and `--risk`. With no `--risk` the class
  * has a floor of write (spec §6.1): a read row is claimed only by `--risk read`, never assumed.
  */
-async function riskOf(ctx: CommandContext, scene: Scene, cand: Candidate, args: LocateArgs): Promise<RiskReading> {
+async function riskOf(ctx: CommandContext, scene: LocateScene, cand: Candidate, args: LocateArgs): Promise<RiskReading> {
   const risk = await clickRisk(ctx.browser, scene.page, scene.tree, cand.node, {
     url: scene.tab.url, ...(args.risk === undefined ? {} : { userRisk: args.risk }),
   });
@@ -83,7 +82,7 @@ function ticketSource(picked: Chosen): Pick<Ticket, 'site' | 'maturity' | 'confi
  * comes from maturity and corroboration; a new model family, or authority below the pick's risk, proposes only.
  */
 export async function settlePick(
-  ctx: CommandContext, scene: Scene, picked: Chosen, args: LocateArgs,
+  ctx: CommandContext, scene: LocateScene, picked: Chosen, args: LocateArgs,
 ): Promise<CommandOutcome<LocateResult>> {
   const key = candidateKey(picked.cand);
   const group = scene.cands.filter((c) => candidateKey(c) === key);

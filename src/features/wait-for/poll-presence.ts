@@ -1,12 +1,14 @@
 import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { boundText, cleanEgressText, sha256Hex } from '../../egress';
-import { causeStatus, RE_OBSERVE, type Status } from '../../output';
+import { causeStatus, type Status } from '../../output';
 import { fold } from '../../page-model';
 import { BOUNDS, presenceSite } from '../../questions';
-import { abstainOutcome, nothingDone, readPage, sleep, typedWithheld, urlGlobMatches, withoutTyped } from '../shared';
+import { abstainOutcome, readPage, sleep, typedWithheld, urlGlobMatches, withoutTyped } from '../shared';
 import type { AbstainWhy, PageReading } from '../shared';
-import { formatDuration } from './duration';
+import { belowOneRound, ended, stalled } from './poll-end';
+import type { PollTally } from './poll-tally';
+import type { PollView } from './poll-view';
 import type { WaitForArgs } from './wait-for.args';
 import type { WaitForResult } from './wait-for.contract';
 
@@ -16,10 +18,12 @@ const STOPS: ReadonlySet<Status> = new Set<Status>(['not_set_up', 'spend_limit',
 const RETRY: ReadonlySet<string> = new Set(['provider_timeout', 'provider_error']);
 
 /**
- * `decisions` counts provider calls; `answered`, Decisions a provider actually answered (present or not);
- * `withheld`, polls whose text was withheld (`typedWithheld`), which no Decision is asked on.
+ * What the stall rule compares from poll to poll: the URL and the body text as read. It never leaves the machine,
+ * so nothing is cut from it: a text withheld from the Decision still changes here as the page changes.
  */
-type Tally = { polls: number; decisions: number; answered: number; withheld: number; started: number };
+function pageKey(whole: PageReading): string {
+  return sha256Hex(`${whole.tab.url}\n${whole.text}`);
+}
 
 function codePresence(args: WaitForArgs, reading: PageReading): WaitForResult['rule'] | null {
   if (args.text !== null && fold(reading.text).includes(fold(args.text))) return 'text';
@@ -39,15 +43,11 @@ function presenceInput(args: WaitForArgs, reading: PageReading, piiMasks: boolea
   };
 }
 
-function plural(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? '' : 's'}`;
-}
-
 /**
- * The wait (spec §6.2): each poll reads `tab show` + body text. Code says `present` when the literal or the URL
- * glob matches. Otherwise the presence Noul is asked, only when the cleaned text changed and at least one interval
- * passed since the last ask, and only when the whole round fits what is left of `--max-decisions` (an `agree`
- * round is two calls). It is never asked on a poll whose text is withheld (`typedWithheld`, noted): a wait only the
+ * The wait (spec §6.2): each poll reads `tab show` + body text, and judges what `view` keeps of it (the whole page
+ * by default). Code says `present` when the literal or the URL glob matches. Otherwise the presence Noul is asked,
+ * only when the cleaned text changed and at least one interval passed since the last ask, and only when the whole
+ * round fits what is left of `--max-decisions` (an `agree` round is two calls). It is never asked on a poll whose text is withheld (`typedWithheld`, noted): a wait only the
  * Decision could settle then ends `not_seen` by code, and says so when every poll was withheld, since nothing judged
  * the page. A timeout is `not_seen` (exit 10), never "absent".
  *
@@ -55,9 +55,14 @@ function plural(n: number, word: string): string {
  * settle keeps polling by code and names the cause in its notes; any other wait stops at once with that cause.
  * The same goes for `--max-decisions`: once no round fits what is left, a wait without a code rule ends there, as
  * `usage` when the cap is below a single round, since nothing else can ever see it.
+ *
+ * With `stallMs`, a poll that leaves the whole page (text and URL) as it has been for that long ends the wait
+ * `stalled`, after that poll's own code rule and Decision had their turn.
  */
-export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page: PageRef): Promise<CommandOutcome<WaitForResult>> {
-  const tally: Tally = { polls: 0, decisions: 0, answered: 0, withheld: 0, started: ctx.now() };
+export async function pollPresence(
+  args: WaitForArgs, ctx: CommandContext, page: PageRef, view: PollView = (whole) => whole,
+): Promise<CommandOutcome<WaitForResult>> {
+  const tally: PollTally = { polls: 0, decisions: 0, answered: 0, withheld: 0, started: ctx.now() };
   const deadline = tally.started + args.timeoutMs;
   const byCode = args.text !== null || args.url !== null;
   const combo = args.agree ? 'agree' : 'auto';
@@ -69,6 +74,8 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
   let lastCause: string | null = null;
   /** Why the Decision is no longer asked, once it is not; code keeps polling when `--text` or `--url` is set. */
   let closed: string | null = null;
+  let lastKey: string | null = null;
+  let changedAt = tally.started;
 
   // A Decision that can never be asked on this wait: stop, unless code can still see it.
   const shut = (why: AbstainWhy): CommandOutcome<WaitForResult> | null => {
@@ -85,18 +92,24 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
   };
 
   for (;;) {
-    const reading = await readPage(ctx, page);
+    const whole = await readPage(ctx, page);
     tally.polls += 1;
-    const rule = codePresence(args, reading);
+    const key = pageKey(whole);
+    if (key !== lastKey) {
+      lastKey = key;
+      changedAt = ctx.now();
+    }
+    const reading = view(whole);
+    const rule = reading === null ? null : codePresence(args, reading);
     if (rule) {
       return { status: 'ok', acted: false, effect: 'none', result: { ...result('present', 'code'), rule }, settledByCode: true };
     }
 
     closed ??= capped(1);
     // A withheld text is no page to judge: this poll asks nothing and spends nothing, and a later readable poll may.
-    const withheld = typedWithheld(reading.text, reading.typed) !== null;
+    const withheld = reading !== null && typedWithheld(reading.text, reading.typed) !== null;
     if (withheld) tally.withheld += 1;
-    if (closed === null && !withheld && ctx.now() - lastAskAt >= args.intervalMs) {
+    if (reading !== null && closed === null && !withheld && ctx.now() - lastAskAt >= args.intervalMs) {
       const input = presenceInput(args, reading, ctx.config.piiMasks);
       const hash = sha256Hex(`${input.pageUrl}\n${input.page}`);
       if (hash !== lastHash) {
@@ -132,62 +145,10 @@ export async function pollPresence(args: WaitForArgs, ctx: CommandContext, page:
 
     // Without --text or --url only the Decision can see it: once it is closed, waiting on cannot change the answer.
     if (closed !== null && !byCode) return ended(args, ctx, { tally, byCode, closed, early: true, lastCause, result });
+    if (args.stallMs !== null && ctx.now() - changedAt >= args.stallMs) return stalled(args.stallMs, tally, result);
     const left = deadline - ctx.now();
     if (left <= 0 || ctx.signal.aborted) break;
     await sleep(Math.min(args.intervalMs, left), ctx.signal);
   }
   return ended(args, ctx, { tally, byCode, closed, early: false, lastCause, result });
-}
-
-/** `--max-decisions` is below one round and only the Decision could settle the wait: nothing was asked. */
-function belowOneRound(cap: number, calls: number): CommandOutcome<WaitForResult> {
-  return nothingDone<WaitForResult>('usage', 'usage', `--max-decisions ${cap} is below one Decision round of ${calls} `
-    + `provider calls, and without --text or --url nothing else can see it: allow at least ${calls}, or add --text or --url`);
-}
-
-/**
- * The wait is over: it ran out, was interrupted, or (`early`) the Decision closed on a wait no code rule can settle.
- * `not_seen` (exit 10) when code looked all along or a provider answered; when the wait rested on the Decision and
- * no provider ever answered, it could not run: `unavailable` with the last provider cause.
- */
-function ended(
-  args: WaitForArgs,
-  ctx: CommandContext,
-  end: {
-    tally: Tally; byCode: boolean; closed: string | null; early: boolean; lastCause: string | null;
-    result: (verdict: WaitForResult['verdict'], by: WaitForResult['by']) => WaitForResult;
-  },
-): CommandOutcome<WaitForResult> {
-  const { tally, lastCause } = end;
-  const capped = tally.decisions >= args.maxDecisions ? `the --max-decisions cap of ${args.maxDecisions} was reached` : null;
-  const closed = end.closed ?? capped;
-  const notes = [plural(tally.polls, 'poll'), plural(tally.decisions, 'provider call')];
-  if (closed !== null && !end.early) notes.push(closed);
-  if (lastCause !== null && !(closed ?? '').includes(lastCause)) notes.push(`the last Decision: ${lastCause}`);
-  // Only the Decision could see it, and it never got a page: the end is no judgement (spec §7.3).
-  if (!end.byCode && tally.decisions === 0 && tally.withheld === tally.polls) {
-    const all = tally.polls === 1 ? 'the one poll' : `all ${tally.polls} polls`;
-    notes.push(`the page text was withheld on ${all}, so nothing judged it`);
-  }
-  let within = `within ${formatDuration(args.timeoutMs)}`;
-  if (end.early && closed !== null) within = `before ${closed}`;
-  else if (ctx.signal.aborted) within = 'before the wait was interrupted';
-  if (!end.byCode && tally.answered === 0 && lastCause !== null && causeStatus(lastCause) === 'unavailable') {
-    return {
-      status: 'unavailable',
-      acted: false,
-      effect: 'none',
-      result: end.result(null, 'decision'),
-      why: { cause: lastCause, detail: `no provider answered ${within} (${notes.join('; ')})` },
-      next: RE_OBSERVE,
-    };
-  }
-  return {
-    status: 'abstained',
-    acted: false,
-    effect: 'none',
-    result: end.result('not_seen', tally.answered > 0 ? 'decision' : 'code'),
-    why: { cause: 'not_seen', detail: `not seen ${within} (${notes.join('; ')})` },
-    next: RE_OBSERVE,
-  };
 }

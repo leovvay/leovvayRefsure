@@ -9,22 +9,30 @@ const TIMEOUT_MAX_MS = 600_000;
 const INTERVAL_MIN_MS = 1_000;
 const INTERVAL_MAX_MS = 300_000;
 const MAX_DECISIONS_LIMIT = 100;
+const STALL_MIN_MS = 1_000;
+const STALL_MAX_MS = 600_000;
 const URL_GLOB_MAX = 2_000;
 
 function stringOf(value: unknown, fallback: string): string {
   return typeof value === 'string' ? value : fallback;
 }
 
-function durationOf(name: string, text: string, min: number, max: number): number | UsageError {
+export function durationOf(name: string, text: string, min: number, max: number): number | UsageError {
   const ms = parseDuration(text);
   if (ms === null) return { usage: `--${name} takes a duration such as 500ms, 30s or 2m, got ${JSON.stringify(text.slice(0, 20))}` };
   if (ms < min || ms > max) return { usage: `--${name} must be from ${formatDuration(min)} to ${formatDuration(max)}` };
   return ms;
 }
 
+/** `--stall`: off when absent, else a duration from 1 s to 10 m. */
+export function stallOf(value: unknown): number | null | UsageError {
+  if (value === undefined) return null;
+  return durationOf('stall', stringOf(value, ''), STALL_MIN_MS, STALL_MAX_MS);
+}
+
 /**
  * `wait-for`'s options, checked: durations `\d+(ms|s|m)`, an interval of at least 1 s, a bounded call cap, and
- * something that can settle the wait (a Decision, `--text` or `--url`).
+ * something that can settle the wait (a Decision, `--text` or `--url`). `--stall` is off unless given.
  */
 export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (raw.positionals.length > 0) return { usage: `wait-for takes no positional arguments, got ${raw.positionals.length}` };
@@ -54,5 +62,7 @@ export function parseWaitFor(raw: ParsedArgs): WaitForArgs | UsageError {
   if (maxDecisions === 0 && text === null && url === null) {
     return { usage: '--max-decisions 0 leaves nothing to see it: give --text or --url, or allow at least 1 Decision' };
   }
-  return { expect, text, url, timeoutMs, intervalMs, maxDecisions, agree: raw.values.agree === true };
+  const stallMs = stallOf(raw.values.stall);
+  if (typeof stallMs === 'object' && stallMs !== null) return stallMs;
+  return { expect, text, url, timeoutMs, intervalMs, maxDecisions, agree: raw.values.agree === true, stallMs };
 }

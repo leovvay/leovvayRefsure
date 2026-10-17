@@ -1,4 +1,5 @@
 export type * from './option-spec';
+export type * from './option-token';
 export type * from './usage-error';
 export type * from './parsed-args';
 export type * from './command-outcome';
