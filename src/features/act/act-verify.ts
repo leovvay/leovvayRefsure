@@ -1,14 +1,14 @@
 import type { PageRef } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { outcomeSite } from '../../questions';
-import { outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from '../outcome';
+import { type ActedElement, outcomeInput, SETTLE_MS, unconfirmed, unjudged, withheldUnmoved } from '../outcome';
 import { type PageReading, readPage, sleep } from '../shared';
 import type { ActCommandResult } from './act.contract';
 
 type Base = Pick<ActCommandResult, 'action' | 'element' | 'refound'>;
 
 /** What `--verify` asks with: the intent, the element acted on, the before-side, and the value a fill typed. */
-type VerifyOpts = { intent: string; acted: string; before: PageReading; piiMasks: boolean; value: string | undefined };
+type VerifyOpts = { intent: string; acted: ActedElement; before: PageReading; piiMasks: boolean; value: string | undefined };
 
 /**
  * Under `--dry-run`, the body `--verify` would send, with a stand-in after-side; `decide` throws `DryRunStop`.

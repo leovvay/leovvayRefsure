@@ -1,6 +1,6 @@
 import type { PageRef } from '../../../src/browser';
-import { outcomeInput, SETTLE_MS } from '../../../src/features/outcome';
-import { type Candidate, candidatesOf, describeElement, fold } from '../../../src/page-model';
+import { type ActedElement, outcomeInput, SETTLE_MS } from '../../../src/features/outcome';
+import { type Candidate, candidatesOf, fold } from '../../../src/page-model';
 import { readTyped } from '../../../src/features/shared';
 import type { PageReading } from '../../../src/features/shared';
 import { actionRole, liveRefRisk, readLiveTarget } from '../../../src/risk';
@@ -14,12 +14,12 @@ import { type BenchDeps, onPage, probeSelector } from './stored-page';
   (refsure's `readLiveTarget` on the acted element's ref: the name the live ref shows, its role, the body text), the
   after page is opened after `SETTLE_MS` the way the command reads it after the act, and the input is refsure's own
   `outcomeInput(intent, acted, before, after)` (cleaned sides; PII masks per mode; no filled value: every step is a
-  press). `acted` is therefore `describeElement(role, seen)` (`button "Save"`), the string refsure sends, not the
-  authored v1 preview. The class `liveRefRisk` gives the press is kept (`refsure_risk_class`): `outcome --` refuses
+  press). `acted` is therefore the role and the names the live ref shows, which `outcomeInput` describes with the
+  typed text cut out (`button "Save"`), the string refsure sends, not the authored v1 preview. The class `liveRefRisk` gives the press is kept (`refsure_risk_class`): `outcome --` refuses
   money, irreversible, auth and consent before acting, `act --ticket --verify` asks the site for any class.
 */
 
-export interface OutcomeReadings { before: PageReading; after: PageReading; acted: string; riskClass: string; actedRef: string }
+export interface OutcomeReadings { before: PageReading; after: PageReading; acted: ActedElement; riskClass: string; actedRef: string }
 
 /** Reads both sides of one outcome item, or the reason it was dropped. */
 export async function readOutcome(item: CaptureItem, deps: BenchDeps): Promise<OutcomeReadings | { drop: string }> {
@@ -37,7 +37,7 @@ export async function readOutcome(item: CaptureItem, deps: BenchDeps): Promise<O
     const target = await readLiveTarget(deps.browser, page, node.ref, 'click');
     const tab = await deps.browser.tabInfo(page);
     const risk = await liveRefRisk(deps.browser, page, node.ref, 'click', target, { url: tab.url });
-    const acted = describeElement(target.role ?? actionRole('click'), target.live.seen);
+    const acted: ActedElement = { role: target.role ?? actionRole('click'), names: target.live.names };
     // What was typed into editable regions, read as refsure's readPage reads it (spec §7.3: never sent).
     const typed = await readTyped(deps.browser, page);
     return { before: { tab, text: target.bodyText, typed }, acted, riskClass: risk.class, actedRef: String(node.ref) };

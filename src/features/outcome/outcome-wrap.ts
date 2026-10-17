@@ -1,6 +1,6 @@
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { RE_OBSERVE } from '../../output';
-import { describeElement, urlNorm } from '../../page-model';
+import { urlNorm } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { actionRole } from '../../risk';
 import { abstainOutcome, nothingDone, readPage, sleep } from '../shared';
@@ -35,7 +35,7 @@ export async function runWrap(args: OutcomeWrapArgs, ctx: CommandContext): Promi
   // The same URL can still have renamed the ref while the before-read ran.
   const still = await nameStill(ctx, page, args, checked.cleared);
   if ('refusal' in still) return still.refusal;
-  const acted = describeElement(checked.cleared.role ?? actionRole(action), still.live.seen);
+  const acted = { role: checked.cleared.role ?? actionRole(action), names: still.live.names };
   // Read before the dispatch: a config error after it could only say effect_unknown.
   const sides = { piiMasks: ctx.config.piiMasks, value };
   if (ctx.dryRun) {

@@ -1,9 +1,10 @@
 import type { CommandOutcome } from '../../cli';
 import { boundText, cleanEgressText } from '../../egress';
 import { RE_OBSERVE } from '../../output';
-import { cutPieces, norm, showsAsWord, valuePieces } from '../../page-model';
+import { cutPieces, describeElement, norm, showsAsWord, valuePieces } from '../../page-model';
 import { BOUNDS } from '../../questions';
 import { type AbstainWhy, type PageReading, typedWithheld, withoutTyped } from '../shared';
+import type { ActedElement } from './acted-element';
 
 const TITLE_MAX = 300;
 
@@ -69,17 +70,42 @@ export function withheldUnmoved(
 }
 
 /**
+ * One name of the element acted on, as it may leave (spec §7.3): what was typed into editable regions before the act,
+ * when the name was read, and the value a fill or select typed, cut out as the sides are cut. Null when it is
+ * withheld (`typedWithheld`) or nothing is left.
+ */
+function nameShown(name: string, before: PageReading, value?: string): string | null {
+  if (typedWithheld(name, before.typed) !== null) return null;
+  const shown = withoutValue(withoutTyped(name, before.typed), value);
+  return norm(shown) === '' || shown === WITHHELD ? null : shown;
+}
+
+/**
+ * The element acted on as it may leave, `<role> "<name>"`: its first name `nameShown` keeps, so the dry-run body and
+ * the one sent after the act name it alike. An editable region with no label is named by its own text, which is
+ * typing, so it falls to its placeholder or title, or to the role alone.
+ */
+function actedShown(acted: ActedElement, before: PageReading, value?: string): string {
+  for (const name of acted.names) {
+    const shown = nameShown(name, before, value);
+    if (shown !== null) return describeElement(acted.role, shown);
+  }
+  return acted.role;
+}
+
+/**
  * The outcome Decision's input for one act (`outcome -- <verb>` and `act --verify`): the intent, the element acted
- * on, and both sides cleaned (`cleanSide`). `after` is null under `--dry-run`, where only a stand-in can be shown.
+ * on (`actedShown`), and both sides cleaned (`cleanSide`). `after` is null under `--dry-run`, where only a stand-in
+ * can be shown.
  */
 export function outcomeInput(
-  intent: string, acted: string, before: PageReading, after: PageReading | null,
+  intent: string, acted: ActedElement, before: PageReading, after: PageReading | null,
   opts: { piiMasks: boolean; value?: string | undefined },
 ) {
   const side = (reading: PageReading): string => outcomeSide(cleanSide(reading, opts.piiMasks, opts.value));
   return {
     intent,
-    acted,
+    acted: actedShown(acted, before, opts.value),
     before: side(before),
     after: after === null ? outcomeSide({ url: '', title: '', text: AFTER_UNREAD }) : side(after),
   };

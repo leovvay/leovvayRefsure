@@ -263,7 +263,9 @@ polling until a poll it can read (with no `--text` or `--url`, a wait whose ever
 and says nothing judged the page), and `outcome` and `act --verify` answer `effect_unknown` (exit 30) when a side is
 withheld and the URL did not change. `wait-for --text` and `outcome -- … --expect-text` still match the whole page
 text, locally. `outcome --mark` compares the mark's text, cut the same way, so its `--expect-text` settles nothing
-when either side's text was withheld.
+when either side's text was withheld. The acted element that `outcome` and `act --verify` send has its name cut the
+same way: a region with no label, which goes by its own text, is named by its placeholder or title, or by its role
+alone.
 
 **Before anything is sent:**
 

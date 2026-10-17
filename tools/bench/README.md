@@ -86,9 +86,9 @@ node "$OUT/bin/capture.mjs" --set tools/bench/sets/n5.jsonl --out <captures>/n5.
   `gold_ref`, then the mapped name must fold-equal the stated name and the selector must match one element (`orca
   eval`); `settleInputs` = raw names and roles of the offered lines), presence/page-state (calibrate's `captureItem`),
   outcome (`capture/outcome.ts`: `readLiveTarget` on the acted ref, after page read after `SETTLE_MS`, refsure's
-  `outcomeInput`; `acted` is `describeElement(role, seen)`; `refsure_risk_class` kept), option-map
-  (`capture/option-map.ts`: pick-option's steps; `open: true` clicks the field first). Mask modes (N10) give
-  `<id>~masks-on|off` items with the mode's gold (`gold_masks_on`).
+  `outcomeInput`; `acted` is the live ref's role and names, described with the typed text cut out;
+  `refsure_risk_class` kept), option-map (`capture/option-map.ts`: pick-option's steps; `open: true` clicks the
+  field first). Mask modes (N10) give `<id>~masks-on|off` items with the mode's gold (`gold_masks_on`).
 - Writes `<out>` (asked items, with the row's labels, `gold_twin`, `gold_cut`, `gold_not_offered`, `origin: native`),
   `<out>.rows.jsonl` (code-settled and dropped, X5), `<out>.meta.json`, and with `--parity` `<out>.parity.jsonl`.
   A gold on the page but outside the offered lines is gold `none` with `gold_cut: true` (X2; `goldChecks` reads

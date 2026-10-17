@@ -112,8 +112,10 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   if (isOut(fresh)) return fresh;
   const element = describeElement(ticket.fingerprint.role, ticket.fingerprint.name);
   ctx.trace.untrusted.add('result.element');
+  // What `--verify` names: the fingerprint's own name, cut as the sides are before it is sent (`outcomeInput`).
+  const acted = { role: ticket.fingerprint.role, names: [ticket.fingerprint.name] };
   if (ctx.dryRun && args.verify !== null && before !== null) {
-    const { verdict } = await dryVerify(ctx, { intent: args.verify, acted: element, before, piiMasks, value: policy.value });
+    const { verdict } = await dryVerify(ctx, { intent: args.verify, acted, before, piiMasks, value: policy.value });
     if (verdict.kind === 'abstain') return abstainOutcome<ActCommandResult>(verdict, null);
   }
 
@@ -130,7 +132,7 @@ async function actOnTicket(args: ActArgs, ctx: CommandContext, peeked: Ticket, p
   if (args.verify === null || before === null) {
     return { status: 'ok', acted: true, effect: 'dispatched', result: { verdict: 'done', ...base } };
   }
-  return verifyAfter(ctx, page, { intent: args.verify, acted: element, before, piiMasks, value: policy.value, base });
+  return verifyAfter(ctx, page, { intent: args.verify, acted, before, piiMasks, value: policy.value, base });
 }
 
 /** `act --ticket T` (spec §6.2, §8.3): the ticket names the page; a different `--page` is a usage error. */

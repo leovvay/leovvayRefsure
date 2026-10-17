@@ -6,7 +6,7 @@ export interface LiveName {
    * The name a browser would give it, roughly: the `aria-labelledby` text, `aria-label`, a `<label for>`, a
    * wrapping `<label>`, innerText (not for fill or select; for an `<input>` button, which has none, its `value`,
    * or an image button's `alt`), `placeholder`, `title`; the first that is not empty. A mismatch quotes it, and
-   * the outcome Decision's `acted_element` names it.
+   * the outcome Decision's `acted_element` names it, with what was typed cut out (`outcomeInput`).
    */
   seen: string;
   /**
