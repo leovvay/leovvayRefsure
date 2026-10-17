@@ -135,7 +135,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
 
     act: async (page, ref, action, value) => actOnSession(actDeps(page), ref, action, value),
 
-    pressEnter: async (page) => pressSessionEnter(actDeps(page)),
+    pressEnter: async (page, ref) => pressSessionEnter(actDeps(page), ref),
 
     async scrollDown(page, px) {
       await call(page, ['scroll', 'down', String(Math.max(1, Math.round(px)))]);

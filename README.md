@@ -109,22 +109,27 @@ Each step is one look, one Jev Decision and at most one act:
    operation needs 0.5; a target needs its risk row (read 0.5, write 0.6); every act is at least write, so 0.6.
    Two readings join heads: a split between CLICK and TYPE aimed at one field reads as TYPE (typing focuses the
    field as the click would), and when the leading operation's head is unsure, the runner-up's sure head is the
-   step. An unsure operation with `WAIT` leading or next waits, since a wait sends nothing.
+   step, if the runner-up holds 0.2 of the operation (0.1 when the first head ruled out every option) and at least
+   half of what the leading one leaves. An unsure operation with `WAIT` leading or next waits, since a wait sends
+   nothing.
 3. **End checks.** `--text` in the new text ends it `seen` by code; the done Noul at 0.85 ends it `seen` whatever
    operation leads; `DONE` without that is `done_unconfirmed`; `BLOCKED` is `blocked`.
 4. **Guard, as `act` guards a ticket.** Right before the act: a fresh snapshot on the same URL and tab, the element
-   found again by its fingerprint (role, name, path, ordinal in an unchanged twin group), else nothing is sent and
-   the step is looked at again; the never-click veto on what a click presses (accept, subscribe, enable…), refused;
-   the risk read on the fresh tree (lexicon, confirm dialog, URL, page raisers for a click, field raisers for a fill
-   or select, Enter as a click on the field and its form's buttons), at least write, and money, irreversible, auth
-   or consent refused with `act-high-risk` in `next`; the pick held to its risk row. Then one act on the fresh ref.
-   A sent act is never sent again by this code, and an act that may not have landed stops the run (exit 30).
+   found again by its fingerprint (role, name, path, ordinal in an unchanged twin group; a twin still in the row the
+   table told it apart by), else nothing is sent and the step is looked at again; the never-click veto on what a
+   click presses (accept, subscribe, enable…), refused; the risk read on the fresh tree (lexicon, confirm dialog,
+   URL, page raisers for a click, field raisers for a fill or select, Enter as a click on the field and its form's
+   buttons), at least write, and money, irreversible, auth or consent refused with `act-high-risk` in `next`; the
+   pick held to its risk row. Then one act on the fresh ref. A sent act is never sent again by this code, and an act
+   that may not have landed stops the run (exit 30). `PRESS_ENTER` is offered only where what Enter does can be
+   read (a field in a form the page names, a search or suggestion box), and the field is focused before the key.
 5. **Settle and look.** 250 ms (500 ms after a click in a dialog, on a field or an option), then the next look; after
-   a `TYPE` into a combobox, once more up to 600 ms until its options show. An unsure Decision gets another look a
-   second later (twice at most per step), and is asked again only when the page has changed since.
-6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget`; three acts in a row that change nothing,
-   or the same act on the same element a third time, end it `no_progress` (Orca delivers clicks only while its
-   browser tab is on screen).
+   a `TYPE` into a combobox, once more up to 600 ms while its options are still those shown before. An unsure
+   Decision is asked again as soon as the page shows something else, looked at four times a second for up to a
+   second (twice at most per step), and not at all when it does not.
+6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
+   look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
+   third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen).
 
 `run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
 offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
@@ -133,8 +138,9 @@ never put a secret in `--goal` or `--fill`. `result.verdict` is `seen`, `done_un
 act may not have landed). `result.steps` lists each step (`n`, `op`, `element` as a v1 line, `value` as the
 `--fill` key and never the value, `p`, `risk`, `page_changed`, `ms`); `new_text`, `url`, `elapsed_ms` and
 `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
-`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `new_text` and `why.detail` are
-untrusted. One Decision per step adds up: mind `decisionsPerMinute` (30 by default) on long tasks.
+`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `new_text`, `url` and `why.detail`
+are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
+cap has room again, within `--timeout`.
 
 Write the goal as a person would ask it, options first when the order matters ("set one-way, then search …"), and
 give every value the task names as a `--fill`, dates included (many date pickers take a typed date). Known limits,
@@ -361,7 +367,9 @@ the likeliest stay, and `--open` is never followed by an `oversize` refusal once
 **Never sent:** cookies, local or session storage, screenshots, API keys, values you typed or filled, textbox
 values, console and network bodies. The one exception is `run`: it sends its `--fill` values (so Jev can pair each
 with a field) and the current value of each field in its element table (so Jev can see what is filled), both
-through the same redaction and masks; an editable region's text is never sent, only that it holds text. `do` never
+through the same redaction and masks; an editable region's text is never sent, only that it holds text, and a field
+the tree cannot tell apart from one (a `role="textbox"` editor) shows its value only once a count finds no editable
+region on the page. `do` never
 sends a value. Text in an editable region (`contenteditable`: a comment box, a rich editor)
 shows in the page text, so `state`, `outcome`, `act --verify`, `wait-for`, `do` and `mark` read each such region (up
 to 16) without a snapshot and cut its text out; `state` also cuts what its snapshot shows. `do` also cuts every value
@@ -786,7 +794,7 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `stalled` | `abstained` | 10 | Not seen, and the page text and URL stopped changing for the --stall time; report it. |
 | `done_unconfirmed` | `abstained` | 10 | run: the Decision said the goal is done, and nothing (--expect, --text) confirmed it. |
 | `blocked` | `abstained` | 10 | run: no offered operation can make progress (a sign-in, a bot check, a missing value). |
-| `no_progress` | `abstained` | 10 | run: acts changed nothing three times in a row, or the same act came a third time. |
+| `no_progress` | `abstained` | 10 | run: acts or scrolls changed nothing three times in a row, or the same act came a third time on one page. |
 | `budget` | `abstained` | 10 | run: --max-steps or --timeout ran out before the goal showed. |
 | `veto` | `refused` | 11 | The control is on the never-click list (accept, subscribe, settings, ...). |
 | `high_risk_class` | `refused` | 11 | Money, irreversible, auth or consent: refused on this path. |

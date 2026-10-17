@@ -35,12 +35,16 @@ export function checkLimits(
   pending = 0,
 ): 'ok' | EgressRefusal {
   const { decisionsPerMinute, usdPerDay } = cfg.limits;
-  const lastMinute = entries.filter((entry) => entry.t > nowMs - MINUTE_MS).length;
+  const inWindow = entries.filter((entry) => entry.t > nowMs - MINUTE_MS).map((entry) => entry.t).sort((a, b) => a - b);
+  const lastMinute = inWindow.length;
   if (lastMinute + pending >= decisionsPerMinute) {
     const alongside = pending > 0 ? ` plus ${pending} more in this Decision` : '';
+    // The call that has to leave the window before this one fits; none when the cap leaves no room at all.
+    const leaving = inWindow[lastMinute + pending - decisionsPerMinute];
     return {
       cause: 'spend_limit',
       detail: `${lastMinute} Decisions in the last 60 s${alongside}; the limit is ${decisionsPerMinute} per minute`,
+      ...(leaving === undefined ? {} : { retryInMs: Math.max(0, leaving + MINUTE_MS - nowMs) + 1 }),
     };
   }
   // Summed in micro-dollars: ten calls at $0.05 must reach $0.50, which float addition misses.

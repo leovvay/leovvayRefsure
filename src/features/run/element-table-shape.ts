@@ -14,7 +14,18 @@ export interface TableEntry { n: number; cand: Candidate; options: readonly stri
 export interface ElementTable { rows: StepRow[]; byN: ReadonlyMap<number, TableEntry>; placed: (number | null)[] }
 
 /**
- * What a table reads beside the page: the goal's and the values' words (`contentWords`) and short numbers (a day,
- * a count), and the `--fill` values.
+ * A value field as the run has settled it (`fieldKey`): a plain `<input>`, whose value a row shows, or one not told
+ * apart from an editable region, whose text a row never shows.
  */
-export interface TableHints { words: readonly string[]; numbers: readonly string[]; fills: readonly StepFill[] }
+export type FieldKind = 'input' | 'withheld';
+
+/**
+ * What a table reads beside the page: the goal's and the values' words (`contentWords`) and short numbers (a day,
+ * a count), the `--fill` values, and the value fields settled so far (`settleFields` adds to them).
+ */
+export interface TableHints {
+  words: readonly string[];
+  numbers: readonly string[];
+  fills: readonly StepFill[];
+  kinds: Map<string, FieldKind>;
+}

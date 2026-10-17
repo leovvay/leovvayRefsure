@@ -15,6 +15,18 @@ const CARD_NAME = new RegExp(CARD_WORDS.join('|'), 'i');
 const RAISER_INPUTS = `${PASSWORD_INPUTS},${CARD_INPUTS}`;
 const AUTH_AUTOCOMPLETE = /(^|\s)(current-password|new-password|one-time-code)(\s|$)/i;
 const CC_AUTOCOMPLETE = /(^|\s)cc-/i;
+/**
+ * Any element a field act can reach (a native field, an element with a role, an editable region, a focusable one)
+ * carrying an attribute a page or a field raiser reads, loosely matched: a superset of both. None on the page means
+ * every one of them misses, as each read would. Elements no act reaches stay out: a page's `<meta name=twitter:card>`
+ * would otherwise match nearly every page.
+ */
+const ANY_RAISER = `:is(input, textarea, select, [role], [contenteditable], [tabindex]):is(${[
+  '[type*=password i]', '[autocomplete*=password i]', '[autocomplete*=one-time-code i]', '[autocomplete*="cc-" i]',
+  ...['name', 'id'].flatMap((attr) => CARD_WORDS.map((word) => `[${attr}*=${word} i]`)),
+].join(', ')})`;
+/** What a field carries on a page where `noRaiserOnPage` holds: none of the attributes the field raisers read. */
+export const NO_FIELD_ATTRS: FieldAttrs = Object.freeze({ type: '', autocomplete: '', name: '', id: '' });
 
 /** What cannot be read counts as both a password and a card input (spec §8.3). */
 function assumedReading(): RiskReading {
@@ -43,6 +55,17 @@ export async function pageRaisers(port: BrowserPort, page: PageRef, action: ActA
   return out;
 }
 
+/**
+ * Whether one count shows that no raiser can fire on the page as it is now: no element there carries an attribute
+ * any page or field raiser reads (`ANY_RAISER`). False when the backend cannot count, the read fails, or one does.
+ * A page gone, Orca down or a stale ref still propagate. A count reads the top document only: a field the snapshot
+ * shows inside a frame (a payment provider's card field) is not covered, and its own attributes must be read.
+ */
+export async function noRaiserOnPage(port: BrowserPort, page: PageRef): Promise<boolean> {
+  if (port.count === undefined || !port.features().has('count')) return false;
+  return await countProbe(port, page, ANY_RAISER) === 'miss';
+}
+
 async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<FieldAttrs | null> {
   const keys = ['type', 'autocomplete', 'name', 'id'] as const;
   if (port.attr !== undefined && port.features().has('attr')) {
@@ -55,7 +78,9 @@ async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<F
 /**
  * Field raisers for fill, select, check and uncheck (spec §8.3): `type=password` or a password/one-time-code
  * autocomplete → auth; a `cc-*` autocomplete or a card, CVV or IBAN name → money. Unreadable counts as hit.
- * `known` is the field's attributes already read off the same ref (`readLiveName`); without it they are read here.
+ * `known` is the field's attributes already read off the same ref (`readLiveName`), or `NO_FIELD_ATTRS` when a
+ * count showed no raiser on the page and the field sits in no frame (`noRaiserOnPage`); without it they are read
+ * here.
  */
 export async function fieldRaisers(
   port: BrowserPort, page: PageRef, ref: Ref, known?: FieldAttrs | null,

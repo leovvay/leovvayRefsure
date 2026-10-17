@@ -15,7 +15,18 @@ export interface StepAct {
   p: number;
   /** The element sits in a dialog, which a click may close. */
   inDialog: boolean;
+  /**
+   * For an element with identical twins, the text of the row the table told it apart by (`row="…"`): the same
+   * ordinal in another row is another element.
+   */
+  row?: string;
 }
+
+/**
+ * The raiser count (`noRaiserOnPage`) taken on a look while its Decision is asked, the browser idle meanwhile: the
+ * look's signature, and whether the page held no raiser then (false when that could not be read).
+ */
+export interface RaiserProbe { sig: string; none: Promise<boolean> }
 
 /**
  * The guard's answer: clear to act on the fresh ref; stale (nothing sent, the fresh snapshot is the next look);

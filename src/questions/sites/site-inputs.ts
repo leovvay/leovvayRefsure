@@ -43,6 +43,8 @@ export interface StepRow {
   n: number;
   /** `[n] role "name"`, then its value or state, and its row or dialog when that tells it apart. */
   text: string;
+  /** `text` without the value: how a refusal quotes the row back to the agent, where a field's value never goes. */
+  label: string;
   /** A field to type into: it may take a TYPE. */
   typable: boolean;
   /** It may take a CLICK: the caller keeps a field it can type into out of CLICK while a value waits for it. */

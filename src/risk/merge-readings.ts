@@ -32,10 +32,14 @@ function pageRaisedOn(port: BrowserPort, page: PageRef, tree: AxTree): Promise<R
 
 /**
  * The risk of clicking node `i` of a snapshot (spec §8.3, §8.5): the lexicon, confirm-dialog, URL and `--risk`
- * rules on the tree, and the page raisers for a click, read once per snapshot.
+ * rules on the tree, and the page raisers for a click, read once per snapshot. `noRaiser`: a count already showed
+ * no raiser on the page as this tree shows it (`noRaiserOnPage`), so every page raiser misses unread.
  */
 export async function clickRisk(
-  port: BrowserPort, page: PageRef, tree: AxTree, i: number, opts: { url: string; userRisk?: RiskClass },
+  port: BrowserPort, page: PageRef, tree: AxTree, i: number,
+  opts: { url: string; userRisk?: RiskClass; noRaiser?: boolean },
 ): Promise<RiskReading> {
-  return mergeReadings(classify(tree, i, { ...opts, action: 'click' }), await pageRaisedOn(port, page, tree));
+  const { noRaiser, ...rules } = opts;
+  const lexicon = classify(tree, i, { ...rules, action: 'click' });
+  return noRaiser === true ? lexicon : mergeReadings(lexicon, await pageRaisedOn(port, page, tree));
 }

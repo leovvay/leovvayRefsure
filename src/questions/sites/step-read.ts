@@ -21,12 +21,14 @@ const HEADS: Partial<Record<StepOp, string>> = {
   CLICK: STEP_QUESTIONS.click, TYPE: STEP_QUESTIONS.type, SELECT: STEP_QUESTIONS.select,
 };
 
-/** An offered option as a refusal names it: an operation by its name, a target by its text as sent. */
-function quoteIn(sent: Sent, head: string): (key: string) => string {
+/**
+ * An offered option as a refusal names it: an operation by its name, a target by the code's own label for it (the
+ * row without its value, the `--fill` key without the value): the refusal goes back to the agent, and a value never
+ * does.
+ */
+function quoteIn(context: StepContext, head: string): (key: string) => string {
   return (key) => {
-    const asked = sent[head];
-    const offered = head !== STEP_QUESTIONS.operation && key !== NONE_KEY && asked?.type === 'choice';
-    const text = offered ? asked.criteria[key] : undefined;
+    const text = key === NONE_KEY ? undefined : context.labels[head]?.get(key);
     return text === undefined ? key : quoteOption(text);
   };
 }
@@ -40,7 +42,7 @@ function unnumbered(text: string): string {
  * The twin rule (spec §8.1 invariant 7) on the options as sent: the other keys whose text, number aside, reads the
  * same as `key`'s. Redaction and masks run after the rows were built, so two rows code told apart can leave as one.
  */
-function sentTwinsOf(sent: Sent, head: string, key: string): { text: string; others: string[] } | null {
+function sentTwinsOf(sent: Sent, head: string, key: string): string[] | null {
   const asked = sent[head];
   const text = asked?.type === 'choice' ? asked.criteria[key] : undefined;
   if (asked?.type !== 'choice' || text === undefined) return null;
@@ -48,7 +50,7 @@ function sentTwinsOf(sent: Sent, head: string, key: string): { text: string; oth
   const others = Object.entries(asked.criteria)
     .filter(([other, line]) => other !== key && other !== NONE_KEY && unnumbered(line) === same)
     .map(([other]) => other);
-  return others.length === 0 ? null : { text, others };
+  return others.length === 0 ? null : others;
 }
 
 /** The leading options of a choice answer, best first: `CLICK 0.41, WAIT 0.32`. */
@@ -79,19 +81,19 @@ function readTarget(
 ): Verdict<StepTarget> {
   const answer = answers[head];
   if (answer === undefined) return abstainVerdict('provider_error', `no answer to ${head}`);
-  const quote = quoteIn(sent, head);
+  const quote = quoteIn(context, head);
   const confidence = answer.type === 'choice' ? answer.confidence : 0;
   const read = readChoice(answer, threshold, (key) => targetOf(context, op, key, confidence), NONE_KEY, quote);
   if (read.kind === 'abstain') {
     const leading = answer.type === 'choice' ? `; leading: ${leadingOf(answer, quote)}` : '';
     return { ...read, detail: `${op} target: ${read.detail}${leading}` };
   }
-  const twin = read.index === null ? null : sentTwinsOf(sent, head, read.index);
-  if (twin === null) return read;
-  const more = twin.others.length === 1 ? 'another option' : `${twin.others.length} other options`;
+  const twins = read.index === null ? null : sentTwinsOf(sent, head, read.index);
+  if (twins === null || read.index === null) return read;
+  const more = twins.length === 1 ? 'another option' : `${twins.length} other options`;
   return {
     kind: 'abstain', cause: 'twins', leaned: read.index, confidence: read.confidence, threshold: read.threshold,
-    detail: `${op} target: picked ${quoteOption(twin.text)}, which reads the same as ${more} as sent: `
+    detail: `${op} target: picked ${quote(read.index)}, which reads the same as ${more} as sent: `
       + 'the model could not tell them apart',
   };
 }
@@ -177,19 +179,23 @@ const SECOND_MIN_REFUTED = 0.1;
 const UNSURE_HEAD: ReadonlySet<string> = new Set(['low_confidence', 'none_chosen']);
 
 /**
- * The leading operation's head could name no target it is sure of. When the runner-up operation takes a target, has
- * at least `SECOND_MIN` (`SECOND_MIN_REFUTED` when the first head was sure that none of its options fits), and its
- * own head is sure (at its threshold, the twin rule read), that is the step; else the first refusal stands. Two
- * right next steps (a date, an option the goal names) split the first head's mass.
+ * The leading operation's head could name no target it is sure of. The runner-up operation is the step when it
+ * takes a target, has at least `SECOND_MIN` (`SECOND_MIN_REFUTED` when the first head was sure that none of its
+ * options fits), holds at least `STEP_OP_MIN` of what the first operation leaves (with the first set aside, it is
+ * the operation the model favours, not one of several it spread the rest over), and its own head is sure (at its
+ * threshold, the twin rule read); else the first refusal stands. Each head is asked as if its operation were
+ * next, so its confidence is no evidence for the operation: that share is. Two right next steps (a date, an option
+ * the goal names) split the first head's mass.
  */
 function secondOperation(
   answers: Answers, context: StepContext, operation: DecisionChoiceAnswer, first: Verdict<StepReading>,
   done: number | null, threshold: Threshold, sent: Sent,
 ): Verdict<StepReading> {
   if (first.kind !== 'abstain' || !UNSURE_HEAD.has(first.cause)) return first;
-  const [, second] = Object.entries(operation.probabilities).sort((a, b) => b[1] - a[1]);
+  const [lead, second] = Object.entries(operation.probabilities).sort((a, b) => b[1] - a[1]);
   const least = first.cause === 'none_chosen' ? SECOND_MIN_REFUTED : SECOND_MIN;
-  if (second === undefined || second[1] < least) return first;
+  if (lead === undefined || second === undefined || second[1] < least) return first;
+  if (second[1] < STEP_OP_MIN * (1 - lead[1])) return first;
   const op = second[0] as StepOp;
   if (!context.ops.includes(op) || HEADS[op] === undefined) return first;
   const read = readHead(answers, context, op, second[1], done, threshold, sent);

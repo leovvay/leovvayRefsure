@@ -26,7 +26,11 @@ export async function actOnOrca(
     if (value === undefined) throw new BrowserError('backend_error', `${action} needs a value`);
     args.push(`--value=${value}`);
   }
-  args.push(...pageArgs(page, deps.env));
+  return sendAct(deps, [...args, ...pageArgs(page, deps.env)], value);
+}
+
+/** One page-changing Orca call, read as `actOnOrca` reads it; `value` is hidden from any detail. */
+async function sendAct(deps: ActDeps, args: readonly string[], value?: string): Promise<ActResult> {
   // A failure before the spawn (no binary, not in an Orca terminal) rethrows: nothing was sent.
   const sent = await sendOnce(deps.trace, (onSpawn) => deps.run(args, ACT_TIMEOUT_MS, onSpawn));
   if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'orca', value) };
@@ -54,18 +58,14 @@ export async function dismissOrcaDialog(deps: ActDeps, page: PageRef): Promise<b
 }
 
 /**
- * `keypress --key=Enter`: Orca sends the key to the page itself, to whatever has focus there. As an act, it counts
- * as dispatched from the moment the request is written; a failure after that is `unknown`, never retried.
+ * `focus --element eN`, then `keypress --key=Enter`: Orca sends the key to the page itself, to whatever has focus
+ * there, so the element is focused first. A focus Orca refused before touching the page sends nothing more (a gone
+ * element is `stale_ref`). From the focus on it counts as dispatched; a failure after that is `unknown`, never
+ * retried.
  */
-export async function pressEnterOnOrca(deps: ActDeps, page: PageRef): Promise<ActResult> {
-  const args = ['keypress', '--key=Enter', ...pageArgs(page, deps.env)];
-  const sent = await sendOnce(deps.trace, (onSpawn) => deps.run(args, ACT_TIMEOUT_MS, onSpawn));
-  if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'orca', undefined) };
-  const reply = sent.reply;
-  if (reply.ok) return { kind: 'done' };
-  if (refusedBeforeDispatch(reply.code, reply.message)) {
-    deps.trace.dispatched = sent.before;
-    throw orcaError(reply.code, reply.message);
-  }
-  return { kind: 'unknown', detail: actDetail(`${reply.code}: ${reply.message}`, undefined) };
+export async function pressEnterOnOrca(deps: ActDeps, page: PageRef, ref: Ref): Promise<ActResult> {
+  if (!isRef(ref)) return { kind: 'stale_ref' };
+  const focused = await sendAct(deps, ['focus', `--element=${ref}`, ...pageArgs(page, deps.env)]);
+  if (focused.kind !== 'done') return focused;
+  return sendAct(deps, ['keypress', '--key=Enter', ...pageArgs(page, deps.env)]);
 }

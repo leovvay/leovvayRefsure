@@ -12,6 +12,19 @@ const EDITABLE_ROOTS_XPATH = `//*[${EDITABLE} and not(ancestor::*[${EDITABLE}])]
 const TYPED_READ_MAX = 16;
 
 /**
+ * How many editable regions the page holds (one count, no snapshot); null when the backend cannot count them or the
+ * read failed.
+ */
+export async function countEditable(port: BrowserPort, page: PageRef): Promise<number | null> {
+  if (!readsSelectors(port)) return null;
+  try {
+    return await port.count!(page, `xpath=${EDITABLE_ROOTS_XPATH}`);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The text typed into the page's editable regions, as pieces to cut (`valuePieces`) and texts too short to cut
  * (`shortPieces`). The body text shows what a contenteditable holds (spec §7.3 never sends it), and a textbox value
  * never shows in it. No snapshot is taken, so the agent's refs survive. A backend that cannot count and read

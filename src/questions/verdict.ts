@@ -35,6 +35,8 @@ export type Verdict<Out> =
     threshold: number | null;
     /** The provider refused the key itself (HTTP 401, 402, 403): asking again, over any input, fails the same way. */
     permanent?: true;
+    /** A `spend_limit` from the per-minute cap: asked again this much later, it has room. */
+    retryInMs?: number;
   };
 
 export type AbstainVerdict<Out> = Extract<Verdict<Out>, { kind: 'abstain' }>;

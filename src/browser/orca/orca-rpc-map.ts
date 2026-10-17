@@ -46,6 +46,7 @@ const ROUTES: Readonly<Record<string, Route>> = {
   console: onPage('browser.console', ['limit'], limited),
   network: onPage('browser.network', ['limit'], limited),
   'dialog dismiss': onPage('browser.dialogDismiss'),
+  focus: onPage('browser.focus', ['element'], element),
   keypress: onPage('browser.keypress', ['key'], (flags) => ({ key: required(flags, 'key') })),
   scroll: onPage('browser.scroll', ['direction', 'amount'], (flags) => ({
     direction: required(flags, 'direction'), amount: positiveInteger(flags, 'amount'),

@@ -2,8 +2,8 @@ import type { AxNode, AxTree } from '../../browser';
 import { escapeRegExp } from '../../shared';
 import { cleanEgressText } from '../../egress';
 import {
-  type Candidate, contentWords, cutName, DIALOG_ROLES, describeElement, fold, isValueField, nearestAncestor, norm,
-  rowTextOf, subtree,
+  type Candidate, candidateKey, contentWords, cutName, DIALOG_ROLES, describeElement, fold, isValueField,
+  nearestAncestor, norm, rowTextOf, subtree,
 } from '../../page-model';
 import type { StepRow } from '../../questions';
 import type { ElementTable, TableEntry, TableHints } from './element-table-shape';
@@ -43,21 +43,51 @@ function labelOf(node: AxNode | undefined): string {
   return (node?.name ?? '').replace(/[\t\n\f\r ]+/g, ' ').replace(/^ | $/g, '');
 }
 
-/** Up to 30 labels, those sharing a word with the goal or a value first, then in page order. */
-function rankedLabels(labels: readonly string[], words: ReadonlySet<string>): string[] {
-  const scored = labels.map((label, at) => ({ label, at, hit: contentWords(label).some((w) => words.has(w)) ? 0 : 1 }));
+/**
+ * Up to 30 labels, those sharing a word or a short number (a day, a count) with the goal or a value first, then in
+ * page order: a cut keeps the first.
+ */
+function rankedLabels(labels: readonly string[], words: ReadonlySet<string>, numbers: ReadonlySet<string>): string[] {
+  const named = (label: string): boolean => contentWords(label).some((w) => words.has(w))
+    || shortNumbers(label).some((n) => numbers.has(n));
+  const scored = labels.map((label, at) => ({ label, at, hit: named(label) ? 0 : 1 }));
   return scored.sort((a, b) => a.hit - b.hit || a.at - b.at).slice(0, OPTIONS_MAX).map((s) => s.label);
 }
 
+/** A value field by its element (fingerprint): how `TableHints.kinds` knows it from look to look. */
+export function fieldKey(cand: Candidate): string {
+  return `${candidateKey(cand)}\n${cand.fp.ordinal}`;
+}
+
 /**
- * The field's value as the row shows it: the text cut, or `empty`; an editable region only says it holds text. A
- * value that is one of the `--fill` values says which: masks can make two different e-mails read the same.
+ * A field whose value only a settled kind lets a row show: text no `--fill` value holds, in a field that is no
+ * native select (whose value is an option label) and that the tree does not mark editable. A `role="textbox"`
+ * contenteditable prints as a plain textbox, and an editable region's text is never sent (spec §7.3).
  */
-function valuePart(node: AxNode, hints: TableHints): string {
+function needsKind(tree: AxTree, cand: Candidate, hints: TableHints): boolean {
+  const node = tree.nodes[cand.node]!;
+  if (!isValueField(node) || node.attrs.contenteditable === true || optionNodes(tree, cand.node).length > 0) return false;
+  const value = norm(node.value ?? '');
+  return value !== '' && !hints.fills.some((one) => holds(value, one.value));
+}
+
+/** The value fields of a look whose value a row would show once settled, and that no look has settled yet. */
+export function unsettledFields(tree: AxTree, cands: readonly Candidate[], hints: TableHints): string[] {
+  return cands.filter((cand) => needsKind(tree, cand, hints) && !hints.kinds.has(fieldKey(cand))).map(fieldKey);
+}
+
+/**
+ * The field's value as the row shows it: the text cut, or `empty`; an editable region, or a field not yet told
+ * apart from one (`needsKind`), only says it holds text. A value that is one of the `--fill` values says which:
+ * masks can make two different e-mails read the same.
+ */
+function valuePart(tree: AxTree, cand: Candidate, hints: TableHints): string {
+  const node = tree.nodes[cand.node]!;
   if (!isValueField(node)) return '';
   const value = norm(node.value ?? '');
   if (value === '') return ' = empty';
   if (node.attrs.contenteditable === true) return ' = (holds text)';
+  if (needsKind(tree, cand, hints) && hints.kinds.get(fieldKey(cand)) !== 'input') return ' = (holds text)';
   const shown = ` = ${JSON.stringify(cutName(value, VALUE_SHOWN))}`;
   const fill = hints.fills.find((one) => holds(value, one.value));
   if (fill !== undefined) return `${shown} (holds ${fill.key})`;
@@ -161,11 +191,14 @@ export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: T
     if ((sameName.get(nameKey(cand)) ?? 0) > 1 && cand.fp.path !== '') where += ` in=${JSON.stringify(cand.fp.path)}`;
     if (cand.fp.twins > 1) where += ` row=${JSON.stringify(cutName(norm(rowTextOf(tree, cand.node)), ROW_SHOWN))}`;
     const labels = optionNodes(tree, cand.node).map((at) => labelOf(tree.nodes[at])).filter((label) => label !== '');
-    const options = rankedLabels(labels, wanted);
+    const options = rankedLabels(labels, wanted, numbers);
     const editable = node.attrs.disabled === undefined && node.attrs.readonly === undefined;
     const typable = isValueField(node) && options.length === 0 && editable;
-    const text = `[${n}] ${describeElement(node.role, node.name)}${valuePart(node, hints)}${statePart(node)}${where}`;
-    rows.push({ n, text, typable, clickable: true, options, overlay: dialog !== null, weight: weights.get(cand.node) ?? 0 });
+    const head = `[${n}] ${describeElement(node.role, node.name)}`;
+    const text = `${head}${valuePart(tree, cand, hints)}${statePart(node)}${where}`;
+    const label = `${head}${statePart(node)}${where}`;
+    const weight = weights.get(cand.node) ?? 0;
+    rows.push({ n, text, label, typable, clickable: true, options, overlay: dialog !== null, weight });
     byN.set(n, { n, cand, options, overlay: dialog !== null });
     const value = isValueField(node) ? node.value ?? '' : '';
     hints.fills.forEach((fill, k) => {

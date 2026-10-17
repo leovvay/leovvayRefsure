@@ -68,7 +68,10 @@ function buildParts<In, Ctx, Out>(
       profileId: deps.pageProfile(),
       config: deps.config, dryRun: opts.dryRun, nowMs, egressLog, pending: plan.kind === 'agree' ? parts.length : 0,
     });
-    if (isEgressRefusal(approved)) return abstain(approved.cause, approved.detail);
+    if (isEgressRefusal(approved)) {
+      const refused = abstain<Out>(approved.cause, approved.detail);
+      return approved.retryInMs === undefined ? refused : { ...refused, retryInMs: approved.retryInMs };
+    }
     const twins = sentTwins(approved, site.question);
     const part: ComboPart<Out> = {
       provider: loggedProvider(provider, { egressLog: deps.config.paths.egressLog, command: deps.command, site: site.id, trace: deps.trace }),

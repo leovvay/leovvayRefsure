@@ -96,7 +96,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),
 
-    pressEnter: (page) => pressEnterOnOrca({ env, trace, run }, page),
+    pressEnter: (page, ref) => pressEnterOnOrca({ env, trace, run }, page, ref),
 
     async scrollDown(page, px) {
       await call(onPage(page, ['scroll'], '--direction=down', `--amount=${Math.max(1, Math.round(px))}`));

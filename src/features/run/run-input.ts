@@ -1,7 +1,8 @@
 import type { CommandContext } from '../../cli';
-import { findByFingerprint } from '../../page-model';
+import { type Fingerprint, findByFingerprint } from '../../page-model';
 import type { StepInput, StepRow } from '../../questions';
 import { expectationOf, newReading, type PageReading, shownLines, typedWithheld, withheldNote } from '../shared';
+import { enterReadable } from './run-guard';
 import type { RunLook } from './run-look-shape';
 import { IN_ROW, NOT_TYPED, placedOf, type RunState } from './run-state';
 
@@ -37,6 +38,12 @@ export function newTextOf(ctx: CommandContext, run: RunState): string {
   return fresh.text;
 }
 
+/** The field just typed into is still on the page, and what Enter in it does can be read (`enterReadable`). */
+function enterIn(look: RunLook, typed: Fingerprint): boolean {
+  const found = findByFingerprint(look.tree, typed);
+  return typeof found === 'object' && enterReadable(look.tree, found.node);
+}
+
 function textField(look: RunLook, row: StepRow): boolean {
   return row.typable && TEXT_ROLES.has(look.table.byN.get(row.n)?.cand.fp.role ?? '');
 }
@@ -44,8 +51,8 @@ function textField(look: RunLook, row: StepRow): boolean {
 /**
  * One step's Decision input from the current look. A value a field of the look shows is offered no TYPE; while a
  * value waits to be typed, a text field takes TYPE and no CLICK (typing opens its search box or picker by itself).
- * PRESS_ENTER only right after a TYPE that ran, while that field is still on the page; SCROLL_DOWN when the backend
- * can and no dialog covers the page.
+ * PRESS_ENTER only right after a TYPE that ran, while that field is still on the page and Enter's effect in it can be
+ * read; SCROLL_DOWN when the backend can and no dialog covers the page.
  */
 export function stepInput(ctx: CommandContext, run: RunState, newText: string): StepInput {
   const { current, args } = run;
@@ -66,7 +73,7 @@ export function stepInput(ctx: CommandContext, run: RunState, newText: string): 
     recent: run.recent.slice(-RECENT_MAX),
     rows: pending ? current.table.rows.map((row) => ({ ...row, clickable: !textField(current, row) })) : current.table.rows,
     canPressEnter: typed !== null && ctx.browser.pressEnter !== undefined && features.has('press-enter')
-      && findByFingerprint(current.tree, typed) !== 'gone',
+      && enterIn(current, typed),
     canScroll: ctx.browser.scrollDown !== undefined && features.has('scroll') && !current.table.rows.some((row) => row.overlay),
   };
 }

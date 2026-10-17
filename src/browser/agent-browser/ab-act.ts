@@ -28,6 +28,11 @@ export async function actOnSession(
     if (value === undefined) throw new BrowserError('backend_error', `${action} needs a value`);
     verb.push(value);
   }
+  return sendVerb(deps, verb, value);
+}
+
+/** One page-changing verb on an element, read as `actOnSession` reads it; `value` is hidden from any detail. */
+async function sendVerb(deps: AbActDeps, verb: readonly string[], value?: string): Promise<ActResult> {
   const sent = await send(deps, verb, ACT_TIMEOUT_MS);
   if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'agent-browser', value) };
   const { replies, launched } = sent.reply;
@@ -64,11 +69,16 @@ export async function dismissSessionDialog(deps: AbActDeps): Promise<boolean> {
 }
 
 /**
- * `press Enter` on the session's active tab, to whatever has focus in the page. Dispatched from the moment the
- * process exists; a failure after that is `unknown`, never retried. A browser started during the call holds none of
- * the user's page, so the press is reported as possibly landed elsewhere.
+ * `focus @eN`, then `press Enter` on the session's active tab: the key goes to whatever has focus in the page, so
+ * the element is focused first, in a call of its own (a batch would press after a failed focus too). A gone
+ * element is `stale_ref`, and nothing is pressed. Dispatched from the moment the first process exists; a failure
+ * after that is `unknown`, never retried. A browser started during the call holds none of the user's page, so the
+ * press is reported as possibly landed elsewhere.
  */
-export async function pressSessionEnter(deps: AbActDeps): Promise<ActResult> {
+export async function pressSessionEnter(deps: AbActDeps, ref: Ref): Promise<ActResult> {
+  if (!isRef(ref)) return { kind: 'stale_ref' };
+  const focused = await sendVerb(deps, ['focus', `@${ref}`]);
+  if (focused.kind !== 'done') return focused;
   const sent = await send(deps, ['press', 'Enter'], ACT_TIMEOUT_MS);
   if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'agent-browser', undefined) };
   const { replies, launched } = sent.reply;

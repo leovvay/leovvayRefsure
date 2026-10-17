@@ -46,9 +46,9 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
   if (network) port.network = (page) => network.call(browser, page);
   const { pressEnter, scrollDown } = browser;
   if (pressEnter) {
-    port.pressEnter = async (page) => {
+    port.pressEnter = async (page, ref) => {
       guard();
-      return pressEnter.call(browser, page);
+      return pressEnter.call(browser, page, ref);
     };
   }
   if (scrollDown) {

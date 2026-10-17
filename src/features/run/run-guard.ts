@@ -1,47 +1,79 @@
 import type { ActAction, AxTree, PageRef, Ref, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
 import { NEEDS_HUMAN, type Next } from '../../output';
-import { describeElement, findByFingerprint, nearestAncestor, subtree, urlNorm } from '../../page-model';
+import { describeElement, findByFingerprint, nearestAncestor, rowContains, rowTextOf, subtree, urlNorm } from '../../page-model';
 import { stepSite, thresholdFor } from '../../questions';
 import {
-  classify, classifyNames, clickRisk, fieldRaisers, floorAtWrite, mergeReadings, refusesHighRisk, type RiskReading,
+  classify, classifyNames, clickRisk, fieldRaisers, floorAtWrite, mergeReadings, NO_FIELD_ATTRS, noRaiserOnPage,
+  refusesHighRisk, type RiskReading,
 } from '../../risk';
 import { vetoOf } from '../dismiss';
 import { highRiskNext } from '../shared';
 import { lookOf } from './run-look';
 import type { TableHints } from './element-table-shape';
 import type { RunLook } from './run-look-shape';
-import type { Guarded, StepAct } from './step-act-shape';
+import type { Guarded, RaiserProbe, StepAct } from './step-act-shape';
 
 /** What each operation hands the browser, for the high-risk step's argv. */
 const ACTIONS: Readonly<Record<StepAct['op'], ActAction>> = {
   CLICK: 'click', TYPE: 'fill', SELECT: 'select', PRESS_ENTER: 'click',
 };
 
-/** The buttons of the field's form: Enter in a field submits through them. Outside a named form, none. */
+/** A form, or a search landmark (`<search>`, `role="search"`): Enter in a field submits through its buttons. */
+const FORM_ROLES: ReadonlySet<string> = new Set(['form', 'search']);
+/** A search box or a suggestion box: Enter there runs the search or picks the suggestion. */
+const ENTER_ROLES: ReadonlySet<string> = new Set(['searchbox', 'combobox']);
+
+/**
+ * The buttons of the field's form: Enter in a field submits through them. Outside a form the tree shows (an unnamed
+ * `<form>` shows as none), none.
+ */
 function formButtons(tree: AxTree, field: number): number[] {
-  const form = nearestAncestor(tree, field, (node) => node.role === 'form');
+  const form = nearestAncestor(tree, field, (node) => FORM_ROLES.has(node.role));
   return form === null ? [] : subtree(tree, form).filter((at) => tree.nodes[at]?.role === 'button');
+}
+
+/**
+ * Whether what Enter in the field does can be read, so the guard can judge it: the field sits in a form the tree
+ * shows, whose buttons the guard reads, or it is a search or suggestion box. Elsewhere Enter may send a message or
+ * submit an unnamed form through a control nobody read, so PRESS_ENTER is neither offered nor sent. Never in an
+ * editable region.
+ */
+export function enterReadable(tree: AxTree, field: number): boolean {
+  const node = tree.nodes[field];
+  if (node === undefined || node.attrs.contenteditable === true) return false;
+  return ENTER_ROLES.has(node.role) || nearestAncestor(tree, field, (up) => FORM_ROLES.has(up.role)) !== null;
+}
+
+/** Whether node `i` sits inside a frame the snapshot opened (a payment provider's card field). */
+function inFrame(tree: AxTree, i: number): boolean {
+  return nearestAncestor(tree, i, (up) => up.role.toLowerCase() === 'iframe') !== null;
 }
 
 /**
  * The risk of the act on the fresh tree, always at least write (design 2026-10-17 §2.5): a click as `locate` reads
  * it (lexicon, confirm dialog, URL, page raisers); a fill or select as `act` reads it (the field, the option's own
- * words, the field raisers); Enter as a click on the field and on every button of its form.
+ * words, the field raisers); Enter as a click on the field and on every button of its form. `probed`: what the
+ * raiser count taken while the Decision was asked found on this same page (`noRaiserOnPage`), null when none
+ * was. No raiser there settles the page raisers, and the field raisers of a field in no frame (a count reads the
+ * top document only); a field the page has not been counted for is counted first, one call for the four reads.
  */
 async function riskOf(
   ctx: CommandContext, page: PageRef, tab: TabInfo, tree: AxTree, node: number, ref: Ref, act: StepAct,
+  probed: boolean | null,
 ): Promise<RiskReading> {
   const url = tab.url;
-  if (act.op === 'CLICK') return floorAtWrite(await clickRisk(ctx.browser, page, tree, node, { url }));
+  const noRaiser = probed === true;
+  if (act.op === 'CLICK') return floorAtWrite(await clickRisk(ctx.browser, page, tree, node, { url, noRaiser }));
   if (act.op === 'PRESS_ENTER') {
     const submits = formButtons(tree, node).map((at) => classify(tree, at, { url, action: 'click' }));
-    return floorAtWrite(mergeReadings(await clickRisk(ctx.browser, page, tree, node, { url }), ...submits));
+    return floorAtWrite(mergeReadings(await clickRisk(ctx.browser, page, tree, node, { url, noRaiser }), ...submits));
   }
   const action = act.op === 'TYPE' ? 'fill' : 'select';
   const readings = [classify(tree, node, { url, action })];
   if (act.op === 'SELECT' && act.value !== undefined) readings.push(classifyNames([act.value], { url, action }));
-  readings.push(await fieldRaisers(ctx.browser, page, ref));
+  const none = !inFrame(tree, node) && (probed ?? await noRaiserOnPage(ctx.browser, page));
+  readings.push(await fieldRaisers(ctx.browser, page, ref, none ? NO_FIELD_ATTRS : undefined));
   return floorAtWrite(mergeReadings(...readings));
 }
 
@@ -74,15 +106,22 @@ function highRiskStop(ctx: CommandContext, tree: AxTree, node: number, ref: Ref,
   return { kind: 'stop', status: 'refused', cause: 'high_risk_class', detail: why, next, risk: risk.class };
 }
 
+/** The row still holds what it held when the table showed it (an empty row holds nothing else either). */
+function sameRow(now: string, then: string): boolean {
+  return then === '' ? now === '' : rowContains(now, then);
+}
+
 /**
  * The guard every act of `run` passes, right before it (design 2026-10-17 §2.5), the same checks `act` makes on a
  * ticket: the same URL and tab, a fresh snapshot, the element found again by its fingerprint (role, name, path and
- * ordinal in an unchanged twin group); the veto on what a click presses; the risk read on the fresh tree, refused
- * at money, irreversible, auth and consent; and the pick held to its own risk row. Nothing else sits between this
- * and the act. A stale element is no stop: nothing was sent, and the caller looks again (`actStep`).
+ * ordinal in an unchanged twin group; a twin still in the row the table showed it in, as `--within` binds a ticket;
+ * Enter still in a field whose effect can be read); the veto on what a click presses; the risk read on the fresh
+ * tree, refused at money, irreversible, auth and consent; and the pick held to its own risk row. Nothing else sits
+ * between this and the act. A stale element is no stop: nothing was sent, and the caller looks again (`actStep`).
+ * `probe` is the raiser count taken while the Decision was asked (`probeRaisers`), used only on the same page.
  */
 export async function guardStep(
-  ctx: CommandContext, page: PageRef, before: RunLook, act: StepAct, hints: TableHints,
+  ctx: CommandContext, page: PageRef, before: RunLook, act: StepAct, hints: TableHints, probe: RaiserProbe | null,
 ): Promise<Guarded> {
   const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
   const fresh = lookOf(tab, tree, hints);
@@ -95,6 +134,13 @@ export async function guardStep(
   if (found === 'changed') {
     return { kind: 'stale', cause: 'page_changed', detail: `the elements named ${name} changed after the Decision`, fresh };
   }
+  // A twin was told apart by its row: the same ordinal in another row (a list re-sorted) is another element.
+  if (act.row !== undefined && !sameRow(rowTextOf(tree, found.node), act.row)) {
+    return { kind: 'stale', cause: 'page_changed', detail: `the row of ${name} changed after the Decision`, fresh };
+  }
+  if (act.op === 'PRESS_ENTER' && !enterReadable(tree, found.node)) {
+    return { kind: 'stale', cause: 'page_changed', detail: `${name} left the form Enter would submit`, fresh };
+  }
   const veto = vetoed(tree, found.node, act);
   if (veto !== null) {
     return {
@@ -102,7 +148,9 @@ export async function guardStep(
       detail: `${JSON.stringify(veto.name)} carries "${veto.term}", which is on the never-click list; nothing was sent`,
     };
   }
-  const risk = await riskOf(ctx, page, tab, tree, found.node, found.ref, act);
+  // The count made while the Decision was asked holds for the page it read, when the fresh snapshot shows that page.
+  const probed = probe !== null && probe.sig === fresh.sig ? await probe.none : null;
+  const risk = await riskOf(ctx, page, tab, tree, found.node, found.ref, act, probed);
   if (refusesHighRisk(risk.class)) return highRiskStop(ctx, tree, found.node, found.ref, act, risk);
   const model = ctx.trace.decisions.at(-1)?.model;
   const row = thresholdFor(stepSite, 'jev', risk.class, model, stepSite.wording.hash);

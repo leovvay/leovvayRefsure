@@ -25,19 +25,39 @@ const RECENT_LINE_MAX = 240;
 /** Both bounds with a tenth to spare: approve re-cleans every string, and a mask can grow a line. */
 const FIT_STATE = Math.floor(BOUNDS.STATE_MAX_BYTES * 0.9);
 const FIT_QUESTIONS = Math.floor(BOUNDS.QUESTIONS_MAX_BYTES * 0.9);
-const FIT_STEP = 0.85;
+/**
+ * The options of one select offered when the whole table does not fit, its best-ranked first (the table ranks
+ * those naming the goal and the values first): a few long dropdowns would otherwise push every other row out.
+ */
+const OPTIONS_CUT = 10;
 
-/** What a read needs to map an answer back: the operations offered, and each target head's keys. */
+/**
+ * What a read needs to map an answer back: the operations offered, each target head's keys, and each key as a
+ * refusal quotes it (by head): the row's label with the `--fill` key or the option, never a value.
+ */
 export interface StepContext {
   ops: readonly StepOp[];
   click: ReadonlyMap<string, number>;
   type: ReadonlyMap<string, { n: number; fill: number }>;
   select: ReadonlyMap<string, { n: number; option: number }>;
+  labels: Readonly<Record<string, ReadonlyMap<string, string>>>;
   askedDone: boolean;
 }
 
-function line(text: string): string {
-  return boundedText(text, BOUNDS.CANDIDATE_LINE_MAX, { inline: true });
+/** Text cleaned and bounded (`boundedText`), each text once per request however many cuts are tried. */
+type Clean = (text: string, max: number, inline?: boolean) => string;
+
+function cleanOnce(): Clean {
+  const seen = new Map<string, string>();
+  return (text, max, inline = false) => {
+    const key = `${max}${inline ? 'i' : 'b'}${text}`;
+    let out = seen.get(key);
+    if (out === undefined) {
+      out = boundedText(text, max, inline ? { inline: true } : {});
+      seen.set(key, out);
+    }
+    return out;
+  };
 }
 
 /**
@@ -62,25 +82,25 @@ function offeredOps(input: StepInput, rows: readonly StepRow[]): StepOp[] {
   return ops;
 }
 
-function stateOf(input: StepInput, rows: readonly StepRow[]): Record<string, string> {
+function stateOf(input: StepInput, rows: readonly StepRow[], clean: Clean): Record<string, string> {
   const state: Record<string, string> = {
-    goal: boundedText(input.goal, GOAL_MAX, { inline: true }),
+    goal: clean(input.goal, GOAL_MAX, true),
     values: input.fills.length === 0
       ? '(none: nothing may be typed)'
       : input.fills.map((fill, at) => {
         const where = input.placed[at] ?? '';
-        return `${fill.key} = ${boundedText(fill.value, VALUE_MAX, { inline: true })}${where === '' ? '' : ` (${where})`}`;
+        return `${fill.key} = ${clean(fill.value, VALUE_MAX, true)}${where === '' ? '' : ` (${where})`}`;
       }).join('\n'),
-    page_url: boundedText(input.pageUrl, BOUNDS.URL_MAX, { inline: true }),
-    title: boundedText(input.title, TITLE_MAX, { inline: true }),
-    page: boundedText(input.page, PAGE_TEXT_MAX),
-    new_text: input.newText === '' ? '(none yet)' : boundedText(input.newText, NEW_TEXT_MAX),
+    page_url: clean(input.pageUrl, BOUNDS.URL_MAX, true),
+    title: clean(input.title, TITLE_MAX, true),
+    page: clean(input.page, PAGE_TEXT_MAX),
+    new_text: input.newText === '' ? '(none yet)' : clean(input.newText, NEW_TEXT_MAX),
     recent: input.recent.length === 0
       ? '(no steps yet)'
-      : input.recent.map((step) => boundedText(step, RECENT_LINE_MAX, { inline: true })).join('\n'),
-    elements: rows.map((row) => line(row.text)).join('\n'),
+      : input.recent.map((step) => clean(step, RECENT_LINE_MAX, true)).join('\n'),
+    elements: rows.map((row) => clean(row.text, BOUNDS.CANDIDATE_LINE_MAX, true)).join('\n'),
   };
-  if (input.expect !== null) state.expect = boundedText(input.expect, BOUNDS.DESCRIPTION_MAX, { inline: true });
+  if (input.expect !== null) state.expect = clean(input.expect, BOUNDS.DESCRIPTION_MAX, true);
   return state;
 }
 
@@ -88,8 +108,14 @@ function choice(instructions: string, criteria: Record<string, string>): Decisio
   return { type: 'choice', instructions, criteria: { ...criteria, [NONE_KEY]: STEP_TARGET_NONE } };
 }
 
-/** One request over `rows` (already cut), with the context that reads its answers. */
-function assemble(input: StepInput, rows: readonly StepRow[]): { request: SiteRequest; context: StepContext } {
+type Built = { request: SiteRequest; context: StepContext };
+
+/**
+ * One request over `rows` (already cut), each select offering at most `optionsMax` of its options, with the context
+ * that reads its answers.
+ */
+function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, optionsMax: number): Built {
+  const line = (text: string): string => clean(text, BOUNDS.CANDIDATE_LINE_MAX, true);
   const ops = offeredOps(input, rows);
   const opCriteria: Record<string, string> = {};
   for (const op of ops) opCriteria[op] = STEP_OPERATIONS[op];
@@ -99,11 +125,14 @@ function assemble(input: StepInput, rows: readonly StepRow[]): { request: SiteRe
   const click = new Map<string, number>();
   const type = new Map<string, { n: number; fill: number }>();
   const select = new Map<string, { n: number; option: number }>();
+  const labels: Record<string, Map<string, string>> = {};
+  const head = (name: string): Map<string, string> => (labels[name] ??= new Map());
   if (ops.includes('CLICK')) {
     const criteria: Record<string, string> = {};
     for (const row of rows.filter((r) => r.clickable)) {
       criteria[String(row.n)] = line(row.text);
       click.set(String(row.n), row.n);
+      head(STEP_QUESTIONS.click).set(String(row.n), row.label);
     }
     questions[STEP_QUESTIONS.click] = choice(STEP_CLICK_INSTRUCTIONS, criteria);
   }
@@ -113,9 +142,9 @@ function assemble(input: StepInput, rows: readonly StepRow[]): { request: SiteRe
       input.fills.forEach((fill, at) => {
         if (input.open[at] !== true) return;
         const key = `${row.n}:${at + 1}`;
-        const value = boundedText(fill.value, VALUE_MAX, { inline: true });
-        criteria[key] = line(`${row.text} ← ${fill.key} (${value})`);
+        criteria[key] = line(`${row.text} ← ${fill.key} (${clean(fill.value, VALUE_MAX, true)})`);
         type.set(key, { n: row.n, fill: at });
+        head(STEP_QUESTIONS.type).set(key, `${row.label} ← ${fill.key}`);
       });
     }
     questions[STEP_QUESTIONS.type] = choice(STEP_TYPE_INSTRUCTIONS, criteria);
@@ -123,17 +152,21 @@ function assemble(input: StepInput, rows: readonly StepRow[]): { request: SiteRe
   if (ops.includes('SELECT')) {
     const criteria: Record<string, string> = {};
     for (const row of rows.filter((r) => r.options.length > 0)) {
-      row.options.forEach((label, at) => {
+      row.options.slice(0, optionsMax).forEach((label, at) => {
         const key = `${row.n}:${at + 1}`;
         criteria[key] = line(`${row.text} ← option ${JSON.stringify(label)}`);
         select.set(key, { n: row.n, option: at });
+        head(STEP_QUESTIONS.select).set(key, `${row.label} ← option ${JSON.stringify(label)}`);
       });
     }
     questions[STEP_QUESTIONS.select] = choice(STEP_SELECT_INSTRUCTIONS, criteria);
   }
   const askedDone = input.expect !== null && input.newText !== '';
   if (askedDone) questions[STEP_QUESTIONS.done] = { type: 'noul', ...STEP_DONE_QUESTION };
-  return { request: { state: stateOf(input, rows), questions }, context: { ops, click, type, select, askedDone } };
+  return {
+    request: { state: stateOf(input, rows, clean), questions },
+    context: { ops, click, type, select, labels, askedDone },
+  };
 }
 
 function fits(request: SiteRequest): boolean {
@@ -141,17 +174,36 @@ function fits(request: SiteRequest): boolean {
 }
 
 /**
- * The step request, its element table cut to fit both bounds (design 2026-10-17 §2.1): overlay rows are kept
- * first, then fields and selects, then the rest, each tier by its weight (`keepOrder`). The rows kept stay in page
- * order, and the site never refuses `oversize` for its own table. The done Noul is asked only once there is new text to judge.
+ * The step request, its element table cut to fit both bounds (design 2026-10-17 §2.1). When the whole table does
+ * not fit, each select first offers only its `OPTIONS_CUT` best options; then the rows are cut, overlay rows kept
+ * first, then fields and selects, then the rest, each tier by its weight (`keepOrder`), as many as fit (more rows
+ * never take fewer bytes, so the most that fit are found by halving). The rows kept stay in page order, and the site
+ * never refuses `oversize` for its own table. Every text is cleaned once, whatever the cuts tried. The done Noul is
+ * asked only once there is new text to judge.
  */
-export function stepRequest(input: StepInput): { request: SiteRequest; context: StepContext } {
+export function stepRequest(input: StepInput): Built {
+  const clean = cleanOnce();
   const order = keepOrder(input.rows);
-  let keep = order.length;
-  for (;;) {
+  const build = (keep: number, optionsMax: number): Built => {
     const kept = new Set(order.slice(0, keep).map((row) => row.n));
-    const built = assemble(input, input.rows.filter((row) => kept.has(row.n)));
-    if (keep <= 1 || fits(built.request)) return built;
-    keep = Math.floor(keep * FIT_STEP);
+    return assemble(input, input.rows.filter((row) => kept.has(row.n)), clean, optionsMax);
+  };
+  const whole = build(order.length, Infinity);
+  if (fits(whole.request)) return whole;
+  const allRows = build(order.length, OPTIONS_CUT);
+  if (fits(allRows.request)) return allRows;
+  let fit: Built | null = null;
+  let low = 0;
+  let high = order.length;
+  while (high - low > 1) {
+    const mid = Math.floor((low + high) / 2);
+    const built = build(mid, OPTIONS_CUT);
+    if (fits(built.request)) {
+      low = mid;
+      fit = built;
+    } else {
+      high = mid;
+    }
   }
+  return fit ?? build(1, OPTIONS_CUT);
 }

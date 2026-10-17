@@ -7,6 +7,7 @@ import type { RunArgs } from './run.args';
 import type { RunResult } from './run.contract';
 import type { RunLook } from './run-look-shape';
 import type { RunStepReport } from './run-step-report';
+import type { RaiserProbe } from './step-act-shape';
 
 /** One run in progress: what it was asked, what it has done, and the look the next step reads. */
 export interface RunState {
@@ -34,6 +35,8 @@ export interface RunState {
   seenIn: Map<number, string>;
   dismissed: DismissLevelReport | null;
   current: RunLook;
+  /** The raiser count taken while the current look's Decision was asked, for the guard (`probeRaisers`). */
+  probe: RaiserProbe | null;
   /** The envelope's `new_text`: the last look's new lines. */
   shown: string[];
 }
