@@ -17,7 +17,7 @@ export function runOrca(bin: string | null, args: readonly string[], opts: OrcaR
   return spawnJson(ORCA, bin, [...args, '--json'], {
     env: opts.env,
     timeoutMs: opts.timeoutMs,
-    verb: verbOf(args),
+    verb: orcaVerb(args),
     onSpawn: opts.onSpawn,
     withholdOutput: args.some((arg) => arg.startsWith('--value=')),
   }, readReply);
@@ -35,6 +35,7 @@ function readReply(stdout: string): OrcaReply | null {
   };
 }
 
-function verbOf(args: readonly string[]): string {
+/** The verb words of an argv, for messages: never a flag, so never a value. */
+export function orcaVerb(args: readonly string[]): string {
   return args.filter((arg) => !arg.startsWith('--')).join(' ') || '?';
 }

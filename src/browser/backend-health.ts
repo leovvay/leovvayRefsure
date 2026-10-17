@@ -14,4 +14,9 @@ export interface BackendHealth {
    * part of `ok`: Orca can be running and ready while a terminal outside it cannot reach its tabs.
    */
   worktree?: boolean;
+  /**
+   * Orca only: what the calls travel over, `socket <path>: …` (the runtime socket) or `cli: <why>` (a spawned `orca`
+   * per call). Either works; the socket is the fast one.
+   */
+  transport?: string;
 }

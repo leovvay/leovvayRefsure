@@ -13,7 +13,7 @@ import { ORCA_FEATURES } from './orca-features';
 import { probeOrca } from './orca-probe';
 import { readTab } from './orca-replies';
 import type { OrcaRun } from './orca-run';
-import { runOrca } from './orca-runner';
+import { createOrcaRun, describeOrcaTransport } from './orca-transport';
 import { resolveOrcaPage } from './resolve-page';
 import { pageArgs } from './worktree-guard';
 
@@ -21,12 +21,15 @@ const UNREACHED: ReadonlySet<BrowserErrorCode> = new Set<BrowserErrorCode>(['no_
 // A selector for `exec`, sent as one double-quoted token: no double quote, backslash or control character in it.
 const EXEC_SELECTOR = /^[^"\\\u0000-\u001f\u007f]{1,2000}$/;
 
-/** The Orca backend: every call spawns the typed `orca` CLI with `--json`; nothing else in refsure spawns it. */
+/**
+ * The Orca backend: every call goes over Orca's runtime socket as the typed `orca` CLI would send it, or spawns that
+ * CLI with `--json` when the socket cannot take it (see orca-transport); nothing else in refsure reaches Orca.
+ */
 export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
   const { env, trace } = opts;
   const bin = findOrcaBinary(env);
   const childEnv = stripRefsureEnv(env);
-  const run: OrcaRun = (args, timeoutMs, onSpawn) => runOrca(bin, args, { env: childEnv, timeoutMs, onSpawn });
+  const run: OrcaRun = createOrcaRun(bin, env, childEnv);
 
   async function call(args: readonly string[]): Promise<unknown> {
     const reply = await run(args, READ_TIMEOUT_MS);
@@ -40,7 +43,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
   return {
     backend: 'orca',
-    probe: () => probeOrca(bin, env, run),
+    probe: () => probeOrca(bin, env, run, () => describeOrcaTransport(env)),
     features: () => ORCA_FEATURES,
     resolvePage: (hint) => resolveOrcaPage(hint, env, (worktree) => call(['tab', 'current', `--worktree=${worktree}`])),
 

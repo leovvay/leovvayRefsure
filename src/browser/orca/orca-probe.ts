@@ -8,13 +8,16 @@ import { ORCA_FEATURES } from './orca-features';
 import type { OrcaRun } from './orca-run';
 
 /**
- * `orca status` plus the binary path, the terminal's `ORCA_APP_VERSION` and whether it names its worktree. Never
- * throws: doctor reads `problem`, and `worktree` for the terminal check.
+ * `orca status` plus the binary path, the terminal's `ORCA_APP_VERSION`, whether it names its worktree and which
+ * transport the calls take. Never throws: doctor reads `problem`, `worktree` for the terminal check and `transport`.
  */
-export async function probeOrca(bin: string | null, env: NodeJS.ProcessEnv, run: OrcaRun): Promise<BackendHealth> {
+export async function probeOrca(
+  bin: string | null, env: NodeJS.ProcessEnv, run: OrcaRun, transport: () => Promise<string>,
+): Promise<BackendHealth> {
   const health: BackendHealth = {
     ok: false,
     worktree: Boolean(env.ORCA_WORKTREE_ID?.trim()),
+    transport: await transport(),
     binary: bin,
     version: env.ORCA_APP_VERSION?.trim() || null,
     running: false,

@@ -61,9 +61,18 @@ function terminalCheck(inTerminal: boolean): DoctorCheck {
 }
 
 /**
+ * Which wire the Orca calls take (spec 2026-10-17 §2.3). Both work, so it never fails: `cli` only costs a process
+ * per call, and the detail says why the socket was not used.
+ */
+function transportCheck(transport: string): DoctorCheck {
+  return { name: 'orca_transport', ok: true, detail: transport };
+}
+
+/**
  * The Node and backend checks (spec §6.3): Node, the chosen backend and its probe, and, for Orca, whether this is
- * an Orca terminal. The agent-browser backend has no worktree guard, so it has no terminal check. With no backend
- * chosen (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no backend to probe.
+ * an Orca terminal and which transport its calls take. The agent-browser backend has no worktree guard, so it has no
+ * terminal check. With no backend chosen (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no
+ * backend to probe.
  */
 export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
   const choice = chooseBackend(ctx.env);
@@ -72,5 +81,6 @@ export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
   const health = await ctx.browser.probe();
   const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health)];
   if (ctx.browser.backend === 'orca') checks.push(terminalCheck(health.worktree === true));
+  if (health.transport) checks.push(transportCheck(health.transport));
   return checks;
 }
