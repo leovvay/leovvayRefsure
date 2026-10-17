@@ -31,8 +31,8 @@ Read the answer (`result.steps`: what each step found and did; `result.new_text`
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.
 - Exit 30: something acted; `result.unconfirmed` says why it is unconfirmed. Never rerun that `do`: writes repeat.
   - `stalled` or `not_seen`: read `result.new_text`. If the page asks one more thing (a confirm field), `do` only the
-    steps still to do. Otherwise report it from `new_text`, with no snapshot or second wait. A stall is final: when
-    the human said it can take a while, pass `--stall 30s` to `do` up front; wait longer only for a time they named.
+    steps still to do. Otherwise report it from `new_text`, with no snapshot or second wait. A stall is final, also on
+    a task said to take a while: keep the default `--stall` and report it; wait longer only for a time they named.
   - Another cause: a step stopped after an earlier one acted (`not_run` steps never ran). Follow `next`.
 - Exit 10-29 or 64-78: nothing was done. The stopping step's cause and `next` (section 9) hold, e.g. `twins`,
   `veto`, or `high_risk_class` with `act-high-risk` in `next.argv`.
