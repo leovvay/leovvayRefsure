@@ -1,6 +1,6 @@
 ---
 name: refsure
-description: Use when driving a web page in the Orca browser or an agent-browser session. Run a whole task in one call with refsure do --page <id> --fill "<field>=<value>" --click "<control>" --expect "<what should show>" - it closes a cookie banner, finds each control by its description, acts in order with risky clicks guarded, and waits until the result shows. Other verbs answer one judgment question (is the page ready, which control, did it work) with one small JSON envelope.
+description: Use when driving a web page in the Orca browser or an agent-browser session. Run a whole task in one call with refsure do --page <id> --fill "<field>=<value>" --click "<control>" --expect "<what should show>" - it closes a cookie banner, finds each control by its description, acts in order with risky clicks guarded, and waits until the result shows. Call do first, with no state or snap before it. Other verbs answer one judgment question (is the page ready, which control, did it work) with one small JSON envelope.
 refsure-skill: 1
 ---
 
@@ -27,12 +27,12 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
   cut); `--text "<literal>"` settles it by code. It ends as `stalled` once the page stops changing for `--stall`
   (10s), or 2s after the Decision was unsure, neither yes nor a clear no (judge `result.new_text` yourself).
 
-Read the answer (`result.steps` says what each step found and did; `result.new_text` is what the page now says):
+Read the answer (`result.steps`: what each step found and did; `result.new_text`: lines new since the call began):
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.
 - Exit 30: something acted; `result.unconfirmed` says why it is unconfirmed. Never rerun that `do`: writes repeat.
   - `stalled` or `not_seen`: read `result.new_text`. If the page asks one more thing (a confirm field), `do` only the
-    steps still to do. Otherwise report it as it stands. A stall is final: when the human said it can take a while,
-    pass `--stall 30s` to `do` up front, no more; wait longer (`wait-for`) only for a time the human named.
+    steps still to do. Otherwise report it from `new_text`, with no snapshot or second wait. A stall is final: when
+    the human said it can take a while, pass `--stall 30s` to `do` up front; wait longer only for a time they named.
   - Another cause: a step stopped after an earlier one acted (`not_run` steps never ran). Follow `next`.
 - Exit 10-29 or 64-78: nothing was done. The stopping step's cause and `next` (section 9) hold, e.g. `twins`,
   `veto`, or `high_risk_class` with `act-high-risk` in `next.argv`.
