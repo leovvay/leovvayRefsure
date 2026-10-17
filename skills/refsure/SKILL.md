@@ -12,20 +12,20 @@ and `causes --json` give version-specific detail; `refsure skill print` prints t
 
 ## 1. Run a task: `refsure do`
 
-`do` is the default way to run a task. One call replaces dismiss, snapshot, locate, act and wait:
+`do` is the default: one call runs dismiss, locate, act and wait. Call it first; no snapshot is needed before:
 
 ```
 refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect "search results for invoice"
 ```
 
-- Steps run in the order given, at most 8: `--fill "<field>=<value>"`, `--select "<field>=<option>"` (a native
-  select, by option label), `--check "<box>"`, `--uncheck "<box>"`, `--click "<control>"`. Describe each target by
-  its visible text or purpose. The value after the first `=` is typed; it never goes to a Decision.
+- Steps run in the order given, at most 8: `--fill "<field>=<value>"`, `--select "<field>=<option>"` (native, by
+  option label), `--check`/`--uncheck "<box>"`, `--click "<control>"`. Describe each target by its visible text or
+  purpose. The value after the first `=` is typed; it never goes to a Decision.
 - It first closes a cookie banner or pop-up as `dismiss` does (never Accept; `--no-dismiss` skips it), then finds
   every step on one snapshot and acts in order, each through a single-use ticket, a recheck and the risk guard.
-- `--expect` waits up to `--timeout` (default 60s) until that shows in text **new** since the call began, with your
-  filled values cut, so neither old text nor an echo of your input can fake success; `--text "<literal>"` settles
-  it by code. It ends early as `stalled` when the page text and URL stop changing for `--stall` (default 10s).
+- `--expect` waits up to `--timeout` (60s) until that shows in text **new** since the call began (your filled values
+  cut); `--text "<literal>"` settles it by code. It ends as `stalled` once the page stops changing for `--stall`
+  (10s), or for 2s after the Decision leaned to it under its bar (judge `result.new_text` yourself).
 
 Read the answer (`result.steps` says what each step found and did; `result.new_text` is what the page now says):
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it.
@@ -34,8 +34,8 @@ Read the answer (`result.steps` says what each step found and did; `result.new_t
     steps still to do. Otherwise report it; wait longer only when the human said so (`refsure wait-for --page <id>
     --expect "…" --timeout <longer> --stall <longer>`, which judges the whole page, not only new text).
   - Another cause: a step stopped after an earlier one acted (`not_run` steps never ran). Follow `next`.
-- Exit 10-29 or 64-78: nothing was done. The stopping step's cause and `next` (section 9) hold, e.g. `twins`, `veto`,
-  or `high_risk_class` with `act-high-risk` in `next.argv`.
+- Exit 10-29 or 64-78: nothing was done. The stopping step's cause and `next` (section 9) hold, e.g. `twins`,
+  `veto`, or `high_risk_class` with `act-high-risk` in `next.argv`.
 
 ## 2. Privacy
 
