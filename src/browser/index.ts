@@ -17,3 +17,4 @@ export { createOrcaBrowser } from './orca';
 export { createAgentBrowser, findAgentBrowserBinary } from './agent-browser';
 export { chooseBackend, createBrowser } from './choose-backend';
 export { namedPage } from './named-page';
+export { readsSelectors } from './reads-selectors';

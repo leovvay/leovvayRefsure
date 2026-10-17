@@ -1,5 +1,5 @@
-import type { BrowserPort, PageRef } from '../browser';
-import { cssString, labelledBySelectors, lookupId, readsSelectors, selectorTexts } from './selector-texts';
+import { type BrowserPort, type PageRef, readsSelectors } from '../browser';
+import { cssString, labelledBySelectors, lookupId, selectorTexts } from './selector-texts';
 
 /** The elements a `<label>` names (HTML's labelable elements). */
 const LABELABLE = ':is(input,select,textarea,button,meter,output,progress)';

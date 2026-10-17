@@ -1,6 +1,5 @@
-import type { BrowserPort, PageRef } from '../../browser';
+import { type BrowserPort, type PageRef, readsSelectors } from '../../browser';
 import { valuePieces } from '../../page-model';
-import { readsSelectors } from '../../risk';
 import type { TypedText } from './typed-text';
 
 /**

@@ -1,11 +1,11 @@
-import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef } from '../browser';
+import { type ActAction, type BrowserPort, CLICK_ACTIONS, type PageRef, readsSelectors } from '../browser';
 import { fold, norm } from '../page-model';
 import { backsOut, CONFIRMING_ROLES, hasConfirmCue } from './confirm-dialog';
 import { wordingXPath } from './dialog-wording-xpath';
 import type { Probe } from './probe';
 import { assumedOn, countProbe, emptyReading, raise } from './raise-probe';
 import type { RiskReading } from './risk-reading';
-import { labelledBySelectors, readsSelectors, selectorTexts } from './selector-texts';
+import { labelledBySelectors, selectorTexts } from './selector-texts';
 
 /** An open dialog: `<dialog open>`, or a dialog, alertdialog or modal role that is not hidden. */
 const OPEN_DIALOG_PARTS = [

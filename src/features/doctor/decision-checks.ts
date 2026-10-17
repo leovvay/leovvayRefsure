@@ -5,7 +5,8 @@ import type { RefsureConfig } from '../../config';
 import { DISCLOSURE_HASH, grantFor, readConsent, readEgressLog } from '../../egress';
 import { gatewayNames, keyPresent } from '../../providers';
 import type { ProviderSlot } from '../../providers';
-import { bareModel, familyOf, KNOWN_FAMILIES, PROVIDER_IDS, snapshotChanged } from '../../questions';
+import { bareModel, familyOf, KNOWN_FAMILIES, snapshotChanged } from '../../questions';
+import { PROVIDER_IDS } from '../../shared';
 import { readConfig, rosterOf } from '../shared';
 import type { DoctorCheck } from './doctor-check';
 

@@ -1,5 +1,6 @@
 import type { RefsureConfig } from '../config';
-import { PROVIDER_IDS, type ProviderId } from '../questions';
+import type { ProviderId } from '../questions';
+import { PROVIDER_IDS } from '../shared';
 import { endpointFor, gatewayNames } from './endpoints';
 import type { ProviderKeys } from './provider-keys';
 import type { ProviderSlot } from './provider-slot';

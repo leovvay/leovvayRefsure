@@ -12,12 +12,6 @@ export function cssString(value: string): string {
   return `"${escaped}"`;
 }
 
-/** Whether the port can count CSS selectors and read the text of their first match. */
-export function readsSelectors(port: BrowserPort): boolean {
-  const has = port.features();
-  return port.count !== undefined && port.selectorText !== undefined && has.has('count') && has.has('selector-text');
-}
-
 /**
  * The `norm`ed innerText of the first element each selector matches, `''` for one that matches none. Each is
  * counted before it is read, so a missing element reads as no text while a failing read still propagates: a text
