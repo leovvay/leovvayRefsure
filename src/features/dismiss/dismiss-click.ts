@@ -40,7 +40,10 @@ export async function clickPick(
   }
 
   const sent = await ctx.browser.act(scene.page, found.ref, 'click');
-  if (sent.kind === 'stale_ref') return stale('ref_gone', `${name} left the page before the click`);
+  if (sent.kind === 'stale_ref') {
+    const why = sent.covered === undefined ? 'left the page before the click' : 'is covered at its click point by another element';
+    return stale('ref_gone', `${name} ${why}`);
+  }
   const unknown = (detail: string, effect: 'dispatched' | 'unknown'): LevelOutcome => ({
     ...stop({ ...report, verdict: 'unknown' }, 'effect_unknown', 'effect_unknown', detail, RE_OBSERVE), clicked: true, effect,
   });

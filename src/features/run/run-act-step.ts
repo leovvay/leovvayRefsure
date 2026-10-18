@@ -260,8 +260,13 @@ export async function actStep(
   const sent = await send(ctx, run.page, guarded.ref, act, plain);
   const actedAt = ctx.now();
   if (sent.kind === 'stale_ref') {
-    report.verdict = 'stale';
-    run.recent.push(recentLine(report, element, 'the element left the page before the act; nothing was sent'));
+    // Covered: the element is there, under another one (a dialog, a banner); the next step sees it in `recent` and
+    // in the table. The same pick a third time on this page stops as a repeat, though nothing was sent.
+    report.verdict = sent.covered === undefined ? 'stale' : 'covered';
+    if (sent.covered !== undefined) run.repeats.set(key, sentBefore + 1);
+    run.recent.push(recentLine(report, element, sent.covered === undefined
+      ? 'the element left the page before the act; nothing was sent'
+      : 'another element covers it at its click point; nothing was sent'));
     const was = run.current;
     run.current = await look(ctx, run.page, run.hints);
     keepTyped(run, was);

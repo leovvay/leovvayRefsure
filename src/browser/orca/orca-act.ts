@@ -1,5 +1,6 @@
 import type { ActAction, ActResult } from '../act-result';
-import { isRef } from '../agent-browser-format';
+import { coveredBy, isRef } from '../agent-browser-format';
+import { boundDetail } from '../bound-detail';
 import type { Ref } from '../ax-tree';
 import { BrowserError } from '../browser-error';
 import type { PageRef } from '../page-ref';
@@ -51,6 +52,13 @@ async function sendAct(deps: ActDeps, args: readonly string[], value?: string): 
   if (sent.kind === 'lost') return { kind: 'unknown', detail: lostDetail(sent.error, 'orca', value) };
   const reply = sent.reply;
   if (reply.ok) return { kind: 'done' };
+  // agent-browser refused the click before any input (another element is over its point); Orca passes its answer
+  // on as `browser_error`. Like a stale ref, nothing reached the page but a scroll, which no act counts.
+  const covered = reply.code === 'browser_error' ? coveredBy(reply.message) : null;
+  if (covered !== null) {
+    deps.trace.dispatched = sent.before;
+    return { kind: 'stale_ref', covered: boundDetail(covered) };
+  }
   if (refusedBeforeDispatch(reply.code, reply.message)) {
     deps.trace.dispatched = sent.before;
     if (staleRefReply(reply.code, reply.message)) return { kind: 'stale_ref' };

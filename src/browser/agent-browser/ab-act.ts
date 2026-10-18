@@ -1,5 +1,6 @@
 import type { ActAction, ActResult } from '../act-result';
-import { isRef } from '../agent-browser-format';
+import { coveredBy, isRef } from '../agent-browser-format';
+import { boundDetail } from '../bound-detail';
 import type { Ref } from '../ax-tree';
 import { BrowserError } from '../browser-error';
 import { ACT_TIMEOUT_MS, READ_TIMEOUT_MS } from '../run-json';
@@ -39,9 +40,10 @@ async function sendVerb(deps: AbActDeps, verb: readonly string[], value?: string
   const reply = replies[0]!;
   if (launched) return launchedAct(deps, reply, sent.before, value);
   if (reply.ok) return { kind: 'done' };
-  if (refusedBeforeDispatch(reply.message)) {
+  const covered = coveredBy(reply.message);
+  if (refusedBeforeDispatch(reply.message) || covered !== null) {
     deps.trace.dispatched = sent.before;
-    return { kind: 'stale_ref' };
+    return covered === null ? { kind: 'stale_ref' } : { kind: 'stale_ref', covered: boundDetail(covered) };
   }
   return { kind: 'unknown', detail: actDetail(`agent-browser: ${reply.message}`, value) };
 }
