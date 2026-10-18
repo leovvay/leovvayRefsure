@@ -298,12 +298,15 @@ export async function actStep(
   if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {
     // Covered: the element is there, under another one (a dialog, a banner); the next step sees it in `recent` and
-    // in the table. The same pick a third time on this page stops as a repeat, though nothing was sent.
+    // in the table. The same pick a third time on this page stops as a repeat, though nothing was sent. A field that
+    // left after its focus landed wrote no text, but the focus reached the page: counted the same way, and acted.
     report.verdict = sent.covered === undefined ? 'stale' : 'covered';
-    if (sent.covered !== undefined) run.repeats.set(key, sentBefore + 1);
-    run.recent.push(recentLine(report, element, sent.covered === undefined
-      ? 'the element left the page before the act; nothing was sent'
-      : 'another element covers it at its click point; nothing was sent'));
+    if (sent.covered !== undefined || sent.focused) run.repeats.set(key, sentBefore + 1);
+    if (sent.focused) run.acted = true;
+    let said = 'the element left the page before the act; nothing was sent';
+    if (sent.covered !== undefined) said = 'another element covers it at its click point; nothing was sent';
+    else if (sent.focused) said = 'it was focused, then left the page before its text went in; no text was written';
+    run.recent.push(recentLine(report, element, said));
     const was = run.current;
     run.current = await look(ctx, run.page, run.hints);
     keepTyped(run, was);

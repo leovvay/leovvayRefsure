@@ -37,7 +37,7 @@ export async function actOnOrca(
   }
   if (action === 'fill') {
     const focused = await focusFirst(deps, page, ref);
-    return focused.kind === 'done' ? orcaFill(deps, page, ref, value!) : focused;
+    return focused.kind === 'done' ? afterFocus(await orcaFill(deps, page, ref, value!)) : focused;
   }
   const args = [action, `--element=${ref}`];
   if (action === 'select') args.push(`--value=${value}`);
@@ -58,8 +58,9 @@ export async function fillInputOnOrca(deps: ActDeps, page: PageRef, ref: Ref, va
   if (!isRef(ref)) return { kind: 'stale_ref' };
   const focused = await focusFirst(deps, page, ref);
   if (focused.kind !== 'done') return focused;
-  if (!EXEC_VALUE.test(value)) return orcaFill(deps, page, ref, value);
-  return sendAct(deps, ['exec', `--command=fill @${ref} "${value}"`, ...pageArgs(page, deps.env)], value);
+  if (!EXEC_VALUE.test(value)) return afterFocus(await orcaFill(deps, page, ref, value));
+  const args = ['exec', `--command=fill @${ref} "${value}"`, ...pageArgs(page, deps.env)];
+  return afterFocus(await sendAct(deps, args, value));
 }
 
 /** How long a focused field gets for its focus handlers (a list opening) before text goes in. */
@@ -69,13 +70,19 @@ const FOCUS_SETTLE_MS = 50;
  * `focus --element eN` on its own, then `FOCUS_SETTLE_MS`: a field whose focus handler opens a list and clears the
  * field (Ryanair's airports, about 20 ms after focus) would erase text that went in with the focus, in the same few
  * ms. The fill's own focus is then a no-op. A gone element is `stale_ref`, and nothing more is sent; from the focus on
- * the act counts as dispatched, so a failure after it is `unknown`, never retried. A fixed wait, not a frame: a tab
- * Orca renders about once a second would add up to a second per TYPE.
+ * the act counts as dispatched, so a failure after it is `unknown`, never retried, and a fill that finds the element
+ * gone is `stale_ref` with `focused` (`afterFocus`). A fixed wait, not a frame: a tab Orca renders about once a
+ * second would add up to a second per TYPE.
  */
 async function focusFirst(deps: ActDeps, page: PageRef, ref: Ref): Promise<ActResult> {
   const focused = await sendAct(deps, ['focus', `--element=${ref}`, ...pageArgs(page, deps.env)]);
   if (focused.kind === 'done') await new Promise((resolve) => setTimeout(resolve, FOCUS_SETTLE_MS));
   return focused;
+}
+
+/** A fill after a focus that landed: a gone element wrote no text, but the focus was dispatched (`focused`). */
+function afterFocus(sent: ActResult): ActResult {
+  return sent.kind === 'stale_ref' ? { ...sent, focused: true } : sent;
 }
 
 /** Orca's own `fill` (a contenteditable check, a focus, a script setting the value), on a field already focused. */
