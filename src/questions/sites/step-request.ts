@@ -32,8 +32,10 @@ const FIT_QUESTIONS = Math.floor(BOUNDS.QUESTIONS_MAX_BYTES * 0.9);
 const OPTIONS_CUT = 10;
 
 /**
- * What a read needs to map an answer back: the operations offered, each target head's keys, and each key as a
- * refusal quotes it (by head): the row's label with the `--fill` key or the option, never a value.
+ * What a read needs to map an answer back: the operations offered, each target head's keys, each key as a
+ * refusal quotes it (by head: the row's label with the `--fill` key or the option, never a value), and by head the
+ * keys whose element is already in the state asked of it (a selected date, a field holding its value, the option
+ * a select already shows), which give way to a runner-up.
  */
 export interface StepContext {
   ops: readonly StepOp[];
@@ -41,6 +43,7 @@ export interface StepContext {
   type: ReadonlyMap<string, { n: number; fill: number }>;
   select: ReadonlyMap<string, { n: number; option: number }>;
   labels: Readonly<Record<string, ReadonlyMap<string, string>>>;
+  asked: Readonly<Record<string, ReadonlySet<string>>>;
   askedDone: boolean;
 }
 
@@ -126,13 +129,18 @@ function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, opti
   const type = new Map<string, { n: number; fill: number }>();
   const select = new Map<string, { n: number; option: number }>();
   const labels: Record<string, Map<string, string>> = {};
+  const asked: Record<string, Set<string>> = {};
   const head = (name: string): Map<string, string> => (labels[name] ??= new Map());
+  const done = (name: string, key: string): void => {
+    (asked[name] ??= new Set()).add(key);
+  };
   if (ops.includes('CLICK')) {
     const criteria: Record<string, string> = {};
     for (const row of rows.filter((r) => r.clickable)) {
       criteria[String(row.n)] = line(row.text);
       click.set(String(row.n), row.n);
       head(STEP_QUESTIONS.click).set(String(row.n), row.label);
+      if (row.asked) done(STEP_QUESTIONS.click, String(row.n));
     }
     questions[STEP_QUESTIONS.click] = choice(STEP_CLICK_INSTRUCTIONS, criteria);
   }
@@ -157,6 +165,7 @@ function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, opti
         criteria[key] = line(`${row.text} ← option ${JSON.stringify(label)}`);
         select.set(key, { n: row.n, option: at });
         head(STEP_QUESTIONS.select).set(key, `${row.label} ← option ${JSON.stringify(label)}`);
+        if (label === row.chosen) done(STEP_QUESTIONS.select, key);
       });
     }
     questions[STEP_QUESTIONS.select] = choice(STEP_SELECT_INSTRUCTIONS, criteria);
@@ -165,7 +174,7 @@ function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, opti
   if (askedDone) questions[STEP_QUESTIONS.done] = { type: 'noul', ...STEP_DONE_QUESTION };
   return {
     request: { state: stateOf(input, rows, clean), questions },
-    context: { ops, click, type, select, labels, askedDone },
+    context: { ops, click, type, select, labels, asked, askedDone },
   };
 }
 

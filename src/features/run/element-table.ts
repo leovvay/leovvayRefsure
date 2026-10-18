@@ -97,9 +97,14 @@ function valuePart(tree: AxTree, cand: Candidate, hints: TableHints): string {
   return lookalike === undefined ? shown : `${shown} (differs from the ${lookalike.key} value)`;
 }
 
-/** The control's state, as the tree gives it. */
-function statePart(node: AxNode): string {
-  const { attrs } = node;
+/** The states a dropped wrapper (`wrappers`) passes to its control, where the control has none of its own. */
+const CARRIED = ['selected', 'checked', 'pressed'] as const;
+
+/** The control's state, as the tree gives it, with its dropped wrapper's selected, checked or pressed. */
+function statePart(node: AxNode, wrapper?: AxNode): string {
+  const carried = CARRIED.filter((name) => wrapper?.attrs[name] !== undefined)
+    .map((name) => [name, wrapper!.attrs[name]]);
+  const attrs = carried.length === 0 ? node.attrs : { ...Object.fromEntries(carried), ...node.attrs };
   const states: string[] = [];
   if (attrs.checked !== undefined) {
     states.push(attrs.checked === 'true' ? 'checked' : attrs.checked === 'mixed' ? 'partly checked' : 'not checked');
@@ -123,17 +128,46 @@ function weightOf(text: string, wanted: ReadonlySet<string>, numbers: ReadonlySe
 }
 
 /**
- * Wrappers whose one control inside carries their own name (a calendar's gridcell around its day button): the
- * control is the row, and the wrapper would only double the table.
+ * Wrappers whose one control inside carries their own name (a calendar's gridcell around its day button), each
+ * with that control: the control is the row, and the wrapper would only double the table. The wrapper's state
+ * (a selected gridcell) is the row's too.
  */
-function wrappers(tree: AxTree, cands: readonly Candidate[]): Set<number> {
+function wrappers(tree: AxTree, cands: readonly Candidate[]): Map<number, number> {
   const at = new Map(cands.map((cand) => [cand.node, cand]));
-  const out = new Set<number>();
+  const out = new Map<number, number>();
   for (const cand of cands) {
     const up = nearestAncestor(tree, cand.node, (node) => at.has(node.i));
-    if (up !== null && at.get(up)!.fp.name === cand.fp.name) out.add(up);
+    if (up !== null && at.get(up)!.fp.name === cand.fp.name) out.set(up, cand.node);
   }
   return out;
+}
+
+/**
+ * The control's nearest named ancestor when it carries the control's own name: a wrapper that is no candidate
+ * itself (a calendar's gridcell, which holds the day's `selected`, around the day's button).
+ */
+function namedWrapper(tree: AxTree, at: number): number | null {
+  const up = nearestAncestor(tree, at, (node) => norm(node.name) !== '');
+  return up !== null && norm(tree.nodes[up]!.name) === norm(tree.nodes[at]!.name) ? up : null;
+}
+
+/** Controls whose click turns a state off as well as on: checked, they may be what the goal asks to undo. */
+const TOGGLES: ReadonlySet<string> = new Set(['checkbox', 'switch', 'menuitemcheckbox']);
+
+/** Selected, or pressed or checked on a control a click does not undo. */
+function isOn(node: AxNode, role: string): boolean {
+  const { attrs } = node;
+  if (attrs.selected === true || attrs.selected === 'true') return true;
+  return !TOGGLES.has(role) && (attrs.checked === 'true' || attrs.pressed === 'true');
+}
+
+/** A native select's chosen option: the option marked selected, else the value the tree gives the select. */
+function chosenOf(tree: AxTree, node: number): string | null {
+  const options = optionNodes(tree, node);
+  if (options.length === 0) return null;
+  const marked = options.find((at) => isOn(tree.nodes[at]!, 'option'));
+  const label = marked === undefined ? norm(tree.nodes[node]?.value ?? '') : labelOf(tree.nodes[marked]);
+  return label === '' ? null : label;
 }
 
 /**
@@ -166,7 +200,13 @@ function familyCut(cands: readonly Candidate[], weights: ReadonlyMap<number, num
 export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: TableHints): ElementTable {
   const wanted = new Set(hints.words.map(fold));
   const numbers = new Set(hints.numbers);
-  const dropped = wrappers(tree, cands);
+  const wrapped = wrappers(tree, cands);
+  const dropped = new Set(wrapped.keys());
+  const outerOf = new Map([...wrapped].map(([outer, inner]) => [inner, outer]));
+  const wrapperOf = (at: number): AxNode | undefined => {
+    const outer = outerOf.get(at) ?? namedWrapper(tree, at);
+    return outer === null ? undefined : tree.nodes[outer];
+  };
   for (const cand of cands) for (const at of optionNodes(tree, cand.node)) dropped.add(at);
   const weights = new Map(cands.map((cand) => {
     const node = tree.nodes[cand.node]!;
@@ -195,12 +235,18 @@ export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: T
     const editable = node.attrs.disabled === undefined && node.attrs.readonly === undefined;
     const typable = isValueField(node) && options.length === 0 && editable;
     const head = `[${n}] ${describeElement(node.role, node.name)}`;
-    const text = `${head}${valuePart(tree, cand, hints)}${statePart(node)}${where}`;
-    const label = `${head}${statePart(node)}${where}`;
+    const wrapper = wrapperOf(cand.node);
+    const state = statePart(node, wrapper);
+    const text = `${head}${valuePart(tree, cand, hints)}${state}${where}`;
+    const label = `${head}${state}${where}`;
     const weight = weights.get(cand.node) ?? 0;
-    rows.push({ n, text, label, typable, clickable: true, options, overlay: dialog !== null, weight });
-    byN.set(n, { n, cand, options, overlay: dialog !== null });
     const value = isValueField(node) ? node.value ?? '' : '';
+    const holding = hints.fills.some((fill) => holds(value, fill.value));
+    const on = isOn(node, node.role) || (wrapper !== undefined && isOn(wrapper, node.role));
+    const asked = holding || (weight > 0 && on && !isValueField(node));
+    const chosen = chosenOf(tree, cand.node);
+    rows.push({ n, text, label, typable, clickable: true, options, overlay: dialog !== null, weight, asked, chosen });
+    byN.set(n, { n, cand, options, overlay: dialog !== null });
     hints.fills.forEach((fill, k) => {
       if (placed[k] === null && holds(value, fill.value)) placed[k] = n;
     });

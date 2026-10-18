@@ -55,6 +55,14 @@ export interface StepRow {
   overlay: boolean;
   /** How much of the goal and the values it names: a cut keeps the heavier rows first within their tier. */
   weight: number;
+  /**
+   * Already in the state asked of it: a field holding a `--fill` value, or a control naming the goal or the values
+   * that is selected (pressed or checked, but for a checkbox or switch, whose click would undo it). A click target
+   * so placed gives way to the runner-up (design 2026-10-17 §2.3).
+   */
+  asked: boolean;
+  /** A native select's option now chosen, as its label; null for any other element. */
+  chosen: string | null;
 }
 
 /**

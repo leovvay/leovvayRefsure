@@ -17,4 +17,6 @@ export interface StepReading {
   p: number;
   target: StepTarget | null;
   done: number | null;
+  /** The operations the Decision led with, best first, as `CLICK 0.63, PRESS_ENTER 0.2`: no page text. */
+  led?: string;
 }
