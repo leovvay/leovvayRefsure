@@ -12,38 +12,35 @@ import type { TableEntry } from './element-table-shape';
 import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
 import type { RunLook } from './run-look-shape';
+import { settleFor } from './run-settle';
 import { changeWords, recentLine, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { StepAct } from './step-act-shape';
 
 /**
- * The page gets this long to show an act's effect before the look after it, and a stale step before the next look;
- * the snapshot itself takes about as long again. jev-ultrafast settles two frames (about 50 ms).
+ * After an act the page gets until it has rendered a frame and its animations have stopped (`settleFor`), at most
+ * this long, before the look after it; a look that follows a stale step or a scroll gets `AGAIN_MS`.
  */
-export const SETTLE_MS = 50;
-/** While a look after an act still shows the page as it was before it, another is taken, up to this long after it. */
+const AFTER_ACT_MS = 1_200;
+export const AGAIN_MS = 600;
+/** While a look after the settle still shows the page as it was before the act, another is taken, this long. */
 const CHANGE_MS = 600;
 /**
- * After typing into a combobox its suggestions come from the network: looks are taken from `SETTLE_MS` on while the
- * options are those shown before the act (none yet, or the list the typing has not narrowed yet), up to `OPTIONS_MS`
- * after it. A changed list ends the wait at once when an option names the typed value; otherwise only from a look
- * started `OPTIONS_WAIT_MS` after the act, since focus alone may show a list the typing has yet to replace.
+ * After typing into a combobox its suggestions come from the network: looks are taken from the settle on while the
+ * options are those shown before the act (none yet, or the list the typing has not narrowed yet), up to
+ * `OPTIONS_MS` after it. A changed list ends the wait at once when an option names the typed value; otherwise only
+ * from a look started `OPTIONS_WAIT_MS` after the settle, since focus alone may show a list the typing has yet to
+ * replace.
  */
 const OPTIONS_WAIT_MS = 250;
 const OPTIONS_MS = 700;
 /**
  * A look after an act that fails as a page caught mid-navigation fails (`timeout`, `backend_error`) is taken again
- * every `RETRY_POLL_MS`, at least once and until this long after the act.
+ * every `RETRY_POLL_MS`, at least once and until this long after the settle.
  */
 const RETRY_MS = 1_000;
 const RETRY_POLL_MS = 100;
-/**
- * A click in a dialog or on an option, a menu item or a combobox opens or closes something, which animates, and so
- * may Enter: a look caught mid-way finds elements that move before the next act (a stale step, a Decision spent on
- * nothing). After such an act one more look is taken, unless this long has passed since it.
- */
-const SETTLED_MS = 800;
 /** The roles whose click opens or closes a list or a dialog. */
 const OPENERS: ReadonlySet<string> = new Set(['combobox', 'option', 'menuitem', 'menuitemradio', 'menuitemcheckbox']);
 /** The same act on the same element on the same page a third time ends the run: twice is a retry, three a loop. */
@@ -159,15 +156,15 @@ function optionsShown(tree: AxTree): string {
 
 /**
  * One look after an act, taken again while it fails as a page caught mid-navigation fails it: at least once, and
- * until `RETRY_MS` after the act. Then the failure stands.
+ * until `RETRY_MS` after `from` (the settle's end). Then the failure stands.
  */
-async function lookOnce(ctx: CommandContext, run: RunState, actedAt: number): Promise<RunLook> {
+async function lookOnce(ctx: CommandContext, run: RunState, from: number): Promise<RunLook> {
   for (let tried = 0; ; tried += 1) {
     try {
       return await look(ctx, run.page, run.hints);
     } catch (error) {
       if (!isBrowserError(error) || (error.code !== 'timeout' && error.code !== 'backend_error')) throw error;
-      if (tried > 0 && ctx.now() - actedAt >= RETRY_MS) throw error;
+      if (tried > 0 && ctx.now() - from >= RETRY_MS) throw error;
       await sleep(RETRY_POLL_MS, ctx.signal);
     }
   }
@@ -179,43 +176,44 @@ function optionNamed(tree: AxTree, value: string): boolean {
 }
 
 /**
- * The look after an act, `SETTLE_MS` after it, taken again while it shows the page as it was before the act, up to
- * `CHANGE_MS` after it (an act that changed nothing costs those looks; one that did shows on the first look, often).
- * After an act that opens or closes something (a click on one of `OPENERS` or in a dialog, Enter, or any act after
- * which a dialog came or went), one more look is taken, within `SETTLED_MS`. After a TYPE into a combobox, looks are
- * taken while its options are still those shown before it, up to `OPTIONS_MS`, and while an early list names no
- * typed value (`OPTIONS_WAIT_MS`).
+ * The look after an act, once the page has settled (`settleFor`, up to `AFTER_ACT_MS`), taken again while it shows
+ * the page as it was before the act, up to `CHANGE_MS` after the settle (an act that changed nothing costs those
+ * looks; one that did shows on the first look, often). After an act that opens or closes something (a click on one
+ * of `OPENERS` or in a dialog, Enter, or any act after which a dialog or a tooltip came or went), one more look is
+ * taken: at once after a quiet settle, after another settle when the first hit its cap or could not run. After a
+ * TYPE into a combobox, looks are taken while its options are still those shown before it, up to `OPTIONS_MS`, and
+ * while an early list names no typed value (`OPTIONS_WAIT_MS`); suggestions come from the network, not from frames.
  */
-async function lookAfter(
-  ctx: CommandContext, run: RunState, act: StepAct, before: RunLook, actedAt: number,
-): Promise<RunLook> {
-  await sleep(SETTLE_MS, ctx.signal);
+async function lookAfter(ctx: CommandContext, run: RunState, act: StepAct, before: RunLook): Promise<RunLook> {
+  const settled = await settleFor(ctx, run.page, run.settling, AFTER_ACT_MS);
   run.timing.phase('look');
-  let lookedAt = ctx.now();
-  let next = await lookOnce(ctx, run, actedAt);
-  const since = (): number => ctx.now() - actedAt;
+  const from = ctx.now();
+  let lookedAt = from;
+  let next = await lookOnce(ctx, run, from);
+  const since = (): number => ctx.now() - from;
   if (act.op === 'TYPE' && act.cand.fp.role === 'combobox') {
     const shown = optionsShown(before.tree);
     const ready = (): boolean => optionsShown(next.tree) !== shown
-      && (lookedAt - actedAt >= OPTIONS_WAIT_MS || optionNamed(next.tree, act.value ?? ''));
+      && (lookedAt - from >= OPTIONS_WAIT_MS || optionNamed(next.tree, act.value ?? ''));
     while (!ready() && since() < OPTIONS_MS) {
       lookedAt = ctx.now();
-      next = await lookOnce(ctx, run, actedAt);
+      next = await lookOnce(ctx, run, from);
     }
     return next;
   }
-  while (next.sig === before.sig && since() < CHANGE_MS) next = await lookOnce(ctx, run, actedAt);
+  while (next.sig === before.sig && since() < CHANGE_MS) next = await lookOnce(ctx, run, from);
   const animates = act.op === 'PRESS_ENTER' || (act.op === 'CLICK' && (act.inDialog || OPENERS.has(act.cand.fp.role)));
   if (next.sig === before.sig || !(animates || dialogsShown(next.tree) !== dialogsShown(before.tree))) return next;
   // One more look: the first after such an act often catches it mid-way (on Google Flights, about half the clicks
   // on an option then went stale), and the one after it showed the elements a third look did.
-  return since() < SETTLED_MS ? lookOnce(ctx, run, actedAt) : next;
+  if (settled === null || !settled.quiet) await settleFor(ctx, run.page, run.settling, AGAIN_MS);
+  return lookOnce(ctx, run, ctx.now());
 }
 
 /**
  * One act of `run` (design 2026-10-17 §2.5-2.8): the repeat rule, the guard on a fresh snapshot, the act at once on
  * the fresh ref, then the look after it, which is the next step's look. A stale element sends nothing: the step is
- * recorded, and the page, which was still moving, gets `SETTLE_MS` before the next look (the recheck's snapshot is
+ * recorded, and the page, which was still moving, settles before the next look (`AGAIN_MS`; the recheck's snapshot is
  * that look when it already shows another URL). A third same act, a guard stop, an act that may not have
  * landed, or three acts in a row that changed nothing end the run. A sent act is never sent again by this code.
  */
@@ -255,7 +253,7 @@ export async function actStep(
     if (guarded.cause === 'page_changed' && guarded.fresh.tab.url !== was.tab.url) {
       run.current = guarded.fresh;
     } else {
-      await sleep(SETTLE_MS, ctx.signal);
+      await settleFor(ctx, run.page, run.settling, AGAIN_MS);
       run.current = await look(ctx, run.page, run.hints);
     }
     keepTyped(run, was);
@@ -278,7 +276,6 @@ export async function actStep(
   // that wants a hover gets it. It is a new step from a new Decision, never a resend of the first.
   const bind = act.op === 'CLICK' && sentBefore === 0 ? bindingTo(guarded.fresh.tree.nodes[guarded.node]!.name) : undefined;
   const sent = await send(ctx, run.page, guarded.ref, act, plain, bind);
-  const actedAt = ctx.now();
   if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {
     // Covered: the element is there, under another one (a dialog, a banner); the next step sees it in `recent` and
@@ -300,7 +297,7 @@ export async function actStep(
     return { verdict: 'stopped', cause: 'effect_unknown', detail: sent.detail, effect: 'unknown' };
   }
   run.timing.phase('settle');
-  const next = await lookAfter(ctx, run, act, guarded.fresh, actedAt);
+  const next = await lookAfter(ctx, run, act, guarded.fresh);
   report.page_changed = next.sig !== guarded.fresh.sig;
   const added = plain ? addedTo(act, guarded.fresh, guarded.node, next) : null;
   if (added !== null) {

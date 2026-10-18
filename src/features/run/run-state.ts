@@ -7,6 +7,7 @@ import type { RunArgs } from './run.args';
 import type { BlockerReport, RunResult } from './run.contract';
 import type { RunLook } from './run-look-shape';
 import type { RunStepReport } from './run-step-report';
+import type { SettleState } from './run-settle';
 import type { RaiserProbe } from './step-act-shape';
 import type { RunTiming } from './run-timing';
 
@@ -46,6 +47,8 @@ export interface RunState {
   shown: string[];
   /** Where each step's time goes, with `REFSURE_RUN_TIMING=1` (`runTiming`); a no-op otherwise. */
   timing: RunTiming;
+  /** What the settles have seen of the page's frames (`settleFor`). */
+  settling: SettleState;
 }
 
 /** The result so far, its verdict set by whoever ends the run. */

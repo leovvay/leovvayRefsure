@@ -20,7 +20,7 @@ export interface RunTiming {
 /** The port's page calls: what a step spends its time on besides the Decision and its own sleeps. */
 const CALLS: ReadonlySet<string> = new Set([
   'tabInfo', 'snapshot', 'text', 'attr', 'count', 'selectorText', 'selectorAttr', 'act', 'pressEnter', 'scrollDown',
-  'dialogDismiss', 'fillInput',
+  'dialogDismiss', 'fillInput', 'settle',
 ]);
 
 const OFF: RunTiming = { phase() {}, note() {}, flush() {}, wrap: (browser) => browser };

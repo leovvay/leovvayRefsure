@@ -13,6 +13,7 @@ import { ORCA_FEATURES } from './orca-features';
 import { probeOrca } from './orca-probe';
 import { readTab } from './orca-replies';
 import type { OrcaRun } from './orca-run';
+import { settleOnOrca } from './orca-settle';
 import { createOrcaRun, describeOrcaTransport } from './orca-transport';
 import { resolveOrcaPage } from './resolve-page';
 import { pageArgs } from './worktree-guard';
@@ -99,6 +100,8 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
     fillInput: (page, ref, value) => fillInputOnOrca({ env, trace, run }, page, ref, value),
 
     pressEnter: (page, ref) => pressEnterOnOrca({ env, trace, run }, page, ref),
+
+    settle: (page, capMs, anim) => settleOnOrca({ env, trace, run }, page, capMs, anim),
 
     async scrollDown(page, px) {
       await call(onPage(page, ['scroll'], '--direction=down', `--amount=${Math.max(1, Math.round(px))}`));

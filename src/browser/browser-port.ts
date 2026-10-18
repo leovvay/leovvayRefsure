@@ -7,6 +7,7 @@ import type { ConsoleLine } from './console-line';
 import type { NetworkLine } from './network-line';
 import type { PageHint } from './page-hint';
 import type { PageRef } from './page-ref';
+import type { Settled } from './settled';
 import type { TabInfo } from './tab-info';
 
 /** The only way commands reach a browser (spec §5.2). Optional methods are gated by `features()`. */
@@ -50,6 +51,12 @@ export interface BrowserPort {
    * Page-changing, like `act`; `stale_ref` when the element is gone before anything was sent.
    */
   pressEnter?(page: PageRef, ref: Ref): Promise<ActResult>;
+  /**
+   * Waits until the page has rendered a frame and, with `anim`, runs no finite animation, at most `capMs`. Read only:
+   * it reads a frame count and an animation count, never page text. Throws when the backend cannot wait so (Orca's
+   * CLI transport); the caller then waits a fixed time.
+   */
+  settle?(page: PageRef, capMs: number, anim: boolean): Promise<Settled>;
   /** Scrolls the page down by `px`. It moves the view only, so it is no act: nothing is dispatched. */
   scrollDown?(page: PageRef, px: number): Promise<void>;
   highlight?(page: PageRef, ref: Ref): Promise<void>;

@@ -9,7 +9,7 @@ import { shortNumbers } from './element-table';
 import type { TableHints } from './element-table-shape';
 import type { RunArgs } from './run.args';
 import type { RunResult } from './run.contract';
-import { actStep, keepTyped, SETTLE_MS, stepActOf, unchangedStop } from './run-act-step';
+import { actStep, AGAIN_MS, keepTyped, stepActOf, unchangedStop } from './run-act-step';
 import { abstainStop, ended, failedAfterAct, newFamilyStop } from './run-finish';
 import { newTextOf, readingOf, stepInput } from './run-input';
 import { look, lookOf } from './run-look';
@@ -19,6 +19,7 @@ import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
 import { levelUnknownStop } from './run-blocker';
+import { freshSettle, settleFor } from './run-settle';
 import { runTiming } from './run-timing';
 
 type Out = CommandOutcome<RunResult>;
@@ -39,6 +40,8 @@ const RELOOKS_MAX = 2;
 const WAIT_MS = 800;
 const WAIT_POLL_MS = 100;
 const SCROLL_PX = 600;
+/** The settle before the first look. */
+const FIRST_SETTLE_MS = 1_200;
 
 /**
  * One step that sends nothing to an element: WAIT looks until the page changes (`WAIT_MS`), SCROLL_DOWN moves the
@@ -50,7 +53,7 @@ async function idleStep(ctx: CommandContext, run: RunState, report: RunStepRepor
   const before = was.sig;
   if (report.op === 'SCROLL_DOWN') {
     await ctx.browser.scrollDown!(run.page, SCROLL_PX);
-    await sleep(SETTLE_MS, ctx.signal);
+    await settleFor(ctx, run.page, run.settling, AGAIN_MS);
     run.current = await look(ctx, run.page, run.hints);
   } else {
     const until = ctx.now() + WAIT_MS;
@@ -224,6 +227,9 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   const hints: TableHints = {
     words: contentWords(asked), numbers: shortNumbers(asked), fills: args.fills, kinds: new Map(),
   };
+  // The first look shows the page once it has drawn a frame and its animations stopped, not one still loading in.
+  const settling = freshSettle();
+  await settleFor(ctx, page, settling, FIRST_SETTLE_MS);
   const first = await look(ctx, page, hints);
   // The blocker level may click before the first step Decision: the step route is checked first, so no refusal
   // follows a click.
@@ -233,7 +239,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,
     typedAt: new Map(), seenIn: new Map(), dismissed: null, blockers: [], tried: new Set(), current: first, probe: null,
-    shown: [], timing,
+    shown: [], timing, settling,
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {

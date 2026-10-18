@@ -44,6 +44,9 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
   if (highlight) port.highlight = (page, ref) => highlight.call(browser, page, ref);
   if (consoleLines) port.console = (page) => consoleLines.call(browser, page);
   if (network) port.network = (page) => network.call(browser, page);
+  // A settle reads a frame count only: no guard, and it runs under --dry-run too.
+  const { settle } = browser;
+  if (settle) port.settle = (page, capMs, anim) => settle.call(browser, page, capMs, anim);
   const { fillInput, pressEnter, scrollDown } = browser;
   if (fillInput) {
     port.fillInput = async (page, ref, value) => {
