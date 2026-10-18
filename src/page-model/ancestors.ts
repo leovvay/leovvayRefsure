@@ -21,6 +21,11 @@ export function nearestAncestor(
   return null;
 }
 
+/** Whether node `i` sits inside a frame the snapshot opened (a payment provider's card field). */
+export function inFrame(tree: AxTree, i: number): boolean {
+  return nearestAncestor(tree, i, (up) => up.role.toLowerCase() === 'iframe') !== null;
+}
+
 /** Whether node `i` sits under an interactive control below `stop`: a control's own label is not a container's wording. */
 export function underControl(tree: AxTree, i: number, stop: number): boolean {
   return nearestAncestor(tree, i, (node) => INTERACTIVE_ROLES.has(node.role), stop) !== null;

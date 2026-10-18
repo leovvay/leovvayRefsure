@@ -1,7 +1,9 @@
 import type { ActAction, AxTree, PageRef, Ref, TabInfo } from '../../browser';
 import type { CommandContext } from '../../cli';
 import { NEEDS_HUMAN, type Next } from '../../output';
-import { describeElement, findByFingerprint, nearestAncestor, rowContains, rowTextOf, subtree, urlNorm } from '../../page-model';
+import {
+  describeElement, findByFingerprint, inFrame, nearestAncestor, rowContains, rowTextOf, subtree, urlNorm,
+} from '../../page-model';
 import { stepSite, thresholdFor } from '../../questions';
 import {
   classify, classifyNames, clickRisk, fieldRaisers, floorAtWrite, mergeReadings, NO_FIELD_ATTRS, noRaiserOnPage,
@@ -44,11 +46,6 @@ export function enterReadable(tree: AxTree, field: number): boolean {
   const node = tree.nodes[field];
   if (node === undefined || node.attrs.contenteditable === true) return false;
   return ENTER_ROLES.has(node.role) || nearestAncestor(tree, field, (up) => FORM_ROLES.has(up.role)) !== null;
-}
-
-/** Whether node `i` sits inside a frame the snapshot opened (a payment provider's card field). */
-export function inFrame(tree: AxTree, i: number): boolean {
-  return nearestAncestor(tree, i, (up) => up.role.toLowerCase() === 'iframe') !== null;
 }
 
 /**

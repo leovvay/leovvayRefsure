@@ -8,7 +8,7 @@ export { INTERACTIVE_ROLES } from './interactive-roles';
 export { nodeAt } from './node-at';
 export { describeElement, lineOf } from './candidate-line';
 export { candidateKey, distinctByGroup, oneGroup } from './candidate-groups';
-export { DIALOG_ROLES, nearestAncestor, underControl } from './ancestors';
+export { DIALOG_ROLES, inFrame, nearestAncestor, underControl } from './ancestors';
 export { groupOf, twinKey, twinsOf } from './twins';
 export { candidatesOf, findByFingerprint, fingerprintOf } from './fingerprint-of';
 export { rowContains, rowTextOf } from './row-text';

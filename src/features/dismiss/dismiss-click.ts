@@ -1,6 +1,6 @@
 import type { CommandContext } from '../../cli';
 import { NEEDS_HUMAN, RE_OBSERVE } from '../../output';
-import { bindingTo, type Candidate, cutName, findByFingerprint, fingerprintOf, urlNorm } from '../../page-model';
+import { bindingTo, type Candidate, cutName, findByFingerprint, fingerprintOf, inFrame, urlNorm } from '../../page-model';
 import type { DismissLevelReport } from './dismiss-level-report';
 import { dismissRisk } from './dismiss-risk';
 import type { DismissScene } from './dismiss-scene';
@@ -39,7 +39,10 @@ export async function clickPick(
     return stale('page_changed', `${name} now reads ${risk.class} (${risk.reasons.join(', ')})`);
   }
 
-  const sent = await ctx.browser.act(scene.page, found.ref, 'click', undefined, bindingTo(tree.nodes[found.node]!.name));
+  // A control in a frame gets no binding: its box is the frame's own, which a click at a point would read in the top
+  // document; agent-browser's click finds it.
+  const bind = inFrame(tree, found.node) ? undefined : bindingTo(tree.nodes[found.node]!.name);
+  const sent = await ctx.browser.act(scene.page, found.ref, 'click', undefined, bind);
   if (sent.kind === 'stale_ref') {
     const why = sent.covered === undefined ? 'left the page before the click' : 'is covered at its click point by another element';
     return stale('ref_gone', `${name} ${why}`);

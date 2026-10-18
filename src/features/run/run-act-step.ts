@@ -1,7 +1,7 @@
 import { type ActBinding, type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
 import {
-  bindingOf, candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
+  bindingOf, candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, inFrame, isValueField, norm, rowTextOf,
 } from '../../page-model';
 import type { StepReading } from '../../questions';
 import { vetoOf } from '../dismiss';
@@ -9,7 +9,7 @@ import { sleep } from '../shared';
 import { holds } from './element-table';
 import { overlayOf, vetoedInOverlay } from './run-blocker';
 import type { TableEntry } from './element-table-shape';
-import { guardStep, inFrame } from './run-guard';
+import { guardStep } from './run-guard';
 import { look } from './run-look';
 import type { RunLook } from './run-look-shape';
 import { offScreenStop, settleFor, settleNote } from './run-settle';
@@ -281,8 +281,10 @@ export async function actStep(
   const plain = await plainField(run, act, guarded.fresh, guarded.node);
   run.timing.phase('act');
   // A second try of the same act on the same page clicks through agent-browser, which moves the mouse first: a control
-  // that wants a hover gets it. It is a new step from a new Decision, never a resend of the first.
-  const bind = act.op === 'CLICK' && sentBefore === 0 ? bindingOf(guarded.fresh.tree, guarded.node) : undefined;
+  // that wants a hover gets it. It is a new step from a new Decision, never a resend of the first. So does a click in
+  // a frame: its box is the frame's own, which the hit check would read in the top document.
+  const native = act.op === 'CLICK' && sentBefore === 0 && !inFrame(guarded.fresh.tree, guarded.node);
+  const bind = native ? bindingOf(guarded.fresh.tree, guarded.node) : undefined;
   const sent = await send(ctx, run.page, guarded.ref, act, plain, bind);
   if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {
