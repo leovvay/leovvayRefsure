@@ -23,13 +23,13 @@ const MARGIN_MS = 1_000;
 function settleScript(cap: number, anim: boolean): string {
   return `new Promise((done) => {
   const cap = ${cap}, anim = ${anim}, t0 = performance.now();
-  let frames = 0, over = false;
+  let frames = 0, last = 0, over = false;
   const running = () => document.getAnimations().filter((a) => a.playState === 'running'
     && a.effect !== null && a.effect.getTiming().iterations !== Infinity).length;
   const end = (quiet) => { if (!over) { over = true;
-    done(JSON.stringify({ frames, quiet, ms: Math.round(performance.now() - t0) })); } };
+    done(JSON.stringify({ frames, quiet, ms: Math.round(performance.now() - t0), last: Math.round(last) })); } };
   setTimeout(() => end(false), cap);
-  const tick = () => { if (over) return; frames += 1;
+  const tick = () => { if (over) return; frames += 1; last = performance.now() - t0;
     if (!anim || running() === 0) end(true); else requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 })`;
@@ -56,5 +56,7 @@ export async function settleOnOrca(deps: SettleDeps, page: PageRef, capMs: numbe
   if (!isRecord(seen) || typeof seen.frames !== 'number' || typeof seen.quiet !== 'boolean' || typeof seen.ms !== 'number') {
     throw new BrowserError('backend_error', 'orca eval: the settle answered in an unknown shape');
   }
-  return { frames: seen.frames, quiet: seen.quiet, ms: seen.ms };
+  // An answer without `last` reads as a frame at the start: the oldest it can be.
+  const last = typeof seen.last === 'number' ? seen.last : 0;
+  return { frames: seen.frames, quiet: seen.quiet, ms: seen.ms, last };
 }

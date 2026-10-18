@@ -19,7 +19,10 @@ const FRAME_WAIT_MS = 3_000;
 
 /** What the settles of one run have seen of the page's frames. */
 export interface SettleState {
-  /** When a settle last saw a frame (`ctx.now()`), null before any: the tab renders, so it takes input. */
+  /**
+   * When the page last drew a frame a settle saw (`ctx.now()` less the time since that frame), null before any and
+   * after a settle that saw none: the tab renders, so it takes input.
+   */
   frameAt: number | null;
   /** Settles in a row that ended at their cap with frames flowing: animations that never stop. */
   capHits: number;
@@ -32,7 +35,8 @@ export interface SettleState {
 
 /** A settle for `REFSURE_RUN_TIMING`: frames, how it ended, ms in the page; counts only, never page text. */
 export function settleNote(seen: Settled | null): string {
-  return seen === null ? 'settle: fixed' : `settle: ${seen.frames}f ${seen.quiet ? 'quiet' : 'cap'} ${seen.ms}ms`;
+  if (seen === null) return 'settle: fixed';
+  return `settle: ${seen.frames}f ${seen.quiet ? 'quiet' : 'cap'} ${seen.ms}ms, last frame at ${seen.last}ms`;
 }
 
 export function freshSettle(): SettleState {
@@ -56,7 +60,8 @@ export async function settleFor(
     await sleep(SETTLE_MS, ctx.signal);
     return null;
   }
-  if (seen.frames > 0) state.frameAt = ctx.now();
+  // A settle whose frames stopped, or that saw none, is the first sign of a tab Orca stopped drawing.
+  state.frameAt = seen.frames > 0 ? ctx.now() - Math.max(0, seen.ms - seen.last) : null;
   if (anim) {
     state.capHits = !seen.quiet && seen.frames >= NOISY_FRAMES ? state.capHits + 1 : 0;
     if (state.capHits >= NOISY_MAX) state.framesOnly = true;
@@ -86,6 +91,7 @@ export async function offScreenStop(ctx: CommandContext, page: PageRef, state: S
     state.frameAt = ctx.now();
     return null;
   }
+  state.frameAt = null;
   const seconds = Math.round(FRAME_WAIT_MS / 1000);
   return {
     verdict: 'stopped', cause: 'off_screen',
