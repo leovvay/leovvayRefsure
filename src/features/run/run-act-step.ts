@@ -1,7 +1,7 @@
 import { type ActBinding, type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
 import {
-  bindingTo, candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
+  bindingOf, candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
 } from '../../page-model';
 import type { StepReading } from '../../questions';
 import { vetoOf } from '../dismiss';
@@ -282,7 +282,7 @@ export async function actStep(
   run.timing.phase('act');
   // A second try of the same act on the same page clicks through agent-browser, which moves the mouse first: a control
   // that wants a hover gets it. It is a new step from a new Decision, never a resend of the first.
-  const bind = act.op === 'CLICK' && sentBefore === 0 ? bindingTo(guarded.fresh.tree.nodes[guarded.node]!.name) : undefined;
+  const bind = act.op === 'CLICK' && sentBefore === 0 ? bindingOf(guarded.fresh.tree, guarded.node) : undefined;
   const sent = await send(ctx, run.page, guarded.ref, act, plain, bind);
   if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {
