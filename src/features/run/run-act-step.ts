@@ -210,8 +210,14 @@ async function lookAfter(ctx: CommandContext, run: RunState, act: StepAct, befor
   if (next.sig === before.sig || !(animates || dialogsShown(next.tree) !== dialogsShown(before.tree))) return next;
   // One more look: the first after such an act often catches it mid-way (on Google Flights, about half the clicks
   // on an option then went stale), and the one after it showed the elements a third look did.
-  if (settled === null || !settled.quiet) await settleFor(ctx, run.page, run.settling, AGAIN_MS);
-  return lookOnce(ctx, run, ctx.now());
+  const quiet = settled !== null && settled.quiet;
+  if (!quiet) await settleFor(ctx, run.page, run.settling, AGAIN_MS);
+  const again = await lookOnce(ctx, run, ctx.now());
+  // Whether it showed another page than the first, by how the settle ended (`frame`: a frames-only one, which only
+  // saw a frame come): the measure of whether the look after a quiet settle earns its 30 ms. Counts only.
+  const ended = settled === null ? 'fixed' : !quiet ? 'cap' : run.settling.framesOnly ? 'frame' : 'quiet';
+  run.timing.note(`again: ${again.sig === next.sig ? 'same' : 'differs'} after ${ended}`);
+  return again;
 }
 
 /**
