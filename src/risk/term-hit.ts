@@ -1,6 +1,6 @@
 /** The word lists of a lexicon, by field. */
 export type TermField =
-  | 'money' | 'irreversible' | 'auth' | 'consent' | 'dismissClose' | 'dismissVeto' | 'cancelContext'
+  | 'money' | 'irreversible' | 'auth' | 'authDefer' | 'consent' | 'dismissClose' | 'dismissVeto' | 'cancelContext'
   | 'cancelVerbs' | 'cancelWords' | 'confirmCue';
 
 /** Which language and which term matched, both `fold`ed. */

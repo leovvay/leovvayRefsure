@@ -15,6 +15,14 @@ export const ES: Lexicon = {
   auth: [
     'iniciar sesión', 'acceder', 'entrar', 'registrarse', 'contraseña', 'dos factores', 'autorizar',
     'cambiar de cuenta', 'código de verificación', 'código único', 'conceder acceso',
+    'inicia sesión', 'regístrate',
+  ],
+  authDefer: [
+    'iniciar sesión más tarde', 'iniciar sesión después', 'registrarse más tarde', 'acceder más tarde',
+    'entrar más tarde', 'omitir inicio de sesión', 'omitir el inicio de sesión', 'omitir registro',
+    'sin iniciar sesión', 'sin registrarse', 'sin registrarte', 'sin acceder', 'sin cuenta', 'sin una cuenta',
+    'como invitado', 'como invitada',
+    'inicia sesión más tarde', 'regístrate más tarde',
   ],
   consent: [
     'aceptar', 'aceptar todo', 'aceptar todas', 'acepto', 'estoy de acuerdo', 'permitir', 'permitir cookies',

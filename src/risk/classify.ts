@@ -51,11 +51,19 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   let risk = base.risk;
   const reasons = [base.reason];
 
+  const clicks = opts.action === undefined || !FIELD_ACTIONS.has(opts.action);
   let matched = false;
   for (const cls of LEXICON_CLASSES) {
     const hit = findTermAnyReading(cls, name);
     if (hit === null) continue;
     matched = true;
+    // "Log in later", "Skip sign-up", "Später anmelden": a click whose whole name puts off or skips an account entry,
+    // in every reading, enters none, so its auth term does not count. Only auth: "Pay later" stays money.
+    const deferred = cls === 'auth' && clicks ? findWholeTermEveryReading(['authDefer'], name) : null;
+    if (deferred !== null) {
+      reasons.push(`lexicon:${deferred.lang}:auth-deferred:${deferred.term}`);
+      continue;
+    }
     risk = maxRisk(risk, cls);
     reasons.push(`lexicon:${hit.lang}:${cls}:${hit.term}`);
   }
@@ -72,7 +80,6 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   }
   if (!matched) reasons.push('lexicon:none');
 
-  const clicks = opts.action === undefined || !FIELD_ACTIONS.has(opts.action);
   const dialog = clicks && CONFIRMING_ROLES.has(node.role) ? dialogOf(tree, i) : null;
   if (dialog !== null && isConfirmDialog(tree, dialog) && !backsOut([name])) {
     risk = maxRisk(risk, 'irreversible');

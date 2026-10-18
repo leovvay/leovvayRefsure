@@ -16,6 +16,12 @@ export const DE: Lexicon = {
     'anmelden', 'einloggen', 'login', 'registrieren', 'passwort', 'kennwort', 'zwei-faktor', 'autorisieren',
     'konto wechseln', 'bestätigungscode', 'einmalcode', 'zugriff gewähren',
   ],
+  authDefer: [
+    'später anmelden', 'später einloggen', 'später registrieren', 'anmeldung überspringen', 'login überspringen',
+    'registrierung überspringen', 'ohne anmeldung', 'ohne login', 'ohne einloggen', 'ohne registrierung', 'ohne konto',
+    'ohne kundenkonto', 'ohne anmeldung fortfahren', 'ohne login fortfahren', 'ohne konto fortfahren', 'als gast',
+    'als gast fortfahren',
+  ],
   consent: [
     'akzeptieren', 'alle akzeptieren', 'zustimmen', 'einverstanden', 'cookies erlauben', 'alle erlauben',
     'annehmen', 'einwilligen', 'erlauben', 'abonnieren',

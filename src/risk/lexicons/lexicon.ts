@@ -4,6 +4,11 @@ export interface Lexicon {
   money: string[];
   irreversible: string[];
   auth: string[];
+  /**
+   * Whole names that put off or skip an account entry ("Log in later", "Skip sign-up", "Continue as guest"). A
+   * click whose whole name is one of them, and nothing else but bare words, reads no auth term (`classify`).
+   */
+  authDefer: string[];
   consent: string[];
   dismissClose: string[];
   dismissVeto: string[];

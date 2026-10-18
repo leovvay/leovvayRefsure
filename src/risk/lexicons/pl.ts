@@ -16,6 +16,11 @@ export const PL: Lexicon = {
     'zaloguj', 'zaloguj się', 'logowanie', 'zarejestruj się', 'hasło', 'dwuetapowa', 'uwierzytelnianie',
     'autoryzuj', 'przełącz konto', 'kod weryfikacyjny', 'kod jednorazowy', 'przyznaj dostęp',
   ],
+  authDefer: [
+    'zaloguj się później', 'zaloguj później', 'zaloguj się potem', 'zarejestruj się później', 'pomiń logowanie',
+    'pomiń rejestrację', 'bez logowania', 'bez zalogowania', 'bez rejestracji', 'bez konta', 'bez zakładania konta',
+    'jako gość',
+  ],
   consent: [
     'akceptuj', 'akceptuję', 'zaakceptuj', 'zaakceptuj wszystkie', 'zgadzam się', 'zgoda', 'zezwól',
     'zezwól na wszystkie', 'zezwól na cookies', 'subskrybuj',

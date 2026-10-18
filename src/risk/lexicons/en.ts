@@ -16,7 +16,15 @@ export const EN: Lexicon = {
   auth: [
     'sign in', 'log in', 'login', 'sign up', 'password', '2fa', 'two-factor', 'authorize', 'authorise',
     'switch account', 'verification code', 'one-time code', 'continue with google', 'continue with apple',
-    'grant access', 'security code',
+    'grant access', 'security code', 'sign-in', 'sign-up', 'log-in', 'signin', 'signup', 'create account',
+    'create an account',
+  ],
+  authDefer: [
+    'log in later', 'login later', 'sign in later', 'sign up later', 'register later', 'skip login', 'skip log in',
+    'skip logging in', 'skip sign in', 'skip sign-in', 'skip signin', 'skip signing in', 'skip sign up', 'skip sign-up',
+    'skip signup', 'skip registration', 'without login', 'without logging in', 'without signing in',
+    'without signing up', 'without registering', 'without registration', 'without an account', 'without account',
+    'as guest', 'as a guest',
   ],
   consent: [
     'accept', 'accept all', 'agree', 'i agree', 'allow cookies', 'allow all', 'opt in', 'opt-in', 'consent',
