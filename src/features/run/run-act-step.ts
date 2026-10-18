@@ -27,11 +27,12 @@ export const AGAIN_MS = 600;
 /** While a look after the settle still shows the page as it was before the act, another is taken, this long. */
 const CHANGE_MS = 600;
 /**
- * After typing into a combobox its suggestions come from the network: looks are taken from the settle on while the
- * options are those shown before the act (none yet, or the list the typing has not narrowed yet), up to
- * `OPTIONS_MS` after it. A changed list ends the wait at once when an option names the typed value; otherwise only
- * from a look started `OPTIONS_WAIT_MS` after the settle, since focus alone may show a list the typing has yet to
- * replace.
+ * After typing into a combobox its suggestions come from the network: looks are taken from the settle on (a frame
+ * only, not the list's fade) while the options are those shown before the act (none yet, or the list the typing has
+ * not narrowed yet), up to `OPTIONS_MS` after it. A changed list ends the wait at once when an option names the typed
+ * value; otherwise only from a look started `OPTIONS_WAIT_MS` after the settle, since focus alone may show a list the
+ * typing has yet to replace. A list later than `OPTIONS_MS` after that frame is missed (the step reads "no suggestion
+ * showed"); on Google Flights each list was in the first look after a 1.2 s settle, how much sooner not measured.
  */
 const OPTIONS_WAIT_MS = 250;
 const OPTIONS_MS = 700;
@@ -181,18 +182,20 @@ function optionNamed(tree: AxTree, value: string): boolean {
  * looks; one that did shows on the first look, often). After an act that opens or closes something (a click on one
  * of `OPENERS` or in a dialog, Enter, or any act after which a dialog or a tooltip came or went), one more look is
  * taken: at once after a quiet settle, after another settle when the first hit its cap or could not run. After a
- * TYPE into a combobox, looks are taken while its options are still those shown before it, up to `OPTIONS_MS`, and
- * while an early list names no typed value (`OPTIONS_WAIT_MS`); suggestions come from the network, not from frames.
+ * TYPE into a combobox, the settle waits for a frame only, then looks are taken while its options are still those
+ * shown before it, up to `OPTIONS_MS`, and while an early list names no typed value (`OPTIONS_WAIT_MS`); suggestions
+ * come from the network, not from frames.
  */
 async function lookAfter(ctx: CommandContext, run: RunState, act: StepAct, before: RunLook): Promise<RunLook> {
-  const settled = await settleFor(ctx, run.page, run.settling, AFTER_ACT_MS);
+  const typeahead = act.op === 'TYPE' && act.cand.fp.role === 'combobox';
+  const settled = await settleFor(ctx, run.page, run.settling, AFTER_ACT_MS, typeahead);
   run.timing.note(settleNote(settled));
   run.timing.phase('look');
   const from = ctx.now();
   let lookedAt = from;
   let next = await lookOnce(ctx, run, from);
   const since = (): number => ctx.now() - from;
-  if (act.op === 'TYPE' && act.cand.fp.role === 'combobox') {
+  if (typeahead) {
     const shown = optionsShown(before.tree);
     const ready = (): boolean => optionsShown(next.tree) !== shown
       && (lookedAt - from >= OPTIONS_WAIT_MS || optionNamed(next.tree, act.value ?? ''));
