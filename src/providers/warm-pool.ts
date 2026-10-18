@@ -14,7 +14,7 @@ import type { WarmUp } from './warm-up';
 
 /** A connection opened at approval that no request takes within this is closed. */
 const WARM_IDLE_MS = 10_000;
-/** How long a later connection of a warm pool may take to open (fetch's own default). */
+/** How long any connection opened here may take, DNS to TLS, from when it opens (fetch's own default). */
 const CONNECT_MS = 10_000;
 /** Where Node's fetch keeps its dispatcher: undici's key, shared by every copy of undici in a process. */
 const GLOBAL_DISPATCHER = Symbol.for('undici.globalDispatcher.1');
@@ -87,7 +87,8 @@ export function warmUp(url: string, loadFetch: () => void): void {
         const asked = unbracketed(opts.hostname);
         spare = null;
         if (socket === null || socket.destroyed || asked !== host) {
-          connectFresh(asked, Number(opts.port || 443), done);
+          // A later connection (the warm one was taken or closed), bounded the same way.
+          whenSecure(openTls(asked, Number(opts.port || 443)), false, done);
           return;
         }
         clearTimeout(idle);
@@ -132,7 +133,11 @@ function unbracketed(host: string): string {
   return host.replace(/^\[|\]$/g, '');
 }
 
-/** A TLS connection as fetch's own: HTTP/1.1 only, no Nagle delay, TCP keep-alive. */
+/**
+ * A TLS connection as fetch's own: HTTP/1.1 only, no Nagle delay, TCP keep-alive, and closed with `ETIMEDOUT` unless
+ * TLS is up within `CONNECT_MS` of opening, whether a request has taken it yet or not. A stalled handshake taken by a
+ * request would otherwise hold the process open with nothing to end it.
+ */
 function openTls(host: string, port: number): TLSSocket {
   const socket = connectTls({
     host,
@@ -141,17 +146,12 @@ function openTls(host: string, port: number): TLSSocket {
     ...(isIP(host) === 0 ? { servername: host } : {}),
     ALPNProtocols: ['http/1.1'],
   });
+  const stalled = setTimeout(() => {
+    socket.destroy(Object.assign(new Error(`no connection within ${CONNECT_MS} ms`), { code: 'ETIMEDOUT' }));
+  }, CONNECT_MS).unref();
+  const settled = (): void => clearTimeout(stalled);
+  socket.once('secureConnect', settled).once('close', settled);
   return socket.setNoDelay(true).setKeepAlive(true, 60_000);
-}
-
-/** A later connection of a warm pool (the warm one was taken or closed), bounded like fetch's own. */
-function connectFresh(host: string, port: number, done: Connected): void {
-  const socket = openTls(host, port);
-  socket.setTimeout(CONNECT_MS, () => socket.destroy(new Error(`no connection within ${CONNECT_MS} ms`)));
-  whenSecure(socket, false, (error, ready) => {
-    socket.setTimeout(0);
-    done(error, ready);
-  });
 }
 
 /** Hands `socket` over once TLS is up (the certificate checked), or its error; nothing is written to it before. */
