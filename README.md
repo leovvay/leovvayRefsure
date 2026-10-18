@@ -136,8 +136,9 @@ Each step is one look, one Jev Decision and at most one act:
    dismiss level runs on that pop-up, as `dismiss` would, at most 2 per run, listed in `result.blockers`; when it
    does not close the pop-up, the run stops on the veto. On Orca a click goes through Orca's own mouse (press and
    release at the element's centre, no move: 7-11 ms, where a move waits up to a second for a frame) once a
-   read-only hit check finds the element with that very box at that point, in view, carrying the name the guard
-   read; any doubt, and a second try of the same act, use agent-browser's click. Before any act, a tab that has drawn
+   read-only hit check finds the element with that very box at that point (or its own label there), in view, with
+   no other control over it, carrying the name the guard read; any doubt, and a second try of the same act, use
+   agent-browser's click. Before any act, a tab that has drawn
    no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: Orca delivers
    input only to a tab on screen. `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
