@@ -12,6 +12,8 @@ import type { RunStop } from './run-stop';
 const BLOCKERS_MAX = 2;
 /** The level `dismiss` runs with no flags: it clicks only a read control with write authority. */
 const LEVEL = { propose: false, agree: false, depth: 1 } as const;
+/** Levels on one overlay whose pick went stale before the click, each a stale step; one more stops on the veto. */
+const STALE_MAX = 1;
 
 /** A level that clicked and may have left its overlay up: the run stops there (exit 30), as `dismiss` would. */
 export function levelUnknownStop(level: LevelOutcome): RunStop {
@@ -41,14 +43,28 @@ export function overlayOf(run: RunState, at: RunLook, node: number): boolean {
  * that showed after step 1: nothing is sent to it. One dismiss level, `dismiss`'s own code (its Decision, the veto,
  * the risk at read, write authority only for a close or reject control, the recheck on a fresh snapshot, the
  * overlay-gone check), works on that overlay instead. When it went away, the look that showed it gone is the next
- * step's; else the run stops on the veto, as it did before, the level's way on kept (a ticket it proposed).
+ * step's. The level reads the look the step's Decision read, and its click finds its pick again on a fresh snapshot:
+ * a pick that left, changed or moved to another URL since (a banner that closed itself, a page that navigated during
+ * the Decision) sent nothing, and the step is `stale` (the caller looks again; the overlay keeps its level), up to
+ * `STALE_MAX` times per overlay. Else the run stops on the veto, as it did before, the level's way on kept (a ticket
+ * it proposed).
  */
 export async function vetoedInOverlay(
   ctx: CommandContext, run: RunState, report: RunStepReport, element: { role: string; name: string }, term: string,
-): Promise<RunStop | null> {
+): Promise<RunStop | null | 'stale'> {
   report.verdict = 'vetoed';
   run.timing.phase('blocker');
   const level = await dismissLevel(ctx, run.page, LEVEL, 1, run.current);
+  const staleKey = `blocker stale\n${level.report.overlay ?? ''}`;
+  const stale = run.repeats.get(staleKey) ?? 0;
+  if (level.status === 'stale' && !level.clicked && stale < STALE_MAX) {
+    run.repeats.set(staleKey, stale + 1);
+    report.verdict = 'stale';
+    run.timing.note('blocker: stale');
+    run.recent.push(recentLine(report, element, 'on the never-click list, so nothing was sent; a dismiss level on '
+      + `${level.report.overlay ?? 'its overlay'} found the page moved on before its click (${level.why?.detail ?? 'stale'})`));
+    return 'stale';
+  }
   run.blockers.push({ ...level.report, at: report.n });
   if (level.report.overlay !== undefined) run.tried.add(level.report.overlay);
   if (level.status === 'effect_unknown') {

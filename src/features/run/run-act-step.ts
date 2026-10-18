@@ -236,7 +236,16 @@ export async function actStep(
   // A pick run never clicks (an Accept), inside an overlay that showed after step 1: a blocker level on the overlay
   // instead, once per overlay. The guard's own veto still stands for every other pick.
   const veto = act.op === 'CLICK' ? vetoOf(run.current.tree.nodes[cand.node]?.name ?? cand.fp.name) : null;
-  if (veto !== null && overlayOf(run, run.current, cand.node)) return vetoedInOverlay(ctx, run, report, element, veto.term);
+  if (veto !== null && overlayOf(run, run.current, cand.node)) {
+    const blocked = await vetoedInOverlay(ctx, run, report, element, veto.term);
+    if (blocked !== 'stale') return blocked;
+    // The level's pick had gone or moved: nothing was sent, and the page was still moving, as after a stale recheck.
+    const was = run.current;
+    await settleFor(ctx, run.page, run.settling, AGAIN_MS);
+    run.current = await look(ctx, run.page, run.hints);
+    keepTyped(run, was);
+    return null;
+  }
   // The same act on the same page: a Next or a + clicked on as the page moves on is a new act each time, and a page
   // that comes back to where it was (a picker opened and closed) is a loop.
   const key = `${act.op}\n${candidateKey(cand)}\n${cand.fp.ordinal}\n${act.value ?? ''}\n${run.current.sig}`;

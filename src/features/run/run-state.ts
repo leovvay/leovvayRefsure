@@ -27,7 +27,7 @@ export interface RunState {
   acted: boolean;
   /** Acts in a row after which the page showed nothing new. */
   unchanged: number;
-  /** How many times each act (operation, element, value) was sent. */
+  /** How many times each act (operation, element, value) was sent, and each overlay's level went stale. */
   repeats: Map<string, number>;
   /** The field the last step typed into, while PRESS_ENTER may follow it. */
   typed: Fingerprint | null;
