@@ -151,21 +151,56 @@ function namedWrapper(tree: AxTree, at: number): number | null {
   return up !== null && norm(tree.nodes[up]!.name) === norm(tree.nodes[at]!.name) ? up : null;
 }
 
-/** Controls whose click turns a state off as well as on: checked, they may be what the goal asks to undo. */
+/**
+ * Controls whose click turns a state off as well as on, so checked or pressed they may be what the goal asks to undo:
+ * a checkbox, a switch, a toggle button (`pressed` is only ever a toggle's).
+ */
 const TOGGLES: ReadonlySet<string> = new Set(['checkbox', 'switch', 'menuitemcheckbox']);
+/** Items whose `selected` follows focus: a suggestion list's highlighted option is the one to click, not one chosen. */
+const HIGHLIGHTS: ReadonlySet<string> = new Set(['option']);
 
-/** Selected, or pressed or checked on a control a click does not undo. */
-function isOn(node: AxNode, role: string): boolean {
-  const { attrs } = node;
-  if (attrs.selected === true || attrs.selected === 'true') return true;
-  return !TOGGLES.has(role) && (attrs.checked === 'true' || attrs.pressed === 'true');
+function isSelected(node: AxNode): boolean {
+  return node.attrs.selected === true || node.attrs.selected === 'true';
+}
+
+/**
+ * Whether a control is in a state its click would not change, as it or its dropped wrapper carries it: selected (a
+ * date, a tab) or checked (a radio). Never a toggle, the control's or the wrapper's (checkbox, switch, any pressed
+ * button), whose click undoes it, nor an option, whose `selected` marks the highlighted suggestion.
+ */
+function settledOn(node: AxNode, wrapper: AxNode | undefined): boolean {
+  const roles = wrapper === undefined ? [node.role] : [node.role, wrapper.role];
+  if (roles.some((role) => TOGGLES.has(role) || HIGHLIGHTS.has(role))) return false;
+  return [node, wrapper].some((one) => one !== undefined && (isSelected(one) || one.attrs.checked === 'true'));
+}
+
+/** Containers whose items are alternatives of one choice: one is picked, and picking another changes it. */
+const CHOICE_SETS: ReadonlySet<string> = new Set([
+  'listbox', 'grid', 'treegrid', 'radiogroup', 'tablist', 'tree', 'menu', 'menubar',
+]);
+/** Items that are such alternatives even outside such a container, by their role and place. */
+const CHOICE_ITEMS: ReadonlySet<string> = new Set(['option', 'radio', 'tab', 'gridcell', 'menuitemradio', 'treeitem']);
+
+/**
+ * The choice a row is one alternative of (`StepRow.choice`): its listbox, grid, radio group, tab list, tree or menu,
+ * and a dialog holding such a grid as a whole (two months of one date picker); else, for an item of `CHOICE_ITEMS` or
+ * a row whose name carries digits (a day, a count), its role in its place. Undefined for any other row.
+ */
+function choiceOf(tree: AxTree, cand: Candidate): string | undefined {
+  const set = nearestAncestor(tree, cand.node, (node) => CHOICE_SETS.has(node.role));
+  if (set === null) {
+    if (!CHOICE_ITEMS.has(cand.fp.role) && !/\d/.test(cand.fp.name)) return undefined;
+    return `${cand.fp.role} in ${cand.fp.path}`;
+  }
+  const box = nearestAncestor(tree, set, (node) => DIALOG_ROLES.has(node.role));
+  return `${cand.fp.role} at ${box ?? set}`;
 }
 
 /** A native select's chosen option: the option marked selected, else the value the tree gives the select. */
 function chosenOf(tree: AxTree, node: number): string | null {
   const options = optionNodes(tree, node);
   if (options.length === 0) return null;
-  const marked = options.find((at) => isOn(tree.nodes[at]!, 'option'));
+  const marked = options.find((at) => isSelected(tree.nodes[at]!));
   const label = marked === undefined ? norm(tree.nodes[node]?.value ?? '') : labelOf(tree.nodes[marked]);
   return label === '' ? null : label;
 }
@@ -242,11 +277,13 @@ export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: T
     const weight = weights.get(cand.node) ?? 0;
     const value = isValueField(node) ? node.value ?? '' : '';
     const holding = hints.fills.some((fill) => holds(value, fill.value));
-    const on = isOn(node, node.role) || (wrapper !== undefined && isOn(wrapper, node.role));
-    const asked = holding || (weight > 0 && on && !isValueField(node));
+    const asked = holding || (weight > 0 && settledOn(node, wrapper) && !isValueField(node));
     const chosen = chosenOf(tree, cand.node);
-    rows.push({ n, text, label, typable, clickable: true, options, overlay: dialog !== null, weight, asked, chosen });
-    byN.set(n, { n, cand, options, overlay: dialog !== null });
+    const choice = choiceOf(tree, cand);
+    const overlay = dialog !== null;
+    const row: StepRow = { n, text, label, typable, clickable: true, options, overlay, weight, asked, chosen };
+    rows.push(choice === undefined ? row : { ...row, choice });
+    byN.set(n, { n, cand, options, overlay });
     hints.fills.forEach((fill, k) => {
       if (placed[k] === null && holds(value, fill.value)) placed[k] = n;
     });

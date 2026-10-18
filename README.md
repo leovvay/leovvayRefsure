@@ -103,17 +103,21 @@ Each step is one look, one Jev Decision and at most one act:
    comes off the same snapshot, with nothing typed in it; the new text is its lines the page did not show when the
    run began (after the blocker level).
 2. **One Decision, site `step`** (Jev only, experimental). One request asks the operation (`CLICK`, `TYPE`,
-   `SELECT`, `PRESS_ENTER` right after a `TYPE`, `SCROLL_DOWN`, `WAIT`, `DONE`, `BLOCKED`, as the page allows), a
-   target for each operation that takes one (the element table; field × `--fill` value pairs; select × option
-   pairs), and with `--expect` a done Noul over the new text. Progress over certainty, as jev-ultrafast acts:
+   `SELECT`, `PRESS_ENTER` after a `TYPE` until another act or another URL, `SCROLL_DOWN`, `WAIT`, `DONE`,
+   `BLOCKED`, as the page allows), a target for each operation that takes one (the element table; field × `--fill`
+   value pairs; select × option pairs), and with `--expect` a done Noul over the new text. Progress over certainty,
+   as jev-ultrafast acts:
    - The step is the most likely operation other than `DONE` and `BLOCKED`, which end the run only at 0.5.
    - Its target is the most likely row of that operation's own head, when it has at least 0.3 and more than
      `none` (`PRESS_ENTER`, whose field code picks, needs 0.3 itself). A row already in the state asked of it (a
-     selected date the goal names, a field holding its `--fill` value, the option a select shows) gives way to the
-     runner-up when that one passes too. Two rows that read the same as sent are twins and stop.
+     selected date or tab or a checked radio the goal names, a field holding its `--fill` value, the option a
+     select shows; never a toggle, nor a highlighted suggestion) gives way to the runner-up when that one passes too
+     and acts on another control: never to another option of the same select, list, calendar or radio group. Two
+     rows that read the same as sent are twins and stop.
    - CLICK and TYPE leading on one field read as TYPE (typing focuses the field as the click would). When the
-     leading head finds no target (a click aimed at a field that waits for a value, which CLICK does not offer
-     then), the next operation with a target head of its own stands in, if it holds at least 0.05.
+     leading head finds no target it is sure of (a click aimed at a field that waits for a value, which CLICK does
+     not offer then), the next operation with a target head of its own stands in, if it holds at least 0.05; a twin
+     pick or a missing answer stops as it is.
    - `low_confidence` is left only when nothing passes. The safety line is the guard (step 4), not the probability:
      a wrong low-risk act costs a step, and the stop rules end a loop.
 3. **End checks.** `--text` in the new text ends it `seen` by code; the done Noul at 0.85 ends it `seen` whatever
@@ -128,15 +132,19 @@ Each step is one look, one Jev Decision and at most one act:
    again by this code, and an act that may not have landed stops the run (exit 30). `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
    is focused before the key. On Orca, a `TYPE` on a page where the count taken while the Decision was asked found
-   no editable region (and the field sits in no frame) goes as agent-browser's own fill in one call, which replaces
-   the field's text with the input events typing fires; elsewhere Orca's `fill`.
+   no editable region and no input that takes no typed text (a date, time, range, colour or file input), into a
+   field in no frame that the tree does not mark editable, goes as agent-browser's own fill in one call, which
+   replaces the field's text with the input events typing fires; elsewhere Orca's `fill`. A field that then shows
+   its old text with the value added (an editor in a shadow root, which the count cannot see) stops the run
+   (exit 30).
 5. **Settle and look.** 50 ms, then the next look, taken again while it shows the page as it was (up to 600 ms);
    after an act that opens or closes something (a click on an option, a menu item, a combobox or in a dialog,
-   Enter, or any act after which a dialog came or went), one more look. After a `TYPE` into a combobox the look
-   waits 250 ms and is taken again while its options are those shown before (up to 700 ms). `WAIT` looks until the
-   page changes, up to 800 ms. The `recent` line of a `TYPE` says whether suggestions showed. An unsure Decision is
-   asked again as soon as the page shows something else, looked at four times a second for up to a second (twice
-   at most per step), and not at all when it does not.
+   Enter, or any act after which a dialog came or went), one more look. A look a navigating page refuses is taken
+   again for up to a second after the act. After a `TYPE` into a combobox the look is taken again while its options
+   are those shown before (up to 700 ms), and before 250 ms while none of them names the typed value. `WAIT` looks
+   until the page changes, up to 800 ms. The `recent` line of a `TYPE` says whether suggestions showed. An unsure
+   Decision is asked again as soon as the page shows something else, looked at four times a second for up to a
+   second (twice at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
    third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen).

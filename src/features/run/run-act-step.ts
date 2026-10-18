@@ -1,8 +1,9 @@
 import { type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { candidateKey, DIALOG_ROLES, type Fingerprint, rowTextOf } from '../../page-model';
+import { candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, norm, rowTextOf } from '../../page-model';
 import type { StepReading } from '../../questions';
 import { sleep } from '../shared';
+import { holds } from './element-table';
 import type { TableEntry } from './element-table-shape';
 import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
@@ -20,12 +21,19 @@ export const SETTLE_MS = 50;
 /** While a look after an act still shows the page as it was before it, another is taken, up to this long after it. */
 const CHANGE_MS = 600;
 /**
- * After typing into a combobox its suggestions come from the network: the first look waits `OPTIONS_WAIT_MS`, and
- * while the options are those shown before the act (none yet, or the list the typing has not narrowed yet), another
- * is taken, up to `OPTIONS_MS` after the act.
+ * After typing into a combobox its suggestions come from the network: looks are taken from `SETTLE_MS` on while the
+ * options are those shown before the act (none yet, or the list the typing has not narrowed yet), up to `OPTIONS_MS`
+ * after it. A changed list ends the wait at once when an option names the typed value; otherwise only from a look
+ * started `OPTIONS_WAIT_MS` after the act, since focus alone may show a list the typing has yet to replace.
  */
 const OPTIONS_WAIT_MS = 250;
 const OPTIONS_MS = 700;
+/**
+ * A look after an act that fails as a page caught mid-navigation fails (`timeout`, `backend_error`) is taken again
+ * every `RETRY_POLL_MS`, at least once and until this long after the act.
+ */
+const RETRY_MS = 1_000;
+const RETRY_POLL_MS = 100;
 /**
  * A click in a dialog or on an option, a menu item or a combobox opens or closes something, which animates, and so
  * may Enter: a look caught mid-way finds elements that move before the next act (a stale step, a Decision spent on
@@ -94,13 +102,36 @@ function send(ctx: CommandContext, page: PageRef, ref: Ref, act: StepAct, plain:
 
 /**
  * Whether the field takes the one-call fill (`fillInput`): the count taken while the Decision was asked found no
- * editable region (and no raiser) on this same page, and the field sits in no frame (a count reads the top document
- * only). An editable region would take agent-browser's fill as added text, not a replacement.
+ * editable region (and no raiser, and no input that takes no typed text) on this same page, the field sits in no
+ * frame (a count reads the top document only), and the fresh tree does not mark it editable. An editable region
+ * would take agent-browser's fill as added text, not a replacement; one in a shadow root escapes the count, so
+ * `addedTo` checks the field after the act.
  */
 async function plainField(run: RunState, act: StepAct, fresh: RunLook, node: number): Promise<boolean> {
   const probe = run.probe;
   if (act.op !== 'TYPE' || probe === null || probe.sig !== fresh.sig || inFrame(fresh.tree, node)) return false;
+  if (fresh.tree.nodes[node]?.attrs.contenteditable === true) return false;
   return probe.plain;
+}
+
+/**
+ * After a one-call fill, whether the field shows its old text with the value added to it rather than replaced by
+ * it (agent-browser's fill in an editable region the count could not see): it held text the value does not hold,
+ * and now shows both. Null when it did not; else the stop, since that text is written and nothing here undoes it.
+ */
+function addedTo(act: StepAct, fresh: RunLook, node: number, next: RunLook): RunStop | null {
+  const before = norm(fresh.tree.nodes[node]?.value ?? '');
+  const value = norm(act.value ?? '');
+  const found = findByFingerprint(next.tree, act.cand.fp);
+  const after = typeof found === 'object' ? norm(next.tree.nodes[found.node]?.value ?? '') : '';
+  const fold = (text: string): string => text.toLowerCase();
+  if (before === '' || value === '' || fold(value).includes(fold(before))) return null;
+  if (after === value || !fold(after).includes(fold(before)) || !fold(after).includes(fold(value))) return null;
+  return {
+    verdict: 'stopped', cause: 'effect_unknown', effect: 'unknown',
+    detail: `the field ${JSON.stringify(act.cand.fp.name)} shows its earlier text with the value added to it, not `
+      + 'replaced by it: an editable region the page count could not see. Check the field before going on',
+  };
 }
 
 /** The dialogs a look shows, by role and name, in page order: a dialog opening or closing animates. */
@@ -113,44 +144,59 @@ function optionsShown(tree: AxTree): string {
   return tree.nodes.filter((node) => node.role === 'option').map((node) => node.name).join('\n');
 }
 
-/** One look, tried once more when the read was slow or failed: a page caught mid-navigation may refuse one. */
-async function lookOnce(ctx: CommandContext, run: RunState): Promise<RunLook> {
-  try {
-    return await look(ctx, run.page, run.hints);
-  } catch (error) {
-    if (!isBrowserError(error) || (error.code !== 'timeout' && error.code !== 'backend_error')) throw error;
-    await sleep(SETTLE_MS, ctx.signal);
-    return look(ctx, run.page, run.hints);
+/**
+ * One look after an act, taken again while it fails as a page caught mid-navigation fails it: at least once, and
+ * until `RETRY_MS` after the act. Then the failure stands.
+ */
+async function lookOnce(ctx: CommandContext, run: RunState, actedAt: number): Promise<RunLook> {
+  for (let tried = 0; ; tried += 1) {
+    try {
+      return await look(ctx, run.page, run.hints);
+    } catch (error) {
+      if (!isBrowserError(error) || (error.code !== 'timeout' && error.code !== 'backend_error')) throw error;
+      if (tried > 0 && ctx.now() - actedAt >= RETRY_MS) throw error;
+      await sleep(RETRY_POLL_MS, ctx.signal);
+    }
   }
+}
+
+/** Whether one of the options a look shows names `value` (`holds`): the typing has narrowed the list. */
+function optionNamed(tree: AxTree, value: string): boolean {
+  return tree.nodes.some((node) => node.role === 'option' && holds(node.name, value));
 }
 
 /**
  * The look after an act, `SETTLE_MS` after it, taken again while it shows the page as it was before the act, up to
  * `CHANGE_MS` after it (an act that changed nothing costs those looks; one that did shows on the first look, often).
  * After an act that opens or closes something (a click on one of `OPENERS` or in a dialog, Enter, or any act after
- * which a dialog came or went), one more look is taken, within `SETTLED_MS`. After a TYPE into a combobox, the first
- * look waits `OPTIONS_WAIT_MS`, and the next ones are taken while its options are still those shown before it, up to
- * `OPTIONS_MS`.
+ * which a dialog came or went), one more look is taken, within `SETTLED_MS`. After a TYPE into a combobox, looks are
+ * taken while its options are still those shown before it, up to `OPTIONS_MS`, and while an early list names no
+ * typed value (`OPTIONS_WAIT_MS`).
  */
 async function lookAfter(
   ctx: CommandContext, run: RunState, act: StepAct, before: RunLook, actedAt: number,
 ): Promise<RunLook> {
-  const combobox = act.op === 'TYPE' && act.cand.fp.role === 'combobox';
-  await sleep(combobox ? OPTIONS_WAIT_MS : SETTLE_MS, ctx.signal);
+  await sleep(SETTLE_MS, ctx.signal);
   run.timing.phase('look');
-  let next = await lookOnce(ctx, run);
+  let lookedAt = ctx.now();
+  let next = await lookOnce(ctx, run, actedAt);
   const since = (): number => ctx.now() - actedAt;
-  if (combobox) {
+  if (act.op === 'TYPE' && act.cand.fp.role === 'combobox') {
     const shown = optionsShown(before.tree);
-    while (optionsShown(next.tree) === shown && since() < OPTIONS_MS) next = await lookOnce(ctx, run);
+    const ready = (): boolean => optionsShown(next.tree) !== shown
+      && (lookedAt - actedAt >= OPTIONS_WAIT_MS || optionNamed(next.tree, act.value ?? ''));
+    while (!ready() && since() < OPTIONS_MS) {
+      lookedAt = ctx.now();
+      next = await lookOnce(ctx, run, actedAt);
+    }
     return next;
   }
-  while (next.sig === before.sig && since() < CHANGE_MS) next = await lookOnce(ctx, run);
+  while (next.sig === before.sig && since() < CHANGE_MS) next = await lookOnce(ctx, run, actedAt);
   const animates = act.op === 'PRESS_ENTER' || (act.op === 'CLICK' && (act.inDialog || OPENERS.has(act.cand.fp.role)));
   if (next.sig === before.sig || !(animates || dialogsShown(next.tree) !== dialogsShown(before.tree))) return next;
   // One more look: the first after such an act often catches it mid-way (on Google Flights, about half the clicks
   // on an option then went stale), and the one after it showed the elements a third look did.
-  return since() < SETTLED_MS ? lookOnce(ctx, run) : next;
+  return since() < SETTLED_MS ? lookOnce(ctx, run, actedAt) : next;
 }
 
 /**
@@ -186,14 +232,16 @@ export async function actStep(
     report.verdict = 'stale';
     run.timing.note(`stale: ${guarded.cause}${guarded.fresh.tab.url === run.current.tab.url ? '' : ', url'}`);
     run.recent.push(recentLine(report, element, `${guarded.detail}; nothing was sent`));
-    run.typed = null;
-    // The page was still moving: give it a moment, unless the recheck already caught it on another page.
-    if (guarded.cause === 'page_changed' && guarded.fresh.tab.url !== run.current.tab.url) {
+    // The page was still moving: give it a moment, unless the recheck already caught it on another page. Nothing
+    // was sent, so a field just typed into may still take Enter, on the page it was typed on (`keepTyped`).
+    const was = run.current;
+    if (guarded.cause === 'page_changed' && guarded.fresh.tab.url !== was.tab.url) {
       run.current = guarded.fresh;
     } else {
       await sleep(SETTLE_MS, ctx.signal);
       run.current = await look(ctx, run.page, run.hints);
     }
+    keepTyped(run, was);
     return null;
   }
   if (guarded.kind === 'stop') {
@@ -214,8 +262,9 @@ export async function actStep(
   if (sent.kind === 'stale_ref') {
     report.verdict = 'stale';
     run.recent.push(recentLine(report, element, 'the element left the page before the act; nothing was sent'));
+    const was = run.current;
     run.current = await look(ctx, run.page, run.hints);
-    run.typed = null;
+    keepTyped(run, was);
     return null;
   }
   run.repeats.set(key, sentBefore + 1);
@@ -227,12 +276,26 @@ export async function actStep(
   run.timing.phase('settle');
   const next = await lookAfter(ctx, run, act, guarded.fresh, actedAt);
   report.page_changed = next.sig !== guarded.fresh.sig;
+  const added = plain ? addedTo(act, guarded.fresh, guarded.node, next) : null;
+  if (added !== null) {
+    report.verdict = 'unknown';
+    run.current = next;
+    return added;
+  }
   const outcome = `${changeWords(report.page_changed)}${typedWords(act, guarded.fresh, next)}`;
   run.recent.push(recentLine(report, element, outcome));
   run.typed = act.op === 'TYPE' ? cand.fp : null;
   if (act.op === 'TYPE' && reading.target?.op === 'TYPE') run.typedAt.set(reading.target.fill, report.n);
   run.current = next;
   return unchangedStop(run, report.page_changed);
+}
+
+/**
+ * After a step that sent nothing (a stale one, a WAIT, a scroll), the field just typed into still takes Enter while
+ * the look shows the page it was typed on: focus and the field are as the TYPE left them. Another URL clears it.
+ */
+export function keepTyped(run: RunState, was: RunLook): void {
+  if (run.current.tab.url !== was.tab.url) run.typed = null;
 }
 
 /**

@@ -10,7 +10,9 @@ const ORCA: JsonChild = { label: 'orca', spawnCode: 'orca_not_running' };
 
 /**
  * Runs `orca <args> --json` and reads stdout as JSON whatever the exit code, because Orca prints its typed error
- * there and exits 1. Throws a `BrowserError` only when no reply could be read.
+ * there and exits 1. Throws a `BrowserError` only when no reply could be read. An argv that carries a value (a fill's
+ * `--value=`, or the `--command=` of an `exec`, which holds a fill's value) keeps the child's output out of that
+ * error: a cut there could leave part of the value where `hideValue` no longer finds it whole.
  */
 export function runOrca(bin: string | null, args: readonly string[], opts: OrcaRunOptions): Promise<OrcaReply> {
   if (!bin) return Promise.reject(new BrowserError('orca_not_running', NO_ORCA_BINARY));
@@ -19,7 +21,7 @@ export function runOrca(bin: string | null, args: readonly string[], opts: OrcaR
     timeoutMs: opts.timeoutMs,
     verb: orcaVerb(args),
     onSpawn: opts.onSpawn,
-    withholdOutput: args.some((arg) => arg.startsWith('--value=')),
+    withholdOutput: args.some((arg) => arg.startsWith('--value=') || arg.startsWith('--command=')),
   }, readReply);
 }
 

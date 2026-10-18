@@ -9,7 +9,7 @@ import { shortNumbers } from './element-table';
 import type { TableHints } from './element-table-shape';
 import type { RunArgs } from './run.args';
 import type { RunResult } from './run.contract';
-import { actStep, SETTLE_MS, stepActOf, unchangedStop } from './run-act-step';
+import { actStep, keepTyped, SETTLE_MS, stepActOf, unchangedStop } from './run-act-step';
 import { abstainStop, ended, failedAfterAct, newFamilyStop } from './run-finish';
 import { newTextOf, readingOf, stepInput } from './run-input';
 import { look, lookOf } from './run-look';
@@ -45,7 +45,8 @@ const SCROLL_PX = 600;
  * page, a page already read whole); a wait that did not changes nothing there, since results may still be loading.
  */
 async function idleStep(ctx: CommandContext, run: RunState, report: RunStepReport): Promise<RunStop | null> {
-  const before = run.current.sig;
+  const was = run.current;
+  const before = was.sig;
   if (report.op === 'SCROLL_DOWN') {
     await ctx.browser.scrollDown!(run.page, SCROLL_PX);
     await sleep(SETTLE_MS, ctx.signal);
@@ -60,7 +61,7 @@ async function idleStep(ctx: CommandContext, run: RunState, report: RunStepRepor
   report.page_changed = run.current.sig !== before;
   const outcome = changeWords(report.page_changed);
   run.recent.push(recentLine(report, null, report.op === 'WAIT' ? `waited; ${outcome}` : outcome));
-  run.typed = null;
+  keepTyped(run, was);
   if (report.op === 'SCROLL_DOWN') return unchangedStop(run, report.page_changed);
   if (report.page_changed) run.unchanged = 0;
   return null;

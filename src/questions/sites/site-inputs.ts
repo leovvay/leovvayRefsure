@@ -57,12 +57,18 @@ export interface StepRow {
   weight: number;
   /**
    * Already in the state asked of it: a field holding a `--fill` value, or a control naming the goal or the values
-   * that is selected (pressed or checked, but for a checkbox or switch, whose click would undo it). A click target
-   * so placed gives way to the runner-up (design 2026-10-17 §2.3).
+   * that is selected or checked where its click would not undo that (a date, a tab, a radio; never a toggle, nor an
+   * option, whose `selected` marks the highlighted suggestion). A click target so placed gives way to a runner-up on
+   * another control (design 2026-10-17 §2.3).
    */
   asked: boolean;
   /** A native select's option now chosen, as its label; null for any other element. */
   chosen: string | null;
+  /**
+   * The choice this row is one alternative of (its listbox, grid, radio group, tab list…), as an id rows share:
+   * an asked row never gives way to another alternative of the same choice. Absent for a row on its own.
+   */
+  choice?: string;
 }
 
 /**

@@ -33,9 +33,10 @@ const OPTIONS_CUT = 10;
 
 /**
  * What a read needs to map an answer back: the operations offered, each target head's keys, each key as a
- * refusal quotes it (by head: the row's label with the `--fill` key or the option, never a value), and by head the
+ * refusal quotes it (by head: the row's label with the `--fill` key or the option, never a value), by head the
  * keys whose element is already in the state asked of it (a selected date, a field holding its value, the option
- * a select already shows), which give way to a runner-up.
+ * a select already shows), which give way to a runner-up on another control, and each row's choice
+ * (`StepRow.choice`) by its number.
  */
 export interface StepContext {
   ops: readonly StepOp[];
@@ -44,6 +45,7 @@ export interface StepContext {
   select: ReadonlyMap<string, { n: number; option: number }>;
   labels: Readonly<Record<string, ReadonlyMap<string, string>>>;
   asked: Readonly<Record<string, ReadonlySet<string>>>;
+  choices: ReadonlyMap<number, string>;
   askedDone: boolean;
 }
 
@@ -130,6 +132,8 @@ function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, opti
   const select = new Map<string, { n: number; option: number }>();
   const labels: Record<string, Map<string, string>> = {};
   const asked: Record<string, Set<string>> = {};
+  const choices = new Map<number, string>();
+  for (const row of rows) if (row.choice !== undefined) choices.set(row.n, row.choice);
   const head = (name: string): Map<string, string> => (labels[name] ??= new Map());
   const done = (name: string, key: string): void => {
     (asked[name] ??= new Set()).add(key);
@@ -174,7 +178,7 @@ function assemble(input: StepInput, rows: readonly StepRow[], clean: Clean, opti
   if (askedDone) questions[STEP_QUESTIONS.done] = { type: 'noul', ...STEP_DONE_QUESTION };
   return {
     request: { state: stateOf(input, rows, clean), questions },
-    context: { ops, click, type, select, labels, asked, askedDone },
+    context: { ops, click, type, select, labels, asked, choices, askedDone },
   };
 }
 

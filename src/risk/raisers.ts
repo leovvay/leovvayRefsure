@@ -66,17 +66,23 @@ export async function noRaiserOnPage(port: BrowserPort, page: PageRef): Promise<
   return await countProbe(port, page, ANY_RAISER) === 'miss';
 }
 
-/** An editable region (`contenteditable`, not `false`) anywhere in the top document. */
-const EDITABLE_REGION = '[contenteditable]:not([contenteditable=false i])';
+/**
+ * What text inserted by typing cannot set as a field's value, anywhere in the top document: an editable region
+ * (`contenteditable`, not `false`), which takes it as added text, and an input whose value is no free text (a date,
+ * a time, a range, a colour, a file), which a script must set.
+ */
+const NOT_PLAIN = '[contenteditable]:not([contenteditable=false i]), '
+  + 'input:is([type=date i], [type=time i], [type=datetime-local i], [type=month i], [type=week i], [type=range i], '
+  + '[type=color i], [type=file i])';
 
 /**
- * `noRaiserOnPage` and no editable region either, in the one count: a superset of its selector, so a miss proves
- * what `noRaiserOnPage` proves, and that every value field of the top document is a native one. False whenever it
- * cannot show that (a hit, a failed read, no count).
+ * `noRaiserOnPage` and none of `NOT_PLAIN` either, in the one count: a superset of its selector, so a miss proves
+ * what `noRaiserOnPage` proves, and that every value field of the top document is a native one that takes typed
+ * text. False whenever it cannot show that (a hit, a failed read, no count).
  */
 export async function noRaiserNorEditableOnPage(port: BrowserPort, page: PageRef): Promise<boolean> {
   if (port.count === undefined || !port.features().has('count')) return false;
-  return await countProbe(port, page, `${ANY_RAISER}, ${EDITABLE_REGION}`) === 'miss';
+  return await countProbe(port, page, `${ANY_RAISER}, ${NOT_PLAIN}`) === 'miss';
 }
 
 async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<FieldAttrs | null> {

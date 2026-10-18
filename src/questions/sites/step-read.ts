@@ -26,6 +26,12 @@ const HEADS: Partial<Record<StepOp, string>> = {
 const TERMINAL: ReadonlySet<StepOp> = new Set<StepOp>(['DONE', 'BLOCKED']);
 
 /**
+ * A head that read the page and found no target it is sure of, which another operation may stand in for. A twin
+ * pick and a missing or malformed answer stop as they are.
+ */
+const UNSURE_HEAD: ReadonlySet<string> = new Set(['low_confidence', 'none_chosen']);
+
+/**
  * An offered option as a refusal names it: an operation by its name, a target by the code's own label for it (the
  * row without its value, the `--fill` key without the value): the refusal goes back to the agent, and a value never
  * does.
@@ -79,6 +85,15 @@ function targetOf(context: StepContext, op: StepOp, key: string, p: number): Ste
   return pair === undefined ? null : { op: 'SELECT', ...pair, p };
 }
 
+/**
+ * The control a head's key acts on: a select or a field by its row, a click target by the choice it is one
+ * alternative of (`StepRow.choice`), else by its row.
+ */
+function controlOf(context: StepContext, op: StepOp, key: string): string {
+  const n = op === 'CLICK' ? context.click.get(key) : (op === 'TYPE' ? context.type : context.select).get(key)?.n;
+  return (op === 'CLICK' && n !== undefined ? context.choices.get(n) : undefined) ?? `row ${n}`;
+}
+
 /** A head's offered options (not `none`, nothing never offered), best first. */
 function rankedRows(answer: DecisionChoiceAnswer, context: StepContext, op: StepOp): Scored[] {
   return Object.entries(answer.probabilities)
@@ -90,7 +105,9 @@ function rankedRows(answer: DecisionChoiceAnswer, context: StepContext, op: Step
 /**
  * A target head read by its argmax (design 2026-10-17 §2.3, revised 2026-10-18): the best offered row, when it has
  * at least `floor` and more than `none`. A row already in the state asked of it (a selected date, a field holding
- * its value) gives way to the runner-up when that one passes too. The twin rule on what was sent refuses the pick.
+ * its value) gives way to the runner-up when that one passes too and acts on another control: another option of
+ * the same select, day of the same calendar or radio of the same group would undo what is already right, where the
+ * asked row itself is a no-op at worst. The twin rule on what was sent refuses the pick.
  */
 function readTarget(
   answers: Answers, context: StepContext, op: StepOp, head: string, floor: number, sent: Sent,
@@ -109,7 +126,9 @@ function readTarget(
       detail: `${op} target: no option reached ${floor} above none; leading: ${leadingOf(answer, quote)}`,
     };
   }
-  const pick = context.asked[head]?.has(best[0]) && passes(second) ? second : best;
+  const givesWay = context.asked[head]?.has(best[0]) === true && passes(second)
+    && controlOf(context, op, second[0]) !== controlOf(context, op, best[0]);
+  const pick = givesWay ? second : best;
   const [key, p] = pick;
   const twins = sentTwinsOf(sent, head, key);
   if (twins !== null) {
@@ -177,9 +196,10 @@ function readHead(
  * - DONE or BLOCKED ends the run only at `STEP_OP_MIN`;
  * - otherwise the step is the argmax over the other operations offered (CLICK and TYPE leading on one field read as
  *   TYPE: `typeIntent`), and its target the argmax of its own head at `threshold`, the step row (the floor), above
- *   `none`, an option already in the asked state giving way to a runner-up that passes too, the twin rule read on
- *   what was sent;
- * - when that head finds no target, the next operation with a target head, while it holds `STEP_RUNNER_MIN`.
+ *   `none`, an option already in the asked state giving way to a runner-up on another control that passes too, the
+ *   twin rule read on what was sent;
+ * - when that head finds no target it is sure of (`UNSURE_HEAD`), the next operation with a target head, while it
+ *   holds `STEP_RUNNER_MIN`; a twin pick or a missing answer stops as it is.
  * Nothing else is held back here: the guard reads the act's risk and refuses money, irreversible, auth and consent
  * whatever the probability. A refusal names the leading options.
  */
@@ -212,16 +232,22 @@ export function readStep(
   const withLed = (verdict: Verdict<StepReading>): Verdict<StepReading> => (
     verdict.kind === 'answer' ? { ...verdict, value: { ...verdict.value, led } } : verdict
   );
+  const stops = (verdict: Verdict<StepReading>): boolean => (
+    verdict.kind === 'abstain' && !UNSURE_HEAD.has(verdict.cause)
+  );
   if (typeIntent(answers, context, lead, next)) {
     const both = Math.round((p('CLICK') + p('TYPE')) * 100) / 100;
     const typed = readHead(answers, context, 'TYPE', both, done, floor, sent);
     if (typed.kind === 'answer') return withLed(typed);
+    if (stops(typed)) return typed;
   }
   const read = readHead(answers, context, lead, p(lead), done, floor, sent);
   if (read.kind === 'answer') return withLed(read);
-  // The lead's head found no target (a click aimed at a field that waits for a value, which CLICK does not offer):
-  // the next operation that takes a target of its own stands in, if it holds a share of the operation and its head
-  // passes. Each head is asked as if its operation were next, so its own probability is no evidence for that one.
+  if (stops(read)) return read;
+  // The lead's head found no target it is sure of (a click aimed at a field that waits for a value, which CLICK does
+  // not offer): the next operation that takes a target of its own stands in, if it holds a share of the operation
+  // and its head passes. Each head is asked as if its operation were next, so its own probability is no evidence for
+  // that one.
   for (const op of moves.slice(1)) {
     if (p(op) < STEP_RUNNER_MIN) break;
     if (HEADS[op] === undefined) continue;
