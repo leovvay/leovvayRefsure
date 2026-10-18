@@ -35,9 +35,12 @@ const TEXT_MAX = 300;
  * as agent-browser's own check counts a label and its control as one). No control may sit between the element at the
  * point and the one with the box: a container the target fills has the target's box too, and a sibling control drawn
  * over the target inside it (Ryanair's return-date button, mid-animation over the departure one) would take the
- * click (`cover`). That element's tag, role, `aria-label`, the names its `aria-labelledby` points to (each one's
- * `aria-label`, else its text) and its `innerText` (the label's for a control under its label; collapsed, cut) come
- * back. Only the box's four numbers are put into the expression, each a finite number.
+ * click (`cover`). Nor may any other element: of the elements the page draws at the point with the box, the topmost
+ * must hold the element at the point and lie inside every other one, so a plain `<div onclick>` over the target, or
+ * one with the target's very box, is a `cover` too (agent-browser's own check refuses both). That element's tag,
+ * role, `aria-label`, the names its `aria-labelledby` points to (each one's `aria-label`, else its text) and its
+ * `innerText` (the label's for a control under its label; collapsed, cut) come back. Only the box's four numbers are
+ * put into the expression, each a finite number.
  */
 function hitCheck(box: Box): string {
   return `(() => {
@@ -58,12 +61,23 @@ function hitCheck(box: Box): string {
     || ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY', 'OPTION'].includes(e.tagName)
     || roles.includes(String(e.getAttribute('role') || '').trim().toLowerCase())
     || (e.hasAttribute('tabindex') && e.tabIndex >= 0);
+  const parent = (e) => e.parentElement || (e.parentNode && e.parentNode.host) || null;
+  const within = (e, top) => {
+    for (let x = e; x; x = parent(x)) if (x === top) return true;
+    return false;
+  };
+  // In paint order, top first, through the shadow root the element at the point is in.
+  const root = at.getRootNode();
+  const drawn = (typeof root.elementsFromPoint === 'function' ? root : document).elementsFromPoint(cx, cy)
+    .filter((e) => same(e.getBoundingClientRect()));
+  const drawnOver = () => drawn.length === 0 || !within(at, drawn[0]) || !drawn.every((e) => within(drawn[0], e));
   let n = at;
   for (let up = 0; n && up <= ${UP_MAX}; up += 1) {
     const labelled = n.tagName === 'LABEL' && n.control && same(n.control.getBoundingClientRect()) ? n : null;
     if (labelled) n = labelled.control;
     if (n.nodeType === 1 && !same(n.getBoundingClientRect()) && control(n)) return JSON.stringify({ why: 'cover' });
     if (n.nodeType === 1 && same(n.getBoundingClientRect())) {
+      if (!labelled && drawnOver()) return JSON.stringify({ why: 'cover' });
       const text = String((labelled || n).innerText || '').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
       const by = String(n.getAttribute('aria-labelledby') || '').split(/\\s+/).filter(Boolean).map((id) => {
         const el = document.getElementById(id);
@@ -71,7 +85,7 @@ function hitCheck(box: Box): string {
       }).join(' ').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
       return JSON.stringify({ x: cx, y: cy, tag: n.tagName, role: n.getAttribute('role'), label: n.getAttribute('aria-label'), by, text });
     }
-    n = n.parentElement || (n.parentNode && n.parentNode.host) || null;
+    n = parent(n);
   }
   return JSON.stringify({ why: 'box' });
 })()`;
