@@ -134,11 +134,12 @@ Each step is one look, one Jev Decision and at most one act:
    covered by another element sends nothing (step verdict `covered`), and the run looks again. A pick on the
    never-click list inside a pop-up that showed after the start (an Accept) is not sent either (`vetoed`): one
    dismiss level runs on that pop-up, as `dismiss` would, at most 2 per run, listed in `result.blockers`; when it
-   does not close the pop-up, the run stops on the veto. On Orca a click goes through Orca's own mouse (press and
-   release at the element's centre, no move: 7-11 ms, where a move waits up to a second for a frame) once a
-   read-only hit check finds the element with that very box at that point (or its own label there), in view, with
-   no other control over it, carrying the name the guard read; any doubt, and a second try of the same act, use
-   agent-browser's click. Before any act, a tab that has drawn
+   does not close the pop-up, the run stops on the veto; when its pick had gone or moved by its click, nothing is
+   sent and the step is `stale` (once per pop-up). On Orca a click goes through Orca's own mouse (press and release
+   at the element's centre, no move: 7-11 ms, where a move waits up to a second for a frame) once a read-only hit
+   check finds the element with that very box at that point (or its own label there), in view, with nothing else
+   drawn over it (a control, a plain element, one with the same box), carrying the name the guard read; any doubt,
+   an element in a frame, and a second try of the same act, use agent-browser's click. Before any act, a tab that has drawn
    no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: Orca delivers
    input only to a tab on screen. `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
@@ -147,12 +148,13 @@ Each step is one look, one Jev Decision and at most one act:
    field in no frame that the tree does not mark editable, goes as agent-browser's own fill in one call, which
    replaces the field's text with the input events typing fires; elsewhere Orca's `fill`. Either way the field is
    focused on its own 50 ms before the text goes in, so a typeahead whose focus opens its list and clears the field
-   keeps the value. A field that then shows
+   keeps the value; a field gone after its focus wrote no text, and the step counts as a try. A field that then shows
    its old text with the value added (an editor in a shadow root, which the count cannot see) stops the run
    (exit 30).
 5. **Settle and look.** On Orca, until the page has drawn a frame and no finite animation runs (up to 1.2 s; one
-   read-only `eval` that reads a frame and an animation count, never page text; a page whose animations never stop
-   gets one frame per wait after two waits hit the cap); elsewhere 50 ms. Then the next look, taken again while it
+   read-only `eval` that reads a frame and an animation count, never page text; after two waits in a row hit the
+   cap, animations that never stop or a tab drawing about once a second, each wait is for one frame; after a `TYPE`
+   into a combobox, a frame only); elsewhere 50 ms. Then the next look, taken again while it
    shows the page as it was (up to 600 ms); after an act that opens or closes something (a click on an option, a
    menu item, a combobox or in a dialog, Enter, or any act after which a dialog or a tooltip came or went), one more
    look. A look a navigating page refuses is taken again for up to a second. After a `TYPE` into a combobox the look
