@@ -5,9 +5,7 @@ import type { RunStop } from './run-stop';
 
 /** The fixed wait where the browser cannot settle (no `settle`, Orca's CLI transport, a failed call). */
 export const SETTLE_MS = 50;
-/** A settle that hits its cap after this many frames saw animations still running. */
-const NOISY_FRAMES = 3;
-/** That many such settles in a row, and the run waits for a frame only (`framesOnly`). */
+/** That many settles in a row that hit their cap, and the run waits for a frame only (`framesOnly`). */
 const NOISY_MAX = 2;
 /** A frame seen this recently shows the tab renders; older, the frame check waits up to `FRAME_WAIT_MS` for one. */
 const FRAME_FRESH_MS = 2_000;
@@ -24,11 +22,15 @@ export interface SettleState {
    * takes input. Null before any, and after a frame check that waited for one in vain.
    */
   frameAt: number | null;
-  /** Settles in a row that ended at their cap with frames flowing: animations that never stop. */
+  /**
+   * Animation settles in a row that ended at their cap, whatever their frames: animations that never stop, or a tab
+   * Orca draws about once a second, where an animation's clock moves only with frames, so it still runs at any cap
+   * and a settle with no frame at all is as long.
+   */
   capHits: number;
   /**
-   * Set after `NOISY_MAX` such settles (a carousel, a count-up): later settles wait for one frame only, so each no
-   * longer costs its cap.
+   * Set after `NOISY_MAX` such settles (a carousel, a count-up, a starved tab): later settles wait for one frame only,
+   * so each no longer costs its cap, and end quiet, so no second settle follows them.
    */
   framesOnly: boolean;
 }
@@ -66,7 +68,7 @@ export async function settleFor(
   // `FRAME_FRESH_MS` by the next act, and the check finds none.
   if (seen.frames > 0) state.frameAt = ctx.now() - Math.max(0, seen.ms - seen.last);
   if (anim) {
-    state.capHits = !seen.quiet && seen.frames >= NOISY_FRAMES ? state.capHits + 1 : 0;
+    state.capHits = seen.quiet ? 0 : state.capHits + 1;
     if (state.capHits >= NOISY_MAX) state.framesOnly = true;
   }
   return seen;
