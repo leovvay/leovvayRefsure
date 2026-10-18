@@ -1,6 +1,7 @@
-import type { PageRef, Settled } from '../../browser';
+import { isBrowserError, type PageRef, type Settled } from '../../browser';
 import type { CommandContext } from '../../cli';
 import { sleep } from '../shared';
+import type { RunStop } from './run-stop';
 
 /** The fixed wait where the browser cannot settle (no `settle`, Orca's CLI transport, a failed call). */
 export const SETTLE_MS = 50;
@@ -8,6 +9,13 @@ export const SETTLE_MS = 50;
 const NOISY_FRAMES = 3;
 /** That many such settles in a row, and the run waits for a frame only (`framesOnly`). */
 const NOISY_MAX = 2;
+/** A frame seen this recently shows the tab renders; older, the frame check waits up to `FRAME_WAIT_MS` for one. */
+const FRAME_FRESH_MS = 2_000;
+/**
+ * Not 300 ms: a tab Orca renders at about 1 Hz (not on screen, but shown) answered a frame in 0.26-1 s on Google
+ * Flights and in over 2 s on Wikipedia, and both took clicks.
+ */
+const FRAME_WAIT_MS = 3_000;
 
 /** What the settles of one run have seen of the page's frames. */
 export interface SettleState {
@@ -49,4 +57,34 @@ export async function settleFor(
     if (state.capHits >= NOISY_MAX) state.framesOnly = true;
   }
   return seen;
+}
+
+/**
+ * Before an act: whether the tab renders at all. Orca delivers clicks and keys only to a tab that renders frames;
+ * in one that renders none (not on screen in a worktree Orca does not show), every click, key and fill reports
+ * success while nothing reaches the page, or input is held and lands later on a page that has moved on. A frame
+ * seen within `FRAME_FRESH_MS` (the settle after the last act) is enough; else one frame is waited for, up to
+ * `FRAME_WAIT_MS`. None, or a wait the browser did not end in time: the stop, with nothing sent. Where the browser
+ * cannot settle, no check.
+ */
+export async function offScreenStop(ctx: CommandContext, page: PageRef, state: SettleState): Promise<RunStop | null> {
+  if (state.frameAt !== null && ctx.now() - state.frameAt < FRAME_FRESH_MS) return null;
+  if (ctx.browser.settle === undefined) return null;
+  let frames: number;
+  try {
+    frames = (await ctx.browser.settle(page, FRAME_WAIT_MS, false)).frames;
+  } catch (error) {
+    if (!isBrowserError(error) || error.code !== 'timeout') return null;
+    frames = 0;
+  }
+  if (frames > 0) {
+    state.frameAt = ctx.now();
+    return null;
+  }
+  const seconds = Math.round(FRAME_WAIT_MS / 1000);
+  return {
+    verdict: 'stopped', cause: 'off_screen',
+    detail: `the tab rendered no frame in ${seconds} s: Orca delivers clicks and keys only to a tab on screen; nothing `
+      + `was sent. Bring it to the front (orca tab switch --page ${page.id} --focus) and run again`,
+  };
 }

@@ -12,7 +12,7 @@ import type { TableEntry } from './element-table-shape';
 import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
 import type { RunLook } from './run-look-shape';
-import { settleFor } from './run-settle';
+import { offScreenStop, settleFor } from './run-settle';
 import { changeWords, recentLine, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
@@ -225,6 +225,13 @@ export async function actStep(
   report.element = cand.line;
   const shown = valueShown(run, act, reading);
   if (shown !== undefined) report.value = shown;
+  // Nothing goes to a tab that renders no frames: it would take no input, or take it later on another page.
+  run.timing.phase('frame');
+  const dark = await offScreenStop(ctx, run.page, run.settling);
+  if (dark !== null) {
+    report.verdict = 'stopped';
+    return dark;
+  }
   // A pick run never clicks (an Accept), inside an overlay that showed after step 1: a blocker level on the overlay
   // instead, once per overlay. The guard's own veto still stands for every other pick.
   const veto = act.op === 'CLICK' ? vetoOf(run.current.tree.nodes[cand.node]?.name ?? cand.fp.name) : null;

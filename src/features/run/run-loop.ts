@@ -19,7 +19,7 @@ import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
 import { levelUnknownStop } from './run-blocker';
-import { freshSettle, settleFor } from './run-settle';
+import { freshSettle, offScreenStop, settleFor } from './run-settle';
 import { runTiming } from './run-timing';
 
 type Out = CommandOutcome<RunResult>;
@@ -229,7 +229,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   };
   // The first look shows the page once it has drawn a frame and its animations stopped, not one still loading in.
   const settling = freshSettle();
-  await settleFor(ctx, page, settling, FIRST_SETTLE_MS);
+  const settled = await settleFor(ctx, page, settling, FIRST_SETTLE_MS);
   const first = await look(ctx, page, hints);
   // The blocker level may click before the first step Decision: the step route is checked first, so no refusal
   // follows a click.
@@ -243,6 +243,11 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {
+    // A tab that rendered nothing during the first settle gets the frame check before the start level may click.
+    if (settled !== null && settled.frames === 0) {
+      const dark = await offScreenStop(ctx, page, settling);
+      if (dark !== null) return ended(dark, false, result());
+    }
     if (args.dismiss) {
       const level = detectOverlay(first.tree) === null
         ? null

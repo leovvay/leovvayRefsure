@@ -42,6 +42,10 @@ export const CAUSES: readonly CauseRow[] = [
   row('orca_not_running', 'unavailable', 'Orca is not running, or its CLI could not be reached.'),
   row('browser_timeout', 'unavailable', 'A browser call timed out before anything was dispatched.'),
   row('browser_error', 'unavailable', 'The browser backend failed before anything was dispatched.'),
+  row(
+    'off_screen', 'unavailable',
+    'run: the tab rendered no frame, so it would take no click or key; nothing was sent. Bring the tab on screen.',
+  ),
   row('internal', 'unavailable', 'refsure hit an unexpected error before acting.'),
 
   row(
