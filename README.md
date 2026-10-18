@@ -402,8 +402,9 @@ Per Decision, refsure sends only the following, after redaction:
 A candidate line is `<role> "<name>" in="<section path>"`: no attributes, no values, no element ids.
 
 `run` also opens the connection to the provider once its route is approved (consent, provider, origin policy, caps),
-before the first look: one `OPTIONS` request to the endpoint per process, with no key, no header of refsure's own,
-no body and no page text. Never under `--dry-run`.
+before the first look: for an `https:` endpoint, a DNS lookup, then the TCP and TLS handshakes with its host, once per
+process. No request, key, header, body or page text goes on that connection until the first Decision's own request.
+Never under `--dry-run`, and not when a proxy or another dispatcher is set for Node's `fetch` (it opens nothing then).
 
 **Size caps.** State ≤24,000 bytes and questions ≤12,000 bytes. Anything larger is refused as `oversize` before any
 call is made. The one exception is a list of options that code built (`locate`, `dismiss`, `verify-target`,

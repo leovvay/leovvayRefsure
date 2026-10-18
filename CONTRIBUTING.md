@@ -17,7 +17,8 @@ This guide has three recipes (add a Decision site, add a verb, add a language) a
   - only `src/browser/` spawns browser processes: `run-json.ts`, the child-process side both backends share, and
     `agent-browser/ab-runner.ts` for the `--version` and `--help` reads. The one other spawn is a key `command`, in
     `src/config/keys/command-key.ts`;
-  - only `src/providers/transport.ts` calls `fetch`;
+  - only `src/providers/transport.ts` calls `fetch`, and only it and `warm-pool.ts` (the warm-up's TLS connection)
+    open a connection to a provider;
   - keys come only from the sources in `src/config/keys/`, and only `src/providers/read-key.ts` reads one;
   - only `src/main.ts` calls `process.exit`;
   - only `src/egress/pipeline.ts` constructs an `ApprovedRequest`, the only thing a provider accepts.

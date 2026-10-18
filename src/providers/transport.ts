@@ -2,10 +2,11 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { BOUNDS } from '../questions';
 import type { ProviderStatus } from './decision-provider';
 import type { PostOptions, TransportResult } from './transport-result';
+import { poolFor, warmUp } from './warm-pool';
 
 /*
   The only `fetch` in refsure. Ported from the author's earlier decision code.
-  (`preconnect` is the other: an OPTIONS with no key, no header of ours and no body.)
+  (`preconnect` fetches a `data:` URL, which loads fetch's code and never leaves the process.)
 
   It never throws. Every failure comes back as a status, and every message that
   leaves has the key replaced by `[key]`. Only a 429 body is read, bounded, to
@@ -27,61 +28,14 @@ const SPENT = /insufficient_quota|budget_exceeded|exceededbudget|budget has been
 
 interface Attempt { status: ProviderStatus; json?: unknown; detail?: string; final?: boolean }
 
-/** How long a warm-up may take; the request that follows it waits for it no longer than this either. */
-const WARM_MS = 2_000;
-/** Warm-ups by origin, in flight or `done`: one per origin per process. */
-const warming = new Map<string, Promise<void> | 'done'>();
-
-function originOf(url: string): string | null {
-  try {
-    return new URL(url).origin;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Opens the connection a Decision will take (DNS, TCP, TLS, and fetch's own first load), once per origin per
- * process: an OPTIONS to the endpoint with no key, no header of ours and no body, its answer ignored and its body
- * cancelled unread. Not a HEAD: fetch closes the connection after every HEAD, so the Decision would open its own.
- * The caller does this only once the route is approved (consent, provider, origin policy, caps), never under
- * --dry-run. It never throws.
+ * Opens the connection a Decision will take, once per origin per process: DNS, then TCP and TLS to the endpoint's
+ * host, with no request, key, header or body sent on it (`warm-pool.ts`). The caller does this only once the route
+ * is approved (consent, provider, origin policy, caps), never under --dry-run. It never throws.
  */
 export function preconnect(url: string): void {
-  const origin = originOf(url);
-  if (origin === null || warming.has(origin)) return;
-  const inFlight = fetch(url, { method: 'OPTIONS', redirect: 'manual', signal: AbortSignal.timeout(WARM_MS) })
-    .then((response) => {
-      void response.body?.cancel().catch(() => {});
-    }, () => {})
-    // fetch frees the connection a moment after the answer: a request sent at once would open another.
-    .then(() => new Promise<void>((resolve) => setTimeout(resolve, 1)))
-    .finally(() => warming.set(origin, 'done'));
-  warming.set(origin, inFlight);
-}
-
-/**
- * Waits for a warm-up still in flight to `url`'s origin, so the request takes its connection rather than opening a
- * second cold one; at most `WARM_MS`, and never past the caller's deadline or signal.
- */
-async function warmedFor(url: string, deadline: number, signal: AbortSignal): Promise<void> {
-  const origin = originOf(url);
-  const inFlight = origin === null ? undefined : warming.get(origin);
-  if (inFlight === undefined || inFlight === 'done') return;
-  const wait = Math.min(WARM_MS, deadline - performance.now() - RETRY_MIN_REMAINING_MS);
-  if (wait <= 0 || signal.aborted) return;
-  let stop = (): void => {};
-  await Promise.race([inFlight, new Promise<void>((resolve) => {
-    const timer = setTimeout(resolve, wait);
-    const abort = (): void => resolve();
-    signal.addEventListener('abort', abort, { once: true });
-    stop = () => {
-      clearTimeout(timer);
-      signal.removeEventListener('abort', abort);
-      resolve();
-    };
-  })]);
-  stop();
+  // fetch loads its code, and its dispatcher, on its first call; a `data:` URL never leaves the process.
+  warmUp(url, () => void fetch('data:,').catch(() => {}));
 }
 
 /**
@@ -105,7 +59,6 @@ export async function postDecision(
     ...(outcome.detail === undefined ? {} : { detail: scrubKey(outcome.detail, secret) }),
   });
   try {
-    await warmedFor(url, deadline, opts.signal);
     for (let attempt = 1; ; attempt += 1) {
       const outcome = await attemptOnce(url, headers, body, deadline - performance.now(), opts.signal);
       const remaining = deadline - performance.now() - RETRY_BACKOFF_MS;
@@ -150,6 +103,8 @@ async function attemptOnce(
       // A redirect would carry the bearer token to wherever it points.
       redirect: 'manual',
       signal,
+      // The pool holding the connection `preconnect` opened, when there is one.
+      ...poolFor(url),
     });
   } catch (error) {
     return thrown(error, timer, outer, budget);
