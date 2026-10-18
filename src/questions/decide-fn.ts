@@ -33,9 +33,14 @@ export type DecideFn = <In, Ctx, Out>(site: DecisionSite<In, Ctx, Out>, input: I
 /**
  * Whether a site could be asked now (keys, consent, allowlist, origin, spend caps), without asking: lets acts
  * refuse before dispatch, and lets a wait stop asking before a round it has no calls left for. `calls` is how many
- * provider calls one Decision on this route may make (2 for `agree` and `fallback`).
+ * provider calls one Decision on this route may make (2 for `agree` and `fallback`). `warm`: on an approved route,
+ * and never under `dryRun`, open the connection to each provider the route names (an OPTIONS with no key or content), so
+ * the first Decision does not pay for it.
  */
-export type RouteCheckFn = (site: DecisionSite<unknown, unknown, unknown>, opts: Pick<DecideOpts, 'combo' | 'originUrl' | 'dryRun'>) =>
+export type RouteCheckFn = (
+  site: DecisionSite<unknown, unknown, unknown>,
+  opts: Pick<DecideOpts, 'combo' | 'originUrl' | 'dryRun'> & { warm?: boolean },
+) =>
   Promise<
     | { ok: true; calls: number }
     | { ok: false; cause: 'not_set_up' | 'provider_not_allowed' | 'origin_denied' | 'spend_limit'; detail: string }

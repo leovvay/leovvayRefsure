@@ -141,6 +141,7 @@ export function createDecide(deps: DecideDeps): { decide: DecideFn; routeCheck: 
     // The caps as `approve` will read them: an `agree` needs room for both of its calls at once.
     const caps = capsNow(deps.config, plan.kind === 'agree' ? 1 : 0);
     if (caps) return { ok: false, cause: 'spend_limit', detail: caps.detail };
+    if (opts.warm === true && !opts.dryRun) for (const id of idsOf(plan)) deps.providers[id]?.warm?.();
     return { ok: true, calls: idsOf(plan).length };
   };
 

@@ -227,14 +227,15 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   const hints: TableHints = {
     words: contentWords(asked), numbers: shortNumbers(asked), fills: args.fills, kinds: new Map(),
   };
+  // The blocker level may click before the first step Decision: the step route is checked first, so no refusal
+  // follows a click. Approved, it opens the provider's connection while the first look is taken.
+  const tab = await ctx.browser.tabInfo(page);
+  const route = await ctx.routeCheck(stepSite, { combo: 'jev', originUrl: tab.url, dryRun: ctx.dryRun, warm: true });
+  if (!route.ok) return abstainOutcome<RunResult>(route, null);
   // The first look shows the page once it has drawn a frame and its animations stopped, not one still loading in.
   const settling = freshSettle();
   const settled = await settleFor(ctx, page, settling, FIRST_SETTLE_MS);
   const first = await look(ctx, page, hints);
-  // The blocker level may click before the first step Decision: the step route is checked first, so no refusal
-  // follows a click.
-  const route = await ctx.routeCheck(stepSite, { combo: 'jev', originUrl: first.tab.url, dryRun: ctx.dryRun });
-  if (!route.ok) return abstainOutcome<RunResult>(route, null);
   const run: RunState = {
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,

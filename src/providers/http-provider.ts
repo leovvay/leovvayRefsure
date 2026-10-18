@@ -4,7 +4,7 @@ import { bareModel } from '../questions';
 import type { DecisionProvider, ProviderAnswer, ProviderStatus } from './decision-provider';
 import type { Endpoint } from './endpoint';
 import { readKey } from './read-key';
-import { postDecision, scrubKey } from './transport';
+import { postDecision, preconnect, scrubKey } from './transport';
 import type { Wire } from './wire';
 
 /** The most questions one request may carry (the earlier decision code's cap). */
@@ -21,6 +21,7 @@ export function httpProvider(endpoint: Endpoint, wire: Wire, key: KeySource): De
     model: endpoint.model,
     host: endpoint.host,
     body: (req, opts) => wire.body(endpoint.model, req, opts.rendering),
+    warm: () => preconnect(endpoint.url),
     async ask(req, opts) {
       // Consent and limits were granted for one provider at one host; nothing else may carry the request.
       if (req.provider !== endpoint.provider || req.host !== endpoint.host) {

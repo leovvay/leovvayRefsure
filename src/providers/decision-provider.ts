@@ -24,4 +24,6 @@ export interface DecisionProvider {
   /** The exact wire body `ask` would send; used by `--dry-run`. Holds no key. */
   body(req: ApprovedRequest, opts: { rendering?: Rendering }): unknown;
   ask(req: ApprovedRequest, opts: { deadlineMs: number; rendering?: Rendering; signal: AbortSignal }): Promise<ProviderAnswer>;
+  /** Opens the connection `ask` will take, carrying nothing (`preconnect`); called only on an approved route. */
+  warm?(): void;
 }
