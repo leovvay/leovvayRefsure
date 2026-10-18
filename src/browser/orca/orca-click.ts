@@ -25,9 +25,11 @@ const TEXT_MAX = 300;
 
 /**
  * The hit check, read only: in the page, the box's centre must be in the viewport; the element there (down through
- * open shadow roots) must not be a frame; and it, or an ancestor within `UP_MAX`, must have exactly the box. That
- * element's tag, role, `aria-label`, the names its `aria-labelledby` points to (each one's `aria-label`, else its
- * text) and its `innerText` (collapsed, cut) come back. Only the box's four numbers are put into the expression,
+ * open shadow roots) must not be a frame; and it, or an ancestor within `UP_MAX`, must have exactly the box, or be
+ * the `<label>` of a control with exactly the box (a custom radio: the click lands on its label, which activates it,
+ * as agent-browser's own check counts a label and its control as one). That element's tag, role, `aria-label`, the
+ * names its `aria-labelledby` points to (each one's `aria-label`, else its text) and its `innerText` (the label's for
+ * a control under its label; collapsed, cut) come back. Only the box's four numbers are put into the expression,
  * each a finite number.
  */
 function hitCheck(box: Box): string {
@@ -46,8 +48,10 @@ function hitCheck(box: Box): string {
     && Math.abs(r.right - (b.x + b.width)) <= ${EDGE_PX} && Math.abs(r.bottom - (b.y + b.height)) <= ${EDGE_PX};
   let n = at;
   for (let up = 0; n && up <= ${UP_MAX}; up += 1) {
+    const labelled = n.tagName === 'LABEL' && n.control && same(n.control.getBoundingClientRect()) ? n : null;
+    if (labelled) n = labelled.control;
     if (n.nodeType === 1 && same(n.getBoundingClientRect())) {
-      const text = String(n.innerText || '').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
+      const text = String((labelled || n).innerText || '').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
       const by = String(n.getAttribute('aria-labelledby') || '').split(/\\s+/).filter(Boolean).map((id) => {
         const el = document.getElementById(id);
         return el ? (el.getAttribute('aria-label') || el.textContent || '') : '';
