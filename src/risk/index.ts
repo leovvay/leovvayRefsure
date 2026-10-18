@@ -10,7 +10,7 @@ export { maxRisk } from './max-risk';
 export { clickRisk, floorAtWrite, mergeReadings } from './merge-readings';
 export { classify } from './classify';
 export { actionRole, classifyNames } from './classify-name';
-export { fieldRaisers, NO_FIELD_ATTRS, noRaiserOnPage, pageRaisers } from './raisers';
+export { fieldRaisers, NO_FIELD_ATTRS, noRaiserNorEditableOnPage, noRaiserOnPage, pageRaisers } from './raisers';
 export type * from './field-attrs';
 export { nameCheck, readLiveName } from './live-ref-check';
 export { liveRefRisk, readLiveTarget } from './live-ref-risk';

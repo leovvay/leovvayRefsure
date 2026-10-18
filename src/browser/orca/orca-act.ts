@@ -29,6 +29,21 @@ export async function actOnOrca(
   return sendAct(deps, [...args, ...pageArgs(page, deps.env)], value);
 }
 
+/** A value agent-browser's tokenizer reads as one double-quoted token, and never as a flag. */
+const EXEC_VALUE = /^(?!-)[^"\\\u0000-\u001f\u007f]{1,2000}$/;
+
+/**
+ * `exec "fill @eN \"value\""`: agent-browser's own fill (focus, select all, insert text, so the field gets the
+ * input events typing fires) in one call, where Orca's `fill` makes three (a contenteditable check, a focus, a
+ * script). Only for a field the caller knows is no editable region: in one, agent-browser's fill adds to the text
+ * instead of replacing it. A value one quoted token cannot carry goes through Orca's `fill`.
+ */
+export async function fillInputOnOrca(deps: ActDeps, page: PageRef, ref: Ref, value: string): Promise<ActResult> {
+  if (!EXEC_VALUE.test(value)) return actOnOrca(deps, page, ref, 'fill', value);
+  if (!isRef(ref)) return { kind: 'stale_ref' };
+  return sendAct(deps, ['exec', `--command=fill @${ref} "${value}"`, ...pageArgs(page, deps.env)], value);
+}
+
 /** One page-changing Orca call, read as `actOnOrca` reads it; `value` is hidden from any detail. */
 async function sendAct(deps: ActDeps, args: readonly string[], value?: string): Promise<ActResult> {
   // A failure before the spawn (no binary, not in an Orca terminal) rethrows: nothing was sent.

@@ -24,15 +24,16 @@ export interface StepAct {
 
 /**
  * The raiser count (`noRaiserOnPage`) taken on a look while its Decision is asked, the browser idle meanwhile: the
- * look's signature, and whether the page held no raiser then (false when that could not be read).
+ * look's signature, whether the page held no raiser then, and whether it held no editable region either, so a fill
+ * may take the one-call path (`fillInput`). Each is false when it could not be read or was not counted.
  */
-export interface RaiserProbe { sig: string; none: Promise<boolean> }
+export interface RaiserProbe { sig: string; none: Promise<boolean>; plain: Promise<boolean> }
 
 /**
  * The guard's answer: clear to act on the fresh ref; stale (nothing sent, the fresh snapshot is the next look);
  * or a stop with its status, cause and way on.
  */
 export type Guarded =
-  | { kind: 'clear'; ref: Ref; risk: RiskReading; fresh: RunLook }
+  | { kind: 'clear'; ref: Ref; node: number; risk: RiskReading; fresh: RunLook }
   | { kind: 'stale'; cause: 'page_changed' | 'ref_gone'; detail: string; fresh: RunLook }
   | { kind: 'stop'; status: Status; cause: string; detail: string; next?: Next; risk?: RiskClass };

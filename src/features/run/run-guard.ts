@@ -13,6 +13,7 @@ import { lookOf } from './run-look';
 import type { TableHints } from './element-table-shape';
 import type { RunLook } from './run-look-shape';
 import type { Guarded, RaiserProbe, StepAct } from './step-act-shape';
+import type { RunTiming } from './run-timing';
 
 /** What each operation hands the browser, for the high-risk step's argv. */
 const ACTIONS: Readonly<Record<StepAct['op'], ActAction>> = {
@@ -46,7 +47,7 @@ export function enterReadable(tree: AxTree, field: number): boolean {
 }
 
 /** Whether node `i` sits inside a frame the snapshot opened (a payment provider's card field). */
-function inFrame(tree: AxTree, i: number): boolean {
+export function inFrame(tree: AxTree, i: number): boolean {
   return nearestAncestor(tree, i, (up) => up.role.toLowerCase() === 'iframe') !== null;
 }
 
@@ -122,6 +123,7 @@ function sameRow(now: string, then: string): boolean {
  */
 export async function guardStep(
   ctx: CommandContext, page: PageRef, before: RunLook, act: StepAct, hints: TableHints, probe: RaiserProbe | null,
+  timing: RunTiming,
 ): Promise<Guarded> {
   const [tab, tree] = await Promise.all([ctx.browser.tabInfo(page), ctx.browser.snapshot(page)]);
   const fresh = lookOf(tab, tree, hints);
@@ -149,6 +151,7 @@ export async function guardStep(
     };
   }
   // The count made while the Decision was asked holds for the page it read, when the fresh snapshot shows that page.
+  timing.phase('raisers');
   const probed = probe !== null && probe.sig === fresh.sig ? await probe.none : null;
   const risk = await riskOf(ctx, page, tab, tree, found.node, found.ref, act, probed);
   if (refusesHighRisk(risk.class)) return highRiskStop(ctx, tree, found.node, found.ref, act, risk);
@@ -160,5 +163,5 @@ export async function guardStep(
       detail: `${act.op} ${name} was picked at ${act.p}, below the ${risk.class} threshold ${row}; nothing was sent`,
     };
   }
-  return { kind: 'clear', ref: found.ref, risk, fresh };
+  return { kind: 'clear', ref: found.ref, node: found.node, risk, fresh };
 }

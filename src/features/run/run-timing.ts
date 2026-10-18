@@ -1,0 +1,80 @@
+import { performance } from 'node:perf_hooks';
+import type { BrowserPort } from '../../browser';
+
+/**
+ * Where one step's time goes, for measuring `run` (design 2026-10-17 §5): the time by phase and each page call with
+ * its phase and ms, one JSON line per step on stderr. Only with `REFSURE_RUN_TIMING=1`; otherwise every call is a
+ * no-op and the port is the one given. The line names methods and phases only, never a ref, a value or page text.
+ */
+export interface RunTiming {
+  /** Ends the phase in progress and starts `name`. */
+  phase(name: string): void;
+  /** What the step's Decision led with (operations and probabilities only), for the step's line. */
+  note(ops: string): void;
+  /** Writes the step's line, then starts the next step. */
+  flush(n: number, op: string): void;
+  /** The port with its page calls timed under the phase in progress. */
+  wrap(browser: BrowserPort): BrowserPort;
+}
+
+/** The port's page calls: what a step spends its time on besides the Decision and its own sleeps. */
+const CALLS: ReadonlySet<string> = new Set([
+  'tabInfo', 'snapshot', 'text', 'attr', 'count', 'selectorText', 'selectorAttr', 'act', 'pressEnter', 'scrollDown',
+  'dialogDismiss', 'fillInput',
+]);
+
+const OFF: RunTiming = { phase() {}, note() {}, flush() {}, wrap: (browser) => browser };
+
+export function runTiming(env: NodeJS.ProcessEnv): RunTiming {
+  if (env.REFSURE_RUN_TIMING !== '1') return OFF;
+  let current = 'start';
+  let since = performance.now();
+  let started = since;
+  const origin = since;
+  let phases: Record<string, number> = {};
+  let calls: [string, string, number][] = [];
+  let ops: string[] = [];
+  const close = (): void => {
+    const now = performance.now();
+    phases[current] = Math.round((phases[current] ?? 0) + now - since);
+    since = now;
+  };
+  return {
+    phase(name) {
+      close();
+      current = name;
+    },
+    note(text) {
+      ops.push(text);
+    },
+    flush(n, op) {
+      close();
+      const now = performance.now();
+      const total = Math.round(now - started);
+      const at = Math.round(now - origin);
+      process.stderr.write(`refsure-timing ${JSON.stringify({ n, op, at, total, phases, calls, ops })}\n`);
+      phases = {};
+      calls = [];
+      ops = [];
+      started = performance.now();
+      since = started;
+    },
+    wrap(browser) {
+      return new Proxy(browser, {
+        get(target, key, receiver) {
+          const value: unknown = Reflect.get(target, key, receiver);
+          if (typeof key !== 'string' || typeof value !== 'function' || !CALLS.has(key)) return value;
+          return async (...args: unknown[]) => {
+            const at = performance.now();
+            const phase = current;
+            try {
+              return await (value as (...a: unknown[]) => Promise<unknown>).apply(target, args);
+            } finally {
+              calls.push([key, phase, Math.round(performance.now() - at)]);
+            }
+          };
+        },
+      });
+    },
+  };
+}

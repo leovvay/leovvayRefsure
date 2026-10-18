@@ -33,6 +33,12 @@ export interface BrowserPort {
   selectorAttr?(page: PageRef, css: string, name: string): Promise<string | null>;
   act(page: PageRef, ref: Ref, action: ActAction, value?: string): Promise<ActResult>;
   /**
+   * `act` fill in fewer page calls, for a field the caller knows is no editable region (the page holds none): the
+   * value replaces what the field holds, with the input events typing fires. Page-changing, like `act`. Absent where
+   * `act` fill is already one call.
+   */
+  fillInput?(page: PageRef, ref: Ref, value: string): Promise<ActResult>;
+  /**
    * Enter in element `ref` (never a terminal: the backend sends it to the page itself). The key goes to whatever
    * has focus, so the element is focused first: page script that moved focus since cannot take it elsewhere.
    * Page-changing, like `act`; `stale_ref` when the element is gone before anything was sent.

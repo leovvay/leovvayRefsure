@@ -1,8 +1,8 @@
 import { isBrowserError } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
 import { contentWords, fold } from '../../page-model';
-import { noRaiserOnPage } from '../../risk';
-import { type StepReading, stepSite } from '../../questions';
+import { noRaiserNorEditableOnPage, noRaiserOnPage } from '../../risk';
+import { type StepInput, type StepReading, stepSite } from '../../questions';
 import { detectOverlay, dismissLevel } from '../dismiss';
 import { abstainOutcome, baselineOf, sleep, valuesOf } from '../shared';
 import { shortNumbers } from './element-table';
@@ -18,6 +18,7 @@ import { changeWords, recentLine, resultOf, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
+import { runTiming } from './run-timing';
 
 type Out = CommandOutcome<RunResult>;
 
@@ -30,24 +31,32 @@ const UNSURE: ReadonlySet<string> = new Set(['low_confidence', 'none_chosen']);
 const RELOOK_MS = 1_000;
 const RELOOK_POLL_MS = 250;
 const RELOOKS_MAX = 2;
-/** WAIT sleeps this long before the next look. */
-const WAIT_MS = 400;
+/**
+ * WAIT looks again every `WAIT_POLL_MS` until the page shows something else, up to `WAIT_MS`: results that were
+ * loading are read as soon as they show.
+ */
+const WAIT_MS = 800;
+const WAIT_POLL_MS = 100;
 const SCROLL_PX = 600;
 
 /**
- * One step that sends nothing to an element: WAIT sleeps, SCROLL_DOWN moves the view; then the next look. A scroll
- * that showed nothing new counts toward `no_progress` as an act does (the end of the page, a page already read
- * whole); a wait that did not changes nothing there, since results may still be loading.
+ * One step that sends nothing to an element: WAIT looks until the page changes (`WAIT_MS`), SCROLL_DOWN moves the
+ * view and looks once. A scroll that showed nothing new counts toward `no_progress` as an act does (the end of the
+ * page, a page already read whole); a wait that did not changes nothing there, since results may still be loading.
  */
 async function idleStep(ctx: CommandContext, run: RunState, report: RunStepReport): Promise<RunStop | null> {
   const before = run.current.sig;
   if (report.op === 'SCROLL_DOWN') {
     await ctx.browser.scrollDown!(run.page, SCROLL_PX);
     await sleep(SETTLE_MS, ctx.signal);
+    run.current = await look(ctx, run.page, run.hints);
   } else {
-    await sleep(WAIT_MS, ctx.signal);
+    const until = ctx.now() + WAIT_MS;
+    do {
+      await sleep(WAIT_POLL_MS, ctx.signal);
+      run.current = await look(ctx, run.page, run.hints);
+    } while (run.current.sig === before && ctx.now() < until);
   }
-  run.current = await look(ctx, run.page, run.hints);
   report.page_changed = run.current.sig !== before;
   const outcome = changeWords(report.page_changed);
   run.recent.push(recentLine(report, null, report.op === 'WAIT' ? `waited; ${outcome}` : outcome));
@@ -74,10 +83,16 @@ async function relook(ctx: CommandContext, run: RunState): Promise<RunLook | nul
 /**
  * The raiser count (`noRaiserOnPage`) on the look a Decision is about to read, started now: the browser is idle
  * while the Decision is asked, and the guard reuses it when its fresh snapshot shows the same page. A failed count
- * reads as no proof, so the guard reads the raisers itself.
+ * reads as no proof, so the guard reads the raisers itself. When TYPE is offered, the count also looks for editable
+ * regions (`noRaiserNorEditableOnPage`), so a fill on a page with none takes one call; one found sends the raiser
+ * count on its own.
  */
-function probeRaisers(ctx: CommandContext, run: RunState): RaiserProbe {
-  return { sig: run.current.sig, none: noRaiserOnPage(ctx.browser, run.page).catch(() => false) };
+function probeRaisers(ctx: CommandContext, run: RunState, input: StepInput): RaiserProbe {
+  const alone = (): Promise<boolean> => noRaiserOnPage(ctx.browser, run.page).catch(() => false);
+  const typing = input.open.some(Boolean) && input.rows.some((row) => row.typable);
+  if (!typing) return { sig: run.current.sig, none: alone(), plain: Promise.resolve(false) };
+  const plain = noRaiserNorEditableOnPage(ctx.browser, run.page).catch(() => false);
+  return { sig: run.current.sig, none: plain.then((yes) => yes || alone()), plain };
 }
 
 /** The budget's end, when the step about to start would pass `--max-steps` or `--timeout`. */
@@ -119,6 +134,7 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
   let relooks = 0;
   for (;;) {
     const at = ctx.now();
+    run.timing.phase('decide');
     // The `--text` rule costs nothing and reads the last look too: an act that showed the goal ends the run `seen`
     // even when it was the budget's last.
     const newText = newTextOf(ctx, run);
@@ -127,8 +143,9 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     }
     const budget = overBudget(run, at);
     if (budget !== null) return budget;
-    run.probe = probeRaisers(ctx, run);
-    const decided = await ctx.decide(stepSite, stepInput(ctx, run, newText), {
+    const input = stepInput(ctx, run, newText);
+    run.probe = probeRaisers(ctx, run, input);
+    const decided = await ctx.decide(stepSite, input, {
       risk: 'write', combo: 'jev', originUrl: run.current.tab.url, dryRun: ctx.dryRun, signal: ctx.signal,
     });
     const { verdict } = decided;
@@ -145,6 +162,7 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
       // asked until it said yes.
       if (relooks >= RELOOKS_MAX || !UNSURE.has(verdict.cause)) return abstainStop(verdict);
       relooks += 1;
+      run.timing.phase('relook');
       const again = await relook(ctx, run);
       if (again === null) return abstainStop(verdict);
       run.current = again;
@@ -153,6 +171,8 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     relooks = 0;
     if (decided.newFamily) return newFamilyStop(ctx.trace.decisions.at(-1)?.model);
     const reading = verdict.value;
+    if (reading.led !== undefined) run.timing.note(reading.led);
+    run.timing.note(`provider ${ctx.trace.decisions.at(-1)?.ms ?? '?'} ms`);
     const end = endOf(reading, verdict.index, args.expect);
     if (end !== null) return end;
     const report: RunStepReport = {
@@ -160,8 +180,10 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     };
     run.steps.push(report);
     if (reading.op === 'WAIT' || reading.op === 'SCROLL_DOWN') {
+      run.timing.phase('idle');
       const stop = await idleStep(ctx, run, report);
       report.ms = ctx.now() - at;
+      run.timing.flush(report.n, report.op);
       if (stop !== null) return stop;
       continue;
     }
@@ -173,6 +195,7 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     }
     const stop = await actStep(ctx, run, reading, act, report);
     report.ms = ctx.now() - at;
+    run.timing.flush(report.n, report.op);
     if (stop !== null) return stop;
   }
 }
@@ -182,7 +205,13 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
  * baseline of new text, then the steps. Under `--dry-run` it stops at the first Decision request. A browser
  * failure after an act keeps the steps so far (exit 30).
  */
-export async function runRun(args: RunArgs, ctx: CommandContext): Promise<Out> {
+export async function runRun(args: RunArgs, given: CommandContext): Promise<Out> {
+  const timing = runTiming(given.env);
+  // Timed, the port is wrapped; the rest of the context is read through (its config loads on first read).
+  const timed = timing.wrap(given.browser);
+  const ctx: CommandContext = timed === given.browser
+    ? given
+    : Object.create(given, { browser: { value: timed } }) as CommandContext;
   const page = ctx.page;
   if (page === null) throw new Error('run needs a page, and none was resolved');
   // What the page wrote: its text, its elements, and the address it ended on (its path and query are the page's).
@@ -201,7 +230,7 @@ export async function runRun(args: RunArgs, ctx: CommandContext): Promise<Out> {
   const run: RunState = {
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,
-    typedAt: new Map(), seenIn: new Map(), dismissed: null, current: first, probe: null, shown: [],
+    typedAt: new Map(), seenIn: new Map(), dismissed: null, current: first, probe: null, shown: [], timing,
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {

@@ -1,10 +1,10 @@
 import { type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { candidateKey, type Fingerprint, rowTextOf } from '../../page-model';
+import { candidateKey, DIALOG_ROLES, type Fingerprint, rowTextOf } from '../../page-model';
 import type { StepReading } from '../../questions';
 import { sleep } from '../shared';
 import type { TableEntry } from './element-table-shape';
-import { guardStep } from './run-guard';
+import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
 import type { RunLook } from './run-look-shape';
 import { changeWords, recentLine, type RunState } from './run-state';
@@ -12,20 +12,28 @@ import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { StepAct } from './step-act-shape';
 
-/** The page gets this long to show an act's effect before the next look. */
-export const SETTLE_MS = 250;
 /**
- * A click in a dialog or on an option often closes it, and a click on a field often opens a picker; either
- * animates, and a picker may fill in later (a calendar's prices). A look caught mid-way finds elements that move
- * before the next act (a stale step, a Decision spent on nothing), so such a click settles this long.
+ * The page gets this long to show an act's effect before the look after it, and a stale step before the next look;
+ * the snapshot itself takes about as long again. jev-ultrafast settles two frames (about 50 ms).
  */
-const DIALOG_SETTLE_MS = 500;
-/** The fields and options whose click settles `DIALOG_SETTLE_MS`. */
-const SLOW_ROLES: ReadonlySet<string> = new Set([
-  'textbox', 'searchbox', 'combobox', 'option', 'menuitem', 'menuitemradio',
-]);
-/** After typing into a combobox, the look is taken again until its options show, up to this long after the act. */
-const OPTIONS_MS = 600;
+export const SETTLE_MS = 50;
+/** While a look after an act still shows the page as it was before it, another is taken, up to this long after it. */
+const CHANGE_MS = 600;
+/**
+ * After typing into a combobox its suggestions come from the network: the first look waits `OPTIONS_WAIT_MS`, and
+ * while the options are those shown before the act (none yet, or the list the typing has not narrowed yet), another
+ * is taken, up to `OPTIONS_MS` after the act.
+ */
+const OPTIONS_WAIT_MS = 250;
+const OPTIONS_MS = 700;
+/**
+ * A click in a dialog or on an option, a menu item or a combobox opens or closes something, which animates, and so
+ * may Enter: a look caught mid-way finds elements that move before the next act (a stale step, a Decision spent on
+ * nothing). After such an act one more look is taken, unless this long has passed since it.
+ */
+const SETTLED_MS = 800;
+/** The roles whose click opens or closes a list or a dialog. */
+const OPENERS: ReadonlySet<string> = new Set(['combobox', 'option', 'menuitem', 'menuitemradio', 'menuitemcheckbox']);
 /** The same act on the same element on the same page a third time ends the run: twice is a retry, three a loop. */
 const REPEAT_MAX = 2;
 /** Acts or scrolls in a row that changed nothing end the run. */
@@ -74,10 +82,30 @@ function valueShown(run: RunState, act: StepAct, reading: StepReading): string |
   return undefined;
 }
 
-function send(ctx: CommandContext, page: PageRef, ref: Ref, act: StepAct): Promise<ActResult> {
+/** The act on the fresh ref; a fill takes the one-call path on a page the probe found no editable region in. */
+function send(ctx: CommandContext, page: PageRef, ref: Ref, act: StepAct, plain: boolean): Promise<ActResult> {
   if (act.op === 'PRESS_ENTER') return ctx.browser.pressEnter!(page, ref);
+  if (act.op === 'TYPE' && plain && ctx.browser.fillInput !== undefined) {
+    return ctx.browser.fillInput(page, ref, act.value!);
+  }
   const action = act.op === 'CLICK' ? 'click' : act.op === 'TYPE' ? 'fill' : 'select';
   return ctx.browser.act(page, ref, action, act.value);
+}
+
+/**
+ * Whether the field takes the one-call fill (`fillInput`): the count taken while the Decision was asked found no
+ * editable region (and no raiser) on this same page, and the field sits in no frame (a count reads the top document
+ * only). An editable region would take agent-browser's fill as added text, not a replacement.
+ */
+async function plainField(run: RunState, act: StepAct, fresh: RunLook, node: number): Promise<boolean> {
+  const probe = run.probe;
+  if (act.op !== 'TYPE' || probe === null || probe.sig !== fresh.sig || inFrame(fresh.tree, node)) return false;
+  return probe.plain;
+}
+
+/** The dialogs a look shows, by role and name, in page order: a dialog opening or closing animates. */
+function dialogsShown(tree: AxTree): string {
+  return tree.nodes.filter((node) => DIALOG_ROLES.has(node.role)).map((node) => `${node.role} ${node.name}`).join('\n');
 }
 
 /** The options a look shows, by name, in page order: one string, so two looks compare at once. */
@@ -85,33 +113,44 @@ function optionsShown(tree: AxTree): string {
   return tree.nodes.filter((node) => node.role === 'option').map((node) => node.name).join('\n');
 }
 
-/**
- * The look after an act, `SETTLE_MS` after it (`DIALOG_SETTLE_MS` after a click in a dialog, on a field or an
- * option): a page caught mid-navigation may refuse one snapshot, so a slow or failing read is tried once more. After
- * a TYPE into a combobox, the look is taken again (once), up to `OPTIONS_MS` after the act, while its options are
- * still those shown before it (none yet, or the list the typing has not narrowed yet).
- */
-async function lookAfter(
-  ctx: CommandContext, run: RunState, act: StepAct, before: RunLook, sentAt: number,
-): Promise<RunLook> {
-  const slow = act.op === 'CLICK' && (act.inDialog || SLOW_ROLES.has(act.cand.fp.role));
-  await sleep(slow ? DIALOG_SETTLE_MS : SETTLE_MS, ctx.signal);
-  let next: RunLook;
+/** One look, tried once more when the read was slow or failed: a page caught mid-navigation may refuse one. */
+async function lookOnce(ctx: CommandContext, run: RunState): Promise<RunLook> {
   try {
-    next = await look(ctx, run.page, run.hints);
+    return await look(ctx, run.page, run.hints);
   } catch (error) {
     if (!isBrowserError(error) || (error.code !== 'timeout' && error.code !== 'backend_error')) throw error;
     await sleep(SETTLE_MS, ctx.signal);
-    next = await look(ctx, run.page, run.hints);
+    return look(ctx, run.page, run.hints);
   }
+}
+
+/**
+ * The look after an act, `SETTLE_MS` after it, taken again while it shows the page as it was before the act, up to
+ * `CHANGE_MS` after it (an act that changed nothing costs those looks; one that did shows on the first look, often).
+ * After an act that opens or closes something (a click on one of `OPENERS` or in a dialog, Enter, or any act after
+ * which a dialog came or went), one more look is taken, within `SETTLED_MS`. After a TYPE into a combobox, the first
+ * look waits `OPTIONS_WAIT_MS`, and the next ones are taken while its options are still those shown before it, up to
+ * `OPTIONS_MS`.
+ */
+async function lookAfter(
+  ctx: CommandContext, run: RunState, act: StepAct, before: RunLook, actedAt: number,
+): Promise<RunLook> {
   const combobox = act.op === 'TYPE' && act.cand.fp.role === 'combobox';
-  const waitOptions = combobox && optionsShown(next.tree) === optionsShown(before.tree);
-  const left = OPTIONS_MS - (ctx.now() - sentAt);
-  if (waitOptions && left > 0) {
-    await sleep(left, ctx.signal);
-    next = await look(ctx, run.page, run.hints);
+  await sleep(combobox ? OPTIONS_WAIT_MS : SETTLE_MS, ctx.signal);
+  run.timing.phase('look');
+  let next = await lookOnce(ctx, run);
+  const since = (): number => ctx.now() - actedAt;
+  if (combobox) {
+    const shown = optionsShown(before.tree);
+    while (optionsShown(next.tree) === shown && since() < OPTIONS_MS) next = await lookOnce(ctx, run);
+    return next;
   }
-  return next;
+  while (next.sig === before.sig && since() < CHANGE_MS) next = await lookOnce(ctx, run);
+  const animates = act.op === 'PRESS_ENTER' || (act.op === 'CLICK' && (act.inDialog || OPENERS.has(act.cand.fp.role)));
+  if (next.sig === before.sig || !(animates || dialogsShown(next.tree) !== dialogsShown(before.tree))) return next;
+  // One more look: the first after such an act often catches it mid-way (on Google Flights, about half the clicks
+  // on an option then went stale), and the one after it showed the elements a third look did.
+  return since() < SETTLED_MS ? lookOnce(ctx, run) : next;
 }
 
 /**
@@ -141,9 +180,11 @@ export async function actStep(
         + 'more was sent',
     };
   }
-  const guarded = await guardStep(ctx, run.page, run.current, act, run.hints, run.probe);
+  run.timing.phase('recheck');
+  const guarded = await guardStep(ctx, run.page, run.current, act, run.hints, run.probe, run.timing);
   if (guarded.kind === 'stale') {
     report.verdict = 'stale';
+    run.timing.note(`stale: ${guarded.cause}${guarded.fresh.tab.url === run.current.tab.url ? '' : ', url'}`);
     run.recent.push(recentLine(report, element, `${guarded.detail}; nothing was sent`));
     run.typed = null;
     // The page was still moving: give it a moment, unless the recheck already caught it on another page.
@@ -166,8 +207,10 @@ export async function actStep(
     return stop;
   }
   report.risk = guarded.risk.class;
-  const sentAt = ctx.now();
-  const sent = await send(ctx, run.page, guarded.ref, act);
+  const plain = await plainField(run, act, guarded.fresh, guarded.node);
+  run.timing.phase('act');
+  const sent = await send(ctx, run.page, guarded.ref, act, plain);
+  const actedAt = ctx.now();
   if (sent.kind === 'stale_ref') {
     report.verdict = 'stale';
     run.recent.push(recentLine(report, element, 'the element left the page before the act; nothing was sent'));
@@ -181,13 +224,25 @@ export async function actStep(
     report.verdict = 'unknown';
     return { verdict: 'stopped', cause: 'effect_unknown', detail: sent.detail, effect: 'unknown' };
   }
-  const next = await lookAfter(ctx, run, act, guarded.fresh, sentAt);
+  run.timing.phase('settle');
+  const next = await lookAfter(ctx, run, act, guarded.fresh, actedAt);
   report.page_changed = next.sig !== guarded.fresh.sig;
-  run.recent.push(recentLine(report, element, changeWords(report.page_changed)));
+  const outcome = `${changeWords(report.page_changed)}${typedWords(act, guarded.fresh, next)}`;
+  run.recent.push(recentLine(report, element, outcome));
   run.typed = act.op === 'TYPE' ? cand.fp : null;
   if (act.op === 'TYPE' && reading.target?.op === 'TYPE') run.typedAt.set(reading.target.fill, report.n);
   run.current = next;
   return unchangedStop(run, report.page_changed);
+}
+
+/**
+ * After a TYPE, whether suggestions showed: code's own words in `recent`, so the next step can confirm the value as
+ * the Decision is asked to (its suggestion, else the confirming button, else Enter).
+ */
+function typedWords(act: StepAct, before: RunLook, after: RunLook): string {
+  if (act.op !== 'TYPE') return '';
+  const options = optionsShown(after.tree);
+  return options !== '' && options !== optionsShown(before.tree) ? '; suggestions showed' : '; no suggestion showed';
 }
 
 /**

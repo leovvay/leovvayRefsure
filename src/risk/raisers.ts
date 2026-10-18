@@ -66,6 +66,19 @@ export async function noRaiserOnPage(port: BrowserPort, page: PageRef): Promise<
   return await countProbe(port, page, ANY_RAISER) === 'miss';
 }
 
+/** An editable region (`contenteditable`, not `false`) anywhere in the top document. */
+const EDITABLE_REGION = '[contenteditable]:not([contenteditable=false i])';
+
+/**
+ * `noRaiserOnPage` and no editable region either, in the one count: a superset of its selector, so a miss proves
+ * what `noRaiserOnPage` proves, and that every value field of the top document is a native one. False whenever it
+ * cannot show that (a hit, a failed read, no count).
+ */
+export async function noRaiserNorEditableOnPage(port: BrowserPort, page: PageRef): Promise<boolean> {
+  if (port.count === undefined || !port.features().has('count')) return false;
+  return await countProbe(port, page, `${ANY_RAISER}, ${EDITABLE_REGION}`) === 'miss';
+}
+
 async function fieldAttrs(port: BrowserPort, page: PageRef, ref: Ref): Promise<FieldAttrs | null> {
   const keys = ['type', 'autocomplete', 'name', 'id'] as const;
   if (port.attr !== undefined && port.features().has('attr')) {

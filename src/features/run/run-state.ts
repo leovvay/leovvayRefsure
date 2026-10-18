@@ -8,6 +8,7 @@ import type { RunResult } from './run.contract';
 import type { RunLook } from './run-look-shape';
 import type { RunStepReport } from './run-step-report';
 import type { RaiserProbe } from './step-act-shape';
+import type { RunTiming } from './run-timing';
 
 /** One run in progress: what it was asked, what it has done, and the look the next step reads. */
 export interface RunState {
@@ -39,6 +40,8 @@ export interface RunState {
   probe: RaiserProbe | null;
   /** The envelope's `new_text`: the last look's new lines. */
   shown: string[];
+  /** Where each step's time goes, with `REFSURE_RUN_TIMING=1` (`runTiming`); a no-op otherwise. */
+  timing: RunTiming;
 }
 
 /** The result so far, its verdict set by whoever ends the run. */
