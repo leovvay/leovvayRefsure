@@ -27,11 +27,16 @@ export function findByFingerprint(tree: AxTree, fp: Fingerprint): { node: number
   return at === undefined || ref === null ? 'gone' : { node: at, ref };
 }
 
-/** Nodes with a ref and an interactive role, in text order, kept by `filter` when one is given. */
+/**
+ * Nodes with a ref and an interactive role, or named from their text as clickable (`AxNode.textNamed`), in text
+ * order, kept by `filter` when one is given.
+ */
 export function candidatesOf(tree: AxTree, filter?: (n: AxNode) => boolean): Candidate[] {
   const out: Candidate[] = [];
   tree.nodes.forEach((node, i) => {
-    if (node.ref === null || !INTERACTIVE_ROLES.has(node.role)) return;
+    // A cursor-clickable node the parser named from its text (a calendar day) is a control too.
+    const clickable = node.textNamed === true && norm(node.name) !== '';
+    if (node.ref === null || !(INTERACTIVE_ROLES.has(node.role) || clickable)) return;
     if (filter !== undefined && !filter(node)) return;
     out.push({ ref: node.ref, node: i, line: lineOf(tree, i), fp: fingerprintOf(tree, i) });
   });

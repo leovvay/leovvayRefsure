@@ -80,7 +80,10 @@ export function classify(tree: AxTree, i: number, opts: ClassifyOpts): RiskReadi
   }
   if (!matched) reasons.push('lexicon:none');
 
-  const dialog = clicks && CONFIRMING_ROLES.has(node.role) ? dialogOf(tree, i) : null;
+  // A plain element the page made clickable (a `div` with a handler, its name its text) confirms as a button does:
+  // a clickable "Tak" in "Usunąć konto?" is the delete, whatever its role.
+  const confirming = CONFIRMING_ROLES.has(node.role) || (node.attrs.clickable === true && name.trim() !== '');
+  const dialog = clicks && confirming ? dialogOf(tree, i) : null;
   if (dialog !== null && isConfirmDialog(tree, dialog) && !backsOut([name])) {
     risk = maxRisk(risk, 'irreversible');
     reasons.push('dialog:confirm');

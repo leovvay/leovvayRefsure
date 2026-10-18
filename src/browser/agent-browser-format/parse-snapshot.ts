@@ -6,6 +6,7 @@ import type { SnapshotLine } from './snapshot-line-shape';
 import { readLine } from './snapshot-line';
 import { withRefSpacing } from './spacing';
 import { valueSpan } from './value-span';
+import { nameClickables } from './clickable-names';
 
 /**
  * Where each multi-line value ends: the lines its run-on text covers are marked, and the whole value is kept.
@@ -70,5 +71,6 @@ export function parseSnapshot(json: unknown, pageId: string): AxTree {
     nodes.push(node);
     stack.push(node);
   }
+  nameClickables(nodes);
   return { origin: body.origin, pageId, nodes, dropped };
 }

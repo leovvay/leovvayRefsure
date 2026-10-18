@@ -14,6 +14,11 @@ export interface AxNode {
   value: string | null;
   parent: number | null;
   children: number[];
+  /**
+   * The parser named it from its own text (`nameClickables`): a node agent-browser found clickable by its cursor,
+   * with no role of a control, no name and no control inside or around it (a calendar day).
+   */
+  textNamed?: true;
 }
 
 export interface AxTree {
