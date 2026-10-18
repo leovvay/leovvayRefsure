@@ -99,9 +99,10 @@ Each step is one look, one Jev Decision and at most one act:
 
 1. **Look.** One snapshot and the tab, read together. The element table is the page's candidates, numbered in page
    order, each with its value or state; a long list of look-alikes (a calendar's days, a list of results) keeps the
-   rows that name the most of the goal, and the table is cut to the questions bound, dialogs first. The page text
-   comes off the same snapshot, with nothing typed in it; the new text is its lines the page did not show when the
-   run began (after the blocker level).
+   rows that name the most of the goal, and the table is cut to the questions bound, dialogs first. An element the
+   page made clickable with no role, name or control in or around it (a calendar day) is a row named by its text and
+   the caption above it (`generic "20 listopada 2026"`). The page text comes off the same snapshot, with nothing
+   typed in it; the new text is its lines the page did not show when the run began (after the blocker level).
 2. **One Decision, site `step`** (Jev only, experimental). One request asks the operation (`CLICK`, `TYPE`,
    `SELECT`, `PRESS_ENTER` after a `TYPE` until another act or another URL, `SCROLL_DOWN`, `WAIT`, `DONE`,
    `BLOCKED`, as the page allows), a target for each operation that takes one (the element table; field × `--fill`
@@ -129,41 +130,61 @@ Each step is one look, one Jev Decision and at most one act:
    URL, page raisers for a click, field raisers for a fill or select, Enter as a click on the field and its form's
    buttons), at least write, and money, irreversible, auth or consent refused with `act-high-risk` in `next`
    whatever the probability; the pick held to its row (0.3). Then one act on the fresh ref. A sent act is never sent
-   again by this code, and an act that may not have landed stops the run (exit 30). `PRESS_ENTER` is offered only
+   again by this code, and an act that may not have landed stops the run (exit 30). A click agent-browser finds
+   covered by another element sends nothing (step verdict `covered`), and the run looks again. A pick on the
+   never-click list inside a pop-up that showed after the start (an Accept) is not sent either (`vetoed`): one
+   dismiss level runs on that pop-up, as `dismiss` would, at most 2 per run, listed in `result.blockers`; when it
+   does not close the pop-up, the run stops on the veto. On Orca a click goes through Orca's own mouse (press and
+   release at the element's centre, no move: 7-11 ms, where a move waits up to a second for a frame) once a
+   read-only hit check finds the element with that very box at that point, in view, carrying the name the guard
+   read; any doubt, and a second try of the same act, use agent-browser's click. Before any act, a tab that has drawn
+   no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: Orca delivers
+   input only to a tab on screen. `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
    is focused before the key. On Orca, a `TYPE` on a page where the count taken while the Decision was asked found
    no editable region and no input that takes no typed text (a date, time, range, colour or file input), into a
    field in no frame that the tree does not mark editable, goes as agent-browser's own fill in one call, which
-   replaces the field's text with the input events typing fires; elsewhere Orca's `fill`. A field that then shows
+   replaces the field's text with the input events typing fires; elsewhere Orca's `fill`. Either way the field is
+   focused on its own 50 ms before the text goes in, so a typeahead whose focus opens its list and clears the field
+   keeps the value. A field that then shows
    its old text with the value added (an editor in a shadow root, which the count cannot see) stops the run
    (exit 30).
-5. **Settle and look.** 50 ms, then the next look, taken again while it shows the page as it was (up to 600 ms);
-   after an act that opens or closes something (a click on an option, a menu item, a combobox or in a dialog,
-   Enter, or any act after which a dialog came or went), one more look. A look a navigating page refuses is taken
-   again for up to a second after the act. After a `TYPE` into a combobox the look is taken again while its options
-   are those shown before (up to 700 ms), and before 250 ms while none of them names the typed value. `WAIT` looks
-   until the page changes, up to 800 ms. The `recent` line of a `TYPE` says whether suggestions showed. An unsure
+5. **Settle and look.** On Orca, until the page has drawn a frame and no finite animation runs (up to 1.2 s; one
+   read-only `eval` that reads a frame and an animation count, never page text; a page whose animations never stop
+   gets one frame per wait after two waits hit the cap); elsewhere 50 ms. Then the next look, taken again while it
+   shows the page as it was (up to 600 ms); after an act that opens or closes something (a click on an option, a
+   menu item, a combobox or in a dialog, Enter, or any act after which a dialog or a tooltip came or went), one more
+   look. A look a navigating page refuses is taken again for up to a second. After a `TYPE` into a combobox the look
+   is taken again while its options are those shown before (up to 700 ms), and before 250 ms while none of them
+   names the typed value. `WAIT` looks until the page changes, up to 800 ms. The `recent` line of a `TYPE` says
+   whether suggestions showed (options, or new buttons or links that hold the value) and whether the page emptied
+   the field. An unsure
    Decision is asked again as soon as the page shows something else, looked at four times a second for up to a
    second (twice at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
-   third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen).
+   third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen); a tab that draws
+   no frames ends it `off_screen` before anything is sent.
 
 `run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
 offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
 never put a secret in `--goal` or `--fill`. `result.verdict` is `seen`, `done_unconfirmed`, `blocked`,
 `no_progress`, `budget`, `refused`, `low_confidence`, `decision_unavailable` or `stopped` (the browser failed, or an
 act may not have landed). `result.steps` lists each step (`n`, `op`, `element` as a v1 line, `value` as the
-`--fill` key and never the value, `p`, `risk`, `page_changed`, `ms`); `new_text`, `url`, `elapsed_ms` and
-`decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
-`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `new_text`, `url` and `why.detail`
-are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
+`--fill` key and never the value, `p`, `risk`, `page_changed`, `ms`, and `verdict` when a step did not run as
+picked: `stale`, `covered`, `vetoed`, `unknown`, `stopped`); `blockers` lists the dismiss levels after the start, when
+any ran; `new_text`, `url`, `elapsed_ms` and `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
+`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `dismissed`, `blockers`, `new_text`,
+`url` and `why.detail` are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
 cap has room again, within `--timeout`.
 
 Write the goal as a person would ask it, and give every value the task names as a `--fill`, dates included (many
-date pickers take a typed date, confirmed with Enter). `REFSURE_RUN_TIMING=1` writes one line per step to stderr:
-the time by phase (decide, recheck, raisers, act, settle, look) and each page call, with no page text. Known limits,
-as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab drops clicks; a
+date pickers take a typed date, confirmed with Enter). For a field that suggests as you type, the value is one word
+of the site's own name or a code (`Charleroi`, `WAW`), never two words the site joins with a hyphen (`Bruksela
+Charleroi` matches nothing in `Bruksela-Charleroi`). `REFSURE_RUN_TIMING=1` writes one line per step to stderr:
+the time by phase (decide, frame, recheck, raisers, act, settle, look, blocker), each page call, the provider's ms
+and how each click went (`native` or `fallback:<why>`), with no page text. Known limits,
+as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab takes no input; a
 date the picker has not rendered yet takes its Next button, step by step.
 
 The next-step rules of the `step` wording follow those of
@@ -376,6 +397,10 @@ Per Decision, refsure sends only the following, after redaction:
 | `run` | per step: your goal (≤600 chars), every `--fill` key **and value** (≤200 chars each), your expectation, the URL, title, page text (≤4,000 chars), new text (≤2,000 chars), the last 8 steps, and the element table (rows of ≤600 chars, with each field's current value and each control's state), as the target options too |
 
 A candidate line is `<role> "<name>" in="<section path>"`: no attributes, no values, no element ids.
+
+`run` also opens the connection to the provider once its route is approved (consent, provider, origin policy, caps),
+before the first look: one `OPTIONS` request to the endpoint per process, with no key, no header of refsure's own,
+no body and no page text. Never under `--dry-run`.
 
 **Size caps.** State ≤24,000 bytes and questions ≤12,000 bytes. Anything larger is refused as `oversize` before any
 call is made. The one exception is a list of options that code built (`locate`, `dismiss`, `verify-target`,
@@ -882,14 +907,18 @@ These rules live in code, not in the agent skill:
 | write | fields, toggles, a plain submit | `act`, at the site's write row (0.8-0.89) |
 | money | pay, buy, order, checkout, top up; card, CVV and IBAN forms; `checkout`, `payment`, `billing` paths | `act-high-risk` only |
 | irreversible | delete, remove, send, publish, revoke; "cancel" next to subscription, order, account or booking; the confirming button of a confirm dialog (never its own Cancel or No); `delete`, `close-account` paths | `act-high-risk` only |
-| auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent (`oauth`, `authorize` paths) | `act-high-risk` only |
+| auth | sign in, password, 2FA, authorize, switch account; password forms; OAuth consent (`oauth`, `authorize` paths); never a click whose whole name defers or skips an account entry (`Log in later`, `Continue as guest`, `Zaloguj się później`), unless a password input is on the page | `act-high-risk` only |
 | consent | accept, agree, allow cookies, opt in | `act-high-risk` only |
 
 Names are matched against the union of all lexicons (English, Ukrainian, Russian, German, Spanish, French and
 Polish), whatever the page language. Typographic apostrophes fold to a straight one (`J’accepte` reads as
 `j'accepte`), and an `<input>` button with no text is named by its `value` (an image button by its `alt`), as the
 snapshot names it. A name only ever lowers a control's class when it is, as a whole, a close, cancel or reject word
-(`Close`, `Close dialog`, `No, cancel`): `Close project` and `Yes, cancel` keep their class. The path rules read the
+(`Close`, `Close dialog`, `No, cancel`): `Close project` and `Yes, cancel` keep their class. Likewise an auth term
+counts for no click whose whole name, in every reading, puts off or skips an account entry (`Log in later`, `Skip
+sign-up`, `Später anmelden`): `Log in later (recommended)`, `Sign in as guest` and `Not now, sign in` stay auth, and
+`Pay later` stays money. An element the page made clickable with no role (a `div "Tak"`) confirms a confirm dialog as
+a button does. The path rules read the
 URL's path and fragment and raise every control on the page, whatever its name: an OAuth consent screen names its
 buttons neutrally, so on an `oauth` or `authorize` route a plain `Continue` reads auth, and so does its `Cancel`.
 

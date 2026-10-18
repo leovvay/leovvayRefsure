@@ -35,8 +35,7 @@ Read the answer (`result.steps`: what each step found and did; `result.new_text`
 
 ## 2. A multi-step task on one site: `refsure run`
 
-When the steps are not known up front (a suggestion to pick, a date picker, a next page), hand the whole sub-task
-over in one call; `do` stays for known steps on one page:
+When the steps are not known up front (a suggestion, a date picker, a next page), hand the sub-task over in one call:
 
 ```
 refsure run --page <id> --goal "<the sub-task, and where to stop>" --fill "origin=Warsaw" --fill "destination=Brussels" --expect "<what shows when done>"
@@ -45,6 +44,7 @@ refsure run --page <id> --goal "<the sub-task, and where to stop>" --fill "origi
 - Jev picks each step and run acts on its most likely move, rechecked and guarded as in `do`: money, irreversible,
   auth or consent is refused whatever the odds. Only `--fill` values are typed: give every value the task names
   (dates too). The goal, field values and `--fill` values go to the provider: never put a secret in them.
+- A typeahead `--fill` is one word of the site's own name or a code ("Charleroi", "WAW"), not two it hyphenates.
 - Exit 0, `seen`: report from `result.new_text`. Exit 30: it acted and stopped short (`result.unconfirmed`): never
   rerun it blind; read `result.steps` and `new_text`, then `state`. Exit 10-29: nothing was done (section 9).
 
@@ -111,7 +111,7 @@ the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `
 | `not_set_up`, `config_mode`, `literal_key`, `gateway_insecure`, `config_invalid`, `backend_unknown` (not_set_up, 23) | Tell the human the cause: they run `refsure setup`, fix their config file, or fix `REFSURE_BACKEND`. Never do it yourself |
 | `not_in_orca_terminal` (24) | Outside an Orca terminal, with no agent-browser to use. Tell the human; do not work around it |
 | `orca_not_running`, `no_tab` (unavailable, 20) | Ask the human to start Orca, open a tab or an agent-browser session, or pass `--page <id>` |
-| `browser_timeout`, `browser_error`, `internal` (unavailable, 20) | Nothing was dispatched. Re-observe (`state`), then retry once |
+| `browser_timeout`, `browser_error`, `internal`, `off_screen` (unavailable, 20) | Nothing was dispatched. Re-observe (`state`), then retry once. `off_screen`: the tab drew no frame, so it takes no input; bring it on screen (`orca tab switch --page <id> --focus`) first |
 | `provider_timeout`, `provider_error` (unavailable, 20) | Retry once a little later. If it persists, tell the human |
 | `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs; a retry will not help. Tell the human |
 | `spend_limit` (22) | Stop asking Decisions. Code-only verbs (`snap`, `guard`, `mark`, `triage`) still work |
@@ -122,7 +122,7 @@ the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `
 | `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
 | `stalled` (abstained, 10) | The page stopped changing before it showed what you expected. If it asks for one more thing, do only that; else report it as it stands. Wait again (`wait-for --timeout <longer> --stall <longer>`) only for a time the human named |
 | `done_unconfirmed`, `blocked`, `no_progress`, `budget` (abstained, 10) | `run` stopped short (exit 30 once it acted). Read `result.steps` and `new_text`, then `state`: report what shows, or hand over only what is left. For `no_progress`, make sure the Orca tab is on screen |
-| `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human |
+| `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human. (`run` first tries one dismiss level on a pop-up the pick sits in, at most 2 per run: `result.blockers`) |
 | `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
 | `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |
 | `origin_denied`, `oversize` (refused, 11) | The human's config blocks this site, or the input is too large. Do not work around it |
