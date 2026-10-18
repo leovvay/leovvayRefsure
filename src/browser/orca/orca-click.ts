@@ -26,8 +26,9 @@ const TEXT_MAX = 300;
 /**
  * The hit check, read only: in the page, the box's centre must be in the viewport; the element there (down through
  * open shadow roots) must not be a frame; and it, or an ancestor within `UP_MAX`, must have exactly the box. That
- * element's tag, role, `aria-label` and `innerText` (collapsed, cut) come back. Only the box's four numbers are put
- * into the expression, each a finite number.
+ * element's tag, role, `aria-label`, the names its `aria-labelledby` points to (each one's `aria-label`, else its
+ * text) and its `innerText` (collapsed, cut) come back. Only the box's four numbers are put into the expression,
+ * each a finite number.
  */
 function hitCheck(box: Box): string {
   return `(() => {
@@ -47,7 +48,11 @@ function hitCheck(box: Box): string {
   for (let up = 0; n && up <= ${UP_MAX}; up += 1) {
     if (n.nodeType === 1 && same(n.getBoundingClientRect())) {
       const text = String(n.innerText || '').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
-      return JSON.stringify({ x: cx, y: cy, tag: n.tagName, role: n.getAttribute('role'), label: n.getAttribute('aria-label'), text });
+      const by = String(n.getAttribute('aria-labelledby') || '').split(/\\s+/).filter(Boolean).map((id) => {
+        const el = document.getElementById(id);
+        return el ? (el.getAttribute('aria-label') || el.textContent || '') : '';
+      }).join(' ').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
+      return JSON.stringify({ x: cx, y: cy, tag: n.tagName, role: n.getAttribute('role'), label: n.getAttribute('aria-label'), by, text });
     }
     n = n.parentElement || (n.parentNode && n.parentNode.host) || null;
   }
@@ -78,9 +83,9 @@ function pointOf(result: unknown, bind: ActBinding): { x: number; y: number } | 
   }
   if (!isRecord(hit)) return 'box';
   if (hit.why === 'outside' || hit.why === 'frame') return hit.why;
-  const { x, y, label, text } = hit;
+  const { x, y, label, by, text } = hit;
   if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return 'box';
-  const carries = (typeof label === 'string' && bind.carries(label)) || (typeof text === 'string' && bind.carries(text));
+  const carries = [label, by, text].some((said) => typeof said === 'string' && bind.carries(said));
   return carries ? { x, y } : 'name';
 }
 
@@ -92,7 +97,7 @@ function pointOf(result: unknown, bind: ActBinding): { x: number; y: number } | 
  *
  * 1. `get box` of the ref, a read. A gone ref is `stale_ref`, nothing sent.
  * 2. The hit check, a read (`hitCheck`): the point is in view, lands on the element with that very box, and that
- *    element's label or text carries the name the guard read (`bind`).
+ *    element's own label, labelled-by names or text carries the name the guard read (`bind`).
  * 3. `mouse click` once (`sendOnce`): the one send. A failure after it is `unknown`, never retried.
  *
  * Every doubt before the send (no socket, a box or answer it cannot read, a point outside the view, a frame, a cover,
