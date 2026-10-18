@@ -42,9 +42,9 @@ over in one call; `do` stays for known steps on one page:
 refsure run --page <id> --goal "<the sub-task, and where to stop>" --fill "origin=Warsaw" --fill "destination=Brussels" --expect "<what shows when done>"
 ```
 
-- Jev picks each step, one Decision a step; each act is rechecked and guarded as in `do`. Only `--fill` values are
-  typed: give every value the task names (dates too), and put options first in the goal ("set one-way, then …").
-  The goal, the page's field values and the `--fill` values go to the provider: never put a secret in them.
+- Jev picks each step and run acts on its most likely move, rechecked and guarded as in `do`: money, irreversible,
+  auth or consent is refused whatever the odds. Only `--fill` values are typed: give every value the task names
+  (dates too). The goal, field values and `--fill` values go to the provider: never put a secret in them.
 - Exit 0, `seen`: report from `result.new_text`. Exit 30: it acted and stopped short (`result.unconfirmed`): never
   rerun it blind; read `result.steps` and `new_text`, then `state`. Exit 10-29: nothing was done (section 9).
 

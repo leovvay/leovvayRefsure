@@ -91,8 +91,8 @@ that one left it, counts from the page's last change, and the detail says so. On
 date picker, a second page), `refsure run` takes the whole sub-task on one site and returns one envelope:
 
 ```text
-refsure run --page <id> --goal "Set the ticket type to one-way, then search flights from Warsaw to Brussels on 20 November 2026, and stop at the results" \
-  --fill "origin=Warsaw" --fill "destination=Brussels" --expect "flight results from Warsaw to Brussels on November 20"
+refsure run --page <id> --goal "Search one-way flights from Warsaw to Brussels on 20 November 2026 for 1 adult in economy and stop at the results." \
+  --fill "origin=Warsaw" --fill "destination=Brussels" --fill "date=20 November 2026" --expect "a list of flight results with prices"
 ```
 
 Each step is one look, one Jev Decision and at most one act:
@@ -105,28 +105,38 @@ Each step is one look, one Jev Decision and at most one act:
 2. **One Decision, site `step`** (Jev only, experimental). One request asks the operation (`CLICK`, `TYPE`,
    `SELECT`, `PRESS_ENTER` right after a `TYPE`, `SCROLL_DOWN`, `WAIT`, `DONE`, `BLOCKED`, as the page allows), a
    target for each operation that takes one (the element table; field × `--fill` value pairs; select × option
-   pairs), and with `--expect` a done Noul over the new text. Only the head of the chosen operation is read. The
-   operation needs 0.5; a target needs its risk row (read 0.5, write 0.6); every act is at least write, so 0.6.
-   Two readings join heads: a split between CLICK and TYPE aimed at one field reads as TYPE (typing focuses the
-   field as the click would), and when the leading operation's head is unsure, the runner-up's sure head is the
-   step, if the runner-up holds 0.2 of the operation (0.1 when the first head ruled out every option) and at least
-   half of what the leading one leaves. An unsure operation with `WAIT` leading or next waits, since a wait sends
-   nothing.
+   pairs), and with `--expect` a done Noul over the new text. Progress over certainty, as jev-ultrafast acts:
+   - The step is the most likely operation other than `DONE` and `BLOCKED`, which end the run only at 0.5.
+   - Its target is the most likely row of that operation's own head, when it has at least 0.3 and more than
+     `none` (`PRESS_ENTER`, whose field code picks, needs 0.3 itself). A row already in the state asked of it (a
+     selected date the goal names, a field holding its `--fill` value, the option a select shows) gives way to the
+     runner-up when that one passes too. Two rows that read the same as sent are twins and stop.
+   - CLICK and TYPE leading on one field read as TYPE (typing focuses the field as the click would). When the
+     leading head finds no target (a click aimed at a field that waits for a value, which CLICK does not offer
+     then), the next operation with a target head of its own stands in, if it holds at least 0.05.
+   - `low_confidence` is left only when nothing passes. The safety line is the guard (step 4), not the probability:
+     a wrong low-risk act costs a step, and the stop rules end a loop.
 3. **End checks.** `--text` in the new text ends it `seen` by code; the done Noul at 0.85 ends it `seen` whatever
-   operation leads; `DONE` without that is `done_unconfirmed`; `BLOCKED` is `blocked`.
+   operation leads; `DONE` at 0.5 without that is `done_unconfirmed`; `BLOCKED` at 0.5 is `blocked`.
 4. **Guard, as `act` guards a ticket.** Right before the act: a fresh snapshot on the same URL and tab, the element
    found again by its fingerprint (role, name, path, ordinal in an unchanged twin group; a twin still in the row the
    table told it apart by), else nothing is sent and the step is looked at again; the never-click veto on what a
    click presses (accept, subscribe, enable…), refused; the risk read on the fresh tree (lexicon, confirm dialog,
    URL, page raisers for a click, field raisers for a fill or select, Enter as a click on the field and its form's
-   buttons), at least write, and money, irreversible, auth or consent refused with `act-high-risk` in `next`; the
-   pick held to its risk row. Then one act on the fresh ref. A sent act is never sent again by this code, and an act
-   that may not have landed stops the run (exit 30). `PRESS_ENTER` is offered only where what Enter does can be
-   read (a field in a form the page names, a search or suggestion box), and the field is focused before the key.
-5. **Settle and look.** 250 ms (500 ms after a click in a dialog, on a field or an option), then the next look; after
-   a `TYPE` into a combobox, once more up to 600 ms while its options are still those shown before. An unsure
-   Decision is asked again as soon as the page shows something else, looked at four times a second for up to a
-   second (twice at most per step), and not at all when it does not.
+   buttons), at least write, and money, irreversible, auth or consent refused with `act-high-risk` in `next`
+   whatever the probability; the pick held to its row (0.3). Then one act on the fresh ref. A sent act is never sent
+   again by this code, and an act that may not have landed stops the run (exit 30). `PRESS_ENTER` is offered only
+   where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
+   is focused before the key. On Orca, a `TYPE` on a page where the count taken while the Decision was asked found
+   no editable region (and the field sits in no frame) goes as agent-browser's own fill in one call, which replaces
+   the field's text with the input events typing fires; elsewhere Orca's `fill`.
+5. **Settle and look.** 50 ms, then the next look, taken again while it shows the page as it was (up to 600 ms);
+   after an act that opens or closes something (a click on an option, a menu item, a combobox or in a dialog,
+   Enter, or any act after which a dialog came or went), one more look. After a `TYPE` into a combobox the look
+   waits 250 ms and is taken again while its options are those shown before (up to 700 ms). `WAIT` looks until the
+   page changes, up to 800 ms. The `recent` line of a `TYPE` says whether suggestions showed. An unsure Decision is
+   asked again as soon as the page shows something else, looked at four times a second for up to a second (twice
+   at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
    third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen).
@@ -142,8 +152,9 @@ act may not have landed). `result.steps` lists each step (`n`, `op`, `element` a
 are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
 cap has room again, within `--timeout`.
 
-Write the goal as a person would ask it, options first when the order matters ("set one-way, then search …"), and
-give every value the task names as a `--fill`, dates included (many date pickers take a typed date). Known limits,
+Write the goal as a person would ask it, and give every value the task names as a `--fill`, dates included (many
+date pickers take a typed date, confirmed with Enter). `REFSURE_RUN_TIMING=1` writes one line per step to stderr:
+the time by phase (decide, recheck, raisers, act, settle, look) and each page call, with no page text. Known limits,
 as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab drops clicks; a
 date the picker has not rendered yet takes its Next button, step by step.
 
@@ -914,9 +925,9 @@ to hand on. A high-risk pick both providers agreed on, or the one provider asked
 **Run.** `run` holds no ticket: its pick is acted on in the same process, right after a fresh snapshot finds the
 element again by fingerprint, as `act` finds a ticket's, with the same risk read, refusals and single send. Its
 `step` site is experimental, so a ticket would carry only `read` authority below 0.85 with corroboration; `run`
-instead acts at the `step` rows (write 0.6) on what the agent handed over with `--goal`, which is why every act is
-floored at write, high risk still goes only to `act-high-risk`, and the veto still refuses accept, subscribe and
-enable. Its rows are numbered in page order (no shuffle: the goal is a route, not a recorded element), and two rows
+instead acts on the most likely step, at the `step` floor (0.3, above `none`), on what the agent handed over with
+`--goal`, which is why every act is floored at write, high risk still goes only to `act-high-risk` whatever the
+probability, and the veto still refuses accept, subscribe and enable. Its rows are numbered in page order (no shuffle: the goal is a route, not a recorded element), and two rows
 that read the same but for their number are twins the model could not tell apart, so a pick of one stops.
 
 **Injection.** Wordings are fixed and hashed. Page text appears only in state fields and in option lines (shuffled,
@@ -990,7 +1001,7 @@ the honest sample size.
 | `page-state` | `state --expect` | `inherited` (held) | 0.8 | browser_page_state 117 (converted); pii_masks 29, each asked with masks on and off; vision_page_state 64 | 1785 | no row ships; at 0.8, 899 of 909 converted (0.980), 357 of 357 on Orca pages whose text carries the answer (0.989), 131 of 275 on pages that show it only in pixels (0.418) | |
 | `presence` | `wait-for`, `doctor --ping` | `inherited` (held) | yes at ≥0.85, no at ≤0.15 | presence_false 40; vision_presence 68 | 648 | no row ships; on text pages 126 of 126 at yes ≥0.92 (0.970); on pixel-only pages 18 of 36 (0.345) | |
 | `option-map` | `pick-option` | `experimental` | 0.8 | none | 0 | not measured | |
-| `step` | `run` | `experimental` | operation 0.5; targets read 0.5, write 0.6 (every act is at least write); done yes at ≥0.85 | none | 0 | not measured | |
+| `step` | `run` | `experimental` | the most likely operation (DONE and BLOCKED at 0.5); its target the most likely row at ≥0.3 and above none, at read and write alike (every act is at least write; high risk refuses whatever the probability); done yes at ≥0.85 | none | 0 | not measured | |
 
 OpenAI (`gpt-6-luna`), which may answer `state` and `wait-for`, was not measured in this pass: its answers run at
 the declared maturity on the starting rows. A new model family gets no authority at all: its answers are reported as
