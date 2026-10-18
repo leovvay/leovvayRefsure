@@ -12,6 +12,7 @@ export { DIALOG_ROLES, nearestAncestor, underControl } from './ancestors';
 export { groupOf, twinKey, twinsOf } from './twins';
 export { candidatesOf, findByFingerprint, fingerprintOf } from './fingerprint-of';
 export { rowContains, rowTextOf } from './row-text';
+export { bindingTo } from './binding-to';
 export { cutPieces, insideValueField, isValueField, shortPieces, showsAsWord, subtree, subtreeText, valuePieces } from './tree-text';
 export { pageView } from './page-view';
 export { pageLines } from './page-lines';

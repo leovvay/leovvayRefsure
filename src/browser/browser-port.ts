@@ -1,3 +1,4 @@
+import type { ActBinding } from './act-binding';
 import type { ActAction, ActResult } from './act-result';
 import type { AxTree, Ref } from './ax-tree';
 import type { BackendHealth } from './backend-health';
@@ -31,7 +32,12 @@ export interface BrowserPort {
    * hands it to agent-browser's own tokenizer as one quoted token.
    */
   selectorAttr?(page: PageRef, css: string, name: string): Promise<string | null>;
-  act(page: PageRef, ref: Ref, action: ActAction, value?: string): Promise<ActResult>;
+  /**
+   * `bind`, for a click: the name the caller's guard read on the fresh tree. Orca then clicks through its own mouse at
+   * the element's point (press and release, no move) when the element at that point carries that name, and through
+   * agent-browser otherwise; the agent-browser backend ignores it.
+   */
+  act(page: PageRef, ref: Ref, action: ActAction, value?: string, bind?: ActBinding): Promise<ActResult>;
   /**
    * `act` fill in fewer page calls, for a field the caller knows is no editable region (the page holds none): the
    * value replaces what the field holds, with the input events typing fires. Page-changing, like `act`. Absent where

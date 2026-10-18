@@ -3,6 +3,7 @@ export type * from './page-ref';
 export type * from './page-hint';
 export type * from './tab-info';
 export type * from './act-result';
+export type * from './act-binding';
 export type * from './capability';
 export type * from './backend-health';
 export type * from './console-line';

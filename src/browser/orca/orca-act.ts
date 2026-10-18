@@ -1,3 +1,4 @@
+import type { ActBinding } from '../act-binding';
 import type { ActAction, ActResult } from '../act-result';
 import { coveredBy, isRef } from '../agent-browser-format';
 import { boundDetail } from '../bound-detail';
@@ -6,6 +7,7 @@ import { BrowserError } from '../browser-error';
 import type { PageRef } from '../page-ref';
 import { ACT_TIMEOUT_MS, READ_TIMEOUT_MS } from '../run-json';
 import { actDetail, hideValue, lostDetail, NO_DIALOG, sendOnce } from '../send-once';
+import { nativeClick } from './orca-click';
 import { orcaError, refusedBeforeDispatch, staleRefReply } from './orca-error-map';
 import type { OrcaBrowserOptions } from './orca-browser-options';
 import type { OrcaRun } from './orca-run';
@@ -16,12 +18,20 @@ type ActDeps = OrcaBrowserOptions & { run: OrcaRun };
 /**
  * `<verb> --element eN [--value v]`. From the moment the process exists the act counts as dispatched; only an Orca
  * answer that proves the page was never touched takes that back. A timeout or any other failure after the spawn
- * is `unknown` and is never retried here.
+ * is `unknown` and is never retried here. A click with `bind` goes through Orca's own mouse when the hit check
+ * binds the point to the element (`nativeClick`), and through agent-browser's click otherwise; either way it is
+ * sent once.
  */
 export async function actOnOrca(
-  deps: ActDeps, page: PageRef, ref: Ref, action: ActAction, value?: string,
+  deps: ActDeps, page: PageRef, ref: Ref, action: ActAction, value?: string, bind?: ActBinding,
 ): Promise<ActResult> {
   if (!isRef(ref)) return { kind: 'stale_ref' };
+  if (action === 'click' && bind !== undefined && bind.name.trim() !== '') {
+    const native = await nativeClick(deps, page, ref, bind);
+    if (typeof native !== 'string') return { ...native, via: 'native' };
+    const sent = await sendAct(deps, ['click', `--element=${ref}`, ...pageArgs(page, deps.env)]);
+    return { ...sent, via: `fallback:${native}` };
+  }
   if ((action === 'fill' || action === 'select') && value === undefined) {
     throw new BrowserError('backend_error', `${action} needs a value`);
   }

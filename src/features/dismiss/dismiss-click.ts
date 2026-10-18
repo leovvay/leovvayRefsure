@@ -1,6 +1,6 @@
 import type { CommandContext } from '../../cli';
 import { NEEDS_HUMAN, RE_OBSERVE } from '../../output';
-import { type Candidate, cutName, findByFingerprint, fingerprintOf, urlNorm } from '../../page-model';
+import { bindingTo, type Candidate, cutName, findByFingerprint, fingerprintOf, urlNorm } from '../../page-model';
 import type { DismissLevelReport } from './dismiss-level-report';
 import { dismissRisk } from './dismiss-risk';
 import type { DismissScene } from './dismiss-scene';
@@ -39,7 +39,7 @@ export async function clickPick(
     return stale('page_changed', `${name} now reads ${risk.class} (${risk.reasons.join(', ')})`);
   }
 
-  const sent = await ctx.browser.act(scene.page, found.ref, 'click');
+  const sent = await ctx.browser.act(scene.page, found.ref, 'click', undefined, bindingTo(tree.nodes[found.node]!.name));
   if (sent.kind === 'stale_ref') {
     const why = sent.covered === undefined ? 'left the page before the click' : 'is covered at its click point by another element';
     return stale('ref_gone', `${name} ${why}`);

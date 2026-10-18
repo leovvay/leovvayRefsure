@@ -1,4 +1,4 @@
-import type { ActAction, BrowserPort, PageRef, Ref, TabInfo } from '../browser';
+import type { ActAction, ActBinding, BrowserPort, PageRef, Ref, TabInfo } from '../browser';
 import { DryRunStop } from '../output';
 import { RegistryInvariantError } from './registry-invariant-error';
 import type { WatchedBrowser } from './watched-browser';
@@ -30,9 +30,9 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
     },
     snapshot: (page) => browser.snapshot(page),
     text: (page, target) => browser.text(page, target),
-    act: async (page: PageRef, ref: Ref, action: ActAction, value?: string) => {
+    act: async (page: PageRef, ref: Ref, action: ActAction, value?: string, bind?: ActBinding) => {
       guard();
-      return browser.act(page, ref, action, value);
+      return browser.act(page, ref, action, value, bind);
     },
   };
   const { attr, count, selectorText, selectorAttr, highlight, network, dialogDismiss } = browser;

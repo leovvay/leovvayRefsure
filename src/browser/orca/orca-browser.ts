@@ -94,7 +94,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
       return readAttr(result, 'orca exec get attr');
     },
 
-    act: (page, ref, action, value) => actOnOrca({ env, trace, run }, page, ref, action, value),
+    act: (page, ref, action, value, bind) => actOnOrca({ env, trace, run }, page, ref, action, value, bind),
 
     fillInput: (page, ref, value) => fillInputOnOrca({ env, trace, run }, page, ref, value),
 

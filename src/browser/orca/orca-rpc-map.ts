@@ -15,6 +15,8 @@ interface Route {
   flags: readonly string[];
   target: 'page' | 'worktree';
   params?: (flags: Flags) => Record<string, unknown>;
+  /** A runtime method the CLI has no command for: it never goes through the CLI (`socketOnly`). */
+  socketOnly?: true;
 }
 
 const element = (flags: Flags) => ({ element: required(flags, 'element') });
@@ -27,6 +29,9 @@ const limited = (flags: Flags) => {
 const onPage = (method: string, flags: readonly string[] = [], params?: Route['params']): Route => ({
   method, flags, target: 'page', params,
 });
+// The left button at a viewport point. No `radius` flag exists here, so Orca never snaps the point to a nearby
+// element nor activates one by script: the click lands where the caller checked.
+const point = (flags: Flags) => ({ x: finite(flags, 'x'), y: finite(flags, 'y'), button: leftButton(flags) });
 
 const ROUTES: Readonly<Record<string, Route>> = {
   'tab show': onPage('browser.tabShow'),
@@ -51,7 +56,19 @@ const ROUTES: Readonly<Record<string, Route>> = {
   scroll: onPage('browser.scroll', ['direction', 'amount'], (flags) => ({
     direction: required(flags, 'direction'), amount: positiveInteger(flags, 'amount'),
   })),
+  eval: onPage('browser.eval', ['expression'], (flags) => ({ expression: required(flags, 'expression') })),
+  // Orca 1.4.229 has `browser.mouseClick` (press and release, no move) but no `orca mouse click` command.
+  'mouse click': { ...onPage('browser.mouseClick', ['x', 'y', 'button'], point), socketOnly: true },
 };
+
+/**
+ * Whether `args` names a runtime method the CLI cannot run (`mouse click`): such a call goes over the socket or not
+ * at all. A CLI that met the unknown verb would fail after its process existed, which reads as "may have landed".
+ */
+export function socketOnly(args: readonly string[]): boolean {
+  const verb = args.filter((arg) => !arg.startsWith('--')).join(' ');
+  return Object.hasOwn(ROUTES, verb) && ROUTES[verb]!.socketOnly === true;
+}
 
 /**
  * The runtime call the `orca` CLI would make for `args`, or the refusal it would print before making one. Null
@@ -114,6 +131,17 @@ function required(flags: Flags, name: string): string {
 
 function optional(flags: Flags, name: string): string | undefined {
   return flags.get(name) || undefined;
+}
+
+function finite(flags: Flags, name: string): number {
+  const value = Number(required(flags, name));
+  if (!Number.isFinite(value)) throw new CliRefusal(`Invalid numeric value for --${name}`);
+  return value;
+}
+
+function leftButton(flags: Flags): 'left' {
+  if (required(flags, 'button') !== 'left') throw new CliRefusal('Invalid value for --button');
+  return 'left';
 }
 
 function positiveInteger(flags: Flags, name: string): number | undefined {

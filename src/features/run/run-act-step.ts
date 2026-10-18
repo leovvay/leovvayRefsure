@@ -1,7 +1,7 @@
-import { type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
+import { type ActBinding, type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
 import {
-  candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
+  bindingTo, candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
 } from '../../page-model';
 import type { StepReading } from '../../questions';
 import { vetoOf } from '../dismiss';
@@ -94,14 +94,19 @@ function valueShown(run: RunState, act: StepAct, reading: StepReading): string |
   return undefined;
 }
 
-/** The act on the fresh ref; a fill takes the one-call path on a page the probe found no editable region in. */
-function send(ctx: CommandContext, page: PageRef, ref: Ref, act: StepAct, plain: boolean): Promise<ActResult> {
+/**
+ * The act on the fresh ref; a fill takes the one-call path on a page the probe found no editable region in. A click
+ * carries `bind`, the name the guard read, so Orca may click at the element's point through its own mouse.
+ */
+function send(
+  ctx: CommandContext, page: PageRef, ref: Ref, act: StepAct, plain: boolean, bind?: ActBinding,
+): Promise<ActResult> {
   if (act.op === 'PRESS_ENTER') return ctx.browser.pressEnter!(page, ref);
   if (act.op === 'TYPE' && plain && ctx.browser.fillInput !== undefined) {
     return ctx.browser.fillInput(page, ref, act.value!);
   }
-  const action = act.op === 'CLICK' ? 'click' : act.op === 'TYPE' ? 'fill' : 'select';
-  return ctx.browser.act(page, ref, action, act.value);
+  if (act.op === 'CLICK') return ctx.browser.act(page, ref, 'click', undefined, bind);
+  return ctx.browser.act(page, ref, act.op === 'TYPE' ? 'fill' : 'select', act.value);
 }
 
 /**
@@ -269,8 +274,12 @@ export async function actStep(
   report.risk = guarded.risk.class;
   const plain = await plainField(run, act, guarded.fresh, guarded.node);
   run.timing.phase('act');
-  const sent = await send(ctx, run.page, guarded.ref, act, plain);
+  // A second try of the same act on the same page clicks through agent-browser, which moves the mouse first: a control
+  // that wants a hover gets it. It is a new step from a new Decision, never a resend of the first.
+  const bind = act.op === 'CLICK' && sentBefore === 0 ? bindingTo(guarded.fresh.tree.nodes[guarded.node]!.name) : undefined;
+  const sent = await send(ctx, run.page, guarded.ref, act, plain, bind);
   const actedAt = ctx.now();
+  if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {
     // Covered: the element is there, under another one (a dialog, a banner); the next step sees it in `recent` and
     // in the table. The same pick a third time on this page stops as a repeat, though nothing was sent.
