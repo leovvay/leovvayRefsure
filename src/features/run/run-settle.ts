@@ -20,8 +20,8 @@ const FRAME_WAIT_MS = 3_000;
 /** What the settles of one run have seen of the page's frames. */
 export interface SettleState {
   /**
-   * When the page last drew a frame a settle saw (`ctx.now()` less the time since that frame), null before any and
-   * after a settle that saw none: the tab renders, so it takes input.
+   * When the page last drew a frame a settle saw (`ctx.now()` less the time since that frame): the tab renders, so it
+   * takes input. Null before any, and after a frame check that waited for one in vain.
    */
   frameAt: number | null;
   /** Settles in a row that ended at their cap with frames flowing: animations that never stop. */
@@ -60,8 +60,11 @@ export async function settleFor(
     await sleep(SETTLE_MS, ctx.signal);
     return null;
   }
-  // A settle whose frames stopped, or that saw none, is the first sign of a tab Orca stopped drawing.
-  state.frameAt = seen.frames > 0 ? ctx.now() - Math.max(0, seen.ms - seen.last) : null;
+  // A settle that saw a frame dates the last one. One that saw none leaves the date as it was, to age: a tab Orca
+  // draws about once a second often draws nothing in a 600 ms settle, and clearing the date there cost the next act
+  // a 0.65-0.8 s frame check after its Decision. A tab Orca stopped drawing is still caught: its last frame passes
+  // `FRAME_FRESH_MS` by the next act, and the check finds none.
+  if (seen.frames > 0) state.frameAt = ctx.now() - Math.max(0, seen.ms - seen.last);
   if (anim) {
     state.capHits = !seen.quiet && seen.frames >= NOISY_FRAMES ? state.capHits + 1 : 0;
     if (state.capHits >= NOISY_MAX) state.framesOnly = true;
