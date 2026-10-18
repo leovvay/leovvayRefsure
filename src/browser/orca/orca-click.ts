@@ -15,8 +15,13 @@ import { pageArgs } from './worktree-guard';
 type ClickDeps = OrcaBrowserOptions & { run: OrcaRun };
 
 /** Why the native click gave way to agent-browser's, before anything was sent; for `REFSURE_RUN_TIMING`. */
-type Fallback = 'socket' | 'box' | 'outside' | 'frame' | 'name';
+type Fallback = 'socket' | 'box' | 'outside' | 'frame' | 'cover' | 'name';
 
+/** Roles of a control: one between the element at the point and the target means another control takes the click. */
+const CONTROL_ROLES: readonly string[] = [
+  'button', 'link', 'checkbox', 'radio', 'switch', 'tab', 'menuitem', 'menuitemcheckbox', 'menuitemradio', 'option',
+  'combobox', 'textbox', 'searchbox', 'slider', 'spinbutton', 'treeitem', 'listbox',
+];
 /** One edge of the box the element must have at the point: agent-browser's `get box` and the page agree to 1 px. */
 const EDGE_PX = 1;
 /** How far up from the element at the point the check looks for the one with the box (parents, shadow hosts). */
@@ -27,10 +32,12 @@ const TEXT_MAX = 300;
  * The hit check, read only: in the page, the box's centre must be in the viewport; the element there (down through
  * open shadow roots) must not be a frame; and it, or an ancestor within `UP_MAX`, must have exactly the box, or be
  * the `<label>` of a control with exactly the box (a custom radio: the click lands on its label, which activates it,
- * as agent-browser's own check counts a label and its control as one). That element's tag, role, `aria-label`, the
- * names its `aria-labelledby` points to (each one's `aria-label`, else its text) and its `innerText` (the label's for
- * a control under its label; collapsed, cut) come back. Only the box's four numbers are put into the expression,
- * each a finite number.
+ * as agent-browser's own check counts a label and its control as one). No control may sit between the element at the
+ * point and the one with the box: a container the target fills has the target's box too, and a sibling control drawn
+ * over the target inside it (Ryanair's return-date button, mid-animation over the departure one) would take the
+ * click (`cover`). That element's tag, role, `aria-label`, the names its `aria-labelledby` points to (each one's
+ * `aria-label`, else its text) and its `innerText` (the label's for a control under its label; collapsed, cut) come
+ * back. Only the box's four numbers are put into the expression, each a finite number.
  */
 function hitCheck(box: Box): string {
   return `(() => {
@@ -46,10 +53,16 @@ function hitCheck(box: Box): string {
   if (at.tagName === 'IFRAME' || at.tagName === 'FRAME') return JSON.stringify({ why: 'frame' });
   const same = (r) => Math.abs(r.left - b.x) <= ${EDGE_PX} && Math.abs(r.top - b.y) <= ${EDGE_PX}
     && Math.abs(r.right - (b.x + b.width)) <= ${EDGE_PX} && Math.abs(r.bottom - (b.y + b.height)) <= ${EDGE_PX};
+  const roles = ${JSON.stringify(CONTROL_ROLES)};
+  const control = (e) => (e.tagName === 'A' && e.hasAttribute('href'))
+    || ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY', 'OPTION'].includes(e.tagName)
+    || roles.includes(String(e.getAttribute('role') || '').trim().toLowerCase())
+    || (e.hasAttribute('tabindex') && e.tabIndex >= 0);
   let n = at;
   for (let up = 0; n && up <= ${UP_MAX}; up += 1) {
     const labelled = n.tagName === 'LABEL' && n.control && same(n.control.getBoundingClientRect()) ? n : null;
     if (labelled) n = labelled.control;
+    if (n.nodeType === 1 && !same(n.getBoundingClientRect()) && control(n)) return JSON.stringify({ why: 'cover' });
     if (n.nodeType === 1 && same(n.getBoundingClientRect())) {
       const text = String((labelled || n).innerText || '').replace(/\\s+/g, ' ').trim().slice(0, ${TEXT_MAX});
       const by = String(n.getAttribute('aria-labelledby') || '').split(/\\s+/).filter(Boolean).map((id) => {
@@ -86,7 +99,7 @@ function pointOf(result: unknown, bind: ActBinding): { x: number; y: number } | 
     return 'box';
   }
   if (!isRecord(hit)) return 'box';
-  if (hit.why === 'outside' || hit.why === 'frame') return hit.why;
+  if (hit.why === 'outside' || hit.why === 'frame' || hit.why === 'cover') return hit.why;
   const { x, y, label, by, text } = hit;
   if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return 'box';
   const carries = [label, by, text].some((said) => typeof said === 'string' && bind.carries(said));
