@@ -4,7 +4,7 @@ import type { DismissLevelReport } from '../dismiss';
 import type { Values } from '../shared';
 import type { TableHints } from './element-table-shape';
 import type { RunArgs } from './run.args';
-import type { RunResult } from './run.contract';
+import type { BlockerReport, RunResult } from './run.contract';
 import type { RunLook } from './run-look-shape';
 import type { RunStepReport } from './run-step-report';
 import type { RaiserProbe } from './step-act-shape';
@@ -35,6 +35,10 @@ export interface RunState {
   /** The field each `--fill` was last seen in, by its index, as `role "name"`: a dialog may hide it since. */
   seenIn: Map<number, string>;
   dismissed: DismissLevelReport | null;
+  /** The blocker levels after step 1 (`blockerLevel`). */
+  blockers: BlockerReport[];
+  /** Every overlay a blocker level has worked on, as `role "name"`, the first level's too: each gets one. */
+  tried: Set<string>;
   current: RunLook;
   /** The raiser count taken while the current look's Decision was asked, for the guard (`probeRaisers`). */
   probe: RaiserProbe | null;
@@ -47,8 +51,8 @@ export interface RunState {
 /** The result so far, its verdict set by whoever ends the run. */
 export function resultOf(run: RunState, now: number, decisions: number): RunResult {
   return {
-    verdict: 'budget', steps: run.steps, dismissed: run.dismissed, new_text: run.shown, url: run.current.tab.url,
-    elapsed_ms: now - run.started, decisions,
+    verdict: 'budget', steps: run.steps, dismissed: run.dismissed, ...(run.blockers.length > 0 ? { blockers: run.blockers } : {}),
+    new_text: run.shown, url: run.current.tab.url, elapsed_ms: now - run.started, decisions,
   };
 }
 

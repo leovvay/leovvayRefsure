@@ -2,8 +2,10 @@ import { type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } f
 import type { CommandContext } from '../../cli';
 import { candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, norm, rowTextOf } from '../../page-model';
 import type { StepReading } from '../../questions';
+import { vetoOf } from '../dismiss';
 import { sleep } from '../shared';
 import { holds } from './element-table';
+import { overlayOf, vetoedInOverlay } from './run-blocker';
 import type { TableEntry } from './element-table-shape';
 import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
@@ -214,6 +216,10 @@ export async function actStep(
   report.element = cand.line;
   const shown = valueShown(run, act, reading);
   if (shown !== undefined) report.value = shown;
+  // A pick run never clicks (an Accept), inside an overlay that showed after step 1: a blocker level on the overlay
+  // instead, once per overlay. The guard's own veto still stands for every other pick.
+  const veto = act.op === 'CLICK' ? vetoOf(run.current.tree.nodes[cand.node]?.name ?? cand.fp.name) : null;
+  if (veto !== null && overlayOf(run, run.current, cand.node)) return vetoedInOverlay(ctx, run, report, element, veto.term);
   // The same act on the same page: a Next or a + clicked on as the page moves on is a new act each time, and a page
   // that comes back to where it was (a picker opened and closed) is a loop.
   const key = `${act.op}\n${candidateKey(cand)}\n${cand.fp.ordinal}\n${act.value ?? ''}\n${run.current.sig}`;

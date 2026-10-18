@@ -18,6 +18,7 @@ import { changeWords, recentLine, resultOf, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
+import { levelUnknownStop } from './run-blocker';
 import { runTiming } from './run-timing';
 
 type Out = CommandOutcome<RunResult>;
@@ -216,7 +217,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   const page = ctx.page;
   if (page === null) throw new Error('run needs a page, and none was resolved');
   // What the page wrote: its text, its elements, and the address it ended on (its path and query are the page's).
-  const untrusted = ['result.steps', 'result.dismissed', 'result.new_text', 'result.url', 'why.detail'];
+  const untrusted = ['result.steps', 'result.dismissed', 'result.blockers', 'result.new_text', 'result.url', 'why.detail'];
   for (const path of untrusted) ctx.trace.untrusted.add(path);
   const started = ctx.now();
   const asked = [args.goal, ...args.fills.map((fill) => fill.value)].join(' ');
@@ -231,7 +232,8 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   const run: RunState = {
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,
-    typedAt: new Map(), seenIn: new Map(), dismissed: null, current: first, probe: null, shown: [], timing,
+    typedAt: new Map(), seenIn: new Map(), dismissed: null, blockers: [], tried: new Set(), current: first, probe: null,
+    shown: [], timing,
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {
@@ -240,14 +242,8 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
         ? null
         : await dismissLevel(ctx, page, { propose: false, agree: false, depth: 1 }, 1, first);
       run.dismissed = level?.report ?? { level: 1, verdict: 'no_overlay' };
-      if (level?.status === 'effect_unknown') {
-        const stop: RunStop = {
-          verdict: 'stopped', cause: level.why?.cause ?? 'effect_unknown',
-          detail: level.why?.detail ?? 'the blocker click may have landed', effect: level.effect ?? 'dispatched',
-        };
-        if (level.next) stop.next = level.next;
-        return ended(stop, true, result());
-      }
+      if (run.dismissed.overlay !== undefined) run.tried.add(run.dismissed.overlay);
+      if (level?.status === 'effect_unknown') return ended(levelUnknownStop(level), true, result());
       if (level?.clicked) {
         run.acted = true;
         run.current = level.tree ? lookOf(await ctx.browser.tabInfo(page), level.tree, hints) : await look(ctx, page, hints);

@@ -13,17 +13,25 @@ export type RunVerdict =
   | 'seen' | 'done_unconfirmed' | 'blocked' | 'no_progress' | 'budget' | 'refused' | 'low_confidence'
   | 'decision_unavailable' | 'stopped';
 
-/** `refsure run`. `steps`, `dismissed` and `new_text` are page text. */
+/** A blocker level after step 1: the dismiss level's report and the step it ran at. */
+export type BlockerReport = DismissLevelReport & { at: number };
+
+/** `refsure run`. `steps`, `dismissed`, `blockers` and `new_text` are page text. */
 export interface RunResult {
   verdict: RunVerdict;
   steps: RunStepReport[];
   /** What the blocker level did, or null under `--no-dismiss`. */
   dismissed: DismissLevelReport | null;
+  /**
+   * The blocker levels after step 1, in order, each with the step it ran at (`at`): a pop-up the step's pick sat in
+   * when the pick was on the never-click list. Present only when one ran.
+   */
+  blockers?: BlockerReport[];
   /** Up to 8 lines the page did not show when the run began, the `--fill` values left in. */
   new_text: string[];
   url: string;
   elapsed_ms: number;
-  /** Decisions asked: the blocker level's and one per step. */
+  /** Decisions asked: the blocker levels' and one per step. */
   decisions: number;
   /** Set whenever something acted and the exit is 30: the stopping cause. */
   unconfirmed?: string;
