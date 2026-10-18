@@ -12,7 +12,7 @@ import type { TableEntry } from './element-table-shape';
 import { guardStep, inFrame } from './run-guard';
 import { look } from './run-look';
 import type { RunLook } from './run-look-shape';
-import { offScreenStop, settleFor } from './run-settle';
+import { offScreenStop, settleFor, settleNote } from './run-settle';
 import { changeWords, recentLine, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
@@ -186,6 +186,7 @@ function optionNamed(tree: AxTree, value: string): boolean {
  */
 async function lookAfter(ctx: CommandContext, run: RunState, act: StepAct, before: RunLook): Promise<RunLook> {
   const settled = await settleFor(ctx, run.page, run.settling, AFTER_ACT_MS);
+  run.timing.note(settleNote(settled));
   run.timing.phase('look');
   const from = ctx.now();
   let lookedAt = from;

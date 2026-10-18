@@ -30,6 +30,11 @@ export interface SettleState {
   framesOnly: boolean;
 }
 
+/** A settle for `REFSURE_RUN_TIMING`: frames, how it ended, ms in the page; counts only, never page text. */
+export function settleNote(seen: Settled | null): string {
+  return seen === null ? 'settle: fixed' : `settle: ${seen.frames}f ${seen.quiet ? 'quiet' : 'cap'} ${seen.ms}ms`;
+}
+
 export function freshSettle(): SettleState {
   return { frameAt: null, capHits: 0, framesOnly: false };
 }
