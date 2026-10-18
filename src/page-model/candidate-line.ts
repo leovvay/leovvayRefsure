@@ -3,9 +3,10 @@ import { nodeAt } from './node-at';
 import { cutName, norm } from './normalize';
 
 // Ancestors that place an element on the page (spec §8.3). Navigation and main are shown bare: their names add
-// little and vary across pages of one site.
+// little and vary across pages of one site. A tooltip popup is a place too, shown bare: it is often appended at the
+// end of the document, where the last heading before it in text order belongs to something else.
 const NAMED_PLACES: ReadonlySet<string> = new Set(['dialog', 'alertdialog', 'form', 'region']);
-const BARE_PLACES: ReadonlySet<string> = new Set(['navigation', 'main']);
+const BARE_PLACES: ReadonlySet<string> = new Set(['navigation', 'main', 'tooltip']);
 
 const pathMemo = new WeakMap<AxTree, readonly string[]>();
 

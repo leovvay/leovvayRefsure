@@ -1,6 +1,8 @@
 import { type ActResult, type AxTree, isBrowserError, type PageRef, type Ref } from '../../browser';
 import type { CommandContext } from '../../cli';
-import { candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, norm, rowTextOf } from '../../page-model';
+import {
+  candidateKey, DIALOG_ROLES, type Fingerprint, findByFingerprint, isValueField, norm, rowTextOf,
+} from '../../page-model';
 import type { StepReading } from '../../questions';
 import { vetoOf } from '../dismiss';
 import { sleep } from '../shared';
@@ -136,9 +138,13 @@ function addedTo(act: StepAct, fresh: RunLook, node: number, next: RunLook): Run
   };
 }
 
-/** The dialogs a look shows, by role and name, in page order: a dialog opening or closing animates. */
+/**
+ * The dialogs a look shows, by role and name, in page order: a dialog opening or closing animates. A tooltip popup
+ * (Ryanair's airport list and calendar) opens and closes as a dialog does.
+ */
 function dialogsShown(tree: AxTree): string {
-  return tree.nodes.filter((node) => DIALOG_ROLES.has(node.role)).map((node) => `${node.role} ${node.name}`).join('\n');
+  return tree.nodes.filter((node) => DIALOG_ROLES.has(node.role) || node.role === 'tooltip')
+    .map((node) => `${node.role} ${node.name}`).join('\n');
 }
 
 /** The options a look shows, by name, in page order: one string, so two looks compare at once. */
@@ -293,7 +299,7 @@ export async function actStep(
     run.current = next;
     return added;
   }
-  const outcome = `${changeWords(report.page_changed)}${typedWords(act, guarded.fresh, next)}`;
+  const outcome = `${changeWords(report.page_changed)}${typedWords(act, guarded.fresh, next)}${emptiedWords(act, next)}`;
   run.recent.push(recentLine(report, element, outcome));
   run.typed = act.op === 'TYPE' ? cand.fp : null;
   if (act.op === 'TYPE' && reading.target?.op === 'TYPE') run.typedAt.set(reading.target.fill, report.n);
@@ -316,7 +322,33 @@ export function keepTyped(run: RunState, was: RunLook): void {
 function typedWords(act: StepAct, before: RunLook, after: RunLook): string {
   if (act.op !== 'TYPE') return '';
   const options = optionsShown(after.tree);
-  return options !== '' && options !== optionsShown(before.tree) ? '; suggestions showed' : '; no suggestion showed';
+  if (options !== '' && options !== optionsShown(before.tree)) return '; suggestions showed';
+  // Suggestions that are buttons or links (Ryanair's airports in a tooltip): a row other than the field that holds
+  // the typed value, new since the look before, or still there while the table got shorter (the list narrowed).
+  const holding = (look: RunLook): string[] => [...look.table.byN.values()]
+    .filter((e) => !sameElement(e.cand.fp, act.cand.fp) && holds(e.cand.fp.name, act.value ?? ''))
+    .map((e) => e.cand.fp.name);
+  const now = holding(after);
+  const was = new Set(holding(before));
+  const narrowed = before.table.rows.length > after.table.rows.length;
+  return now.length > 0 && (now.some((name) => !was.has(name)) || narrowed) ? '; suggestions showed' : '; no suggestion showed';
+}
+
+/**
+ * After a TYPE, when the look after shows the field empty (a focus handler that cleared it, a page that reset the
+ * form): code's own words, so the next step reads the value as gone rather than typed. A field the look no longer
+ * shows, an editable region, or a value another field now holds (a picker that moved the text into its own box)
+ * says nothing.
+ */
+function emptiedWords(act: StepAct, after: RunLook): string {
+  if (act.op !== 'TYPE') return '';
+  const found = findByFingerprint(after.tree, act.cand.fp);
+  if (typeof found !== 'object') return '';
+  const node = after.tree.nodes[found.node];
+  if (node === undefined || !isValueField(node) || node.attrs.contenteditable === true) return '';
+  if (norm(node.value ?? '') !== '') return '';
+  const moved = after.tree.nodes.some((field) => isValueField(field) && holds(field.value ?? '', act.value ?? ''));
+  return moved ? '' : '; the page emptied the field';
 }
 
 /**
