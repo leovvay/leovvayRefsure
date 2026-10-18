@@ -406,7 +406,8 @@ A candidate line is `<role> "<name>" in="<section path>"`: no attributes, no val
 `run` also opens the connection to the provider once its route is approved (consent, provider, origin policy, caps),
 before the first look: for an `https:` endpoint, a DNS lookup, then the TCP and TLS handshakes with its host, once per
 process. No request, key, header, body or page text goes on that connection until the first Decision's own request.
-Never under `--dry-run`, and not when a proxy or another dispatcher is set for Node's `fetch` (it opens nothing then).
+Never under `--dry-run`, and not when Node's `fetch` already has a dispatcher that Node did not make for refsure: a
+proxy, or an `Agent` with its own DNS, CA or address. It opens nothing then, and every request goes through that one.
 
 **Size caps.** State ≤24,000 bytes and questions ≤12,000 bytes. Anything larger is refused as `oversize` before any
 call is made. The one exception is a list of options that code built (`locate`, `dismiss`, `verify-target`,

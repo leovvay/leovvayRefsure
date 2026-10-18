@@ -8,8 +8,9 @@ import type { WarmUp } from './warm-up';
   one pool of fetch's own dispatcher class (`poolFor`): its `connect` hook gives the pool that socket first, and opens
   a plain one after, so later requests reuse the same connection as they would with fetch's global pool.
 
-  Not with a proxy or another dispatcher in front of fetch: they decide where a request goes, and a socket opened here
-  would go around them. `https:` only.
+  Not with a proxy or another dispatcher in front of fetch: they decide where a request goes (and with what DNS, CA or
+  address), and a socket opened here would go around them. Only the dispatcher Node makes on refsure's own first fetch
+  counts as fetch's own; one set before it is another, even of the same `Agent` class. `https:` only.
 */
 
 /** A connection opened at approval that no request takes within this is closed. */
@@ -29,6 +30,8 @@ type AgentClass = new (opts: { connect: Connector }) => Dispatcher;
 const pools = new Map<string, Dispatcher | null>();
 /** This process's warm-ups, in the order they started. */
 const warmed: WarmUp[] = [];
+/** fetch's dispatcher as Node made it on refsure's own first fetch (`loadFetch`); `undefined` until then. */
+let stock: object | undefined;
 
 /**
  * Opens the TLS connection to `url`'s origin and, once `loadFetch` has loaded fetch's code (~10 ms, run while the
@@ -47,10 +50,9 @@ export function warmUp(url: string, loadFetch: () => void): void {
   pools.set(origin, null);
   const warm: WarmUp = { startedAt: performance.now(), readyAt: null, takenAt: null, failed: null };
   warmed.push(warm);
-  // A dispatcher already set (a proxy from the environment, or one set before refsure ran) stops it before anything
-  // is opened.
-  const set = dispatcherNow();
-  if (set !== undefined && agentClassOf(set) === null) {
+  // A dispatcher already set that is not Node's own (a proxy from the environment, or an Agent a preload set up)
+  // stops it before anything is opened.
+  if (dispatcherNow() !== undefined && stockNow() === undefined) {
     warm.failed = 'another dispatcher';
     return;
   }
@@ -74,8 +76,11 @@ export function warmUp(url: string, loadFetch: () => void): void {
   spare.on('error', failed).once('close', closed);
   idle = setTimeout(() => gone('unused'), WARM_IDLE_MS).unref();
   setImmediate(() => {
-    if (dispatcherNow() === undefined) loadFetch();
-    const current = dispatcherNow();
+    if (dispatcherNow() === undefined) {
+      loadFetch();
+      stock = dispatcherNow();
+    }
+    const current = stockNow();
     const Agent = current === undefined ? null : agentClassOf(current);
     if (Agent === null) {
       gone('another dispatcher');
@@ -100,7 +105,7 @@ export function warmUp(url: string, loadFetch: () => void): void {
   });
 }
 
-/** The warm pool for `url`'s origin, as a fetch option, when `warmUp` built one. */
+/** The warm pool for `url`'s origin, as a fetch option, when `warmUp` built one and fetch's dispatcher is Node's. */
 export function poolFor(url: string): { dispatcher?: Dispatcher } {
   let origin: string;
   try {
@@ -109,7 +114,7 @@ export function poolFor(url: string): { dispatcher?: Dispatcher } {
     return {};
   }
   const pool = pools.get(origin);
-  return pool ? { dispatcher: pool } : {};
+  return pool && stockNow() !== undefined ? { dispatcher: pool } : {};
 }
 
 /** This process's warm-ups, in the order they started, for `REFSURE_RUN_TIMING`. */
@@ -122,7 +127,13 @@ function dispatcherNow(): object | undefined {
   return typeof current === 'object' && current !== null ? current : undefined;
 }
 
-/** The class of fetch's own stock dispatcher; `null` for anything else (a proxy agent, a mock). */
+/** fetch's dispatcher, while it is still the one Node made on refsure's own first fetch. */
+function stockNow(): object | undefined {
+  const current = dispatcherNow();
+  return current !== undefined && current === stock ? current : undefined;
+}
+
+/** The class of fetch's own stock dispatcher, to build a pool from; `null` for anything else (a mock). */
 function agentClassOf(dispatcher: object): AgentClass | null {
   const { constructor } = dispatcher;
   return typeof constructor === 'function' && constructor.name === 'Agent' ? constructor as AgentClass : null;
