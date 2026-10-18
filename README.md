@@ -186,7 +186,9 @@ date pickers take a typed date, confirmed with Enter). For a field that suggests
 of the site's own name or a code (`Charleroi`, `WAW`), never two words the site joins with a hyphen (`Bruksela
 Charleroi` matches nothing in `Bruksela-Charleroi`). `REFSURE_RUN_TIMING=1` writes one line per step to stderr:
 the time by phase (decide, frame, recheck, raisers, act, settle, look, blocker), each page call, the provider's ms
-and how each click went (`native` or `fallback:<why>`), with no page text. Known limits,
+and how each click went (`native` or `fallback:<why>`), with no page text. The first line also has `warm`: when the
+connection to the provider was opened (`at`, ms into the run), when TLS was up (`tls`) and when the first Decision
+took it (`taken`), both ms after that, and how long the Decision waited for TLS (`waited`). Known limits,
 as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab takes no input; a
 date the picker has not rendered yet takes its Next button, step by step.
 
