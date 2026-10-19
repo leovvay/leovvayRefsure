@@ -674,15 +674,18 @@ refsure mark [--label L]
 refsure snap [--max-chars 4000] [--scope dialog|main|form] [--all]
 ```
 
-- `--max-chars <value>`: Cut the lines at a line boundary past this many characters (default: 4000)
+- `--max-chars <value>`: Cut the lines at a line boundary past this many characters; left out, a list up to twice the default prints whole (default: 4000)
 - `--scope <value>`: Only elements inside a dialog, main or form
 - `--interactive`: Only interactive elements with a ref (default: true)
 - `--all`: Every named node, not only interactive ones (overrides --interactive)
 
-Lines are cut whole, never split. A cut list ends with the footer `N lines dropped (~T tokens): --max-chars=<total>
-shows all`, inside the budget: T is the dropped lines' characters over 4, and `<total>` the whole list's length
-(at most 1,000,000, the flag's limit). On a cut, `next` is that same call: `snapshot` with argv
-`refsure snap --max-chars=<total>`, plus the `--scope` and `--all` given and the pinned `--page`.
+Lines are cut whole, never split. Without `--max-chars`, a list that fits in twice the default (8,000 characters,
+about 2,000 tokens) prints whole: a second snap costs the agent a turn, which costs far more than those lines. A
+`--max-chars` you pass is a hard cap, whatever the list's length. A cut list ends with the footer
+`N lines dropped (~T tokens): --max-chars=<total> shows all`, inside the budget: T is the dropped lines' characters
+over 4, and `<total>` the whole list's length (at most 1,000,000, the flag's limit). On a cut, `next` is that same
+call: `snapshot` with argv `refsure snap --max-chars=<total>`, plus the `--scope` and `--all` given and the pinned
+`--page`.
 
 **`guard`** (no Decision)
 

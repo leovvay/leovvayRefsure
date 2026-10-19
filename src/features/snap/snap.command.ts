@@ -2,9 +2,16 @@ import type { CommandOutcome, CommandSpec } from '../../cli';
 import type { Next } from '../../output';
 import type { SnapArgs, SnapScope } from './snap.args';
 import type { SnapResult } from './snap.contract';
-import { cutLines, MAX_CHARS_LIMIT, snapLines, wholeBudget } from './snap-lines';
+import { cutLines, linesLength, MAX_CHARS_LIMIT, snapLines, wholeBudget } from './snap-lines';
 
 const MAX_CHARS_DEFAULT = '4000';
+/**
+ * The finish rule: under the default budget, a list that fits in twice that prints whole. A second snap costs the
+ * agent a turn, and a turn costs far more than what it prints (measured inside Claude Code at 23,000-33,000 tokens
+ * of session overhead per tool call: only-cli/oc, src/render.js). Twice the 4,000-character default is about 2,000
+ * tokens, oc's own bound for printing whole. A `--max-chars` the caller gave stays a hard cap.
+ */
+const FINISH = 2;
 const SCOPES: readonly SnapScope[] = ['dialog', 'main', 'form'];
 
 function isScope(value: string): value is SnapScope {
@@ -25,7 +32,10 @@ export const snapCommand: CommandSpec<SnapArgs, SnapResult> = {
   since: '0.1.0',
   stability: 'stable',
   options: {
-    'max-chars': { type: 'string', summary: 'Cut the lines at a line boundary past this many characters', default: MAX_CHARS_DEFAULT },
+    'max-chars': {
+      type: 'string', default: MAX_CHARS_DEFAULT,
+      summary: 'Cut the lines at a line boundary past this many characters; left out, a list up to twice the default prints whole',
+    },
     scope: { type: 'string', summary: 'Only elements inside a dialog, main or form' },
     interactive: { type: 'boolean', summary: 'Only interactive elements with a ref', default: true },
     all: { type: 'boolean', summary: 'Every named node, not only interactive ones (overrides --interactive)' },
@@ -43,12 +53,15 @@ export const snapCommand: CommandSpec<SnapArgs, SnapResult> = {
     if (scope !== undefined && (typeof scope !== 'string' || !isScope(scope))) {
       return { usage: `--scope must be one of ${SCOPES.join(', ')}` };
     }
-    return { maxChars, scope: scope ?? null, interactive: raw.values.all !== true };
+    const maxCharsGiven = raw.tokens.some((token) => token.name === 'max-chars');
+    return { maxChars, maxCharsGiven, scope: scope ?? null, interactive: raw.values.all !== true };
   },
   async run(args, ctx) {
     if (ctx.page === null) throw new Error('snap needs a page, and none was resolved');
     const tree = await ctx.browser.snapshot(ctx.page);
-    const { lines, dropped, total } = cutLines(snapLines(tree, args), args.maxChars);
+    const all = snapLines(tree, args);
+    const finish = !args.maxCharsGiven && linesLength(all) <= args.maxChars * FINISH;
+    const { lines, dropped, total } = cutLines(all, finish ? Infinity : args.maxChars);
     const result: SnapResult = { lines, dropped };
     if (tree.dropped > 0) result.unparsed = tree.dropped;
     ctx.trace.untrusted.add('result.lines');
