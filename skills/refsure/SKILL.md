@@ -61,6 +61,8 @@ cut out, or the text is withheld (`typed_text_withheld`). `--dry-run` prints the
 | Situation | Call |
 |---|---|
 | After you open a URL or navigate, or anything surprising (not before `do`: it reads the page itself) | `refsure state --page <id> --expect="<the intended page>"`, then follow `next` |
+| A search or listing whose results URL you can write (query parameters, `?q=`) | Open it yourself (`orca goto --page <id> --url=<url>`), then `state --expect="<the results>"`: 7-19x faster than `run` filling the form (refsure never navigates) |
+| A fact on the page that no envelope gave you | `result.new_text` first; else pipe `orca get --page <id> --what=text --element=body` through `grep -i -m1 -C3 "<word>"`; `orca snapshot` last (4-10x the page text) |
 | A cookie banner, modal or pop-up is in the way | `refsure dismiss --page <id>`. If it abstains, never click Accept to get past it |
 | One control on a big, busy or translated page | `refsure locate --page <id> --intent="<what it is for>" --risk <read\|write>`, then `refsure act --page <id> --ticket <T>` |
 | `locate` or a `do` step says `twins` (several equal rows) | `locate` again with `--within="<text of the row you mean>"` |
@@ -124,11 +126,9 @@ the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `
 | `done_unconfirmed`, `blocked`, `no_progress`, `budget` (abstained, 10) | `run` stopped short (exit 30 once it acted). Read `result.steps` and `new_text`, then `state`: report what shows, or hand over only what is left. For `no_progress`, make sure the Orca tab is on screen |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it; ask the human. (`run` first tries one dismiss level on a pop-up the pick sits in, at most 2 per run: `result.blockers`) |
 | `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
-| `provider_not_allowed` (refused, 11) | This verb needs a provider the human has not set up. Tell the human |
-| `origin_denied`, `oversize` (refused, 11) | The human's config blocks this site, or the input is too large. Do not work around it |
+| `provider_not_allowed`, `origin_denied`, `oversize` (refused, 11) | A provider the human has not set up, a site their config blocks, or input too large. Tell the human; do not work around it |
 | `ambiguous_option` (refused, 11) | Two options read the same; refsure will not pick. Ask the human which one |
-| `expect_name_mismatch` (stale, 12) | The ref shows another name than you gave; nothing was done. Snapshot again |
-| `page_changed`, `ref_gone`, `ticket_expired`, `ticket_used` (stale, 12) | `locate` again for a fresh ticket, or snapshot again. Never reuse a ticket |
+| `expect_name_mismatch`, `page_changed`, `ref_gone`, `ticket_expired`, `ticket_used` (stale, 12) | Nothing was done (a name mismatch: the ref shows another name than you gave). `locate` again for a fresh ticket, or snapshot again. Never reuse a ticket |
 | `effect_unknown` (30) | The action was sent but not confirmed. Re-observe before repeating anything |
 | `dry_run` (ok, 0) | Nothing was sent or done: that was `--dry-run` |
 | `usage` (64) | The command line was wrong; nothing was done. Read `refsure <command> --help` |
