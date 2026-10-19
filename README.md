@@ -880,7 +880,8 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 
 `next.do` is one of `act`, `act_high_risk`, `dismiss`, `state`, `wait` (with `after_ms`), `snapshot`,
 `retry_within`, `needs_human` or `stop`; `causes --json` lists the installed version's values as `next_do`. `argv[0]` is
-always `refsure` or `orca`.
+always `refsure` or `orca`. Free text in an `argv` (an expectation, a name, an intent) is one `--flag=<text>` token,
+as in `--expect=-5% off`: the parser refuses a separate value that starts with `-`. Pass such text the same way.
 
 **Compatibility.** `refsure` in the envelope is the schema major. Within a major, fields are only added, never renamed
 or retyped, and no status or cause moves between exit classes. `why.cause` and `next.do` are open sets: new values

@@ -9,10 +9,14 @@ import { stateNext } from './state-next';
 import { stateInput } from './state-page';
 
 
-/** The same `state` call: the custom states in their order, then `--expect`. */
+/**
+ * The same `state` call: the custom states in their order, then `--expect`. The expectation goes inline
+ * (`--expect=<text>`): strict `parseArgs` refuses a separate value that starts with `-`, such as "-5% off". A state
+ * pair needs no such care, since it starts with its snake_case key.
+ */
 function askAgain(args: StateArgs): string[] {
   const custom = args.states === null ? [] : Object.entries(args.states).flatMap(([key, when]) => ['--state', `${key}=${when}`]);
-  return ['refsure', 'state', ...custom, ...(args.expect === null ? [] : ['--expect', args.expect])];
+  return ['refsure', 'state', ...custom, ...(args.expect === null ? [] : [`--expect=${args.expect}`])];
 }
 
 /**
