@@ -1,14 +1,21 @@
-import type { CommandSpec } from '../../cli';
+import type { CommandOutcome, CommandSpec } from '../../cli';
+import type { Next } from '../../output';
 import type { SnapArgs, SnapScope } from './snap.args';
 import type { SnapResult } from './snap.contract';
-import { cutLines, snapLines } from './snap-lines';
+import { cutLines, MAX_CHARS_LIMIT, snapLines, wholeBudget } from './snap-lines';
 
 const MAX_CHARS_DEFAULT = '4000';
-const MAX_CHARS_LIMIT = 1_000_000;
 const SCOPES: readonly SnapScope[] = ['dialog', 'main', 'form'];
 
 function isScope(value: string): value is SnapScope {
   return (SCOPES as readonly string[]).includes(value);
+}
+
+/** The same snap with the budget that prints every line; the registry pins it to the page. */
+function showAll(args: SnapArgs, total: number): Next {
+  const scope = args.scope === null ? [] : ['--scope', args.scope];
+  const all = args.interactive ? [] : ['--all'];
+  return { do: 'snapshot', argv: ['refsure', 'snap', `--max-chars=${wholeBudget(total)}`, ...scope, ...all] };
 }
 
 /** Compact lines in line format v1 with ordinals and refs (spec §6.3), filtered locally. Reads only. */
@@ -41,10 +48,12 @@ export const snapCommand: CommandSpec<SnapArgs, SnapResult> = {
   async run(args, ctx) {
     if (ctx.page === null) throw new Error('snap needs a page, and none was resolved');
     const tree = await ctx.browser.snapshot(ctx.page);
-    const { lines, dropped } = cutLines(snapLines(tree, args), args.maxChars);
+    const { lines, dropped, total } = cutLines(snapLines(tree, args), args.maxChars);
     const result: SnapResult = { lines, dropped };
     if (tree.dropped > 0) result.unparsed = tree.dropped;
     ctx.trace.untrusted.add('result.lines');
-    return { status: 'ok', acted: false, effect: 'none', result };
+    const outcome: CommandOutcome<SnapResult> = { status: 'ok', acted: false, effect: 'none', result };
+    if (dropped > 0) outcome.next = showAll(args, total);
+    return outcome;
   },
 };

@@ -679,6 +679,11 @@ refsure snap [--max-chars 4000] [--scope dialog|main|form] [--all]
 - `--interactive`: Only interactive elements with a ref (default: true)
 - `--all`: Every named node, not only interactive ones (overrides --interactive)
 
+Lines are cut whole, never split. A cut list ends with the footer `N lines dropped (~T tokens): --max-chars=<total>
+shows all`, inside the budget: T is the dropped lines' characters over 4, and `<total>` the whole list's length
+(at most 1,000,000, the flag's limit). On a cut, `next` is that same call: `snapshot` with argv
+`refsure snap --max-chars=<total>`, plus the `--scope` and `--all` given and the pinned `--page`.
+
 **`guard`** (no Decision)
 
 ```text
