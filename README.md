@@ -167,8 +167,9 @@ Each step is one look, one Jev Decision and at most one act:
    second (twice at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
-   third time, end it `no_progress` (Orca delivers clicks only while its browser tab is on screen); a tab that draws
-   no frames ends it `off_screen` before anything is sent.
+   third time, end it `no_progress` (on Orca, which delivers clicks only while its browser tab is on screen, the detail
+   says to bring the tab to the front; on agent-browser it does not); a tab that draws no frames ends it `off_screen`
+   before anything is sent.
 
 `run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
 offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
@@ -179,11 +180,12 @@ act may not have landed). `result.steps` lists each step (`n`, `op`, `element` a
 picked: `stale`, `covered`, `vetoed`, `unknown`, `stopped`); `blockers` lists the dismiss levels after the start, when
 any ran; `new_text` (up to 8 new lines, with `new_text_more`, how many more there were, when there were), `url`,
 `elapsed_ms` and `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
-`result.unconfirmed`; with nothing acted it is the cause's own exit. When a run ends short of `seen` and the table its
-last step Decision read was cut, `why.detail` ends with one clause saying so, such as `; the step's table cut 24
-look-alike rows (refsure snap lists them)`, or `… 241 rows to fit the request …`, or `… 24 look-alike rows and 256
-more to fit the request …`: a control you expected may be among them. Only the envelope says it; the Decision request
-is the same either way. `steps`, `dismissed`, `blockers`, `new_text`, `url` and `why.detail` are untrusted. One
+`result.unconfirmed`; with nothing acted it is the cause's own exit. When a run ends short of `seen`, other than
+`decision_unavailable` (an unanswered Decision, or `proposed_only`: no model's read of the table was used), and the
+table its last step Decision read was cut, `why.detail` ends with one clause saying so, such as `; the step's table
+cut 24 look-alike rows (refsure snap lists them)`, or `… 241 rows to fit the request …`, or `… 24 look-alike rows and
+256 more to fit the request …`: a control you expected may be among them. Only the envelope says it; the Decision
+request is the same either way. `steps`, `dismissed`, `blockers`, `new_text`, `url` and `why.detail` are untrusted. One
 Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the cap has room again,
 within `--timeout`.
 

@@ -1,6 +1,6 @@
 ---
 name: refsure
-description: Use when driving a web page in the Orca browser or an agent-browser session. Run a whole task in one call with refsure do --page <id> --fill "<field>=<value>" --click "<control>" --expect "<what should show>" - it closes a cookie banner, finds each control by its description, acts in order with risky clicks guarded, and waits until the result shows. Call do first, with no state or snap before it. For a multi-step task on one site whose steps you do not know up front (suggestions, date pickers, a next page), hand it over with refsure run --page <id> --goal "<sub-task>" --fill "<what>=<value>". Other verbs answer one judgment question (is the page ready, which control, did it work) with one small JSON envelope.
+description: Use when driving a web page in the Orca browser or an agent-browser session. Run a whole task in one call with refsure do --page <id> --fill="<field>=<value>" --click="<control>" --expect="<what should show>" - it closes a cookie banner, finds each control by its description, acts in order with risky clicks guarded, and waits until the result shows. Call do first, with no state or snap before it. For a multi-step task on one site whose steps you do not know up front (suggestions, date pickers, a next page), hand it over with refsure run --page <id> --goal="<sub-task>" --fill="<what>=<value>". Other verbs answer one judgment question (is the page ready, which control, did it work) with one small JSON envelope.
 refsure-skill: 1
 ---
 
@@ -14,15 +14,15 @@ page before anything is clicked, and each call prints one JSON envelope (`causes
 `do` is the default: one call runs dismiss, locate, act and wait. Call it first, with no `state` or `snap` before:
 
 ```
-refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect "search results for invoice"
+refsure do --page <id> --fill="Search=invoice" --click="Search button" --expect="search results for invoice"
 ```
 
-- Steps run in order, at most 8: `--fill "<field>=<value>"` (the value is typed, never sent to a Decision), `--select
-  "<field>=<option>"` (by label), `--check`/`--uncheck "<box>"`, `--click "<control>"`, each by visible text or purpose.
+- Steps run in order, at most 8: `--fill="<field>=<value>"` (the value is typed, never sent to a Decision),
+  `--select="<field>=<option>"` (by label), `--check="<box>"`/`--uncheck="<box>"`, `--click="<control>"`, each by visible text or purpose.
 - It first closes a cookie banner or pop-up as `dismiss` does (never Accept; `--no-dismiss` skips it), then finds
   every step on one snapshot and acts in order, each through a single-use ticket, a recheck and the risk guard.
 - `--expect` waits up to `--timeout` (60s) until that shows in text **new** since the call began (your values cut);
-  `--text "<literal>"` settles it by code. It ends `stalled` once the page stops changing for `--stall` (10s).
+  `--text="<literal>"` settles it by code. It ends `stalled` once the page stops changing for `--stall` (10s).
 
 Read the answer (`result.steps`: what each step found and did; `result.new_text`: lines new since the call began):
 - Exit 0, `result.verdict` `seen` (`done` without `--expect`): every step ran and the result showed. Report it,
@@ -38,7 +38,7 @@ Read the answer (`result.steps`: what each step found and did; `result.new_text`
 When the steps are not known up front (a suggestion, a date picker, a next page), hand the sub-task over in one call:
 
 ```
-refsure run --page <id> --goal "<the sub-task, and where to stop>" --fill "origin=Warsaw" --fill "destination=Brussels" --expect "<what shows when done>"
+refsure run --page <id> --goal="<the sub-task, and where to stop>" --fill="origin=Warsaw" --fill="destination=Brussels" --expect="<what shows when done>"
 ```
 
 - Jev picks each step and run acts on its most likely move, rechecked and guarded as in `do`: money, irreversible,
@@ -60,14 +60,14 @@ cut out, or the text is withheld (`typed_text_withheld`). `--dry-run` prints the
 
 | Situation | Call |
 |---|---|
-| After you open a URL or navigate, or anything surprising (not before `do`: it reads the page itself) | `refsure state --page <id> --expect "<the intended page>"`, then follow `next` |
+| After you open a URL or navigate, or anything surprising (not before `do`: it reads the page itself) | `refsure state --page <id> --expect="<the intended page>"`, then follow `next` |
 | A cookie banner, modal or pop-up is in the way | `refsure dismiss --page <id>`. If it abstains, never click Accept to get past it |
-| One control on a big, busy or translated page | `refsure locate --page <id> --intent "<what it is for>" --risk <read\|write>`, then `refsure act --page <id> --ticket <T>` |
-| `locate` or a `do` step says `twins` (several equal rows) | `locate` again with `--within "<text of the row you mean>"` |
-| You hold your own ref and the action writes anything | `refsure outcome --page <id> --intent "<what should happen>" --expect-name "<name you saw>" -- click --element @eN` |
-| You will act in several steps yourself | `refsure mark --page <id>` first, then `refsure outcome --page <id> --intent "…" --mark <M>` |
-| Content that loads later | `refsure wait-for --page <id> --expect "<what should appear>" [--text "<literal>"] [--stall 10s]` |
-| A dropdown value by meaning ("Ukraine" vs "Україна") | `refsure pick-option --page <id> --field @eN --want "<meaning>"`, then `act --ticket`. A custom dropdown that lists its options only once open: add `--open --expect-name "<name on the field>"` |
+| One control on a big, busy or translated page | `refsure locate --page <id> --intent="<what it is for>" --risk <read\|write>`, then `refsure act --page <id> --ticket <T>` |
+| `locate` or a `do` step says `twins` (several equal rows) | `locate` again with `--within="<text of the row you mean>"` |
+| You hold your own ref and the action writes anything | `refsure outcome --page <id> --intent="<what should happen>" --expect-name="<name you saw>" -- click --element @eN` |
+| You will act in several steps yourself | `refsure mark --page <id>` first, then `refsure outcome --page <id> --intent="…" --mark <M>` |
+| Content that loads later | `refsure wait-for --page <id> --expect="<what should appear>" [--text="<literal>"] [--stall 10s]` |
+| A dropdown value by meaning ("Ukraine" vs "Україна") | `refsure pick-option --page <id> --field @eN --want="<meaning>"`, then `act --ticket`. A custom dropdown that lists its options only once open: add `--open --expect-name="<name on the field>"` |
 | Something broke and you need the console or failed requests | `refsure mark --page <id>` before, `refsure triage --page <id> --since <M>` after |
 | Money, irreversible, auth (an OAuth consent screen too) or consent | only `refsure act-high-risk`, and only when the human asked for exactly that action in this session |
 
@@ -116,7 +116,7 @@ the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `
 | `unsupported` (unsupported_by_backend, 21) | This browser backend lacks what the verb needs; a retry will not help. Tell the human |
 | `spend_limit` (22) | Stop asking Decisions. Code-only verbs (`snap`, `guard`, `mark`, `triage`) still work |
 | `low_confidence`, `none_chosen` (abstained, 10) | Make `--intent` or the step's target concrete (role, visible text, section), or narrow with `--within` |
-| `twins` (abstained, 10) | Retry with `--within "<row text>"`. Use `--first` only when any of the equal rows is fine. If the detail says the options read the same as sent, the model could not tell them apart: with `locate` narrow with `--within`; with `pick-option` ask the human |
+| `twins` (abstained, 10) | Retry with `--within="<row text>"`. Use `--first` only when any of the equal rows is fine. If the detail says the options read the same as sent, the model could not tell them apart: with `locate` narrow with `--within`; with `pick-option` ask the human |
 | `proposed_only` (abstained, 10) | Not trusted enough to act on alone. Follow `next` if it names a command; otherwise check the pick (`guard --ticket T`, a snapshot) and act through `outcome` with your own ref |
 | `disagree` (abstained, 10) | Two providers picked differently. Treat it as an abstain |
 | `not_seen` (abstained, 10) | Not seen within the timeout, which does not mean absent. Check with `state`, or wait again |
@@ -138,7 +138,7 @@ the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `
 - The page is `--page`, then `REFSURE_PAGE`, then the current tab of `ORCA_WORKTREE_ID`'s worktree. Pass the same
   id to your own calls: `orca snapshot --page <id>`. Orca clicks only while its browser tab is on screen.
 - Never use `orca type` or `orca keypress` for form input: keys go to whatever has focus, which can be a terminal.
-  Use `refsure do --page <id> --fill "<field>=<value>"` or `orca fill --page <id> --element @eN`.
+  Use `refsure do --page <id> --fill="<field>=<value>"` or `orca fill --page <id> --element @eN`.
 - Orca's default profile carries the human's Chrome cookies, so pages are logged in: mind section 3. refsure never
   logs in, solves a bot check or navigates; `login_wall` and `bot_challenge` go to the human (`needs_human`).
 

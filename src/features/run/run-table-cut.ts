@@ -17,9 +17,11 @@ function cutWords(family: number, fit: number): string {
  * A run that ends short of `seen` says when the table its last step Decision read was cut: the look-alike rows
  * `familyCut` left out and the rows the request dropped to fit its bounds. A control the agent expects may be among
  * them, and `refsure snap` lists them. One clause on the stop's detail, envelope only: the request went as it was.
+ * Not on `decision_unavailable` (no answer came, or `proposed_only`'s unmeasured family): no model's read of the
+ * table was used, so a cut explains nothing.
  */
 export function withTableCut(stop: RunStop, run: RunState): RunStop {
-  if (stop.verdict === 'seen' || run.asked === null) return stop;
+  if (stop.verdict === 'seen' || stop.verdict === 'decision_unavailable' || run.asked === null) return stop;
   const { input, familyCut } = run.asked;
   const fit = stepRowsCut(input);
   if (familyCut + fit === 0) return stop;

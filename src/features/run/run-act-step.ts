@@ -395,9 +395,11 @@ function emptiedWords(act: StepAct, after: RunLook): string {
 export function unchangedStop(run: RunState, changed: boolean): RunStop | null {
   run.unchanged = changed ? 0 : run.unchanged + 1;
   if (run.unchanged < UNCHANGED_MAX) return null;
-  return {
-    verdict: 'no_progress', cause: 'no_progress',
-    detail: `${UNCHANGED_MAX} steps in a row changed nothing on the page. Orca delivers clicks and keys only while its `
-      + 'browser tab is on screen: bring the tab to the front, then look again',
-  };
+  const changedNothing = `${UNCHANGED_MAX} steps in a row changed nothing on the page`;
+  // Only Orca's tab can be off screen; agent-browser's headless page takes input wherever it is.
+  const detail = run.page.backend === 'orca'
+    ? `${changedNothing}. Orca delivers clicks and keys only while its browser tab is on screen: bring the tab to the `
+      + 'front, then look again'
+    : changedNothing;
+  return { verdict: 'no_progress', cause: 'no_progress', detail };
 }
