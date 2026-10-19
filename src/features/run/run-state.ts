@@ -43,8 +43,9 @@ export interface RunState {
   current: RunLook;
   /** The raiser count taken while the current look's Decision was asked, for the guard (`probeRaisers`). */
   probe: RaiserProbe | null;
-  /** The envelope's `new_text`: the last look's new lines. */
+  /** The envelope's `new_text`: the last look's new lines, and `new_text_more`: how many more it had. */
   shown: string[];
+  shownMore: number;
   /** Where each step's time goes, with `REFSURE_RUN_TIMING=1` (`runTiming`); a no-op otherwise. */
   timing: RunTiming;
   /** What the settles have seen of the page's frames (`settleFor`). */
@@ -55,7 +56,8 @@ export interface RunState {
 export function resultOf(run: RunState, now: number, decisions: number): RunResult {
   return {
     verdict: 'budget', steps: run.steps, dismissed: run.dismissed, ...(run.blockers.length > 0 ? { blockers: run.blockers } : {}),
-    new_text: run.shown, url: run.current.tab.url, elapsed_ms: now - run.started, decisions,
+    new_text: run.shown, ...(run.shownMore > 0 ? { new_text_more: run.shownMore } : {}), url: run.current.tab.url,
+    elapsed_ms: now - run.started, decisions,
   };
 }
 

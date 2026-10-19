@@ -29,6 +29,8 @@ export interface RunResult {
   blockers?: BlockerReport[];
   /** Up to 8 lines the page did not show when the run began, the `--fill` values left in. */
   new_text: string[];
+  /** How many more new lines there were past the 8 in `new_text`, which are only the first ones; absent when none. */
+  new_text_more?: number;
   url: string;
   elapsed_ms: number;
   /** Decisions asked: the blocker levels' and one per step. */

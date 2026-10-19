@@ -23,12 +23,14 @@ export function readingOf(look: RunLook): PageReading {
 /**
  * The new text of the current look, its `--fill` values marked; '' when nothing is new or it is withheld. The
  * baseline is never trimmed here: a dialog hides the page behind it, and its closing must not make that page new.
- * The envelope's `new_text` is kept current on the way.
+ * The envelope's `new_text` and `new_text_more` are kept current on the way.
  */
 export function newTextOf(ctx: CommandContext, run: RunState): string {
   const whole = readingOf(run.current);
   const fresh = newReading(whole, new Set(run.baseline), run.values);
-  run.shown = shownLines(whole, run.baseline);
+  const shown = shownLines(whole, run.baseline);
+  run.shown = shown.lines;
+  run.shownMore = shown.more;
   if (fresh === null) return '';
   if (typedWithheld(fresh.text, fresh.typed) !== null) {
     const note = withheldNote(SHORT_VALUE);

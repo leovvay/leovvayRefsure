@@ -75,12 +75,13 @@ refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect 
    The Decision is asked at most once a poll, and no call cap ends the wait sooner.
 
 `result.verdict` is `done`, `seen`, `not_seen`, `stalled` or `stopped`; `result.steps` says what each step found and
-did, and `result.new_text` holds up to 8 new lines (untrusted). Once anything acted, the exit is only 0 or 30, with
-the reason in `result.unconfirmed`, also when a browser call fails after an act. `next` is `state` after
-`not_seen`, and `stop` after `stalled` (or a fresh look when the new text was withheld from the Decision). After
-either, read `result.new_text`: if the page asks for one more thing (a confirm field), `do` only the steps still to
-do. A stall is the answer, also on a task said to take a while: keep the default and report it. To wait again for a
-time the human named, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a
+did, and `result.new_text` holds up to 8 new lines (untrusted), each cut at 200 characters. When there were more,
+`result.new_text_more` says how many (absent otherwise): the lines shown are only the first ones. Once anything
+acted, the exit is only 0 or 30, with the reason in `result.unconfirmed`, also when a browser call fails after an act.
+`next` is `state` after `not_seen`, and `stop` after `stalled` (or a fresh look when the new text was withheld from
+the Decision). After either, read `result.new_text`: if the page asks for one more thing (a confirm field), `do`
+only the steps still to do. A stall is the answer, also on a task said to take a while: keep the default and report
+it. To wait again for a time the human named, `wait-for --expect "…" --timeout <longer> --stall <longer>` gives the same stall rule to a
 plain wait (off by default; it judges the whole page, not only new text). `--stall` must be shorter than `--timeout`. The
 stall clock is the page's: a wait that starts within 2 minutes of an earlier one on the same page, with the page as
 that one left it, counts from the page's last change, and the detail says so. Only a hash of the URL and text is kept.
@@ -176,7 +177,8 @@ never put a secret in `--goal` or `--fill`. `result.verdict` is `seen`, `done_un
 act may not have landed). `result.steps` lists each step (`n`, `op`, `element` as a v1 line, `value` as the
 `--fill` key and never the value, `p`, `risk`, `page_changed`, `ms`, and `verdict` when a step did not run as
 picked: `stale`, `covered`, `vetoed`, `unknown`, `stopped`); `blockers` lists the dismiss levels after the start, when
-any ran; `new_text`, `url`, `elapsed_ms` and `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
+any ran; `new_text` (up to 8 new lines, with `new_text_more`, how many more there were, when there were), `url`,
+`elapsed_ms` and `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
 `result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `dismissed`, `blockers`, `new_text`,
 `url` and `why.detail` are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
 cap has room again, within `--timeout`.

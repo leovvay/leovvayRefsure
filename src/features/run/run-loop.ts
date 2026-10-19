@@ -240,7 +240,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,
     typedAt: new Map(), seenIn: new Map(), dismissed: null, blockers: [], tried: new Set(), current: first, probe: null,
-    shown: [], timing, settling,
+    shown: [], shownMore: 0, timing, settling,
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {

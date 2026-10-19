@@ -14,6 +14,8 @@ export interface DoResult {
   dismissed: DismissLevelReport | null;
   /** Up to 8 body lines not on the page before the steps, typed and filled text cut; empty when withheld. */
   new_text: string[];
+  /** How many more new lines there were past the 8 in `new_text`, which are only the first ones; absent when none. */
+  new_text_more?: number;
   waited_ms: number;
   polls: number;
   /** Provider calls in all: the blocker level, the picks and the wait. */

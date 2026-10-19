@@ -80,9 +80,13 @@ async function finish(
     return seen.last;
   };
   const started = ctx.now();
-  const sofar = (polls: number): DoResult => ({
-    ...result, new_text: shownLines(seen.whole, baseline), polls, waited_ms: ctx.now() - started, decisions: ctx.trace.egress.length,
-  });
+  const sofar = (polls: number): DoResult => {
+    const shown = shownLines(seen.whole, baseline);
+    return {
+      ...result, new_text: shown.lines, ...(shown.more > 0 ? { new_text_more: shown.more } : {}), polls,
+      waited_ms: ctx.now() - started, decisions: ctx.trace.egress.length,
+    };
+  };
   try {
     // The page gets `SETTLE_MS` to show the acts' effect before the first look, as `outcome` and `act --verify` give
     // it: a Decision on a page caught mid-update is spent on nothing. A read meanwhile judges nothing; it only lets

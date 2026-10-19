@@ -105,10 +105,13 @@ export function expectationOf(expect: string, values: Values): string {
 /**
  * `new_text` as the envelope shows it: the body lines beyond the baseline's with the page's own typing cut, at most 8
  * of at most 200 characters; none when that typing cannot be cut. The run's own values stay: the agent typed them,
- * and a result line read without them ("7 results for " "") reads as an empty search.
+ * and a result line read without them ("7 results for " "") reads as an empty search. `more` counts the fresh
+ * lines past the 8 shown (`new_text_more`), so a reader knows the lines are only the first ones.
  */
-export function shownLines(whole: PageReading | null, baseline: Set<string>): string[] {
-  if (whole === null || typedWithheld(whole.text, whole.typed) !== null) return [];
+export function shownLines(whole: PageReading | null, baseline: Set<string>): { lines: string[]; more: number } {
+  if (whole === null || typedWithheld(whole.text, whole.typed) !== null) return { lines: [], more: 0 };
   const fresh = linesOf(whole.text).filter((line) => !baseline.has(line)).join('\n');
-  return linesOf(withoutTyped(fresh, whole.typed)).slice(0, SHOWN_LINES).map((line) => cutShown(line, SHOWN_LINE_MAX));
+  const all = linesOf(withoutTyped(fresh, whole.typed));
+  const lines = all.slice(0, SHOWN_LINES).map((line) => cutShown(line, SHOWN_LINE_MAX));
+  return { lines, more: all.length - lines.length };
 }
