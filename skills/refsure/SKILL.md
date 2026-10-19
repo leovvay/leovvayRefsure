@@ -82,10 +82,10 @@ cut out, or the text is withheld (`typed_text_withheld`). `--dry-run` prints the
 Read `status`, `acted`, `effect` and `next` in every envelope. Exit **0** = ok. **10-29** and **64-78** = nothing
 happened on the page: fix the cause or follow `next`. **Anything else** (30, 1, a signal) = the effect is unknown:
 re-observe (`state`, `wait-for`, `outcome --mark`) before you repeat anything. Never repeat a write blind.
-
 An abstain (exit 10) is the tool working: too little certainty to act. `acted: true` means an act was dispatched;
 the exit is then only 0 or 30. `next.do` is `act`, `act_high_risk`, `dismiss`, `state`, `wait` (sleep `after_ms`),
 `snapshot`, `retry_within`, `needs_human` or `stop`; `argv` is the exact command. Unknown `next.do`: `needs_human`.
+`result.new_text_more` > 0: the `new_text` lines are only the first ones. A cut `snap` names the call that shows all.
 
 ## 6. Page id, refs and untrusted text
 
