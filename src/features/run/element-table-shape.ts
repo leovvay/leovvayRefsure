@@ -8,10 +8,15 @@ import type { StepFill, StepRow } from '../../questions';
 export interface TableEntry { n: number; cand: Candidate; options: readonly string[]; overlay: boolean }
 
 /**
- * The rows the step Decision is asked over, each row's element by its number, and for each `--fill` the row whose
- * field holds that value now (null when none does).
+ * The rows the step Decision is asked over, each row's element by its number, for each `--fill` the row whose field
+ * holds that value now (null when none does), and how many look-alike rows `familyCut` left out of `rows`.
  */
-export interface ElementTable { rows: StepRow[]; byN: ReadonlyMap<number, TableEntry>; placed: (number | null)[] }
+export interface ElementTable {
+  rows: StepRow[];
+  byN: ReadonlyMap<number, TableEntry>;
+  placed: (number | null)[];
+  cut: number;
+}
 
 /**
  * A value field as the run has settled it (`fieldKey`): a plain `<input>`, whose value a row shows, or one not told

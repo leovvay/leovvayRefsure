@@ -187,14 +187,14 @@ function fits(request: SiteRequest): boolean {
 }
 
 /**
- * The step request, its element table cut to fit both bounds (design 2026-10-17 §2.1). When the whole table does
- * not fit, each select first offers only its `OPTIONS_CUT` best options; then the rows are cut, overlay rows kept
- * first, then fields and selects, then the rest, each tier by its weight (`keepOrder`), as many as fit (more rows
- * never take fewer bytes, so the most that fit are found by halving). The rows kept stay in page order, and the site
- * never refuses `oversize` for its own table. Every text is cleaned once, whatever the cuts tried. The done Noul is
- * asked only once there is new text to judge.
+ * The step request, its element table cut to fit both bounds (design 2026-10-17 §2.1), and how many rows it kept.
+ * When the whole table does not fit, each select first offers only its `OPTIONS_CUT` best options; then the rows are
+ * cut, overlay rows kept first, then fields and selects, then the rest, each tier by its weight (`keepOrder`), as
+ * many as fit (more rows never take fewer bytes, so the most that fit are found by halving). The rows kept stay in
+ * page order, and the site never refuses `oversize` for its own table. Every text is cleaned once, whatever the cuts
+ * tried. The done Noul is asked only once there is new text to judge.
  */
-export function stepRequest(input: StepInput): Built {
+function fitted(input: StepInput): { built: Built; kept: number } {
   const clean = cleanOnce();
   const order = keepOrder(input.rows);
   const build = (keep: number, optionsMax: number): Built => {
@@ -202,9 +202,9 @@ export function stepRequest(input: StepInput): Built {
     return assemble(input, input.rows.filter((row) => kept.has(row.n)), clean, optionsMax);
   };
   const whole = build(order.length, Infinity);
-  if (fits(whole.request)) return whole;
+  if (fits(whole.request)) return { built: whole, kept: order.length };
   const allRows = build(order.length, OPTIONS_CUT);
-  if (fits(allRows.request)) return allRows;
+  if (fits(allRows.request)) return { built: allRows, kept: order.length };
   let fit: Built | null = null;
   let low = 0;
   let high = order.length;
@@ -218,5 +218,18 @@ export function stepRequest(input: StepInput): Built {
       high = mid;
     }
   }
-  return fit ?? build(1, OPTIONS_CUT);
+  return fit === null ? { built: build(1, OPTIONS_CUT), kept: Math.min(1, order.length) } : { built: fit, kept: low };
+}
+
+/** The step site's `build`: the request `fitted` cuts to its bounds, with the context that reads its answers. */
+export function stepRequest(input: StepInput): Built {
+  return fitted(input).built;
+}
+
+/**
+ * How many of `input.rows` the step request leaves out to fit its bounds: for the envelope only (`run` names the
+ * cut when it stops short), so nothing about the request changes. Pure, as `build` is: the same input cuts the same.
+ */
+export function stepRowsCut(input: StepInput): number {
+  return input.rows.length - fitted(input).kept;
 }

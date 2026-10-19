@@ -25,6 +25,7 @@ export {
   presenceSite,
   RESEARCH_STATES,
   SITES,
+  stepRowsCut,
   stepSite,
 } from './sites';
 export { bareModel, familyOf, KNOWN_FAMILIES, snapshotChanged, thresholdFor } from './calibration';

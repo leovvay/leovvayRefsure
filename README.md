@@ -179,7 +179,10 @@ act may not have landed). `result.steps` lists each step (`n`, `op`, `element` a
 picked: `stale`, `covered`, `vetoed`, `unknown`, `stopped`); `blockers` lists the dismiss levels after the start, when
 any ran; `new_text` (up to 8 new lines, with `new_text_more`, how many more there were, when there were), `url`,
 `elapsed_ms` and `decisions` follow. `seen` is exit 0; anything else after an act is `effect_unknown` (exit 30) with the cause in
-`result.unconfirmed`; with nothing acted it is the cause's own exit. `steps`, `dismissed`, `blockers`, `new_text`,
+`result.unconfirmed`; with nothing acted it is the cause's own exit. When a run ends short of `seen` and the table its
+last step Decision read was cut, `why.detail` ends with one clause saying so, such as `; the step's table cut 24
+look-alike rows (refsure snap lists them)`, or `… 241 rows to fit the request …`, or `… 24 look-alike rows and 256
+more to fit the request …`: a control you expected may be among them. The request itself is unchanged. `steps`, `dismissed`, `blockers`, `new_text`,
 `url` and `why.detail` are untrusted. One Decision per step adds up: a step `decisionsPerMinute` (30 by default) refuses waits until the
 cap has room again, within `--timeout`.
 

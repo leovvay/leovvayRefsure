@@ -20,6 +20,7 @@ import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
 import { levelUnknownStop } from './run-blocker';
 import { freshSettle, offScreenStop, settleFor } from './run-settle';
+import { withTableCut } from './run-table-cut';
 import { runTiming } from './run-timing';
 
 type Out = CommandOutcome<RunResult>;
@@ -149,6 +150,7 @@ async function steps(ctx: CommandContext, run: RunState): Promise<RunStop> {
     const budget = overBudget(run, at);
     if (budget !== null) return budget;
     const input = stepInput(ctx, run, newText);
+    run.asked = { input, familyCut: run.current.table.cut };
     run.probe = probeRaisers(ctx, run, input);
     const decided = await ctx.decide(stepSite, input, {
       risk: 'write', combo: 'jev', originUrl: run.current.tab.url, dryRun: ctx.dryRun, signal: ctx.signal,
@@ -240,7 +242,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
     args, page, hints, values: valuesOf(args.fills.map((fill) => ({ action: 'fill', value: fill.value }))),
     baseline: new Set(), started, steps: [], recent: [], acted: false, unchanged: 0, repeats: new Map(), typed: null,
     typedAt: new Map(), seenIn: new Map(), dismissed: null, blockers: [], tried: new Set(), current: first, probe: null,
-    shown: [], shownMore: 0, timing, settling,
+    asked: null, shown: [], shownMore: 0, timing, settling,
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {
@@ -264,11 +266,11 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
     // New text is what the steps bring: the page as the blocker level left it is the baseline.
     run.baseline = baselineOf(readingOf(run.current));
     const stop = await steps(ctx, run);
-    return ended(stop, run.acted, result());
+    return ended(withTableCut(stop, run), run.acted, result());
   } catch (error) {
     if (!(run.acted || ctx.trace.dispatched) || !isBrowserError(error)) throw error;
     const at = run.steps.at(-1);
     if (at !== undefined && at.verdict === undefined && at.page_changed === null) at.verdict = 'stopped';
-    return failedAfterAct(error, result());
+    return ended(withTableCut(failedAfterAct(error), run), true, result());
   }
 }

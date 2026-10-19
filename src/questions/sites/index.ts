@@ -8,5 +8,6 @@ export { outcomeSite } from './outcome';
 export { presenceSite } from './presence';
 export { optionMapSite } from './option-map';
 export { stepSite } from './step';
+export { stepRowsCut } from './step-request';
 export { SITES } from './registry';
 export { RESEARCH_STATES } from './wordings';

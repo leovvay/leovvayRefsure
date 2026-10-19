@@ -1,5 +1,6 @@
 import type { PageRef } from '../../browser';
 import { describeElement, type Fingerprint } from '../../page-model';
+import type { StepInput } from '../../questions';
 import type { DismissLevelReport } from '../dismiss';
 import type { Values } from '../shared';
 import type { TableHints } from './element-table-shape';
@@ -43,6 +44,8 @@ export interface RunState {
   current: RunLook;
   /** The raiser count taken while the current look's Decision was asked, for the guard (`probeRaisers`). */
   probe: RaiserProbe | null;
+  /** The last step Decision's input, and how many look-alike rows its look's table cut (`withTableCut`). */
+  asked: { input: StepInput; familyCut: number } | null;
   /** The envelope's `new_text`: the last look's new lines, and `new_text_more`: how many more it had. */
   shown: string[];
   shownMore: number;

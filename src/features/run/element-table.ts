@@ -228,9 +228,10 @@ function familyCut(cands: readonly Candidate[], weights: ReadonlyMap<number, num
 /**
  * `run`'s element table from one look (design 2026-10-17 §2.1): the page's candidates, numbered in page order,
  * each `[n] role "name"` with its value or state; a wrapper that only repeats its control's name is left out, and a
- * long list of look-alikes keeps its heaviest rows (`familyCut`). A row says where it sits when that tells it apart:
- * its dialog, its path when another row has its role and name, its row's text when it has identical twins. A native
- * select's own options are its SELECT pairs, not rows. The goal's and the values' words rank a long option list.
+ * long list of look-alikes keeps its heaviest rows (`familyCut`; `cut` counts the rest). A row says where it sits
+ * when that tells it apart: its dialog, its path when another row has its role and name, its row's text when it has
+ * identical twins. A native select's own options are its SELECT pairs, not rows. The goal's and the values' words
+ * rank a long option list.
  */
 export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: TableHints): ElementTable {
   const wanted = new Set(hints.words.map(fold));
@@ -288,5 +289,5 @@ export function elementTable(tree: AxTree, cands: readonly Candidate[], hints: T
       if (placed[k] === null && holds(value, fill.value)) placed[k] = n;
     });
   });
-  return { rows, byN, placed };
+  return { rows, byN, placed, cut: cut.size };
 }

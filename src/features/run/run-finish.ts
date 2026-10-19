@@ -59,11 +59,11 @@ export function newFamilyStop(model: string | undefined): RunStop {
 }
 
 /**
- * A browser call failed after something acted (a click closed the tab, Orca restarted): exit 30 as the registry would
- * give, with the steps so far kept and the browser's cause in `result.unconfirmed`.
+ * A browser call failed after something acted (a click closed the tab, Orca restarted): ended as acted, it is exit 30
+ * as the registry would give, with the steps so far kept and the browser's cause in `result.unconfirmed`.
  */
-export function failedAfterAct(error: unknown, result: RunResult): Out {
+export function failedAfterAct(error: unknown): RunStop {
   const { why } = failureOutcome(error, false);
   const cause = why?.cause ?? 'browser_error';
-  return ended({ verdict: 'stopped', cause, detail: why?.detail ?? cause, next: RE_OBSERVE }, true, result);
+  return { verdict: 'stopped', cause, detail: why?.detail ?? cause, next: RE_OBSERVE };
 }
