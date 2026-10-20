@@ -1,0 +1,6 @@
+# GitHub's language bar counts code. The stored pages that the benchmark and calibration replay, and the HTML the
+# README art is rendered from, are data and documentation.
+tools/bench/sets/** linguist-vendored
+tools/bench/fixtures/** linguist-vendored
+tools/calibrate/sets/** linguist-vendored
+docs/** linguist-documentation
