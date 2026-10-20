@@ -17,6 +17,7 @@ import { changeWords, recentLine, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { StepAct } from './step-act-shape';
+import { unchangedStop } from './run-unchanged';
 
 /**
  * After an act the page gets until it has rendered a frame and its animations have stopped (`settleFor`), at most
@@ -46,8 +47,6 @@ const RETRY_POLL_MS = 100;
 const OPENERS: ReadonlySet<string> = new Set(['combobox', 'option', 'menuitem', 'menuitemradio', 'menuitemcheckbox']);
 /** The same act on the same element on the same page a third time ends the run: twice is a retry, three a loop. */
 const REPEAT_MAX = 2;
-/** Acts or scrolls in a row that changed nothing end the run. */
-const UNCHANGED_MAX = 3;
 
 /** One element by its fingerprint: role, name, path and ordinal in a twin group of the same size. */
 export function sameElement(a: Fingerprint, b: Fingerprint): boolean {
@@ -237,7 +236,7 @@ export async function actStep(
   if (shown !== undefined) report.value = shown;
   // Nothing goes to a tab that renders no frames: it would take no input, or take it later on another page.
   run.timing.phase('frame');
-  const dark = await offScreenStop(ctx, run.page, run.settling);
+  const dark = await offScreenStop(ctx, run.page, run.settling, run.current.tab.url);
   if (dark !== null) {
     report.verdict = 'stopped';
     return dark;
@@ -341,7 +340,7 @@ export async function actStep(
   run.typed = act.op === 'TYPE' ? cand.fp : null;
   if (act.op === 'TYPE' && reading.target?.op === 'TYPE') run.typedAt.set(reading.target.fill, report.n);
   run.current = next;
-  return unchangedStop(run, report.page_changed);
+  return unchangedStop(run, report.page_changed, ctx.env);
 }
 
 /**
@@ -386,20 +385,4 @@ function emptiedWords(act: StepAct, after: RunLook): string {
   if (norm(node.value ?? '') !== '') return '';
   const moved = after.tree.nodes.some((field) => isValueField(field) && holds(field.value ?? '', act.value ?? ''));
   return moved ? '' : '; the page emptied the field';
-}
-
-/**
- * Counts a step that moved the page (an act, a scroll) and ends the run once `UNCHANGED_MAX` in a row changed
- * nothing; a change resets the count.
- */
-export function unchangedStop(run: RunState, changed: boolean): RunStop | null {
-  run.unchanged = changed ? 0 : run.unchanged + 1;
-  if (run.unchanged < UNCHANGED_MAX) return null;
-  const changedNothing = `${UNCHANGED_MAX} steps in a row changed nothing on the page`;
-  // Only Orca's tab can be off screen; agent-browser's headless page takes input wherever it is.
-  const detail = run.page.backend === 'orca'
-    ? `${changedNothing}. Orca delivers clicks and keys only while its browser tab is on screen: bring the tab to the `
-      + 'front, then look again'
-    : changedNothing;
-  return { verdict: 'no_progress', cause: 'no_progress', detail };
 }

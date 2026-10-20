@@ -10,4 +10,6 @@ export interface AbProbeDeps {
   /** `agent-browser --version`, as text. */
   version: () => Promise<string>;
   features: () => ReadonlySet<BrowserCapability>;
+  /** The session a page command would drive (`--page`, `REFSURE_PAGE`, the default); throws on a bad name. */
+  session: () => string;
 }

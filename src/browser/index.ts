@@ -16,7 +16,8 @@ export { ACT_ACTIONS, CLICK_ACTIONS, FIELD_ACTIONS, isActAction, VALUE_ACTIONS }
 export { BrowserError, isBrowserError } from './browser-error';
 export { parseSnapshot, isRef } from './agent-browser-format';
 export { createOrcaBrowser } from './orca';
-export { createAgentBrowser, findAgentBrowserBinary } from './agent-browser';
+export type { HeadlessRerun } from './agent-browser';
+export { createAgentBrowser, findAgentBrowserBinary, headlessRerun } from './agent-browser';
 export { chooseBackend, createBrowser } from './choose-backend';
 export { namedPage } from './named-page';
 export { readsSelectors } from './reads-selectors';

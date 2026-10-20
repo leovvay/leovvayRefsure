@@ -20,7 +20,7 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
   };
   const port: BrowserPort = {
     backend: browser.backend,
-    probe: () => browser.probe(),
+    probe: (hint) => browser.probe(hint),
     features: () => browser.features(),
     resolvePage: (hint) => browser.resolvePage(hint),
     tabInfo: async (page: PageRef) => {

@@ -23,6 +23,7 @@ const UNKNOWN_COMMAND = /^Unknown command\b/i;
   running daemon it reaches, so it lives by agent-browser's own default: none on 0.27, 1 h from 0.33.) So every page
   call is checked with both first, and then runs as `batch [stream status, …verbs]`, which repeats the check inside
   the same daemon round trip: a browser that went away between the check and the call shows as `connected: false`.
+  Only the session the invocation names is ever asked: other agents' sessions are never sent a command.
 */
 
 /** Whether the daemon holds a live browser, from a `stream status` result. */
@@ -41,8 +42,11 @@ function statusError(message: string): BrowserError {
   return abError(message);
 }
 
-/** Session checks and guarded calls, bound to one runner. Concurrent checks of one session share one answer. */
-export function createSessionGuard(run: AbRun, batch: AbBatchRun): SessionGuard {
+/**
+ * Session checks and guarded calls, bound to one runner. Concurrent checks of one session share one answer. `bin`
+ * is the binary the runner spawns, named in the `open` command a `no_tab` hands over.
+ */
+export function createSessionGuard(run: AbRun, batch: AbBatchRun, bin: string | null): SessionGuard {
   const pending = new Map<string, Promise<SessionState>>();
 
   async function check(session: string): Promise<SessionState> {
@@ -68,7 +72,7 @@ export function createSessionGuard(run: AbRun, batch: AbBatchRun): SessionGuard 
     session: string, verbs: readonly (readonly string[])[], timeoutMs: number, onSpawn?: () => void,
   ): Promise<SessionReply> {
     const before = await state(session);
-    if (before !== 'running') throw sessionGone(session, before);
+    if (before !== 'running') throw sessionGone(session, before, bin);
     const [head, ...replies] = await batch(['--session', session], [STREAM_STATUS, ...verbs], timeoutMs, onSpawn);
     if (!head) throw new BrowserError('backend_error', 'agent-browser batch answered with no reply');
     // A failed client ran nothing; a failed `stream status` inside the batch cannot vouch for the browser.

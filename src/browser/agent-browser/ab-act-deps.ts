@@ -7,4 +7,6 @@ export interface AbActDeps {
   /** `SessionGuard.call`, bound to `session`. */
   call: (verbs: readonly (readonly string[])[], timeoutMs: number, onSpawn?: () => void) => Promise<SessionReply>;
   trace: RunTrace;
+  /** The binary refsure drives, named in the `open` command a `no_tab` hands over. */
+  bin: string | null;
 }

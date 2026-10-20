@@ -37,14 +37,16 @@ export const CAUSES: readonly CauseRow[] = [
   row('provider_error', 'unavailable', 'The provider failed or answered invalidly.'),
   row(
     'no_tab', 'unavailable',
-    'No browser tab: none is current, the page id is unknown, or the agent-browser session is closed.',
+    'No browser tab: none is current, the page id is unknown, or the agent-browser session is closed (next.argv '
+      + 'then opens it, headless).',
   ),
   row('orca_not_running', 'unavailable', 'Orca is not running, or its CLI could not be reached.'),
   row('browser_timeout', 'unavailable', 'A browser call timed out before anything was dispatched.'),
   row('browser_error', 'unavailable', 'The browser backend failed before anything was dispatched.'),
   row(
     'off_screen', 'unavailable',
-    'run: the tab rendered no frame, so it would take no click or key; nothing was sent. Bring the tab on screen.',
+    'run: the Orca tab is hidden and takes no input; nothing was sent. Rerun on your own headless agent-browser '
+      + 'session (next.argv opens it).',
   ),
   row('internal', 'unavailable', 'refsure hit an unexpected error before acting.'),
 

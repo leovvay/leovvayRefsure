@@ -1,4 +1,4 @@
-import type { CommandSpec, UsageError } from '../../cli';
+import { type CommandSpec, hintOf, type UsageError } from '../../cli';
 import { basicChecks } from './basic-checks';
 import { decisionChecks } from './decision-checks';
 import type { DoctorArgs } from './doctor.args';
@@ -23,10 +23,10 @@ export const doctorCommand: CommandSpec<DoctorArgs, DoctorResult> = {
   needs: { page: 'none', capabilities: [], sites: ['presence'], acts: 'never' },
   parse(raw): DoctorArgs | UsageError {
     if (raw.positionals.length > 0) return { usage: `doctor takes no positional arguments, got ${raw.positionals.length}` };
-    return { ping: raw.values.ping === true };
+    return { ping: raw.values.ping === true, page: hintOf(raw) };
   },
   async run(args, ctx) {
-    const checks = [...await basicChecks(ctx), ...await decisionChecks(ctx), skillCheck(ctx.env)];
+    const checks = [...await basicChecks(ctx, args.page), ...await decisionChecks(ctx), skillCheck(ctx.env)];
     if (args.ping) checks.push(...await pingChecks(ctx));
     const failed = checks.filter((check) => !check.ok).map((check) => check.name);
     return { status: 'ok', acted: false, effect: 'none', result: { checks, failed } };

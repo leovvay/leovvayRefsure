@@ -60,7 +60,7 @@ export async function dismissSessionDialog(deps: AbActDeps): Promise<boolean> {
   if (launched) {
     // A browser started during the call holds no dialog of the user's page; nothing of theirs was dismissed.
     if (!reply.ok && NO_DIALOG.test(reply.message)) deps.trace.dispatched = sent.before;
-    throw sessionGone(deps.session, 'launched');
+    throw sessionGone(deps.session, 'launched', deps.bin);
   }
   if (reply.ok) return true;
   if (NO_DIALOG.test(reply.message)) {
@@ -97,7 +97,7 @@ export async function pressSessionEnter(deps: AbActDeps, ref: Ref): Promise<ActR
 function launchedAct(deps: AbActDeps, reply: AbReply, before: boolean, value: string | undefined): ActResult {
   if (!reply.ok && refusedBeforeDispatch(reply.message)) {
     deps.trace.dispatched = before;
-    throw sessionGone(deps.session, 'launched');
+    throw sessionGone(deps.session, 'launched', deps.bin);
   }
   const detail = `the browser of agent-browser session "${deps.session}" went away during the act, and `
     + 'agent-browser started a new one, which received it';

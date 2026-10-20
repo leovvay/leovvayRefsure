@@ -1,5 +1,5 @@
 import { chooseBackend } from '../../browser';
-import type { BackendChoice, BackendHealth } from '../../browser';
+import type { BackendChoice, BackendHealth, PageHint } from '../../browser';
 import type { CommandContext } from '../../cli';
 import type { DoctorCheck } from './doctor-check';
 
@@ -12,14 +12,17 @@ function nodeCheck(version: string): DoctorCheck {
   return { name: 'node', ok, detail };
 }
 
-/** Which backend drives the browser, and why (spec §5.2; `REFSURE_BACKEND`, the Orca terminal, agent-browser). */
+/**
+ * Which backend drives the browser, and where the choice came from (spec §5.2): `REFSURE_BACKEND` when set, else the
+ * default (agent-browser wherever a binary is found, an Orca terminal included; Orca otherwise).
+ */
 function backendChoiceCheck(choice: BackendChoice): DoctorCheck {
   return { name: 'backend', ok: choice.backend !== null, detail: `${choice.backend ?? 'none'}: ${choice.why}` };
 }
 
 /**
  * The backend as `probe()` saw it. Orca's worktree is not part of it: the terminal check below reads `worktree`.
- * agent-browser's `detail` lists the open sessions, which `--page` names.
+ * agent-browser's `detail` names the one session it asked (`--page`, `REFSURE_PAGE`, the default) and lists the others.
  */
 function backendChecks(backend: string, health: BackendHealth): DoctorCheck[] {
   const runningOk = health.ok;
@@ -74,11 +77,11 @@ function transportCheck(transport: string): DoctorCheck {
  * terminal check. With no backend chosen (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no
  * backend to probe.
  */
-export async function basicChecks(ctx: CommandContext): Promise<DoctorCheck[]> {
+export async function basicChecks(ctx: CommandContext, page: PageHint): Promise<DoctorCheck[]> {
   const choice = chooseBackend(ctx.env);
   const node = nodeCheck(process.versions.node);
   if (choice.backend === null) return [node, backendChoiceCheck(choice)];
-  const health = await ctx.browser.probe();
+  const health = await ctx.browser.probe(page);
   const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health)];
   if (ctx.browser.backend === 'orca') checks.push(terminalCheck(health.worktree === true));
   if (health.transport) checks.push(transportCheck(health.transport));

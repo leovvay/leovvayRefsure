@@ -9,7 +9,7 @@ import { shortNumbers } from './element-table';
 import type { TableHints } from './element-table-shape';
 import type { RunArgs } from './run.args';
 import type { RunResult } from './run.contract';
-import { actStep, AGAIN_MS, keepTyped, stepActOf, unchangedStop } from './run-act-step';
+import { actStep, AGAIN_MS, keepTyped, stepActOf } from './run-act-step';
 import { abstainStop, ended, failedAfterAct, newFamilyStop } from './run-finish';
 import { newTextOf, readingOf, stepInput } from './run-input';
 import { look, lookOf } from './run-look';
@@ -22,6 +22,7 @@ import { levelUnknownStop } from './run-blocker';
 import { freshSettle, offScreenStop, settleFor } from './run-settle';
 import { withTableCut } from './run-table-cut';
 import { runTiming } from './run-timing';
+import { unchangedStop } from './run-unchanged';
 
 type Out = CommandOutcome<RunResult>;
 
@@ -67,7 +68,7 @@ async function idleStep(ctx: CommandContext, run: RunState, report: RunStepRepor
   const outcome = changeWords(report.page_changed);
   run.recent.push(recentLine(report, null, report.op === 'WAIT' ? `waited; ${outcome}` : outcome));
   keepTyped(run, was);
-  if (report.op === 'SCROLL_DOWN') return unchangedStop(run, report.page_changed);
+  if (report.op === 'SCROLL_DOWN') return unchangedStop(run, report.page_changed, ctx.env);
   if (report.page_changed) run.unchanged = 0;
   return null;
 }
@@ -248,7 +249,7 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   try {
     // A tab that rendered nothing during the first settle gets the frame check before the start level may click.
     if (settled !== null && settled.frames === 0) {
-      const dark = await offScreenStop(ctx, page, settling);
+      const dark = await offScreenStop(ctx, page, settling, tab.url);
       if (dark !== null) return ended(dark, false, result());
     }
     if (args.dismiss) {

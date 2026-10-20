@@ -13,8 +13,11 @@ import type { TabInfo } from './tab-info';
 /** The only way commands reach a browser (spec §5.2). Optional methods are gated by `features()`. */
 export interface BrowserPort {
   backend: 'orca' | 'agent-browser';
-  /** Binary, version, status, features; used by doctor. */
-  probe(): Promise<BackendHealth>;
+  /**
+   * Binary, version, status, features; used by doctor. agent-browser asks only the session `hint` names (else its
+   * default); Orca ignores it.
+   */
+  probe(hint?: PageHint): Promise<BackendHealth>;
   features(): ReadonlySet<BrowserCapability>;
   /** Orca: `--page` → `REFSURE_PAGE` → `tab current --worktree`. */
   resolvePage(hint: PageHint): Promise<PageRef>;

@@ -1,4 +1,4 @@
-import { isBrowserError, type PageRef, type Settled } from '../../browser';
+import { headlessRerun, isBrowserError, type PageRef, type Settled } from '../../browser';
 import type { CommandContext } from '../../cli';
 import { sleep } from '../shared';
 import type { RunStop } from './run-stop';
@@ -76,13 +76,16 @@ export async function settleFor(
 
 /**
  * Before an act: whether the tab renders at all. Orca delivers clicks and keys only to a tab that renders frames;
- * in one that renders none (not on screen in a worktree Orca does not show), every click, key and fill reports
+ * in one that renders none (hidden: in a worktree or pane Orca does not show), every click, key and fill reports
  * success while nothing reaches the page, or input is held and lands later on a page that has moved on. A frame
  * seen within `FRAME_FRESH_MS` (the settle after the last act) is enough; else one frame is waited for, up to
- * `FRAME_WAIT_MS`. None, or a wait the browser did not end in time: the stop, with nothing sent. Where the browser
- * cannot settle, no check.
+ * `FRAME_WAIT_MS`. None, or a wait the browser did not end in time: the stop, with nothing sent, and the way on is
+ * the agent's own headless session at `url`, never showing the tab (the human's screen is not the agent's). Where
+ * the browser cannot settle, no check.
  */
-export async function offScreenStop(ctx: CommandContext, page: PageRef, state: SettleState): Promise<RunStop | null> {
+export async function offScreenStop(
+  ctx: CommandContext, page: PageRef, state: SettleState, url: string,
+): Promise<RunStop | null> {
   if (state.frameAt !== null && ctx.now() - state.frameAt < FRAME_FRESH_MS) return null;
   if (ctx.browser.settle === undefined) return null;
   let frames: number;
@@ -98,9 +101,11 @@ export async function offScreenStop(ctx: CommandContext, page: PageRef, state: S
   }
   state.frameAt = null;
   const seconds = Math.round(FRAME_WAIT_MS / 1000);
-  return {
+  const rerun = headlessRerun(ctx.env, url, 'run');
+  const stop: RunStop = {
     verdict: 'stopped', cause: 'off_screen',
-    detail: `the tab rendered no frame in ${seconds} s: Orca delivers clicks and keys only to a tab on screen; nothing `
-      + `was sent. Bring it to the front (orca tab switch --page ${page.id} --focus) and run again`,
+    detail: `the Orca tab is hidden (no frame in ${seconds} s) and takes no input; nothing was sent. ${rerun.text}`,
   };
+  if (rerun.next !== null) stop.next = rerun.next;
+  return stop;
 }

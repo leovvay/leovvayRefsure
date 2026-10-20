@@ -6,21 +6,32 @@ import type { BrowserPort } from './browser-port';
 import { createOrcaBrowser } from './orca';
 
 /**
- * `REFSURE_BACKEND=orca|agent-browser` decides. Without it: an Orca terminal (`ORCA_WORKTREE_ID`) drives Orca;
- * elsewhere an agent-browser binary (on PATH, else the one Orca bundles) drives agent-browser sessions; with
- * neither, Orca, which then answers `not_in_orca_terminal`.
+ * `REFSURE_BACKEND=orca|agent-browser` decides. Without it, an agent-browser binary (on PATH, else the one Orca
+ * bundles) drives agent-browser sessions, in an Orca terminal too: Orca's tabs take no input while hidden, and an
+ * agent's own headless session never moves the human's screen. Orca drives only when named, or with no binary in an
+ * Orca terminal (`ORCA_WORKTREE_ID`); with neither, Orca, which then answers `not_in_orca_terminal`.
  */
 export function chooseBackend(env: NodeJS.ProcessEnv): BackendChoice {
   const raw = env.REFSURE_BACKEND?.trim() ?? '';
   const named = raw.toLowerCase();
-  if (named === 'orca' || named === 'agent-browser') return { backend: named, why: `REFSURE_BACKEND=${named}` };
+  if (named === 'orca' || named === 'agent-browser') {
+    return { backend: named, why: `REFSURE_BACKEND=${named} names it` };
+  }
   if (named !== '') {
     const why = `REFSURE_BACKEND=${JSON.stringify(raw.slice(0, 40))} names no backend: use orca or agent-browser`;
     return { backend: null, why };
   }
-  if (env.ORCA_WORKTREE_ID?.trim()) return { backend: 'orca', why: 'ORCA_WORKTREE_ID is set: an Orca terminal' };
+  const inOrca = Boolean(env.ORCA_WORKTREE_ID?.trim());
   const found = findAgentBrowserBinary(env);
-  if (found) return { backend: 'agent-browser', why: `ORCA_WORKTREE_ID is not set, and agent-browser is at ${found}` };
+  if (found && inOrca) {
+    const why = `default in an Orca terminal (REFSURE_BACKEND unset): agent-browser at ${found}, your own headless `
+      + 'session; REFSURE_BACKEND=orca drives Orca tabs instead';
+    return { backend: 'agent-browser', why };
+  }
+  if (found) return { backend: 'agent-browser', why: `default outside Orca: agent-browser at ${found}` };
+  if (inOrca) {
+    return { backend: 'orca', why: 'ORCA_WORKTREE_ID is set and no agent-browser binary was found: Orca tabs' };
+  }
   const why = 'ORCA_WORKTREE_ID is not set and no agent-browser binary was found: page commands answer '
     + 'not_in_orca_terminal';
   return { backend: 'orca', why };

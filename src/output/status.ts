@@ -10,5 +10,8 @@ export type NextDo = (typeof NEXT_DO)[number];
 /** `cause` and `next.do` are open sets; the installed version's values are listed by `refsure causes --json`. */
 export interface Why { cause: string; detail: string }
 
-/** `argv[0]` is always `refsure` or `orca`; `wait` carries `after_ms`. */
+/**
+ * `argv[0]` is `refsure` or `orca`, or for `open_session` the absolute agent-browser binary refsure drives; `wait`
+ * carries `after_ms`.
+ */
 export interface Next { do: NextDo; argv?: string[]; after_ms?: number }

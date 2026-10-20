@@ -22,7 +22,7 @@ import {
 } from './ab-runner';
 import { createSessionGuard } from './ab-session-guard';
 import { activeTabId } from './ab-tabs';
-import { checkedSession, resolveSession, sessionGone } from './resolve-session';
+import { checkedSession, resolveSession, sessionGone, sessionOf } from './resolve-session';
 
 // Values travel in a batch's JSON argv, taken literally; this only keeps the word well formed.
 const SELECTOR = /^\S[\s\S]{0,1999}$/;
@@ -48,7 +48,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
   const batch: AbBatchRun = async (args, commands, timeoutMs, onSpawn) => runAgentBrowserBatch(bin, args, commands, {
     env: childEnv, config: config(), timeoutMs, onSpawn,
   });
-  const guard = createSessionGuard(run, batch);
+  const guard = createSessionGuard(run, batch, bin);
   let features: ReadonlySet<BrowserCapability> | null = null;
   const featureSet = (): ReadonlySet<BrowserCapability> => {
     features ??= featuresFromHelp(bin ? helpTextSync(bin, childEnv) : null);
@@ -59,7 +59,7 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
   async function read(page: PageRef, verbs: readonly (readonly string[])[], onSpawn?: () => void): Promise<unknown[]> {
     const session = checkedSession(page.id);
     const answer = await guard.call(session, verbs, READ_TIMEOUT_MS, onSpawn);
-    if (answer.launched) throw sessionGone(session, 'launched');
+    if (answer.launched) throw sessionGone(session, 'launched', bin);
     return verbs.map((verb, i) => {
       const reply = answer.replies[i];
       if (!reply) throw new BrowserError('backend_error', `agent-browser batch gave no reply for ${verb[0] ?? '?'}`);
@@ -75,17 +75,20 @@ export function createAgentBrowser(opts: AgentBrowserOptions): BrowserPort {
 
   function actDeps(page: PageRef): AbActDeps {
     const session = checkedSession(page.id);
-    return { session, trace, call: (verbs, timeoutMs, onSpawn) => guard.call(session, verbs, timeoutMs, onSpawn) };
+    return {
+      session, trace, bin, call: (verbs, timeoutMs, onSpawn) => guard.call(session, verbs, timeoutMs, onSpawn),
+    };
   }
 
   return {
     backend: 'agent-browser',
-    probe: () => probeAgentBrowser({
+    probe: (hint) => probeAgentBrowser({
       bin, run, state: guard.state, features: featureSet,
       version: () => runAgentBrowserText(bin!, ['--version'], childEnv),
+      session: () => sessionOf(hint ?? {}, env),
     }),
     features: featureSet,
-    resolvePage: (hint) => resolveSession(hint, env, guard.state),
+    resolvePage: (hint) => resolveSession(hint, env, guard.state, bin),
 
     async tabInfo(page) {
       const [tabs, url, title] = await read(page, [['tab', 'list'], ['get', 'url'], ['get', 'title']]);

@@ -48,7 +48,8 @@ export function failureOutcome(error: unknown, dispatched: boolean): CommandOutc
   }
   if (isBrowserError(error)) {
     const { status, cause } = BROWSER_FAILURES[error.code] ?? BROWSER_FAILURES.backend_error;
-    return nothingDone(status, cause, clean(error.detail), cause === 'ref_gone' ? RE_OBSERVE : undefined);
+    const next = error.next ?? (cause === 'ref_gone' ? RE_OBSERVE : undefined);
+    return nothingDone(status, cause, clean(error.detail), next);
   }
   // `detail` alone: the message repeats the cause, which `why.cause` already carries.
   if (isConfigError(error)) return nothingDone('not_set_up', error.cause_, clean(error.detail));

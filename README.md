@@ -141,8 +141,10 @@ Each step is one look, one Jev Decision and at most one act:
    check finds the element with that very box at that point (or its own label there), in view, with nothing else
    drawn over it (a control, a plain element, one with the same box), carrying the name the guard read; any doubt,
    an element in a frame, and a second try of the same act, use agent-browser's click. Before any act, a tab that has drawn
-   no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: Orca delivers
-   input only to a tab on screen. `PRESS_ENTER` is offered only
+   no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: a hidden Orca tab
+   takes no input. Its detail names the agent's own headless session instead (the `open` command, also in
+   `next.argv`, then the same `run` with `REFSURE_BACKEND=agent-browser`); refsure never shows or focuses a tab.
+   `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
    is focused before the key. On Orca, a `TYPE` on a page where the count taken while the Decision was asked found
    no editable region and no input that takes no typed text (a date, time, range, colour or file input), into a
@@ -167,9 +169,9 @@ Each step is one look, one Jev Decision and at most one act:
    second (twice at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
-   third time, end it `no_progress` (on Orca, which delivers clicks only while its browser tab is on screen, the detail
-   says to bring the tab to the front; on agent-browser it does not); a tab that draws no frames ends it `off_screen`
-   before anything is sent.
+   third time, end it `no_progress` (on Orca, whose hidden tab takes no input, the detail says so and gives the
+   commands to rerun on the agent's own headless session; on agent-browser it does not); a tab that draws no frames
+   ends it `off_screen` before anything is sent.
 
 `run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
 offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
@@ -221,8 +223,13 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
 
 | Backend | Chosen when | The page (`--page`) |
 |---|---|---|
-| Orca's embedded browser, through the typed verbs of the `orca` CLI | `ORCA_WORKTREE_ID` is set (an Orca terminal), or `REFSURE_BACKEND=orca` | a browser page id; else `REFSURE_PAGE`, else this worktree's current tab |
-| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or outside an Orca terminal when an `agent-browser` binary is found | a session name; else `REFSURE_PAGE`, else the session `default` |
+| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or by default wherever an `agent-browser` binary is found, an Orca terminal included | a session name; else `REFSURE_PAGE`, else `bg-$ORCA_TERMINAL_HANDLE` in an Orca terminal, else the session `default` |
+| Orca's embedded browser, through the typed verbs of the `orca` CLI | `REFSURE_BACKEND=orca`, or in an Orca terminal (`ORCA_WORKTREE_ID`) when no `agent-browser` binary is found | a browser page id; else `REFSURE_PAGE`, else this worktree's current tab |
+
+Inside Orca the default is agent-browser because Orca's browser tabs take no input while hidden (a page loaded while
+parked never paints, and clicks are dropped), and showing one would move the human's screen. An agent's own headless
+session runs in a Chrome that never comes to the front. Set `REFSURE_BACKEND=orca` to drive Orca's tabs, for example
+when the human wants to watch.
 
 - **Orca:** refsure looks for the binary in `$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then
   `/Applications/Orca.app/Contents/Resources/bin/orca` (an executable file; a directory of that name does not
@@ -238,13 +245,22 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
   runtime token goes only to that socket.
   `refsure doctor` names the transport in its `orca_transport` check.
 - **agent-browser:** refsure uses `agent-browser` on `PATH` first, then the copy Orca bundles
-  (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). It drives only a session you opened
-  yourself, and acts on that session's active tab:
+  (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). A node wrapper on `PATH` (Homebrew's
+  `agent-browser` is one) is read as the native build kept beside its real file, `agent-browser-<platform>-<arch>`:
+  the same version, without about 50 ms of node start per call. It drives only a session you opened yourself, and
+  acts on that session's active tab:
 
   ```sh
   agent-browser --session work open https://example.com
   refsure state --page work --expect "the example home page"
   ```
+
+  With no `--page` or `REFSURE_PAGE`, an Orca terminal's session is `bg-$ORCA_TERMINAL_HANDLE`, so agents in
+  parallel terminals never share one; elsewhere it is `default`. A session that is not running answers `no_tab` with
+  `next: {do: "open_session", argv: [<the absolute binary refsure drives>, "--session", <name>, "open", "<url>"]}`:
+  the agent runs it with its own URL. It names the very binary refsure spawns, because a daemon started by another
+  agent-browser version restarts (and loses its browser) when this one reaches it. refsure itself still never opens
+  or navigates anything.
 
   agent-browser launches a browser for any page command on a session that has none, and its reply does not say
   so. So before every page call refsure checks that the session's browser is running, with two calls that never
@@ -252,21 +268,24 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
   (exit 20) and no browser is started. The call itself runs as one `batch` that repeats that check: if the browser
   went away in the instant between, agent-browser starts a new one to answer, and refsure discards the answer
   (`no_tab`, or `effect_unknown` for an act that may have reached it). A session closed a moment before refsure's
-  check or call can make agent-browser start a new daemon for it; a daemon refsure's call starts has a 0.5 s idle
-  timeout, so that one exits by itself (open the session again a second later, not at once, or your `open` lands in
-  it and ends with it). A daemon of yours whose browser died in that instant keeps the new browser; close it with
-  `agent-browser --session <name> close`. The check needs `stream status` (agent-browser 0.27). Each
-  page call costs two agent-browser round trips (about 0.3 s). The capabilities come from `agent-browser --help`.
+  check or call can make agent-browser start a new daemon for it. refsure sets that daemon no idle timeout: from
+  0.33, a call that carries `AGENT_BROWSER_IDLE_TIMEOUT_MS` other than a running daemon's own restarts that daemon and
+  closes its browser, so refsure never sends one. Such a daemon lives by agent-browser's own default (none on 0.27,
+  1 h from 0.33); your next `open` on that session reuses it, and `agent-browser --session <name> close` ends it.
+  The check needs `stream status` (agent-browser 0.27). Each page call costs two agent-browser round trips (about
+  0.3 s on 0.27, far less from 0.27.2). The capabilities come from `agent-browser --help`.
 
   agent-browser also sends launch settings (a profile, headed, a CDP target, auto-connect, a proxy) with every
   command, and a daemon whose session was launched with other values relaunches its browser to match. So refsure
   passes `--config` with an empty file of its own (no `~/.agent-browser/config.json`, no `./agent-browser.json` from
   its working directory) and none of agent-browser's environment (`AGENT_BROWSER_*` apart from the socket directory,
-  `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY`). It sends no launch setting, so it never relaunches a
-  session with other ones, and a browser started in the race above gets agent-browser's defaults (headless, a fresh
-  profile) or, in a daemon of yours, that daemon's own settings.
+  `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY`, the idle timeout). It sends no launch setting, so it never
+  relaunches a session with other ones, and a browser started in the race above gets agent-browser's defaults
+  (headless, a fresh profile) or, in a daemon of yours, that daemon's own settings.
 - With neither (no Orca terminal, no `agent-browser` binary), refsure falls back to Orca, which answers
   `not_in_orca_terminal`.
+- `refsure doctor` asks only the session a page command would drive (`--page`, `REFSURE_PAGE`, the default). Other
+  listed sessions are named, never sent a command, so doctor cannot disturb another agent's browser.
 - `REFSURE_BACKEND` set to anything but `orca` or `agent-browser` chooses no backend: page commands answer
   `backend_unknown` (not_set_up, exit 23), and `doctor` shows only that failed check.
 
@@ -386,8 +405,9 @@ if you had granted nothing, because anyone who can write it could grant on your 
   provider you granted.
 - `refsure privacy` prints the disclosure, its hash, your grants and which key source each provider uses (by name,
   never by value).
-- `refsure doctor` checks Node, the chosen browser backend (the `orca` or `agent-browser` binary, and its open
-  sessions), keys (by name), consent, the config file mode, model drift and the installed skill. On Orca, its
+- `refsure doctor` checks Node, the chosen browser backend and where the choice came from (the `orca` or
+  `agent-browser` binary, and the one session a page command would drive), keys (by name), consent, the config file
+  mode, model drift and the installed skill. On Orca, its
   `orca_terminal` check reports the worktree (`ORCA_WORKTREE_ID`) on its own: a terminal outside Orca fails that
   check, and `orca_running` still reports Orca itself; `orca_transport` says whether calls take the runtime socket
   or spawn the CLI, and why. `refsure doctor --ping` sends one synthetic Decision per configured provider.
@@ -876,10 +896,11 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `expect_name_mismatch` | `stale` | 12 | The live ref shows another name than --expect-name; nothing was done. |
 | `provider_timeout` | `unavailable` | 20 | The provider did not answer within its time budget. |
 | `provider_error` | `unavailable` | 20 | The provider failed or answered invalidly. |
-| `no_tab` | `unavailable` | 20 | No browser tab: none is current, the page id is unknown, or the agent-browser session is closed. |
+| `no_tab` | `unavailable` | 20 | No browser tab: none is current, the page id is unknown, or the agent-browser session is closed (next.argv then opens it, headless). |
 | `orca_not_running` | `unavailable` | 20 | Orca is not running, or its CLI could not be reached. |
 | `browser_timeout` | `unavailable` | 20 | A browser call timed out before anything was dispatched. |
 | `browser_error` | `unavailable` | 20 | The browser backend failed before anything was dispatched. |
+| `off_screen` | `unavailable` | 20 | run: the Orca tab is hidden and takes no input; nothing was sent. Rerun on your own headless agent-browser session (next.argv opens it). |
 | `internal` | `unavailable` | 20 | refsure hit an unexpected error before acting. |
 | `unsupported` | `unsupported_by_backend` | 21 | The browser backend lacks a capability this command needs, or cannot send this input; a retry will not help. |
 | `spend_limit` | `spend_limit` | 22 | The per-minute Decision cap or the daily spend cap was reached. |
@@ -895,8 +916,9 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `usage` | `usage` | 64 | The command line was not valid; nothing was done. |
 
 `next.do` is one of `act`, `act_high_risk`, `dismiss`, `state`, `wait` (with `after_ms`), `snapshot`,
-`retry_within`, `needs_human` or `stop`; `causes --json` lists the installed version's values as `next_do`. `argv[0]` is
-always `refsure` or `orca`. Free text in an `argv` (an expectation, a name, an intent) is one `--flag=<text>` token,
+`retry_within`, `open_session`, `needs_human` or `stop`; `causes --json` lists the installed version's values as
+`next_do`. `argv[0]` is `refsure` or `orca`, or for `open_session` the absolute `agent-browser` binary refsure drives
+(the agent puts its URL in place of `<url>`). Free text in an `argv` (an expectation, a name, an intent) is one `--flag=<text>` token,
 as in `--expect=-5% off`: the parser refuses a separate value that starts with `-`. Pass such text the same way.
 
 **Compatibility.** `refsure` in the envelope is the schema major. Within a major, fields are only added, never renamed
