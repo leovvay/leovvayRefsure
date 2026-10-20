@@ -18,13 +18,17 @@ export function checkedSession(name: string): string {
   return name;
 }
 
+/** Characters of the Orca terminal handle (after `term_`) that name its sessions, as the background-browsing skill does. */
+const HANDLE_CHARS = 8;
+
 /**
- * The session when neither `--page` nor `REFSURE_PAGE` names one: `bg-<ORCA_TERMINAL_HANDLE>` in an Orca terminal
- * (`term_<uuid>` gives 44 characters), so agents in parallel terminals never share one; else `default`. A handle
- * that makes no valid name also falls back to `default`.
+ * The session when neither `--page` nor `REFSURE_PAGE` names one: `bg-<first 8 of ORCA_TERMINAL_HANDLE without
+ * term_>` in an Orca terminal, the prefix the background-browsing skill's `bg-<id>-<rand>-<task>` names start with,
+ * so agents in parallel terminals never share one; else `default`. A handle that makes no valid name also falls back
+ * to `default`.
  */
 export function defaultSession(env: NodeJS.ProcessEnv): string {
-  const handle = env.ORCA_TERMINAL_HANDLE?.trim() ?? '';
+  const handle = (env.ORCA_TERMINAL_HANDLE?.trim() ?? '').replace(/^term_/, '').slice(0, HANDLE_CHARS);
   const own = `bg-${handle}`;
   return handle !== '' && SESSION_NAME.test(own) ? own : DEFAULT_SESSION;
 }
@@ -67,7 +71,8 @@ export function sessionGone(
 ): BrowserError {
   const argv = bin === null ? null : openCommand(bin, session);
   const how = argv === null ? `agent-browser --session ${session} open ${URL_PLACEHOLDER}` : argv.join(' ');
-  const reopen = `open it yourself, headless (${how}; next.argv, with your URL), or name another with --page`;
+  const reopen = `if you already opened your own session, pass it with --page instead; else open this one yourself, `
+    + `headless (${how}; next.argv, with your URL)`;
   const detail: Record<typeof state, string> = {
     closed: `no agent-browser session "${session}" is open: ${reopen}`,
     no_browser: `agent-browser session "${session}" is listed, but its browser is not running; refsure never `

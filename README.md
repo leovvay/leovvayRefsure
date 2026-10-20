@@ -223,7 +223,7 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
 
 | Backend | Chosen when | The page (`--page`) |
 |---|---|---|
-| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or by default wherever an `agent-browser` binary is found, an Orca terminal included | a session name; else `REFSURE_PAGE`, else `bg-$ORCA_TERMINAL_HANDLE` in an Orca terminal, else the session `default` |
+| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or by default wherever an `agent-browser` binary is found, an Orca terminal included | a session name; else `REFSURE_PAGE`, else `bg-<first 8 characters of $ORCA_TERMINAL_HANDLE without term_>` in an Orca terminal, else the session `default` |
 | Orca's embedded browser, through the typed verbs of the `orca` CLI | `REFSURE_BACKEND=orca`, or in an Orca terminal (`ORCA_WORKTREE_ID`) when no `agent-browser` binary is found | a browser page id; else `REFSURE_PAGE`, else this worktree's current tab |
 
 Inside Orca the default is agent-browser because Orca's browser tabs take no input while hidden (a page loaded while
@@ -255,8 +255,9 @@ when the human wants to watch.
   refsure state --page work --expect "the example home page"
   ```
 
-  With no `--page` or `REFSURE_PAGE`, an Orca terminal's session is `bg-$ORCA_TERMINAL_HANDLE`, so agents in
-  parallel terminals never share one; elsewhere it is `default`. A session that is not running answers `no_tab` with
+  With no `--page` or `REFSURE_PAGE`, an Orca terminal's session is `bg-<first 8 characters of the handle without
+  term_>` (the prefix of the background-browsing skill's `bg-<id>-<rand>-<task>` names), so agents in parallel
+  terminals never share one; elsewhere it is `default`. Parallel agents in one terminal each pass their own `--page`. A session that is not running answers `no_tab` with
   `next: {do: "open_session", argv: [<the absolute binary refsure drives>, "--session", <name>, "open", "<url>"]}`:
   the agent runs it with its own URL. It names the very binary refsure spawns, because a daemon started by another
   agent-browser version restarts (and loses its browser) when this one reaches it. refsure itself still never opens

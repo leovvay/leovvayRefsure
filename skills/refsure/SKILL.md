@@ -99,7 +99,7 @@ is the exact command. Unknown `next.do`: `needs_human`.
 
 ## 7. Setup
 
-- Run `refsure doctor` only on a setup cause (exit 23, 24, `orca_not_running`, `no_tab`); `skill_stale`: tell the human.
+- Run `refsure doctor` only on a setup cause (exit 23, 24, `orca_not_running`, `no_tab`); `skill_stale`: name it once in your final answer; go on.
 - On `not_set_up` (exit 23), never block: do the task with plain `agent-browser --session <id>` commands and say once
   in your final answer that the human can run `refsure setup` in their own terminal. Never run `setup` yourself,
   never type its consent phrase, and never ask for, read, print or paste an API key.
@@ -128,8 +128,8 @@ is the exact command. Unknown `next.do`: `needs_human`.
 | `stalled` (abstained, 10) | The page stopped changing before it showed what you expected. If it asks for one more thing, do only that; else report it as it stands. Wait again (`wait-for --timeout <longer> --stall <longer>`) only for a time the human named |
 | `done_unconfirmed`, `blocked`, `no_progress`, `budget` (abstained, 10) | `run` stopped short (exit 30 once it acted). Read `result.steps` and `new_text`, then `state`: report what shows, or hand over only what is left. `no_progress` on Orca: the tab is hidden; rerun on your own session as the detail says |
 | `veto` (refused, 11) | The pick would accept, subscribe or enable something. Never click it: `dismiss` (it rejects or closes) or go on without it. (`run` first tries one dismiss level on a pop-up the pick sits in, at most 2 per run: `result.blockers`) |
-| `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, ask the human |
-| `provider_not_allowed`, `origin_denied`, `oversize` (refused, 11) | A provider the human has not set up, a site their config blocks, or input too large. Tell the human; do not work around it |
+| `high_risk_class` (refused, 11) | Money, irreversible, auth or consent. Only `act-high-risk`, only when the human asked for it. With no `argv` in `next`, never act on it. Put `Needs a human: <URL> - <action>` in your final answer and go on with the rest |
+| `provider_not_allowed`, `origin_denied`, `oversize` (refused, 11) | A provider the human has not set up, a site their config blocks, or input too large. Do that step with plain `agent-browser --session <id>` (no Decision is sent) and name the cause once in your final answer |
 | `ambiguous_option` (refused, 11) | Two options read the same; refsure will not pick. Narrow by the task's words (`--want`); if two still fit, report both |
 | `expect_name_mismatch`, `page_changed`, `ref_gone`, `ticket_expired`, `ticket_used` (stale, 12) | Nothing was done (a name mismatch: the ref shows another name than you gave). `locate` again for a fresh ticket, or snapshot again. Never reuse a ticket |
 | `effect_unknown` (30) | The action was sent but not confirmed. Re-observe before repeating anything |
@@ -139,12 +139,12 @@ is the exact command. Unknown `next.do`: `needs_human`.
 ## 10. Your own headless session (never the human's screen)
 
 - Headless Chrome never comes to the front. Never focus, reveal, switch, create or close an Orca tab (no `orca tab`,
-  `orca goto|click|fill`, `orca computer`), never `open <url>` or `agent-browser --headed`, never ask to show a tab.
+  `orca goto|click|fill`, `orca computer`), never `open` or `agent-browser --headed`, never ask to show a tab.
 - refsure drives agent-browser wherever a binary is found, in Orca too (`doctor` says why; `REFSURE_BACKEND=orca` only
-  when the human asks to watch an Orca tab). The page is a session: `--page`, then `REFSURE_PAGE`, then
-  `bg-$ORCA_TERMINAL_HANDLE` in an Orca terminal, else `default`. Parallel agents in one terminal: one `bg-<task>` each.
+  when the human asks to watch an Orca tab). The page is a session: `--page`, then `REFSURE_PAGE`, then `bg-<first 8
+  of the handle>` in an Orca terminal, else `default`. Parallel agents: each its own session, named as the
+  background-browsing skill says (`bg-<id>-<rand>-<task>`), passed with `--page`.
 - refsure never opens or navigates: open the session yourself (`no_tab` puts the command in `next.argv`), use it for
-  your own calls too (`tab list`, `tab <n>` for a popup; a ticket keeps the tab it saw, else `page_changed`), and
-  `close` it when done. Form input: `do --fill` or `fill @eN "<value>"`, never `type` or `keypress`.
+  your own calls (`tab list`, then `tab <id>` it prints, e.g. `t2`, for a popup; a ticket keeps its tab, else `page_changed`) and `close` it. Form input: `do --fill` or `fill @eN "<value>"`, never `type`.
 - A fresh session is not logged in. refsure never logs in, solves a bot check or navigates; `login_wall` and
   `bot_challenge` go to the human (`needs_human`): report the URL and what is needed, and go on with the rest.
