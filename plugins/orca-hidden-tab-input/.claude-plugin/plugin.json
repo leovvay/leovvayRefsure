@@ -1,0 +1,19 @@
+{
+  "name": "orca-hidden-tab-input",
+  "version": "0.1.0",
+  "description": "Lets agents click and type in Orca browser tabs that are not on screen, without switching the view",
+  "author": {
+    "name": "Vladyslav Leonchyk",
+    "url": "https://github.com/leovvay"
+  },
+  "homepage": "https://github.com/leovvay/leovvayRefsure",
+  "repository": "https://github.com/leovvay/leovvayRefsure",
+  "license": "MIT",
+  "keywords": [
+    "orca",
+    "browser",
+    "hooks",
+    "agents",
+    "codex"
+  ]
+}

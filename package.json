@@ -9,6 +9,9 @@
   "files": [
     "dist",
     "skills",
+    "plugins/orca-hidden-tab-input",
+    "!plugins/**/__pycache__",
+    "!plugins/**/*.pyc",
     "README.md",
     "LICENSE",
     "SECURITY.md"
@@ -18,6 +21,14 @@
   },
   "license": "MIT",
   "author": "Vladyslav Leonchyk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leovvay/leovvayRefsure.git"
+  },
+  "homepage": "https://github.com/leovvay/leovvayRefsure#readme",
+  "bugs": {
+    "url": "https://github.com/leovvay/leovvayRefsure/issues"
+  },
   "keywords": [
     "orca",
     "agent-browser",

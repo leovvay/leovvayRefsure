@@ -1,0 +1,15 @@
+{
+  "name": "refsure",
+  "owner": {
+    "name": "Vladyslav Leonchyk",
+    "url": "https://github.com/leovvay"
+  },
+  "description": "Claude Code plugins that ship with refsure, for agents driving Orca's embedded browser",
+  "plugins": [
+    {
+      "name": "orca-hidden-tab-input",
+      "source": "./plugins/orca-hidden-tab-input",
+      "description": "Lets agents click and type in Orca browser tabs that are not on screen, without switching the view"
+    }
+  ]
+}

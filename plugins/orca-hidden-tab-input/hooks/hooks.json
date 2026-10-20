@@ -1,0 +1,17 @@
+{
+  "description": "Paint a hidden Orca browser page before an agent clicks or types in it",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/orca-hidden-tab-input.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

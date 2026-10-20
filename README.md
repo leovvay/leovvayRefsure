@@ -141,10 +141,8 @@ Each step is one look, one Jev Decision and at most one act:
    check finds the element with that very box at that point (or its own label there), in view, with nothing else
    drawn over it (a control, a plain element, one with the same box), carrying the name the guard read; any doubt,
    an element in a frame, and a second try of the same act, use agent-browser's click. Before any act, a tab that has drawn
-   no frame for 2 s gets up to 3 s to draw one, else the run stops `off_screen` with nothing sent: a hidden Orca tab
-   takes no input. Its detail names the agent's own headless session instead (the `open` command, also in
-   `next.argv`, then the same `run` with `REFSURE_BACKEND=agent-browser`); refsure never shows or focuses a tab.
-   `PRESS_ENTER` is offered only
+   no frame for 2 s has its page painted if it never was (see [Backends](#backends)), and the act goes on; refsure
+   never shows or focuses a tab. `PRESS_ENTER` is offered only
    where what Enter does can be read (a field in a form the page names, a search or suggestion box), and the field
    is focused before the key. On Orca, a `TYPE` on a page where the count taken while the Decision was asked found
    no editable region and no input that takes no typed text (a date, time, range, colour or file input), into a
@@ -157,7 +155,8 @@ Each step is one look, one Jev Decision and at most one act:
 5. **Settle and look.** On Orca, until the page has drawn a frame and no finite animation runs (up to 1.2 s; one
    read-only `eval` that reads a frame and an animation count, never page text; after two waits in a row hit the
    cap, animations that never stop or a tab drawing about once a second, each wait is for one frame; after a `TYPE`
-   into a combobox, a frame only); elsewhere 50 ms. Then the next look, taken again while it
+   into a combobox, a frame only; once a wait of 1 s or more saw no frame, as in a hidden tab, which draws none even
+   once painted, each wait is for one frame, up to 50 ms, until a frame shows); elsewhere 50 ms. Then the next look, taken again while it
    shows the page as it was (up to 600 ms); after an act that opens or closes something (a click on an option, a
    menu item, a combobox or in a dialog, Enter, or any act after which a dialog or a tooltip came or went), one more
    look. A look a navigating page refuses is taken again for up to a second. After a `TYPE` into a combobox the look
@@ -169,9 +168,7 @@ Each step is one look, one Jev Decision and at most one act:
    second (twice at most per step), and not at all when it does not.
 6. **Stop rules.** `--max-steps` (25) or `--timeout` (90s) end it `budget` (the `--text` rule still reads the last
    look); three acts or scrolls in a row that change nothing, or the same act on the same element on one page a
-   third time, end it `no_progress` (on Orca, whose hidden tab takes no input, the detail says so and gives the
-   commands to rerun on the agent's own headless session; on agent-browser it does not); a tab that draws no frames
-   ends it `off_screen` before anything is sent.
+   third time, end it `no_progress`.
 
 `run` types only `--fill` values; Jev picks which value goes into which field, and a value a field already shows is
 offered no `TYPE`. The values reach the provider (see [What leaves your machine](#what-leaves-your-machine)), so
@@ -195,12 +192,13 @@ Write the goal as a person would ask it, and give every value the task names as 
 date pickers take a typed date, confirmed with Enter). For a field that suggests as you type, the value is one word
 of the site's own name or a code (`Charleroi`, `WAW`), never two words the site joins with a hyphen (`Bruksela
 Charleroi` matches nothing in `Bruksela-Charleroi`). `REFSURE_RUN_TIMING=1` writes one line per step to stderr:
-the time by phase (decide, frame, recheck, raisers, act, settle, look, blocker), each page call, the provider's ms
+the time by phase (decide, paint, recheck, raisers, act, settle, look, blocker), each page call, the provider's ms
 and how each click went (`native` or `fallback:<why>`), with no page text. The first line also has `warm`: when the
 connection to the provider was opened (`at`, ms into the run), when TLS was up (`tls`) and when the first Decision
 took it (`taken`), both ms after that, and how long the Decision waited for TLS (`waited`). Known limits,
-as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab takes no input; a
-date the picker has not rendered yet takes its Next button, step by step.
+as jev-ultrafast's: frames, canvas, uploads, new tabs and keyboard-only widgets; a hidden Orca tab draws no animation
+frame, so a menu or dialog that waits for one can get stuck; a date the picker has not rendered yet takes its Next
+button, step by step.
 
 The next-step rules of the `step` wording follow those of
 [browser-use/jev-ultrafast](https://github.com/browser-use/jev-ultrafast) (MIT), reworded in refsure's style; the
@@ -223,13 +221,28 @@ refsure drives one of two browser backends. `refsure doctor` names the one it ch
 
 | Backend | Chosen when | The page (`--page`) |
 |---|---|---|
-| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or by default wherever an `agent-browser` binary is found, an Orca terminal included | a session name; else `REFSURE_PAGE`, else `bg-<first 8 characters of $ORCA_TERMINAL_HANDLE without term_>` in an Orca terminal, else the session `default` |
-| Orca's embedded browser, through the typed verbs of the `orca` CLI | `REFSURE_BACKEND=orca`, or in an Orca terminal (`ORCA_WORKTREE_ID`) when no `agent-browser` binary is found | a browser page id; else `REFSURE_PAGE`, else this worktree's current tab |
+| Orca's embedded browser, through the typed verbs of the `orca` CLI | by default in an Orca terminal (`ORCA_WORKTREE_ID`), or `REFSURE_BACKEND=orca` | a browser page id, the agent's own tab; else `REFSURE_PAGE`, else this worktree's current tab |
+| A standalone `agent-browser` session | `REFSURE_BACKEND=agent-browser`, or by default outside an Orca terminal when an `agent-browser` binary is found | a session name; else `REFSURE_PAGE`, else `bg-<first 8 characters of $ORCA_TERMINAL_HANDLE without term_>` in an Orca terminal, else the session `default` |
 
-Inside Orca the default is agent-browser because Orca's browser tabs take no input while hidden (a page loaded while
-parked never paints, and clicks are dropped), and showing one would move the human's screen. An agent's own headless
-session runs in a Chrome that never comes to the front. Set `REFSURE_BACKEND=orca` to drive Orca's tabs, for example
-when the human wants to watch.
+In an Orca terminal the agent works in its own tab of Orca's browser. It opens one with `orca tab create`, which
+does not switch to it, and passes the `browserPageId` it gets as `--page`:
+
+```sh
+orca tab create --worktree "id:$ORCA_WORKTREE_ID" --url https://example.com --json
+refsure state --page <browserPageId> --expect "the example home page"
+```
+
+Without `--page` or `REFSURE_PAGE`, refsure drives the worktree's current tab, which can be the one the human is
+looking at. refsure never shows, focuses or switches to a tab, so the agent's tab usually stays hidden. A page loaded
+in a hidden tab never paints, and then Orca answers `ok` to a click or a key that never reaches the page, or holds a
+check for about 5.5 s (Orca 1.4.230). So before the inputs such a page would drop or hold (a click, double click,
+check, uncheck, Enter, and a fill that goes as agent-browser's own), refsure asks the page how many paint entries it has
+(one read-only `eval` of `performance.getEntriesByType('paint').length` and the document's time origin). When the
+answer is 0, it paints the page once with a quality-1 JPEG screenshot through Orca, which paints the page for the
+capture without showing the tab. The file goes to a new temporary folder that is deleted at once; refsure never reads
+it and never sends it. Each call has a 5 s limit, and a probe or capture that fails leaves the page as it was. The
+[Orca hook](#orca-hook-input-in-hidden-tabs) does the same for the agent's own `orca` commands. Set
+`REFSURE_BACKEND=agent-browser` to drive an agent-browser session instead.
 
 - **Orca:** refsure looks for the binary in `$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then
   `/Applications/Orca.app/Contents/Resources/bin/orca` (an executable file; a directory of that name does not
@@ -255,9 +268,10 @@ when the human wants to watch.
   refsure state --page work --expect "the example home page"
   ```
 
-  With no `--page` or `REFSURE_PAGE`, an Orca terminal's session is `bg-<first 8 characters of the handle without
-  term_>` (the prefix of the background-browsing skill's `bg-<id>-<rand>-<task>` names), so agents in parallel
-  terminals never share one; elsewhere it is `default`. Parallel agents in one terminal each pass their own `--page`. A session that is not running answers `no_tab` with
+  With no `--page` or `REFSURE_PAGE`, the session in an Orca terminal (with `REFSURE_BACKEND=agent-browser`) is
+  `bg-<first 8 characters of the handle without term_>` (the prefix of the background-browsing skill's
+  `bg-<id>-<rand>-<task>` names), so agents in parallel terminals never share one; elsewhere it is `default`.
+  Parallel agents in one terminal each pass their own `--page`. A session that is not running answers `no_tab` with
   `next: {do: "open_session", argv: [<the absolute binary refsure drives>, "--session", <name>, "open", "<url>"]}`:
   the agent runs it with its own URL. It names the very binary refsure spawns, because a daemon started by another
   agent-browser version restarts (and loses its browser) when this one reaches it. refsure itself still never opens
@@ -470,6 +484,10 @@ its role alone. Any element whose name is part of a typed line and shows nowhere
 its role alone: a link or chip inside a region, and an icon-only "Send" button too when the region holds "send".
 When the regions cannot be read, any element is named by its role alone.
 
+**Local only.** On Orca, refsure may take one screenshot of a page that has never painted, only to paint it (see
+[Backends](#backends)): a quality-1 JPEG in a new temporary folder, deleted right after the capture. refsure never
+reads it, logs it or sends it.
+
 **Before anything is sent:**
 
 - secret shapes (cloud, VCS, payment, messaging and AI provider keys, JWTs, private keys, `Bearer` tokens,
@@ -516,7 +534,7 @@ This reference is generated from `refsure commands --json` and `refsure causes -
 
 Global options, accepted by every command:
 
-- `--page <value>`: Orca page id, or agent-browser session name; else REFSURE_PAGE, else the worktree's current tab (agent-browser: the session default)
+- `--page <value>`: Orca page id (your own tab), or agent-browser session name; else REFSURE_PAGE, else the worktree's current tab (agent-browser: bg-<first 8 of the Orca terminal handle>, else default)
 - `--dry-run`: Print the exact redacted request; send nothing, do nothing
 - `--help, -h`: Show this command's options
 - `--json`: Accepted and ignored: output is one JSON envelope (skill print: the file itself)
@@ -901,7 +919,6 @@ Every `why.cause` refsure emits, from `refsure causes --json`. An unknown cause 
 | `orca_not_running` | `unavailable` | 20 | Orca is not running, or its CLI could not be reached. |
 | `browser_timeout` | `unavailable` | 20 | A browser call timed out before anything was dispatched. |
 | `browser_error` | `unavailable` | 20 | The browser backend failed before anything was dispatched. |
-| `off_screen` | `unavailable` | 20 | run: the Orca tab is hidden and takes no input; nothing was sent. Rerun on your own headless agent-browser session (next.argv opens it). |
 | `internal` | `unavailable` | 20 | refsure hit an unexpected error before acting. |
 | `unsupported` | `unsupported_by_backend` | 21 | The browser backend lacks a capability this command needs, or cannot send this input; a retry will not help. |
 | `spend_limit` | `spend_limit` | 22 | The per-minute Decision cap or the daily spend cap was reached. |
@@ -1135,7 +1152,7 @@ The skill teaches an agent when to call which verb and how to read the envelope.
 Codex:
 
 ```sh
-npx --yes skills add https://github.com/kma-leovvay/leovvayRefsure --skill refsure --global --agent claude-code --agent codex -y
+npx --yes skills add https://github.com/leovvay/leovvayRefsure --skill refsure --global --agent claude-code --agent codex -y
 ```
 
 Or print the copy bundled with your installed binary and put it where your agent loads skills. `skill print` writes
@@ -1161,6 +1178,186 @@ under `~/.claude/skills/refsure/`, `~/.codex/skills/refsure/` and `~/.agents/ski
 
 Minor details come from `refsure commands --json` at run time, so a skill installed from the repository and a pinned
 npm binary can drift safely.
+
+## Orca hook: input in hidden tabs
+
+refsure paints a hidden page itself before its own acts (see [Backends](#backends)). An agent that also drives Orca's
+browser with its own `orca` commands meets the same problem: when its tab is not on screen, some of its clicks and
+keys silently do nothing, and a few commands hang the tab. The usual way out, `orca tab switch --focus`, takes the
+human's view with it. The repository ships a hook for Claude Code and Codex, `orca-hidden-tab-input`, that makes that
+input land in a tab nobody is looking at. It adds behaviour and takes nothing away: it never blocks or rewrites a
+command.
+
+Upstream tracks the problem as [stablyai/orca#27309](https://github.com/stablyai/orca/issues/27309), with a proposed
+fix in [#27310](https://github.com/stablyai/orca/pull/27310). The hook is a stopgap until Orca fixes it. When that
+happens, the hook only costs its 0.2 s check.
+
+### The problem, measured
+
+Orca hides browser tabs that are off screen with `display:none`. A page that loads while its tab is hidden (any new
+page load; measured after `orca goto`) is never painted. Chromium drops, delays or stalls input sent to a page that
+has never painted, and Orca usually still answers `ok: true`.
+
+Measured on Orca 1.4.230 (macOS) for each input command, on a page loaded in a hidden tab. Each row held in two runs
+(`select-all`: one valid run without a paint; `mouse wheel`: one run after a paint); the right column was painted
+with `orca screenshot`. A final run in which the hook itself painted the page gave the same right column for every
+command the hook handles except `uncheck` and `download`, which that run did not include:
+
+| Command | Page never painted, no hook | After one paint |
+| --- | --- | --- |
+| `click`, `dblclick`, `find ... --action click`, `exec "click ..."` | `ok: true` after about 5.5 s; the page sees a `mouseover` but no `mousedown` or `click` | lands in about 0.3 s |
+| `mouse move` / `down` / `up` | `ok: true` after about 5.5 s, no `mousedown` | lands |
+| `type`, `inserttext`, `keypress`, `select-all` | `ok: true` at once, no key reaches the page | lands |
+| `hover`, `check`, `uncheck` | lands, but takes about 5.5 s | lands in about 0.3-0.6 s |
+| `drag`, `mouse wheel`, `download` | no answer within 15 s, and the next command for that tab timed out too; one tab was still stuck after 8 minutes and recovered only when closed | `drag` and `mouse wheel` land in under 0.7 s; `download` returns in about 1.3-1.5 s* |
+| `focus`, `fill`, `select`, `clear`, `scroll`, `scrollintoview`, `upload` | work | not needed; the hook leaves these alone |
+
+\* In these runs Orca 1.4.230 then reported "Downloaded file not found" for both a `data:` and an `http:` link. That
+is a separate Orca problem the hook does not fix.
+
+A page that painted before its tab was hidden (for example, the first page of a tab made by `orca tab create`, which
+Orca keeps painting for its first 10 s) is not affected.
+
+### What the hook runs
+
+Before an `orca` command from the first five rows of the table (`click`, `dblclick`, `hover`, `check`, `uncheck`,
+`type`, `inserttext`, `keypress`, `select-all`, `mouse`, `drag`, `find`, `download`, `exec`), up to three per Bash
+call, the hook asks the target page how many paint entries it has. If the page has never painted, it takes one small
+screenshot through Orca, which paints the page for the capture without showing the tab, and the agent's command that
+follows lands. The screenshot goes to a temporary file that the hook deletes. Each page load is painted at most once.
+
+Hooks run before your permission prompt, so this one runs only two Orca commands, against the page and worktree the
+agent's command names:
+
+- `orca eval --expression "performance.getEntriesByType('paint').length+' '+performance.timeOrigin"`
+- `orca exec --command "screenshot <temporary file> --screenshot-format jpeg --screenshot-quality 1"`, only when the
+  first answers 0
+
+It uses the `orca` on your `PATH` or the one inside `/Applications/Orca.app`, never a file the agent's command names
+by path unless it is that same `orca`. It sends nothing over the network. It keeps a list of the last 200 documents
+it painted (the `--page` id, or the worktree selector or working directory when there is none, plus the document's
+time origin) in a private directory under `$TMPDIR`. It prints nothing and exits 0 whatever happens. Measured cost
+per Bash call: under 0.01 s for a command that does not run `orca`, about 0.05 s for an `orca` command that sends no
+input, about 0.2 s for an input command on a page that has painted, and about 0.5 s when the hook paints the page.
+
+It needs macOS (tested on macOS 27 with Orca 1.4.230, Claude Code 2.1.304 and Codex CLI 0.162.1; on other systems
+the hook does nothing), `python3` 3.8 or newer, and agents running in Orca terminals, where `orca` is on `PATH`.
+
+### Install the hook
+
+**Claude Code, as a plugin.** This repository is also a plugin marketplace, `refsure`:
+
+```
+/plugin marketplace add https://github.com/leovvay/leovvayRefsure.git
+/plugin install orca-hidden-tab-input@refsure
+```
+
+From a shell: `claude plugin marketplace add https://github.com/leovvay/leovvayRefsure.git`, then
+`claude plugin install orca-hidden-tab-input@refsure` (`-s user|project|local` picks the scope). Claude Code 2.1.275
+or later also takes one step: `/plugin install orca-hidden-tab-input --marketplace leovvay/leovvayRefsure`. Start a
+new session afterwards. The plugin adds a `PreToolUse` hook on `Bash`.
+
+**Claude Code, by hand.** The hook ships in the npm package: after `npm i -g @leovvay/refsure` it is in
+`$(npm root -g)/@leovvay/refsure/plugins/orca-hidden-tab-input/hooks/` (`orca-hidden-tab-input.sh`,
+`orca_hidden_tab_input.py`, `hooks.json`), or in `plugins/orca-hidden-tab-input/hooks/` of a clone. Merge this entry
+into the `hooks.PreToolUse` list in `~/.claude/settings.json` (keep your other hooks), with your path:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash \"/path/to/orca-hidden-tab-input/hooks/orca-hidden-tab-input.sh\"", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Codex.**
+
+1. Copy the two files from that `hooks/` folder (the `.sh` and the `.py`) into one directory, for example
+   `~/.codex/hooks/orca-hidden-tab-input/`. Keep them together. The `.sh` finds the `.py` beside its real file, so a
+   symlink to it works too.
+2. Merge this entry into the `hooks.PreToolUse` list in `~/.codex/hooks.json` (create the file if it does not exist;
+   keep the hooks already there):
+
+   ```json
+   {
+     "hooks": {
+       "PreToolUse": [
+         {
+           "matcher": "^Bash$",
+           "hooks": [
+             { "type": "command", "command": "bash \"/Users/you/.codex/hooks/orca-hidden-tab-input/orca-hidden-tab-input.sh\"", "timeout": 10 }
+           ]
+         }
+       ]
+     }
+   }
+   ```
+
+3. Codex runs a new hook only after you trust it. Start `codex`, open `/hooks` and trust this one.
+4. Restart the Codex panes in Orca. Orca copies `~/.codex/hooks.json` and your trust decisions into the Codex homes it
+   manages when it launches a pane.
+
+Changing the hook's path, matcher or timeout in `hooks.json` asks for trust again; changing the script does not.
+
+### Check it on your machine
+
+In an Orca terminal, from a clone of this repository:
+
+```sh
+tools/orca-hidden-tab/repro.sh
+```
+
+It opens one tab in the current worktree without switching to it, loads a page while the tab is hidden, clicks
+without the hook and then with it, and closes the tab. Expected output: the first click takes about 5.5 s and the page
+sees 0 clicks; after the hook the click takes under a second and the page sees 1.
+
+`repro.sh` runs the hook from the clone, so it shows that the hook works with your Orca, not that your agent runs it.
+To check that, open `/hooks` in Claude Code or Codex and look for the `PreToolUse` entry (Codex must show it as
+trusted). Or start the agent with `ORCA_HIDDEN_TAB_INPUT_LOG=/tmp/orca-hidden-tab-input.log` and let it click
+something in an Orca tab: the file gets one line per check (the page id, the worktree selector and the paint count,
+never page content).
+
+### Turn it off, update, uninstall
+
+- **Off:** `ORCA_HIDDEN_TAB_INPUT=off` in the agent's environment disables the hook without uninstalling it.
+- **Update the plugin:** `claude plugin marketplace update refsure`, then
+  `claude plugin update orca-hidden-tab-input@refsure`, and start a new session. Claude Code updates the plugin when
+  the `version` in its `plugin.json` changes.
+- **Update by hand:** update refsure (`npm i -g @leovvay/refsure`) or `git pull` your clone. For Codex, copy both
+  files again; Codex does not ask for trust again, because the entry in `hooks.json` did not change.
+- **Uninstall:** `claude plugin uninstall orca-hidden-tab-input@refsure` (in a session,
+  `/plugin uninstall orca-hidden-tab-input@refsure`), and `claude plugin marketplace remove refsure` to forget the
+  marketplace too; or remove the `PreToolUse` entries you added. Start new sessions, then delete any files you copied.
+  Deleting them first can make sessions that are still running report a hook error on Bash calls until they restart.
+
+### Limitations
+
+- **One shell call, one page state.** The hook runs before the whole command. In `orca goto ... && orca click ...` it
+  prepares the page that was there before `goto`, not the one `goto` loads. Run navigation and the input that follows
+  as separate tool calls.
+- **Only what the agent types.** The hook reads the agent's Bash command. It does not see `orca` calls made inside a
+  script the agent runs (refsure paints for its own calls), it skips a command whose `--page` it cannot know in
+  advance (`--page "$(...)"`) entirely, and it prepares at most three pages per Bash call within a 7 s budget.
+- **Pass `--page`.** Without it, Orca picks the active tab of the worktree that contains the current directory. The
+  hook follows `cd` in the same command, but not a working directory Codex sets outside the command.
+- **A missed command can still hang a tab.** If the hook does not see a `drag`, `mouse wheel` or `download` (see the
+  two points above) and the page has never painted, that tab stops answering. Close it with
+  `orca tab close --page <id>`.
+- **Animations still stall.** After the one paint the tab is hidden again and does not run animation frames. Users
+  report that menus with exit animations and some dialogs get stuck in hidden tabs (see
+  [stablyai/orca#27309](https://github.com/stablyai/orca/issues/27309)). The hook does not change that.
+- **It relies on Orca internals.** It depends on a screenshot painting a hidden page (Orca's capture paint hold,
+  added in [stablyai/orca#22534](https://github.com/stablyai/orca/pull/22534)) and on `orca exec` passing a command
+  to agent-browser. A new Orca version can change either. refsure's own paint step depends on the same two.
+- **It does not stop agents from switching your view.** `orca tab switch --focus` and similar commands still do
+  what they do in Orca.
 
 ## Contributing and security
 
