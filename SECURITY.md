@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report it privately through GitHub security advisories:
-<https://github.com/kma-leovvay/leovvayRefsure/security/advisories/new>.
+<https://github.com/leovvay/leovvayRefsure/security/advisories/new>.
 
 Please do not open a public issue for a vulnerability. Include the refsure version (`refsure --version` or the
 envelope's `version`), the Orca or agent-browser version, the command you ran, and a minimal page or fixture that
@@ -41,7 +41,12 @@ A hostile page can still defeat a lexicon. That is a known limit, not a vulnerab
 - Answers are validated all-or-nothing against the offered options.
 - The envelope lists every field that holds page text under `untrusted`, and the agent skill tells agents to treat
   it as content, never instructions.
-- refsure runs none of its own JavaScript in the page, never navigates, and never follows a URL found on a page.
+- refsure never changes a page with its own JavaScript, never navigates, and never follows a URL found on a page. On
+  Orca it runs three fixed, read-only expressions through `orca eval`, with only numbers and a flag put into them as
+  literals: the settle's frame and animation count, the click's hit check (the element at a point: its tag, role and
+  name), and the paint probe (the page's paint-entry count and time origin).
+- To paint a page loaded in a hidden Orca tab, refsure takes one quality-1 JPEG screenshot through Orca into a new
+  temporary folder and deletes it at once. It never reads, logs or sends that file, and never shows or focuses a tab.
 
 A way to make refsure act on an option code did not offer, or to act past a refusal, **is** a vulnerability.
 
@@ -76,6 +81,21 @@ advisory, not a boundary:
 Reports that only restate these limits are welcome as documentation issues, not as advisories. A way for an ordinary
 verb (`act`, `outcome`, `dismiss`, `pick-option`) to click a money, irreversible, auth or consent control that refsure
 classified correctly **is** a vulnerability.
+
+**The Orca hook** (`plugins/orca-hidden-tab-input`, optional). It runs as a `PreToolUse` hook on every Bash call,
+before the host's permission prompt, so it does as little as it can:
+
+- It reads the agent's command and runs at most two Orca commands per page it names, up to three pages per call:
+  `orca eval` of a fixed paint-count expression, and `orca exec` of a quality-1 JPEG screenshot into a temporary file
+  it deletes, only when the page has never painted. It never blocks or rewrites the command.
+- It runs only the `orca` on `PATH` or the one inside `/Applications/Orca.app`, never a file the command names by
+  path unless it is that same `orca`. It sends nothing over the network and prints nothing.
+- It keeps a list of the last 200 documents it painted (page id or worktree selector, and time origin) in a private
+  directory under `$TMPDIR`. Its optional log (`ORCA_HIDDEN_TAB_INPUT_LOG`) holds page ids, worktree selectors and
+  paint counts, never page content.
+
+A way for an agent's command to make the hook run anything else, another binary, or an Orca command against another
+page than the one the command itself would reach, **is** a vulnerability.
 
 ## Out of scope
 

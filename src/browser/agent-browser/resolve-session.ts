@@ -58,8 +58,8 @@ export async function resolveSession(
 }
 
 /** The command that opens `session` headless with the very binary refsure drives, so its daemon is the same one. */
-export function openCommand(bin: string, session: string, url = URL_PLACEHOLDER): string[] {
-  return [bin, '--session', session, 'open', url];
+export function openCommand(bin: string, session: string): string[] {
+  return [bin, '--session', session, 'open', URL_PLACEHOLDER];
 }
 
 /**

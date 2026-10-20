@@ -1,6 +1,7 @@
 # Contributing to refsure
 
-refsure has no runtime plugins. Extension is by pull request, and composition is by calling `refsure` from a script.
+refsure loads no plugins. Extension is by pull request, and composition is by calling `refsure` from a script. (The
+Claude Code plugin under `plugins/` is the Orca hook, installed into an agent, not into refsure.)
 This guide has three recipes (add a Decision site, add a verb, add a language) and the rules every change follows.
 
 ## Ground rules
@@ -198,11 +199,12 @@ There are no test suites. A change is proven by running the real command against
    python3 -m http.server 8765 --bind 127.0.0.1 -d /tmp/refsure-probe/site
    ```
    Use synthetic content only. A `data:` URL works for one-off pages.
-3. In an Orca terminal, open the fixture in an **isolated** browser profile, never your default one (it carries your
-   imported cookies):
+3. In an Orca terminal, open the fixture in its own tab and an **isolated** browser profile, never your default one
+   (it carries your imported cookies). `tab create` does not switch to the tab; leave it hidden, as an agent's tab is,
+   and never focus or switch to it:
    ```sh
    orca tab profile create --label refsure-probe --scope isolated --json
-   orca tab create --url http://127.0.0.1:8765/<fixture>.html --profile <profile id> --json
+   orca tab create --worktree "id:$ORCA_WORKTREE_ID" --url http://127.0.0.1:8765/<fixture>.html --profile <profile id> --json
    ```
 4. Run the bundle against that tab and read both the envelope and the exit code:
    ```sh
@@ -249,8 +251,10 @@ change, the maintainer will tell you which line to change.
 0.1.0 is published by hand. From 0.2, a release is a pushed `v<version>` tag that names `package.json`'s version:
 `.github/workflows/release.yml` checks the tag and runs `npm publish --provenance` over OIDC (npm trusted publishing,
 no stored token), and `prepublishOnly` runs the gate there with the same secrets. npm refuses a provenance publish
-unless `package.json`'s `repository.url` names the GitHub repository the workflow runs in. The owner adds that field
-with the GitHub account; until then the workflow stops at its `repository.url` step, before anything is built.
+unless `package.json`'s `repository.url` names the GitHub repository the workflow runs in; it names
+github.com/leovvay/leovvayRefsure. What is left before the first tagged release is the npm trusted-publisher setup.
+A change to the hook under `plugins/orca-hidden-tab-input` bumps that plugin's `version` in its
+`.claude-plugin/plugin.json`: Claude Code updates an installed plugin only when that number changes.
 
 ## Style
 

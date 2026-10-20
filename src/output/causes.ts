@@ -43,11 +43,6 @@ export const CAUSES: readonly CauseRow[] = [
   row('orca_not_running', 'unavailable', 'Orca is not running, or its CLI could not be reached.'),
   row('browser_timeout', 'unavailable', 'A browser call timed out before anything was dispatched.'),
   row('browser_error', 'unavailable', 'The browser backend failed before anything was dispatched.'),
-  row(
-    'off_screen', 'unavailable',
-    'run: the Orca tab is hidden and takes no input; nothing was sent. Rerun on your own headless agent-browser '
-      + 'session (next.argv opens it).',
-  ),
   row('internal', 'unavailable', 'refsure hit an unexpected error before acting.'),
 
   row(

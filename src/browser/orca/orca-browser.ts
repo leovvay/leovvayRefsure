@@ -10,6 +10,7 @@ import { findOrcaBinary } from './orca-binary';
 import type { OrcaBrowserOptions } from './orca-browser-options';
 import { orcaError } from './orca-error-map';
 import { ORCA_FEATURES } from './orca-features';
+import { paintOnce } from './orca-paint';
 import { probeOrca } from './orca-probe';
 import { readTab } from './orca-replies';
 import type { OrcaRun } from './orca-run';
@@ -31,6 +32,15 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
   const bin = findOrcaBinary(env);
   const childEnv = stripRefsureEnv(env);
   const run: OrcaRun = createOrcaRun(bin, env, childEnv);
+  // The documents this process tried to paint (`paintOnce`), as `<page id>@<timeOrigin>`.
+  const painted = new Set<string>();
+  const paint = (page: PageRef): Promise<void> => paintOnce({ env, run, painted }, page);
+  // Before an act: the run may have been aborted while the page was painted, after the port's guard passed.
+  const paintFirst = async (page: PageRef): Promise<void> => {
+    await paint(page);
+    if (opts.signal?.aborted) throw new Error('interrupted before the act; nothing was dispatched');
+  };
+  const acting = { env, trace, run, paint: paintFirst };
 
   async function call(args: readonly string[]): Promise<unknown> {
     const reply = await run(args, READ_TIMEOUT_MS);
@@ -95,11 +105,13 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
       return readAttr(result, 'orca exec get attr');
     },
 
-    act: (page, ref, action, value, bind) => actOnOrca({ env, trace, run }, page, ref, action, value, bind),
+    act: (page, ref, action, value, bind) => actOnOrca(acting, page, ref, action, value, bind),
 
-    fillInput: (page, ref, value) => fillInputOnOrca({ env, trace, run }, page, ref, value),
+    fillInput: (page, ref, value) => fillInputOnOrca(acting, page, ref, value),
 
-    pressEnter: (page, ref) => pressEnterOnOrca({ env, trace, run }, page, ref),
+    pressEnter: (page, ref) => pressEnterOnOrca(acting, page, ref),
+
+    paint,
 
     settle: (page, capMs, anim) => settleOnOrca({ env, trace, run }, page, capMs, anim),
 
@@ -120,6 +132,6 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
       return readNetwork(await call(onPage(page, ['network'], `--limit=${LOG_LIMIT}`)), 'orca network');
     },
 
-    dialogDismiss: (page) => dismissOrcaDialog({ env, trace, run }, page),
+    dialogDismiss: (page) => dismissOrcaDialog(acting, page),
   };
 }

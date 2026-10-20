@@ -5,4 +5,6 @@ export interface OrcaBrowserOptions {
   env: NodeJS.ProcessEnv;
   /** Receives `snapshotTaken` and `dispatched`. */
   trace: RunTrace;
+  /** The run's abort: an act whose page was being painted when it fired is not sent. */
+  signal?: AbortSignal;
 }

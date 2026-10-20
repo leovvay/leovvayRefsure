@@ -14,7 +14,7 @@ function nodeCheck(version: string): DoctorCheck {
 
 /**
  * Which backend drives the browser, and where the choice came from (spec §5.2): `REFSURE_BACKEND` when set, else the
- * default (agent-browser wherever a binary is found, an Orca terminal included; Orca otherwise).
+ * default (Orca in an Orca terminal; elsewhere agent-browser where a binary is found, else Orca).
  */
 function backendChoiceCheck(choice: BackendChoice): DoctorCheck {
   return { name: 'backend', ok: choice.backend !== null, detail: `${choice.backend ?? 'none'}: ${choice.why}` };

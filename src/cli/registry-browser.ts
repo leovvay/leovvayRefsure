@@ -47,6 +47,14 @@ export function watchBrowser(browser: BrowserPort, opts: WatchOpts): WatchedBrow
   // A settle reads a frame count only: no guard, and it runs under --dry-run too.
   const { settle } = browser;
   if (settle) port.settle = (page, capMs, anim) => settle.call(browser, page, capMs, anim);
+  // A paint is no act either (the tab draws; the page is not changed): no guard. Under --dry-run or once aborted
+  // nothing is sent that it would help, so it does nothing then.
+  const { paint } = browser;
+  if (paint) {
+    port.paint = async (page) => {
+      if (!opts.dryRun && !opts.signal.aborted) await paint.call(browser, page);
+    };
+  }
   const { fillInput, pressEnter, scrollDown } = browser;
   if (fillInput) {
     port.fillInput = async (page, ref, value) => {

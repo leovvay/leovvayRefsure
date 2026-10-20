@@ -12,8 +12,8 @@ type ParseOption = ParseOptions[string];
 export const GLOBAL_OPTIONS: Readonly<Record<string, OptionSpec>> = {
   page: {
     type: 'string',
-    summary: 'agent-browser session name (your own bg-<id>-<rand>-<task>), or Orca page id; else REFSURE_PAGE, else '
-      + 'bg-<first 8 of the Orca terminal handle> (Orca backend: the worktree\'s current tab), else default',
+    summary: 'Orca page id (your own tab), or agent-browser session name; else REFSURE_PAGE, else the worktree\'s '
+      + 'current tab (agent-browser: bg-<first 8 of the Orca terminal handle>, else default)',
   },
   'dry-run': { type: 'boolean', summary: 'Print the exact redacted request; send nothing, do nothing' },
   help: { type: 'boolean', short: 'h', summary: 'Show this command\'s options' },

@@ -2,8 +2,8 @@ name: release
 
 # From 0.2, a pushed version tag publishes to npm with provenance, over OIDC (npm trusted publishing): no npm token
 # is stored anywhere. 0.1.0 is published by hand. Before the first run, the npm package must name this repository
-# and this workflow file as its trusted publisher, and package.json must name this repository in `repository.url`
-# (the owner adds it with the GitHub account): npm refuses a provenance publish without a matching one.
+# and this workflow file as its trusted publisher; package.json names this repository in `repository.url`
+# (github.com/leovvay/leovvayRefsure): npm refuses a provenance publish without a matching one.
 
 on:
   push:

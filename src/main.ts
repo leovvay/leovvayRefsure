@@ -98,7 +98,7 @@ async function runVerb(
   const config = configOnce(env);
   // Orca in an Orca terminal, else an agent-browser session (see chooseBackend).
   const paths = resolvePaths(env);
-  const backend = createBrowser({ env, trace, stateDir: paths.state });
+  const backend = createBrowser({ env, trace, stateDir: paths.state, signal });
   // The profile of the last tab read, for the isolated-profile rule; null (refused when required) until one is read.
   let profileId: string | null = null;
   const browser: BrowserPort = {

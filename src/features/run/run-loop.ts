@@ -19,7 +19,7 @@ import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { RaiserProbe } from './step-act-shape';
 import { levelUnknownStop } from './run-blocker';
-import { freshSettle, offScreenStop, settleFor } from './run-settle';
+import { freshSettle, paintBeforeAct, settleFor } from './run-settle';
 import { withTableCut } from './run-table-cut';
 import { runTiming } from './run-timing';
 import { unchangedStop } from './run-unchanged';
@@ -68,7 +68,7 @@ async function idleStep(ctx: CommandContext, run: RunState, report: RunStepRepor
   const outcome = changeWords(report.page_changed);
   run.recent.push(recentLine(report, null, report.op === 'WAIT' ? `waited; ${outcome}` : outcome));
   keepTyped(run, was);
-  if (report.op === 'SCROLL_DOWN') return unchangedStop(run, report.page_changed, ctx.env);
+  if (report.op === 'SCROLL_DOWN') return unchangedStop(run, report.page_changed);
   if (report.page_changed) run.unchanged = 0;
   return null;
 }
@@ -247,11 +247,8 @@ export async function runRun(args: RunArgs, given: CommandContext): Promise<Out>
   };
   const result = (): RunResult => resultOf(run, ctx.now(), ctx.trace.decisions.length);
   try {
-    // A tab that rendered nothing during the first settle gets the frame check before the start level may click.
-    if (settled !== null && settled.frames === 0) {
-      const dark = await offScreenStop(ctx, page, settling, tab.url);
-      if (dark !== null) return ended(dark, false, result());
-    }
+    // A tab that drew nothing during the first settle is painted, if it never was, before the start level may click.
+    if (settled !== null && settled.frames === 0) await paintBeforeAct(ctx, page, settling);
     if (args.dismiss) {
       const level = detectOverlay(first.tree) === null
         ? null

@@ -13,19 +13,23 @@ import type { OrcaBrowserOptions } from './orca-browser-options';
 import type { OrcaRun } from './orca-run';
 import { pageArgs } from './worktree-guard';
 
-type ActDeps = OrcaBrowserOptions & { run: OrcaRun };
+type ActDeps = OrcaBrowserOptions & { run: OrcaRun; paint: (page: PageRef) => Promise<void> };
+
+/** The acts a page that never painted drops or holds (`paintOnce`): the page is painted before them. */
+const PAINT_FIRST: ReadonlySet<ActAction> = new Set<ActAction>(['click', 'dblclick', 'check', 'uncheck']);
 
 /**
  * `<verb> --element eN [--value v]`. From the moment the process exists the act counts as dispatched; only an Orca
  * answer that proves the page was never touched takes that back. A timeout or any other failure after the spawn
  * is `unknown` and is never retried here. A click with `bind` goes through Orca's own mouse when the hit check
  * binds the point to the element (`nativeClick`), and through agent-browser's click otherwise; either way it is
- * sent once.
+ * sent once. Before a click, double click or check, a page that never painted is painted (`PAINT_FIRST`), no act.
  */
 export async function actOnOrca(
   deps: ActDeps, page: PageRef, ref: Ref, action: ActAction, value?: string, bind?: ActBinding,
 ): Promise<ActResult> {
   if (!isRef(ref)) return { kind: 'stale_ref' };
+  if (PAINT_FIRST.has(action)) await deps.paint(page);
   if (action === 'click' && bind !== undefined && bind.name.trim() !== '') {
     const native = await nativeClick(deps, page, ref, bind);
     if (typeof native !== 'string') return { ...native, via: 'native' };
@@ -52,13 +56,16 @@ const EXEC_VALUE = /^(?!-)[^"\\\u0000-\u001f\u007f]{1,2000}$/;
  * input events typing fires) in one call, where Orca's `fill` makes three (a contenteditable check, a focus, a
  * script). Only for a field the caller knows is no editable region: in one, agent-browser's fill adds to the text
  * instead of replacing it. A value one quoted token cannot carry goes through Orca's `fill`. Either way the field is
- * focused first (`focusFirst`).
+ * focused first (`focusFirst`). agent-browser's fill selects all and inserts text, which a page that never painted
+ * drops, so for it the page is painted first; Orca's `fill` sets the value from a script and needs no paint.
  */
 export async function fillInputOnOrca(deps: ActDeps, page: PageRef, ref: Ref, value: string): Promise<ActResult> {
   if (!isRef(ref)) return { kind: 'stale_ref' };
+  const viaExec = EXEC_VALUE.test(value);
+  if (viaExec) await deps.paint(page);
   const focused = await focusFirst(deps, page, ref);
   if (focused.kind !== 'done') return focused;
-  if (!EXEC_VALUE.test(value)) return afterFocus(await orcaFill(deps, page, ref, value));
+  if (!viaExec) return afterFocus(await orcaFill(deps, page, ref, value));
   const args = ['exec', `--command=fill @${ref} "${value}"`, ...pageArgs(page, deps.env)];
   return afterFocus(await sendAct(deps, args, value));
 }
@@ -127,12 +134,13 @@ export async function dismissOrcaDialog(deps: ActDeps, page: PageRef): Promise<b
 
 /**
  * `focus --element eN`, then `keypress --key=Enter`: Orca sends the key to the page itself, to whatever has focus
- * there, so the element is focused first. A focus Orca refused before touching the page sends nothing more (a gone
- * element is `stale_ref`). From the focus on it counts as dispatched; a failure after that is `unknown`, never
- * retried.
+ * there, so the element is focused first, and the page painted before that (a page that never painted drops the
+ * key). A focus Orca refused before touching the page sends nothing more (a gone element is `stale_ref`). From the
+ * focus on it counts as dispatched; a failure after that is `unknown`, never retried.
  */
 export async function pressEnterOnOrca(deps: ActDeps, page: PageRef, ref: Ref): Promise<ActResult> {
   if (!isRef(ref)) return { kind: 'stale_ref' };
+  await deps.paint(page);
   const focused = await sendAct(deps, ['focus', `--element=${ref}`, ...pageArgs(page, deps.env)]);
   if (focused.kind !== 'done') return focused;
   return sendAct(deps, ['keypress', '--key=Enter', ...pageArgs(page, deps.env)]);

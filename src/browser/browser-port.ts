@@ -60,6 +60,12 @@ export interface BrowserPort {
    * CLI transport); the caller then waits a fixed time.
    */
   settle?(page: PageRef, capMs: number, anim: boolean): Promise<Settled>;
+  /**
+   * Paints the page once if it has never painted (one loaded while its Orca tab was hidden, which drops or holds
+   * clicks and keys), never showing or focusing the tab. No act: nothing counts as dispatched. Best effort: it never
+   * throws, and a page it could not paint stays as it was. A hidden tab draws no frame even once painted.
+   */
+  paint?(page: PageRef): Promise<void>;
   /** Scrolls the page down by `px`. It moves the view only, so it is no act: nothing is dispatched. */
   scrollDown?(page: PageRef, px: number): Promise<void>;
   highlight?(page: PageRef, ref: Ref): Promise<void>;
