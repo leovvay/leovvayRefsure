@@ -19,9 +19,10 @@ const UNKNOWN_COMMAND = /^Unknown command\b/i;
   session's own launch settings. Neither says so in its reply (probed live on 0.27: `get url` answered about:blank).
   Two calls never launch a browser: `session list` reads the socket directory without a daemon, and `stream status`
   reports `connected` (does the daemon hold a live browser) without starting one. (On a daemon that exited a moment
-  ago it starts a new, browserless daemon, which the idle timeout in ab-runner ends.) So every page call is checked
-  with both first, and then runs as `batch [stream status, …verbs]`, which repeats the check inside the same daemon
-  round trip: a browser that went away between the check and the call shows as `connected: false`.
+  ago it starts a new, browserless daemon; refsure sets it no idle timeout, since on 0.33+ that would restart every
+  running daemon it reaches, so it lives by agent-browser's own default: none on 0.27, 1 h from 0.33.) So every page
+  call is checked with both first, and then runs as `batch [stream status, …verbs]`, which repeats the check inside
+  the same daemon round trip: a browser that went away between the check and the call shows as `connected: false`.
 */
 
 /** Whether the daemon holds a live browser, from a `stream status` result. */

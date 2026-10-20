@@ -13,25 +13,21 @@ export const NO_BINARY = 'no agent-browser binary on PATH or in /Applications/Or
 const KEPT: ReadonlySet<string> = new Set(['AGENT_BROWSER_SOCKET_DIR']);
 // agent-browser reads these as its --proxy and --proxy-bypass when no AGENT_BROWSER_PROXY is set.
 const PROXY = /^(http|https|all|no)_proxy$/i;
-/**
- * How long a daemon the child starts may sit idle before it exits, with any browser it launched. refsure never
- * means to start one; a session closed between refsure's check and its call can still make the client start a
- * daemon, and this ends it. A daemon that already runs keeps its own setting (probed live).
- */
-const STRAY_DAEMON_IDLE_MS = '500';
 
 /**
  * The child never sees refsure's own settings, nor agent-browser's launch settings (a profile, a CDP target,
- * auto-connect, headed, a proxy, an executable). agent-browser sends launch settings with every command, and a
- * daemon whose session was launched with other values relaunches its browser to match (probed live: a proxy
- * variable or a profile relaunched a live session). Config files are kept out by `--config` (see ab-empty-config).
+ * auto-connect, headed, a proxy, an executable, an idle timeout). agent-browser sends launch settings with every
+ * command, and a daemon whose session was launched with other values relaunches its browser to match (probed live: a
+ * proxy variable or a profile relaunched a live session). From 0.33 an idle timeout counts too: a call carrying
+ * `AGENT_BROWSER_IDLE_TIMEOUT_MS` other than the daemon's own (even the 1 h default, spelled out) restarts the daemon
+ * and closes its browser (probed live on 0.36), so refsure sends none, to any session. Config files are kept out by
+ * `--config` (see ab-empty-config).
  */
 export function stripChildEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const out = stripRefsureEnv(env);
   for (const key of Object.keys(out)) {
     if (PROXY.test(key) || (key.startsWith('AGENT_BROWSER_') && !KEPT.has(key))) delete out[key];
   }
-  out.AGENT_BROWSER_IDLE_TIMEOUT_MS = STRAY_DAEMON_IDLE_MS;
   return out;
 }
 
