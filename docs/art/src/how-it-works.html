@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>refsure: how it works</title><link rel="stylesheet" href="stage.css">
+<style>
+.row { position: absolute; left: 64px; right: 64px; height: 150px; display: grid; grid-template-columns: 112px 380px 1fr; align-items: center; }
+.q { display: flex; align-items: center; gap: 16px; font: 800 38px "Big Shoulders Text"; letter-spacing: .04em; color: #cfcbc0; }
+.q b { width: 34px; height: 34px; border-radius: 4px; }
+.row .label { position: relative; display: inline-block; justify-self: start; font-size: 52px; padding: 12px 22px 9px; }
+.row p { color: #e2ded3; font: 600 40px/1.18 "Big Shoulders Text"; letter-spacing: .01em; }
+.row p em { font-style: normal; color: #ff8a84; }
+.line { position: absolute; left: 96px; top: 96px; width: 6px; height: 650px; background: #f4f2ec26; border-radius: 3px; }
+</style></head><body><div class="floor" role="img" aria-label="How refsure acts, as five cues: read the page, code builds candidates, a Decision picks or holds, a fresh recheck by fingerprint, then one act; when unsure it holds and when the page changed nothing is clicked">
+<div class="line"></div>
+<div class="row" style="top:40px"><div class="q"><b style="background:var(--tape)"></b>Q1</div><span class="label" style="transform:rotate(-.8deg)">Read</span><p>One snapshot. A hidden tab is painted once, never shown.</p></div>
+<div class="row" style="top:190px"><div class="q"><b style="background:var(--yellow)"></b>Q2</div><span class="label" style="transform:rotate(.9deg)">Candidates</span><p>Code builds the options from the page, plus none.</p></div>
+<div class="row" style="top:340px"><div class="q"><b style="background:var(--blue)"></b>Q3</div><span class="label" style="transform:rotate(-1deg)">Decide</span><p>A Decision picks one at a calibrated confidence. <em>Unsure: it holds and says why.</em></p></div>
+<div class="row" style="top:490px"><div class="q"><b style="background:var(--yellow)"></b>Q4</div><span class="label" style="transform:rotate(.6deg)">Recheck</span><p>A fresh snapshot must match the element's fingerprint. <em>Changed: nothing is clicked.</em></p></div>
+<div class="row" style="top:640px"><div class="q"><span class="dot go" style="width:34px;height:34px"></span>GO</div><span class="label" style="transform:rotate(-.7deg)">Act once</span><p>One act on a single-use ticket; outcome says if it landed.</p></div>
+</div></body></html>

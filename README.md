@@ -1,23 +1,58 @@
-# refsure
+<p align="center">
+  <img src="docs/art/hero.png" width="100%" alt="refsure, drawn as a stage floor: it finds the Search button on a page in a hidden Orca tab, holds the Accept all button, and does the whole step, click included, in 2.6 seconds while your screen stays put">
+</p>
 
-Decision-backed browser judgment for AI agents that drive the embedded browser of the Orca ADE, or a standalone
-`agent-browser` session.
+<h3 align="center">Browser judgment for coding agents. Fast, and never on your screen.</h3>
 
-`refsure` is a command-line tool plus an agent skill. Claude Code, Codex and other agents running in Orca terminals,
-or beside an `agent-browser` session, call it while they work in a browser tab. It answers the questions agents most
-often get wrong, or burn tokens on:
+<p align="center">
+  <a href="LICENSE"><img alt="licence: MIT" src="https://img.shields.io/badge/licence-MIT-1f7a36?style=flat-square&labelColor=0d0d10"></a>
+  <img alt="node: 22 or newer" src="https://img.shields.io/badge/node-22%2B-2a5fc4?style=flat-square&labelColor=0d0d10">
+  <a href="#calibration-status"><img alt="status: 0.x" src="https://img.shields.io/badge/status-0.x-b8231d?style=flat-square&labelColor=0d0d10"></a>
+  <a href="https://github.com/leovvay/leovvayRefsure/actions/workflows/ci.yml"><img alt="ci" src="https://img.shields.io/github/actions/workflow/status/leovvay/leovvayRefsure/ci.yml?branch=master&style=flat-square&label=ci&labelColor=0d0d10&color=1f7a36"></a>
+</p>
 
-- Which control on this page means X?
-- How do I get past this cookie banner or pop-up?
-- What state is the page in: the page I wanted, a sign-in wall, a rate limit, an error?
-- Did my click or form submit actually land?
-- Does the page now show what I am waiting for?
+`refsure` is a command-line tool plus an agent skill. Claude Code, Codex and other agents running in [Orca](https://github.com/stablyai/orca)
+terminals, or beside an `agent-browser` session, call it while they work in a browser tab. It answers the questions
+agents most often get wrong, or burn tokens on: which control means X, how to get past a banner, what state the page
+is in, whether a click landed, whether the page now shows what they wait for.
+
+```sh
+git clone https://github.com/leovvay/leovvayRefsure && cd leovvayRefsure
+npm ci && npm run build && npm i -g .
+refsure doctor
+```
+
+<sub>Once the npm release is out, <code>npm i -g @leovvay/refsure</code> does the same.</sub>
+
+One call does a whole step, in the agent's own tab:
+
+```sh
+refsure do --page <id> --fill "Search=invoice" --click "Search button" --expect "search results for invoice"
+```
+
+- **Fast.** In the author's agent benchmark (12 tasks, 72 runs per arm), agents with refsure needed 3.8x (Opus 5.5)
+  and 3.4x (Sonnet 5.5) less total time than with the plain Orca CLI, in 3-4 turns instead of 7-10. Most of that is
+  one task where refsure reports a stall in under a minute; per task it is about 2x and 1.4x.
+  [Results](tools/bench/agent/RESULTS-fast-path-2026-10-17.md).
+- **In the background.** It works in the agent's own Orca tab and paints a hidden page before input: a whole `do`
+  step took 2.6 s and the click landed, where Orca alone answers ok and nothing is clicked. Your view never moves.
+  [Measured](#the-problem-measured).
+- **Small answers.** One JSON envelope of about 1 KB instead of a 50-540 KB accessibility tree.
+- **Right, or it holds.** The model only picks among options that code built. `locate` was right 2,056 of 2,056
+  times it acted, and below its threshold it answers none instead of guessing. [Calibration](#calibration-status).
 
 You bring your own API key (BYOK). Nothing runs as a service, and there is no account.
 
 > **Status: 0.x.** Three Decision sites are `measured` on Jev: `locate`, `find` and `outcome`. `dismiss`, `page-state`
 > and `presence` still run on starting thresholds carried over from the author's earlier decision code,
 > `pick-option` is experimental, and no OpenAI answer is measured. See [Calibration status](#calibration-status).
+
+**Contents:** [Why](#why) · [How it works](#how-it-works) · [One call](#run-a-task-in-one-call) ·
+[`run`](#hand-over-a-multi-step-task-refsure-run) · [Install](#install) · [Setup](#setup) ·
+[What leaves your machine](#what-leaves-your-machine) · [Commands](#commands) · [Envelope](#the-envelope) ·
+[Exit codes](#exit-codes) · [Safety and limits](#safety-model-and-honest-limits) ·
+[Calibration](#calibration-status) · [Skill](#agent-skill-install) · [Orca hook](#orca-hook-input-in-hidden-tabs) ·
+[Contributing](#contributing-and-security)
 
 ## Why
 
@@ -32,6 +67,8 @@ You bring your own API key (BYOK). Nothing runs as a service, and there is no ac
 - **Guarded risk.** Money, irreversible, sign-in and consent controls never go through the ordinary verbs.
 
 ## How it works
+
+<img src="docs/art/how-it-works.png" width="100%" alt="How refsure acts, as five cues: read the page, code builds candidates, a Decision picks or holds, a fresh recheck by fingerprint, then one act on a single-use ticket; when unsure it holds, and when the page changed nothing is clicked">
 
 Every answer is a classify-or-select call to a Decision API:
 
@@ -1193,6 +1230,15 @@ fix in [#27310](https://github.com/stablyai/orca/pull/27310). The hook is a stop
 happens, the hook only costs its 0.2 s check.
 
 ### The problem, measured
+
+<img src="docs/art/hidden-tab.png" width="100%" alt="Orca alone: a page loaded in a hidden tab, a click, ok true, the page saw 0 clicks after 5.5 seconds. With refsure: the page is painted once, the click lands in 0.3 seconds, and the tab never comes on screen">
+
+<sub>Measured on Orca 1.4.230, 2026-10-20, with <code>tools/orca-hidden-tab/repro.sh</code>. The paint is one tiny
+screenshot, deleted at once.</sub>
+
+refsure's own commands paint the page the same way. On a page loaded in a hidden tab, `refsure do --click "Press"`
+took 2.6 s for the whole step (read, find, paint, click) and the click landed; the build before the paint step answered
+`done` after 7.4 s while the page saw no click (Orca 1.4.230, 2026-10-20).
 
 Orca hides browser tabs that are off screen with `display:none`. A page that loads while its tab is hidden (any new
 page load; measured after `orca goto`) is never painted. Chromium drops, delays or stalls input sent to a page that

@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>refsure: hidden tabs</title><link rel="stylesheet" href="stage.css">
+<style>
+.lane { position: absolute; left: 64px; right: 64px; }
+.top { display: flex; align-items: baseline; justify-content: space-between; }
+.who { font: 900 64px/1 "Big Shoulders Stencil Display"; color: var(--tape); }
+.time { font: 900 120px/1 "Big Shoulders Stencil Display"; color: var(--tape); font-variant-numeric: tabular-nums; }
+.row { display: flex; align-items: center; gap: 24px; margin-top: 26px; }
+.row .label { position: relative; font-size: 44px; padding: 12px 20px 9px; }
+.arrow { width: 40px; height: 6px; background: #f4f2ec55; border-radius: 3px; flex: none; }
+.row .lamp { font-size: 42px; letter-spacing: .01em; color: #f1ede2; gap: 16px; }
+.row .dot { width: 42px; height: 42px; }
+</style></head><body><div class="floor" role="img" aria-label="In a hidden Orca tab, Orca alone answers ok and the page sees no click after 5.5 seconds; after one paint the click lands in 0.3 seconds">
+<div class="lane" style="top:44px"><div class="top"><div class="who">Orca alone</div><div class="time">5.5 s</div></div>
+ <div class="row"><span class="label" style="transform:rotate(-.8deg)">hidden tab</span><span class="arrow"></span><span class="label" style="transform:rotate(.7deg)">click</span><span class="arrow"></span><span class="lamp"><span class="dot stby"></span>ok: true, page saw 0 clicks</span></div></div>
+<div style="position:absolute;left:64px;right:64px;top:350px;height:3px;background:#f4f2ec1c"></div>
+<div class="lane" style="top:384px"><div class="top"><div class="who">With refsure</div><div class="time">0.3 s</div></div>
+ <div class="row"><span class="label" style="transform:rotate(.6deg)">hidden tab</span><span class="arrow"></span><span class="label" style="transform:rotate(-.9deg);background:#fbefc7">paint once</span><span class="arrow"></span><span class="label" style="transform:rotate(.7deg)">click</span><span class="arrow"></span><span class="lamp"><span class="dot go"></span>page saw 1 click</span></div></div>
+</div></body></html>
