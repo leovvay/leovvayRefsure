@@ -1,16 +1,27 @@
 import { closeSync, openSync, readSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { firstExecutable, pathCandidates } from '../find-binary';
+import { firstExecutable, pathCandidates, pathDirs } from '../../shared';
 
-/** Where the macOS Orca app keeps its resources, the bundled agent-browser among them. */
-const ORCA_RESOURCES = '/Applications/Orca.app/Contents/Resources';
+/** Where the Orca app keeps its resources, the bundled agent-browser among them: macOS, or the Windows install. */
+function orcaResources(env: NodeJS.ProcessEnv): string | null {
+  if (process.platform !== 'win32') return '/Applications/Orca.app/Contents/Resources';
+  return env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Programs', 'orca', 'resources') : null;
+}
 
 /**
  * The name agent-browser gives its native build for this machine, e.g. `agent-browser-darwin-arm64`: the file Orca
  * bundles, and the one an npm or Homebrew install keeps beside its node wrapper.
  */
 function nativeName(): string {
-  return `agent-browser-${process.platform}-${process.arch}${process.platform === 'win32' ? '.exe' : ''}`;
+  if (process.platform !== 'win32') return `agent-browser-${process.platform}-${process.arch}`;
+  // There is no Windows arm64 build: agent-browser's own wrapper runs the x64 one there.
+  return 'agent-browser-win32-x64.exe';
+}
+
+/** npm on Windows puts only `agent-browser.cmd` on PATH; the native build stays in the package beside it. */
+function npmNatives(env: NodeJS.ProcessEnv, name: string): string[] {
+  if (process.platform !== 'win32') return [];
+  return pathDirs(env).map((dir) => join(dir, 'node_modules', 'agent-browser', 'bin', name));
 }
 
 /** Whether a file starts with `#!`: a script (the node wrapper), not a native build. Unreadable reads as native. */
@@ -47,10 +58,14 @@ function nativeOf(file: string): string {
  */
 export function findAgentBrowserBinary(env: NodeJS.ProcessEnv): string | null {
   const name = nativeName();
+  const resources = orcaResources(env);
   const found = firstExecutable([
     ...pathCandidates(env, 'agent-browser'),
-    join(ORCA_RESOURCES, name),
-    join(ORCA_RESOURCES, 'app.asar.unpacked', 'node_modules', 'agent-browser', 'bin', name),
+    ...npmNatives(env, name),
+    ...(resources === null ? [] : [
+      join(resources, name),
+      join(resources, 'app.asar.unpacked', 'node_modules', 'agent-browser', 'bin', name),
+    ]),
   ]);
   return found === null ? null : nativeOf(resolve(found));
 }

@@ -1,6 +1,6 @@
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import { ConfigError } from './config-error';
-import { isRecord } from '../shared';
+import { isRecord, POSIX_MODES } from '../shared';
 import {
   checkGatewayUrl, invalid, onlyFields, readBoolean, readGateway, readKeySpec, readLimits, readOrigins,
 } from './config-fields';
@@ -52,7 +52,7 @@ function readConfigFile(path: string): Record<string, unknown> | null {
   try {
     const stat = fstatSync(fd);
     if (!stat.isFile()) invalid(`${path} is not a regular file`);
-    if ((stat.mode & 0o077) !== 0) {
+    if (POSIX_MODES && (stat.mode & 0o077) !== 0) {
       const mode = (stat.mode & 0o777).toString(8).padStart(4, '0');
       throw new ConfigError('config_mode', `${path} has mode ${mode}; run chmod 600 ${path}`);
     }

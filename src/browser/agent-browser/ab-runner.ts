@@ -8,7 +8,7 @@ import type { AbRunOptions } from './ab-run-options';
 
 const HELP_TIMEOUT_MS = 5_000;
 const AGENT_BROWSER: JsonChild = { label: 'agent-browser', spawnCode: 'backend_error' };
-export const NO_BINARY = 'no agent-browser binary on PATH or in /Applications/Orca.app';
+export const NO_BINARY = 'no agent-browser binary on PATH or in the Orca app';
 /** The one agent-browser setting a child keeps: where the user's session sockets live. */
 const KEPT: ReadonlySet<string> = new Set(['AGENT_BROWSER_SOCKET_DIR']);
 // agent-browser reads these as its --proxy and --proxy-bypass when no AGENT_BROWSER_PROXY is set.

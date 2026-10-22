@@ -1,6 +1,6 @@
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import type { PageRef } from '../page-ref';
 import { isRecord } from '../../shared';
 import type { OrcaBrowserOptions } from './orca-browser-options';
@@ -14,7 +14,7 @@ const PROBE = "performance.getEntriesByType('paint').length+' '+performance.time
 /** Each call's own deadline, shorter than a read's: a hidden tab's paint took about 0.5 s, the probe far less. */
 const PAINT_TIMEOUT_MS = 5_000;
 // The file goes to agent-browser's tokenizer as one double-quoted token: no double quote, backslash or control
-// character in it.
+// character in it. Windows paths are written with forward slashes, which it opens the same.
 const QUOTABLE = /^[^"\\\u0000-\u001f\u007f]{1,1000}$/;
 
 /**
@@ -41,7 +41,7 @@ export async function paintOnce(deps: PaintDeps, page: PageRef): Promise<void> {
     const key = `${page.id}@${origin}`;
     if (deps.painted.has(key)) return;
     dir = await mkdtemp(join(tmpdir(), 'refsure-paint-'));
-    const file = join(dir, 'paint.jpg');
+    const file = join(dir, 'paint.jpg').split(sep).join('/');
     if (!QUOTABLE.test(file)) return;
     const command = `screenshot "${file}" --screenshot-format jpeg --screenshot-quality 1`;
     deps.painted.add(key);

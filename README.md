@@ -252,6 +252,18 @@ refsure doctor
 
 Install it globally. Agents call refsure many times per task, and `npx` adds package resolution time to every call.
 
+It runs on macOS and on Windows (checked on Windows 11 with Orca 1.4.224 and agent-browser). On Windows, keep the key
+in a user environment variable and restart Orca once so its terminals see it, then run `refsure setup` in a terminal
+(it reads the console there):
+
+```powershell
+$key = Read-Host 'OpenRouter key' -AsSecureString
+[Environment]::SetEnvironmentVariable('REFSURE_OPENROUTER_KEY', [Net.NetworkCredential]::new('', $key).Password, 'User')
+```
+
+The painting of hidden Orca tabs is measured on macOS only, and the [Orca hook](#orca-hook-input-in-hidden-tabs) is
+macOS only.
+
 ### Backends
 
 refsure drives one of two browser backends. `refsure doctor` names the one it chose, and why.
@@ -283,8 +295,9 @@ it and never sends it. Each call has a 5 s limit, and a probe or capture that fa
 
 - **Orca:** refsure looks for the binary in `$ORCA_CLI_BIN_DIR/orca`, then `orca` on `PATH`, then
   `/Applications/Orca.app/Contents/Resources/bin/orca` (an executable file; a directory of that name does not
-  count). Page commands outside an Orca terminal answer `not_in_orca_terminal` (exit 24); the worktree guard has no
-  fallback.
+  count). On Windows the name is `orca.exe`, and the app's copy is
+  `%LOCALAPPDATA%\Programs\orca\resources\bin\orca.exe`. Page commands outside an Orca terminal answer
+  `not_in_orca_terminal` (exit 24); the worktree guard has no fallback.
 - **Orca transport:** each call goes over Orca's runtime socket, the one the `orca` CLI itself uses (found through
   `orca-runtime.json` in `$ORCA_USER_DATA_PATH`, else Orca's default user-data folder), as the same method and
   params the CLI would send. That saves a process per call (a snapshot takes about 0.17 s instead of 0.4 s). refsure
@@ -295,7 +308,9 @@ it and never sends it. Each call has a 5 s limit, and a probe or capture that fa
   runtime token goes only to that socket.
   `refsure doctor` names the transport in its `orca_transport` check.
 - **agent-browser:** refsure uses `agent-browser` on `PATH` first, then the copy Orca bundles
-  (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`). A node wrapper on `PATH` (Homebrew's
+  (`/Applications/Orca.app/Contents/Resources/agent-browser-<platform>-<arch>`, on Windows
+  `%LOCALAPPDATA%\Programs\orca\resources\agent-browser-win32-x64.exe`; an npm install there puts only
+  `agent-browser.cmd` on `PATH`, so refsure runs the native build in its package). A node wrapper on `PATH` (Homebrew's
   `agent-browser` is one) is read as the native build kept beside its real file, `agent-browser-<platform>-<arch>`:
   the same version, without about 50 ms of node start per call. It drives only a session you opened yourself, and
   acts on that session's active tab:
@@ -363,7 +378,8 @@ refsure needs at least one Decision provider key. Which verbs each provider unlo
 
 `$XDG_CONFIG_HOME/refsure/config.json` (default `~/.config/refsure/config.json`). Only you may read or write it:
 any group or other permission bit (`0640`, `0644`, `0660`…) is refused with `config_mode` (`not_set_up`). `0600` is
-the mode to use; a stricter one such as `0400` also passes.
+the mode to use; a stricter one such as `0400` also passes. Windows has no mode bits (NTFS permissions keep your
+profile private), so there refsure skips this check, and the same check on its consent and state files.
 
 ```sh
 mkdir -p ~/.config/refsure && touch ~/.config/refsure/config.json && chmod 600 ~/.config/refsure/config.json
@@ -371,7 +387,7 @@ mkdir -p ~/.config/refsure && touch ~/.config/refsure/config.json && chmod 600 ~
 
 A key is named, never stored. Each entry under `keys` is either `{"env": "<VARIABLE>"}` or
 `{"command": [argv…]}`. A command runs without a shell, with a 5 s timeout; its trimmed stdout is the key, and it is
-never echoed.
+never echoed. On Windows a bare name is looked up on `PATH` only, as `<name>.exe`, never in the working directory.
 
 ```json
 {

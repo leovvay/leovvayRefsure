@@ -1,6 +1,6 @@
 import { closeSync, constants, fstatSync, openSync, readFileSync } from 'node:fs';
 import type { ProviderId } from '../questions';
-import { isProviderId, isRecord } from '../shared';
+import { isProviderId, isRecord, POSIX_MODES } from '../shared';
 import type { Consent, ConsentGrant } from './consent-record';
 import { DISCLOSURE_HASH } from './disclosure';
 import { writePrivateFile } from './private-file';
@@ -28,7 +28,7 @@ export function readConsent(path: string): Consent | null {
   }
   try {
     const stat = fstatSync(fd);
-    if (!stat.isFile() || (stat.mode & 0o022) !== 0) return null;
+    if (!stat.isFile() || (POSIX_MODES && (stat.mode & 0o022) !== 0)) return null;
     const parsed: unknown = JSON.parse(readFileSync(fd, 'utf8'));
     if (!isRecord(parsed) || parsed.v !== 1 || typeof parsed.disclosure !== 'string' || !Array.isArray(parsed.grants)) {
       return null;

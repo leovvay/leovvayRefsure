@@ -4,6 +4,7 @@ import {
   unlinkSync, writeSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import { POSIX_MODES } from '../shared';
 import type { EntryKind } from './state-store';
 import type { ReadOutcome, StoredEntry } from './stored-entry';
 
@@ -37,7 +38,7 @@ export function ensureDir(dir: string): void {
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   const st = statSync(dir);
   if (!st.isDirectory()) throw new Error(`state path is not a directory: ${dir}`);
-  if ((st.mode & 0o077) !== 0) chmodSync(dir, 0o700);
+  if (POSIX_MODES && (st.mode & 0o077) !== 0) chmodSync(dir, 0o700);
 }
 
 /** Temp file in the same directory, then rename: a reader never sees a half-written entry. */
@@ -82,7 +83,7 @@ export function readEntry(path: string): ReadOutcome {
     if (!st.isFile()) return { refused: 'not a regular file' };
     const uid = process.getuid?.();
     if (uid !== undefined && st.uid !== uid) return { refused: `owner uid ${st.uid}` };
-    if ((st.mode & 0o077) !== 0) return { refused: `mode ${(st.mode & 0o777).toString(8)}` };
+    if (POSIX_MODES && (st.mode & 0o077) !== 0) return { refused: `mode ${(st.mode & 0o777).toString(8)}` };
     if (st.size > MAX_ENTRY_BYTES) return { refused: `size ${st.size}` };
     return parseEntry(readFileSync(fd, 'utf8'));
   } finally {
