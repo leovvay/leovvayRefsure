@@ -1203,10 +1203,10 @@ dataset is committed.
 ## Agent skill install
 
 The skill teaches an agent when to call which verb and how to read the envelope. Install it for Claude Code and
-Codex:
+Codex with the community skills CLI, the same version Orca 1.4.230 uses for its own skills:
 
 ```sh
-npx --yes skills add https://github.com/leovvay/leovvayRefsure --skill refsure --global --agent claude-code --agent codex -y
+npx --yes skills@1.7.2 add https://github.com/leovvay/leovvayRefsure --skill refsure --global --agent claude-code --agent codex -y
 ```
 
 Or print the copy bundled with your installed binary and put it where your agent loads skills. `skill print` writes
