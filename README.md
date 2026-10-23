@@ -282,7 +282,8 @@ refsure state --page <browserPageId> --expect "the example home page"
 ```
 
 Without `--page` or `REFSURE_PAGE`, refsure drives the worktree's current tab, which can be the one the human is
-looking at. refsure never shows, focuses or switches to a tab, so the agent's tab usually stays hidden. A page loaded
+looking at. refsure never shows, focuses or switches to a tab, so the agent's tab usually stays hidden. The skill
+tells the agent to leave its tab open when done, so the human can open it from the worktree's tab strip. A page loaded
 in a hidden tab never paints, and then Orca answers `ok` to a click or a key that never reaches the page, or holds a
 check for about 5.5 s (Orca 1.4.230). So before the inputs such a page would drop or hold (a click, double click,
 check, uncheck, Enter, and a fill that goes as agent-browser's own), refsure asks the page how many paint entries it has

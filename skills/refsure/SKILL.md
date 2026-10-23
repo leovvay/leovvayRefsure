@@ -141,8 +141,8 @@ is the exact command. Unknown `next.do`: `needs_human`.
 - The one hard rule: never focus, reveal or switch to a tab (`orca tab switch`, `--focus`, `orca computer`).
 - In an Orca terminal, `orca tab create --worktree "id:$ORCA_WORKTREE_ID" --url <url> --json` opens your tab without
   switching to it: pass its `browserPageId` as `--page` (else refsure uses the worktree's current tab, maybe the
-  human's) and close it when done. A page loaded in a hidden tab never paints and drops clicks and keys, so refsure
-  paints it once before it acts (a tiny screenshot, deleted unread). Before your own `orca click`/`type`/`keypress` there,
+  human's). Keep that one tab for the whole task and leave it open when done: the human opens it from the tab strip.
+  A page loaded in a hidden tab never paints and drops clicks and keys, so refsure paints it once before it acts (a tiny screenshot, deleted unread). Before your own `orca click`/`type`/`keypress` there,
   once per page load (unless the `orca-hidden-tab-input` hook does it): `orca exec --page <id> --command "screenshot /tmp/p.jpg --screenshot-format jpeg --screenshot-quality 1"`, then delete the file. Prefer `fill` to `type`.
 - Elsewhere, or with `REFSURE_BACKEND=agent-browser`: your own agent-browser session, named by `--page`. Open it
   yourself (`agent-browser --session <id> open <url>`; `no_tab` puts it in `next.argv`), use it for your own calls
