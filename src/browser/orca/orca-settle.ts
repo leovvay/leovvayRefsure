@@ -5,8 +5,8 @@ import { isRecord } from '../../shared';
 import { orcaError } from './orca-error-map';
 import type { OrcaBrowserOptions } from './orca-browser-options';
 import type { OrcaRun } from './orca-run';
+import { evalRiding, pendingDraw } from './orca-trail';
 import { chooseOrcaTransport } from './runtime-lookup';
-import { pageArgs } from './worktree-guard';
 
 type SettleDeps = OrcaBrowserOptions & { run: OrcaRun };
 
@@ -38,13 +38,17 @@ function settleScript(cap: number, anim: boolean): string {
 /**
  * `settle` on Orca: one `eval` of `settleScript` over the runtime socket. On the CLI transport it is `unsupported`
  * (an `orca eval` process costs about 100 ms, more than the wait saves), and the caller waits a fixed time instead.
+ * When the trail has rows an act changed on this page (`pendingDraw`), its draw rides the same eval, after the
+ * settle's promise is made and with that promise returned unchanged: the result of the act just sent shows in the
+ * page with no call of its own. The trail's motion lives in a closed shadow root, which `document.getAnimations()`
+ * leaves out (measured on Orca 1.4.230), so it never holds the settle.
  */
 export async function settleOnOrca(deps: SettleDeps, page: PageRef, capMs: number, anim: boolean): Promise<Settled> {
   if (chooseOrcaTransport(deps.env).kind !== 'socket') {
     throw new BrowserError('unsupported', 'a settle needs the Orca runtime socket');
   }
   const cap = Math.max(1, Math.round(capMs));
-  const reply = await deps.run(['eval', `--expression=${settleScript(cap, anim)}`, ...pageArgs(page, deps.env)], cap + MARGIN_MS);
+  const reply = await evalRiding(deps, page, settleScript(cap, anim), pendingDraw(deps.trail, page), cap + MARGIN_MS);
   if (!reply.ok) throw orcaError(reply.code, reply.message);
   const raw = isRecord(reply.result) && typeof reply.result.result === 'string' ? reply.result.result : '';
   let seen: unknown;

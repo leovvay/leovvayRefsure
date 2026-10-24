@@ -30,10 +30,10 @@ export interface StepAct {
 export interface RaiserProbe { sig: string; none: Promise<boolean>; plain: Promise<boolean> }
 
 /**
- * The guard's answer: clear to act on the fresh ref; stale (nothing sent, the fresh snapshot is the next look);
- * or a stop with its status, cause and way on.
+ * The guard's answer: clear to act on the fresh ref (with the risk row the pick's confidence was held to, when it
+ * has one); stale (nothing sent, the fresh snapshot is the next look); or a stop with its status, cause and way on.
  */
 export type Guarded =
-  | { kind: 'clear'; ref: Ref; node: number; risk: RiskReading; fresh: RunLook }
+  | { kind: 'clear'; ref: Ref; node: number; risk: RiskReading; fresh: RunLook; threshold: number | null }
   | { kind: 'stale'; cause: 'page_changed' | 'ref_gone'; detail: string; fresh: RunLook }
   | { kind: 'stop'; status: Status; cause: string; detail: string; next?: Next; risk?: RiskClass };

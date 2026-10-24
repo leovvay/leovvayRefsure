@@ -16,6 +16,8 @@ import { readTab } from './orca-replies';
 import type { OrcaRun } from './orca-run';
 import { settleOnOrca } from './orca-settle';
 import { createOrcaRun, describeOrcaTransport } from './orca-transport';
+import { orcaTrailSend } from './orca-trail';
+import { withTrail } from './orca-trail-acts';
 import { resolveOrcaPage } from './resolve-page';
 import { pageArgs } from './worktree-guard';
 
@@ -25,20 +27,27 @@ const EXEC_SELECTOR = /^[^"\\\u0000-\u001f\u007f]{1,2000}$/;
 
 /**
  * The Orca backend: every call goes over Orca's runtime socket as the typed `orca` CLI would send it, or spawns that
- * CLI with `--json` when the socket cannot take it (see orca-transport); nothing else in refsure reaches Orca.
+ * CLI with `--json` when the socket cannot take it (see orca-transport); nothing else in refsure reaches Orca. With
+ * the trail on, its snapshot and acts feed the recorder and draw in the page (`withTrail`), and its settle carries
+ * the rows an act changed (`settleOnOrca`).
  */
 export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
   const { env, trace } = opts;
+  const trail = opts.trail !== undefined && opts.trail.on() ? opts.trail : undefined;
   const bin = findOrcaBinary(env);
   const childEnv = stripRefsureEnv(env);
   const run: OrcaRun = createOrcaRun(bin, env, childEnv);
   // The documents this process tried to paint (`paintOnce`), as `<page id>@<timeOrigin>`.
   const painted = new Set<string>();
   const paint = (page: PageRef): Promise<void> => paintOnce({ env, run, painted }, page);
-  // Before an act: the run may have been aborted while the page was painted, after the port's guard passed.
+  // Before an act: the run may have been aborted while the page was painted or the trail drawn, after the port's
+  // guard passed.
+  const unlessAborted = (): void => {
+    if (opts.signal?.aborted) throw new Error('interrupted before the act; nothing was dispatched');
+  };
   const paintFirst = async (page: PageRef): Promise<void> => {
     await paint(page);
-    if (opts.signal?.aborted) throw new Error('interrupted before the act; nothing was dispatched');
+    unlessAborted();
   };
   const acting = { env, trace, run, paint: paintFirst };
 
@@ -52,7 +61,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
     return [...verb, ...flags, ...pageArgs(page, env)];
   }
 
-  return {
+  const port: BrowserPort = {
     backend: 'orca',
     probe: () => probeOrca(bin, env, run, () => describeOrcaTransport(env)),
     features: () => ORCA_FEATURES,
@@ -113,7 +122,7 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     paint,
 
-    settle: (page, capMs, anim) => settleOnOrca({ env, trace, run }, page, capMs, anim),
+    settle: (page, capMs, anim) => settleOnOrca({ env, trace, run, trail }, page, capMs, anim),
 
     async scrollDown(page, px) {
       await call(onPage(page, ['scroll'], '--direction=down', `--amount=${Math.max(1, Math.round(px))}`));
@@ -134,4 +143,8 @@ export function createOrcaBrowser(opts: OrcaBrowserOptions): BrowserPort {
 
     dialogDismiss: (page) => dismissOrcaDialog(acting, page),
   };
+  if (trail === undefined) return port;
+  const send = orcaTrailSend(env);
+  trail.attach(send);
+  return withTrail(port, trail, send, unlessAborted);
 }

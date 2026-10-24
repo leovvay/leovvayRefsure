@@ -160,5 +160,6 @@ export async function guardStep(
       detail: `${act.op} ${name} was picked at ${act.p}, below the ${risk.class} threshold ${row}; nothing was sent`,
     };
   }
-  return { kind: 'clear', ref: found.ref, node: found.node, risk, fresh };
+  const threshold = typeof row === 'number' ? row : null;
+  return { kind: 'clear', ref: found.ref, node: found.node, risk, fresh, threshold };
 }

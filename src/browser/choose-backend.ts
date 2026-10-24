@@ -4,6 +4,7 @@ import type { BackendChoice } from './backend-choice';
 import { BrowserError } from './browser-error';
 import type { BrowserPort } from './browser-port';
 import { createOrcaBrowser } from './orca';
+import type { TrailRecorder } from './trail-recorder';
 
 /**
  * `REFSURE_BACKEND=orca|agent-browser` decides. Without it, an Orca terminal (`ORCA_WORKTREE_ID`) drives Orca, in the
@@ -34,9 +35,12 @@ export function chooseBackend(env: NodeJS.ProcessEnv): BackendChoice {
   return { backend: 'orca', why };
 }
 
-/** The port for this invocation, per `chooseBackend`. `stateDir` holds the agent-browser backend's empty config. */
+/**
+ * The port for this invocation, per `chooseBackend`. `stateDir` holds the agent-browser backend's empty config.
+ * `trail` goes to Orca only: v1 draws in Orca's tabs, and an agent-browser session is headless by default.
+ */
 export function createBrowser(
-  opts: { env: NodeJS.ProcessEnv; trace: RunTrace; stateDir: string; signal?: AbortSignal },
+  opts: { env: NodeJS.ProcessEnv; trace: RunTrace; stateDir: string; signal?: AbortSignal; trail?: TrailRecorder },
 ): BrowserPort {
   const choice = chooseBackend(opts.env);
   if (choice.backend === 'agent-browser') return createAgentBrowser(opts);

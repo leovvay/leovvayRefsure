@@ -1,6 +1,7 @@
 export type * from './status';
 export type * from './envelope';
 export type * from './run-trace';
+export type * from './trail-why';
 export type * from './cause-row';
 export { DryRunStop } from './dry-run-stop';
 export { EXIT_CODES, exitFor } from './exit-classes';

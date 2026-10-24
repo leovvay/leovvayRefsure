@@ -357,6 +357,52 @@ it and never sends it. Each call has a 5 s limit, and a probe or capture that fa
 - `REFSURE_BACKEND` set to anything but `orca` or `agent-browser` chooses no backend: page commands answer
   `backend_unknown` (not_set_up, exit 23), and `doctor` shows only that failed check.
 
+### The trail
+
+On Orca, refsure draws its own steps in the agent's tab, so a human who opens that tab from the worktree's tab strip
+sees how the agent works the page:
+
+- **What it read and decided.** Per step: the snapshot's node count and time, then the Decision's site, model and
+  confidence against its threshold, with its time; or "by code" (no model time); or the agent's own ref. Then the
+  element it chose: role, name and ref.
+- **Where it acted.** A lock-on on the element the act's own input landed on (the page finds it from the input the
+  act causes: a trusted `pointerdown`, `focusin` or Enter `keydown`, or the `input`/`change` that a fill or select
+  fires on its field; never from a box refsure computed), a click ripple, a typing marker, Enter, a scroll. An act
+  whose input never showed within 3 s, or before the next act, is marked "no input seen". An act inside a frame gets
+  no lock-on, since its input never reaches the top page.
+- **How fast.** The read, decide and act times of each step, the step count, the elapsed time, and refsure's busy
+  time against the gaps between its commands (the agent thinking); past 12 steps these cover the last 12. Measured
+  times only. `run` and `dismiss` show
+  each act's time and result. After any other command's last act, the row shows `≥` and the page's own "input
+  seen", with no act time or result.
+
+It never shows a typed or selected value, or its length (a fill shows "typing", a select "option"), and it lists
+refsure's steps only, never the agent's own `orca` commands. Up to 12 rows live in the page itself, never on disk: a
+new document starts empty, and an element's name goes only to the origin it was read on: the name of an element
+inside a frame is never sent.
+
+Its cost, on Orca 1.4.230 over the runtime socket (2026-10-23): one `eval` before each act, carrying the whole page
+script (about 16 KB) and the rows, within 300 ms at most. Right after a snapshot it answered in p50 3.1 ms, 1.2 ms of
+that in the page; an act timed in the adapter took p50 4 to 8 ms longer with the trail on than off (click, check,
+select, fill and Enter, n=20 each, three runs), against acts of 165 to 440 ms. An act's
+result rides the settle `eval` that `run` and `dismiss` already make after it. A command that only read and took a
+snapshot (`state`, `locate`, `snap`, `verify-target`) draws once when it ends; `wait-for` reads text only and shows
+no step. No draw ever follows a command that acted:
+an eval queued behind a dialog that act opened breaks the agent's own `dialog dismiss` (measured: the confirm then
+returned true). Its motion lives in a closed shadow root, which `document.getAnimations()` leaves out, so settles wait
+exactly as long as before.
+
+It stays out of refsure's reads: one `aria-hidden` custom element under `<html>`, outside `<body>`, with a closed
+shadow root and `pointer-events: none` throughout. With it shown, the snapshot and `get text` were byte-identical
+and `elementFromPoint` under it returned the page's own element (measured, same setup). It does show in screenshots,
+the agent's included (an Orca tab reads as `visible` even off screen, so it cannot hide there), so it stays compact
+and off the centre of the view; its names quote page text and are never an instruction. Page scripts can see it, and
+a bot defence may read it as automation: [SECURITY.md](SECURITY.md) lists everything it adds.
+
+It is off on the CLI transport (each draw would spawn `orca` and put element names in its argv), on the
+agent-browser backend, and with `REFSURE_TRAIL=off` (or `0`, `false`). `refsure doctor` says which in its `trail`
+check.
+
 ## Setup
 
 Three steps: name a key, optionally write a config file, then grant consent yourself.
@@ -1014,7 +1060,8 @@ These rules live in code, not in the agent skill:
 7. A group of identical controls (twins) is resolved by code (`--within`, `--first`) or refsure stops.
 8. Nothing leaves your machine without a matching consent grant. `--dry-run` works everywhere.
 9. Decision inputs come only from the accessibility tree, tab info, page text, element attributes and element
-   counts. refsure runs none of its own JavaScript in the page, never navigates and never follows a page URL.
+   counts. refsure never changes the page's own elements, values, focus or storage, never navigates and never follows
+   a page URL. Its own JavaScript in the page is three read-only probes and, on Orca, the [trail](#the-trail).
 10. The authority to act depends on how well a site is calibrated (see below).
 
 **Risk classes.**

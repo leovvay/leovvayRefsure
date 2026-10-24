@@ -41,10 +41,30 @@ A hostile page can still defeat a lexicon. That is a known limit, not a vulnerab
 - Answers are validated all-or-nothing against the offered options.
 - The envelope lists every field that holds page text under `untrusted`, and the agent skill tells agents to treat
   it as content, never instructions.
-- refsure never changes a page with its own JavaScript, never navigates, and never follows a URL found on a page. On
-  Orca it runs three fixed, read-only expressions through `orca eval`, with only numbers and a flag put into them as
-  literals: the settle's frame and animation count, the click's hit check (the element at a point: its tag, role and
-  name), and the paint probe (the page's paint-entry count and time origin).
+- refsure never changes the page's own elements, values, focus, storage or URL, never navigates, and never follows a
+  URL found on a page. On Orca it runs three fixed, read-only expressions through `orca eval`, with only numbers and a
+  flag put into them as literals: the settle's frame and animation count, the click's hit check (the element at a
+  point: its tag, role and name), and the paint probe (the page's paint-entry count and time origin).
+- With the trail on (the default on Orca's runtime socket; `REFSURE_TRAIL=off` turns it off), refsure also runs one
+  fixed script, built into the binary, that draws its own steps in the agent's tab. Its only input is a JSON literal of
+  refs, roles, element names (cleaned, at most 80 characters, sent only to the origin they were read on, and never
+  for an element inside a frame), act names, results, times and Decision numbers (site, model, confidence,
+  threshold). Typed and selected values never reach it, nor their length. It never reads a field's value, takes
+  focus, navigates, fetches, or touches cookies or storage, and it puts page text into the page only as text
+  (`textContent`), never as markup or code. What it adds is visible to page scripts, and a site's bot defence may
+  read it as an automation marker:
+  - one `refsure-trail` element appended to `<html>`, `aria-hidden`, with `pointer-events: none` and a closed shadow
+    root (one mutation record per document), and a non-enumerable `Symbol.for('refsure.trail')` property on it and on
+    `document` that holds its state;
+  - while an act is armed (at most 3 s), passive capture listeners for the input that act causes (`pointerdown`,
+    `focusin` or `input` for a fill, `keydown` Enter, or `change`/`input` for a select), which never cancel or stop an
+    event, and are removed on the first match or at the deadline;
+  - read-only looks at the page: its origin and load state, the reduced-motion setting, the scroll position, the
+    tag, role and box of the element an act's input landed on, and up to 30 `elementFromPoint` hit tests per draw
+    that keep its panel off the page's controls;
+  - its own Web Animations (`id: 'refsure-trail'`) and timers, inside the shadow root.
+
+  It goes out only over the runtime socket, never as an `orca` process's argv, which other local users could read.
 - To paint a page loaded in a hidden Orca tab, refsure takes one quality-1 JPEG screenshot through Orca into a new
   temporary folder and deletes it at once. It never reads, logs or sends that file, and never shows or focuses a tab.
 

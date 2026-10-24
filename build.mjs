@@ -1,11 +1,24 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { build } from 'esbuild';
+import { runInNewContext } from 'node:vm';
+import { build, transform } from 'esbuild';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const loader = { '.md': 'text' };
 const SKILL = 'skills/refsure/SKILL.md';
 const SKILL_MAX_LINES = 150;  // spec §10
+const TRAIL_PAGE = 'src/trail/page/trail-page.js';
+// Spec trail v1: the page script is sent whole with every draw (an 8 KB eval answered in p50 0.49 ms).
+const TRAIL_PAGE_MAX_BYTES = 16 * 1024;
+// What the page script never does: write markup or inline style, run strings as code, log, reach the network or
+// page storage, message other frames, wait on a frame or a promise (Orca awaits an eval in the tab's queue with no
+// deadline), read a value, take focus, or stop the page's own events. `async(` is the minified form of `async (`.
+const TRAIL_FORBIDDEN = [
+  'innerHTML', 'outerHTML', 'insertAdjacentHTML', 'document.write', 'eval(', 'Function(', "setAttribute('style'",
+  'setAttribute("style"', 'console.', 'fetch(', 'XMLHttpRequest', 'localStorage', 'sessionStorage', 'cookie',
+  'postMessage', 'requestAnimationFrame', '.value', 'focus(', 'preventDefault', 'stopPropagation', 'Promise',
+  'async ', 'async(', 'await ', 'url(',
+];
 
 /**
  * The troubleshooting table's rows under `## 9. Troubleshooting`, by cause: each backticked name in a row's first
@@ -92,8 +105,52 @@ async function checkBundledSkill() {
   checkTroubleshooting(BUNDLED_SKILL, CAUSES, exitFor);
 }
 
+/**
+ * The trail's page script, minified (`transform`) into one parenthesized function expression, the value of
+ * `__TRAIL_PAGE__`. The file must hold that one expression and nothing else; it is assigned to a name so the minifier
+ * keeps it, evaluated once in an empty context to take the function's own text (its body never runs), and refused on
+ * a parse error, on any other statement, over `TRAIL_PAGE_MAX_BYTES`, or on a `TRAIL_FORBIDDEN` token. Tokens are
+ * read in the minified text, so a comment may name them.
+ */
+async function trailPage() {
+  let source;
+  try {
+    source = readFileSync(new URL(`./${TRAIL_PAGE}`, import.meta.url), 'utf8');
+  } catch {
+    throw new Error(`${TRAIL_PAGE}: the trail's page script cannot be read`);
+  }
+  const holder = '__refsureTrailPage';
+  const { code } = await transform(`var ${holder} = ${source}`, {
+    loader: 'js', minify: true, target: 'es2022', legalComments: 'none', sourcefile: TRAIL_PAGE, logLevel: 'silent',
+  });
+  let fn;
+  try {
+    fn = runInNewContext(`${code};${holder}`, Object.create(null), { timeout: 100 });
+  } catch (error) {
+    const why = error instanceof Error ? error.message : String(error);
+    throw new Error(`${TRAIL_PAGE}: does not evaluate to a function (${why})`);
+  }
+  if (typeof fn !== 'function') throw new Error(`${TRAIL_PAGE}: is not a function expression`);
+  const text = Function.prototype.toString.call(fn);
+  if (code !== `var ${holder}=(${text});\n` && code !== `var ${holder}=${text};\n`) {
+    throw new Error(`${TRAIL_PAGE}: must hold one function expression and nothing else`);
+  }
+  const page = `(${text})`;
+  const bytes = Buffer.byteLength(page);
+  if (bytes > TRAIL_PAGE_MAX_BYTES) {
+    throw new Error(`${TRAIL_PAGE}: ${bytes} bytes minified, over its budget of ${TRAIL_PAGE_MAX_BYTES}`);
+  }
+  const found = TRAIL_FORBIDDEN.filter((token) => page.includes(token));
+  if (found.length > 0) {
+    throw new Error(`${TRAIL_PAGE}: forbidden ${found.map((token) => JSON.stringify(token)).join(', ')}`);
+  }
+  return page;
+}
+
+let trail;
 try {
   await checkBundledSkill();
+  trail = await trailPage();
 } catch (error) {
   console.error(`build refused: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
@@ -106,7 +163,7 @@ await build({
   format: 'esm',
   target: 'node22',
   banner: { js: '#!/usr/bin/env node' },
-  define: { __REFSURE_VERSION__: JSON.stringify(pkg.version) },
+  define: { __REFSURE_VERSION__: JSON.stringify(pkg.version), __TRAIL_PAGE__: JSON.stringify(trail) },
   loader,
   legalComments: 'none',
   logLevel: 'warning',

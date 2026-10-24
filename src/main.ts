@@ -1,5 +1,5 @@
 import { createBrowser } from './browser';
-import type { BrowserPort } from './browser';
+import type { BrowserPort, TrailRecorder } from './browser';
 import { routeArgv, runCommand, verbHelp } from './cli';
 import type { AnyCommandSpec, CommandResult, RegistryDeps } from './cli';
 import { configOnce, keySet, resolvePaths } from './config';
@@ -12,11 +12,12 @@ import { makeProviders } from './providers';
 import { createDecide } from './questions';
 import type { DecideFn, RouteCheckFn } from './questions';
 import { createTicketBook } from './tickets';
+import { createTrailRecorder } from './trail';
 
 // The composition root, and the only place that sets the process exit (spec §6.1). One invocation, one trace:
-// browser → store and tickets → the registry over FEATURES. The config, and the keys, providers and decide()
-// built on it, load on first use: a verb that reads none of them runs on a broken config file, and one that does
-// gets the file's ConfigError, which the registry maps to not_set_up (exit 23) with its cause.
+// browser (fed the trail's recorder) → store and tickets → the registry over FEATURES. The config, and the keys,
+// providers and decide() built on it, load on first use: a verb that reads none of them runs on a broken config
+// file, and one that does gets the file's ConfigError, which the registry maps to not_set_up (exit 23) with its cause.
 
 const CRASH_DETAIL_MAX = 500;
 /** 128 + the signal number: what a shell reports for a process a second signal stopped. */
@@ -98,7 +99,9 @@ async function runVerb(
   const config = configOnce(env);
   // Orca in an Orca terminal, else an agent-browser session (see chooseBackend).
   const paths = resolvePaths(env);
-  const backend = createBrowser({ env, trace, stateDir: paths.state, signal });
+  // The in-page trail (Orca only): the adapter records refsure's own steps into it and draws them in the tab.
+  const trail = createTrailRecorder({ env, trace, command: spec.name });
+  const backend = createBrowser({ env, trace, stateDir: paths.state, signal, trail });
   // The profile of the last tab read, for the isolated-profile rule; null (refused when required) until one is read.
   let profileId: string | null = null;
   const browser: BrowserPort = {
@@ -120,7 +123,29 @@ async function runVerb(
     },
     now: () => Date.now(),
   };
-  return runCommand(spec, argv, deps);
+  const result = await runCommand(spec, argv, deps);
+  await closeTrail(trail, result, argv, signal);
+  return result;
+}
+
+/**
+ * The post-command draw (spec trail v1, decision 2): a command that read a page and sent it nothing shows what it
+ * read and decided there, once, within 300 ms. The recorder skips it after any act, under `--dry-run` (the flag has
+ * no short form, so its literal is the whole test; a false hit only skips a draw) and after an abort. Never throws.
+ */
+async function closeTrail(
+  trail: TrailRecorder, result: CommandResult, argv: readonly string[], signal: AbortSignal,
+): Promise<void> {
+  try {
+    await trail.close({
+      status: result.envelope.status,
+      cause: result.envelope.why?.cause ?? null,
+      dryRun: argv.includes('--dry-run'),
+      aborted: signal.aborted,
+    });
+  } catch {
+    // A view for the human: the envelope is already decided.
+  }
 }
 
 async function main(argv: string[]): Promise<number> {

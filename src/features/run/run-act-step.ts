@@ -17,6 +17,7 @@ import { changeWords, recentLine, type RunState } from './run-state';
 import type { RunStepReport } from './run-step-report';
 import type { RunStop } from './run-stop';
 import type { StepAct } from './step-act-shape';
+import { stepWhy } from './step-why';
 import { unchangedStop } from './run-unchanged';
 
 /**
@@ -298,6 +299,7 @@ export async function actStep(
   // a frame: its box is the frame's own, which the hit check would read in the top document.
   const native = act.op === 'CLICK' && sentBefore === 0 && !inFrame(guarded.fresh.tree, guarded.node);
   const bind = native ? bindingOf(guarded.fresh.tree, guarded.node) : undefined;
+  ctx.trace.trailWhy = stepWhy(ctx, act, guarded.threshold);
   const sent = await send(ctx, run.page, guarded.ref, act, plain, bind);
   if (sent.via !== undefined) run.timing.note(sent.via);
   if (sent.kind === 'stale_ref') {

@@ -2,7 +2,7 @@ export type * from './fingerprint';
 export type * from './candidate';
 export type * from './page-view-shape';
 export type * from './rank-opts';
-export { cutName, cutShown, fold, foldVisible, norm, urlNorm } from './normalize';
+export { cutName, cutShown, dropInvisible, fold, foldVisible, norm, urlNorm } from './normalize';
 export { contentWords } from './content-words';
 export { INTERACTIVE_ROLES } from './interactive-roles';
 export { nodeAt } from './node-at';

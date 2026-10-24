@@ -1,6 +1,7 @@
 import { chooseBackend } from '../../browser';
 import type { BackendChoice, BackendHealth, PageHint } from '../../browser';
 import type { CommandContext } from '../../cli';
+import { orcaTrailStatus } from '../../trail';
 import type { DoctorCheck } from './doctor-check';
 
 const NODE_MIN_MAJOR = 22;
@@ -72,10 +73,18 @@ function transportCheck(transport: string): DoctorCheck {
 }
 
 /**
+ * Whether refsure draws its own steps in the agent's Orca tab (the trail), and why not when it does not. A view for
+ * the human only: every command works the same without it, so it never fails.
+ */
+function trailCheck(env: NodeJS.ProcessEnv): DoctorCheck {
+  return { name: 'trail', ok: true, detail: orcaTrailStatus(env) };
+}
+
+/**
  * The Node and backend checks (spec §6.3): Node, the chosen backend and its probe, and, for Orca, whether this is
- * an Orca terminal and which transport its calls take. The agent-browser backend has no worktree guard, so it has no
- * terminal check. With no backend chosen (a `REFSURE_BACKEND` typo), only the failed choice is shown: there is no
- * backend to probe.
+ * an Orca terminal and which transport its calls take; then the trail. The agent-browser backend has no worktree
+ * guard, so it has no terminal check. With no backend chosen (a `REFSURE_BACKEND` typo), only the failed choice is
+ * shown: there is no backend to probe.
  */
 export async function basicChecks(ctx: CommandContext, page: PageHint): Promise<DoctorCheck[]> {
   const choice = chooseBackend(ctx.env);
@@ -85,5 +94,6 @@ export async function basicChecks(ctx: CommandContext, page: PageHint): Promise<
   const checks = [node, backendChoiceCheck(choice), ...backendChecks(ctx.browser.backend, health)];
   if (ctx.browser.backend === 'orca') checks.push(terminalCheck(health.worktree === true));
   if (health.transport) checks.push(transportCheck(health.transport));
+  checks.push(trailCheck(ctx.env));
   return checks;
 }

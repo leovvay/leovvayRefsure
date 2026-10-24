@@ -43,7 +43,12 @@ const INVISIBLE = /[\p{Cf}\p{Default_Ignorable_Code_Point}]/gu;
  * both ways (`readingsOf`).
  */
 export function foldVisible(s: string): string {
-  return fold(s.replace(INVISIBLE, ''));
+  return fold(dropInvisible(s));
+}
+
+/** `s` with every `INVISIBLE` character dropped, case and spacing kept: bidi overrides cannot reorder what shows. */
+export function dropInvisible(s: string): string {
+  return s.replace(INVISIBLE, '');
 }
 
 /**

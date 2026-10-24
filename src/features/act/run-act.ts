@@ -1,6 +1,6 @@
 import { type ActAction, type ActResult, type PageRef, type TabInfo, VALUE_ACTIONS } from '../../browser';
 import type { CommandContext, CommandOutcome } from '../../cli';
-import { RE_OBSERVE } from '../../output';
+import { RE_OBSERVE, type TrailWhy } from '../../output';
 import { describeElement } from '../../page-model';
 import { outcomeSite } from '../../questions';
 import { HIGH_RISK } from '../../risk';
@@ -66,16 +66,31 @@ async function verifyRouteRefusal(ctx: CommandContext, tab: TabInfo, args: ActAr
 }
 
 /**
+ * Why the trail shows the act: the ticket's own pick (the Decision ran in the `locate` that issued it, or code
+ * picked it), never whatever Decision this process asked last. `do` asks all of its Decisions before its first act.
+ */
+function ticketWhy(ticket: Ticket): TrailWhy {
+  if (ticket.site === 'code') return { by: 'code' };
+  const why: TrailWhy = { by: 'decision', site: ticket.site };
+  if (ticket.model !== null) why.model = ticket.model;
+  if (ticket.confidence !== null) why.p = ticket.confidence;
+  return why;
+}
+
+/**
  * The typed act on the fresh ref, at once. A stale ref is re-found once on a fresh snapshot (recheck and policy
- * again); a second stale ref is `page_changed`. An act that may have landed is never sent twice.
+ * again); a second stale ref is `page_changed`. An act that may have landed is never sent twice. Each act carries
+ * the ticket's why for the trail, which reads it once.
  */
 async function dispatchWithRefind(
   ctx: CommandContext, page: PageRef, ticket: Ticket, policy: PolicyAct, fresh: Fresh,
 ): Promise<Sent | Out> {
+  ctx.trace.trailWhy = ticketWhy(ticket);
   const first = await ctx.browser.act(page, fresh.ref, policy.action, policy.value);
   if (first.kind !== 'stale_ref') return { sent: first, refound: false };
   const again = await cleared(ctx, ticket, policy, !ctx.dryRun, 'page_changed');
   if (isOut(again)) return again;
+  ctx.trace.trailWhy = ticketWhy(ticket);
   const sent = await ctx.browser.act(page, again.ref, policy.action, policy.value);
   if (sent.kind === 'stale_ref') return recheckStale('page_changed', ticket.id);
   return { sent, refound: true };
