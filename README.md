@@ -246,11 +246,13 @@ loop, the element table and the guard are refsure's own.
 Requires Node 22 or newer.
 
 ```sh
-npm i -g @leovvay/refsure
+git clone https://github.com/leovvay/leovvayRefsure && cd leovvayRefsure
+npm ci && npm run build && npm i -g .
 refsure doctor
 ```
 
-Install it globally. Agents call refsure many times per task, and `npx` adds package resolution time to every call.
+The npm package `@leovvay/refsure` is not published yet, so this installs from a clone: `npm i -g .` links the global
+`refsure` to it, and `git pull && npm run build` there updates it. Install it globally. Agents call refsure many times per task, and `npx` adds package resolution time to every call.
 
 It runs on macOS and on Windows (checked on Windows 11 with Orca 1.4.224 and agent-browser). On Windows, keep the key
 in a user environment variable and restart Orca once so its terminals see it, then run `refsure setup` in a terminal
@@ -1367,7 +1369,7 @@ From a shell: `claude plugin marketplace add https://github.com/leovvay/leovvayR
 or later also takes one step: `/plugin install orca-hidden-tab-input --marketplace leovvay/leovvayRefsure`. Start a
 new session afterwards. The plugin adds a `PreToolUse` hook on `Bash`.
 
-**Claude Code, by hand.** The hook ships in the npm package: after `npm i -g @leovvay/refsure` it is in
+**Claude Code, by hand.** The hook ships with refsure: after the install it is in
 `$(npm root -g)/@leovvay/refsure/plugins/orca-hidden-tab-input/hooks/` (`orca-hidden-tab-input.sh`,
 `orca_hidden_tab_input.py`, `hooks.json`), or in `plugins/orca-hidden-tab-input/hooks/` of a clone. Merge this entry
 into the `hooks.PreToolUse` list in `~/.claude/settings.json` (keep your other hooks), with your path:
@@ -1440,7 +1442,7 @@ never page content).
 - **Update the plugin:** `claude plugin marketplace update refsure`, then
   `claude plugin update orca-hidden-tab-input@refsure`, and start a new session. Claude Code updates the plugin when
   the `version` in its `plugin.json` changes.
-- **Update by hand:** update refsure (`npm i -g @leovvay/refsure`) or `git pull` your clone. For Codex, copy both
+- **Update by hand:** `git pull && npm run build` in your refsure clone. For Codex, copy both
   files again; Codex does not ask for trust again, because the entry in `hooks.json` did not change.
 - **Uninstall:** `claude plugin uninstall orca-hidden-tab-input@refsure` (in a session,
   `/plugin uninstall orca-hidden-tab-input@refsure`), and `claude plugin marketplace remove refsure` to forget the

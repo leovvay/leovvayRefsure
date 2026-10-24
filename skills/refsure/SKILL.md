@@ -107,7 +107,7 @@ is the exact command. Unknown `next.do`: `needs_human`.
 ## 8. Cost
 
 - A Decision costs about $0.00002-0.0001 and takes 0.2-1.2 s; code-settled answers cost nothing. The human's caps
-  answer `spend_limit` (exit 22). Install globally (`npm i -g @leovvay/refsure`), never through `npx`.
+  answer `spend_limit` (exit 22). Install globally (`npm i -g .` in a clone), never through `npx`.
 
 ## 9. Troubleshooting: every cause in `refsure causes --json` (run it for the installed version)
 
